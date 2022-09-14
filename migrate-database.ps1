@@ -1,0 +1,1 @@
+dotnet run --project Propnex.Poster --migrate-database

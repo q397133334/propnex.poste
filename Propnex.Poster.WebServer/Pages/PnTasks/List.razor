@@ -1,0 +1,40 @@
+﻿@page "/PnTask/List"
+@using Volo.Abp.Application.Dtos
+@using Dtos
+@inherits AbpCrudPageBase<WebServer.Services.IPnTaskAppService, PnTaskDto , Guid, PagedAndSortedResultRequestDto, CreateUpdatePnTaskDto>
+
+<Card>
+    <CardHeader>
+        <h2>@L["Books"]</h2>
+    </CardHeader>
+    <CardBody>
+        <DataGrid TItem="PnTaskDto"
+                  Data="Entities"
+                  ReadData="OnDataGridReadAsync"
+                  TotalItems="TotalCount"
+                  ShowPager="true"
+                  PageSize="PageSize">
+            <DataGridColumns>
+                <DataGridColumn TItem="PnTaskDto"
+                                Field="@nameof(PnTaskDto.Number)"
+                                Caption="编号"></DataGridColumn>
+                <DataGridColumn TItem="PnTaskDto"
+                                Field="@nameof(PnTaskDto.CreationTime)"
+                                Caption="@L["CreationTime"]">
+                    <DisplayTemplate>
+                        @context.CreationTime.ToLongDateString()
+                    </DisplayTemplate>
+                </DataGridColumn>
+                <DataGridEntityActionsColumn TItem="PnTaskDto" @ref="@EntityActionsColumn">
+                    <DisplayTemplate>
+                        <EntityActions TItem="PnTaskDto" EntityActionsColumn="@EntityActionsColumn">
+                            <EntityAction TItem="PnTaskDto"
+                                          Text="重试"/>
+                        </EntityActions>
+                    </DisplayTemplate>
+                </DataGridEntityActionsColumn>
+
+            </DataGridColumns>
+        </DataGrid>
+    </CardBody>
+</Card>
