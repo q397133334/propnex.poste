@@ -10,11 +10,17 @@ using System.Windows.Forms;
 
 namespace Propnex.Poster.Guru
 {
-    public partial class Form1 : Form
+    public partial class Main : Form
     {
-        public Form1()
+        public Main()
         {
             InitializeComponent();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            CefPoster cefPoster = new CefPoster();
+            cefPoster.Show();
         }
     }
 }

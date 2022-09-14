@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Propnex.Poster.Data;
+using Propnex.Poster.WebServer.Data;
 using Volo.Abp.EntityFrameworkCore;
 
 #nullable disable

@@ -3,7 +3,6 @@ using Blazorise.Icons.FontAwesome;
 using Microsoft.AspNetCore.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
-using Propnex.Poster.Data;
 using Propnex.Poster.Localization;
 using Propnex.Poster.Menus;
 using OpenIddict.Validation.AspNetCore;
@@ -52,6 +51,7 @@ using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.Validation.Localization;
 using Volo.Abp.VirtualFileSystem;
 using Volo.Abp.BackgroundWorkers;
+using Propnex.Poster.WebServer.Data;
 
 namespace Propnex.Poster;
 

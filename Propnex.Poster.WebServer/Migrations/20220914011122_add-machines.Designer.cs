@@ -2,7 +2,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Propnex.Poster.Data;
 using Propnex.Poster.WebServer.Data;
 using Volo.Abp.EntityFrameworkCore;
 
@@ -11,9 +13,10 @@ using Volo.Abp.EntityFrameworkCore;
 namespace Propnex.Poster.Migrations
 {
     [DbContext(typeof(PosterDbContext))]
-    partial class PosterDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220914011122_add-machines")]
+    partial class addmachines
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -65,9 +68,6 @@ namespace Propnex.Poster.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("AccountId")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ClientId")
                         .HasColumnType("longtext");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -145,31 +145,6 @@ namespace Propnex.Poster.Migrations
                     b.HasIndex("PnTaskId");
 
                     b.ToTable("PropnexPosterPnTaskItems", (string)null);
-                });
-
-            modelBuilder.Entity("Propnex.Poster.WebServer.Entities.PnTaskLog", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTime>("CreateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Ip")
-                        .HasColumnType("longtext");
-
-                    b.Property<Guid>("MachineId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("longtext");
-
-                    b.Property<Guid>("PntaskId")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PropnexPosterPnTaskLog", (string)null);
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLog", b =>
@@ -1561,13 +1536,11 @@ namespace Propnex.Poster.Migrations
 
             modelBuilder.Entity("Propnex.Poster.WebServer.Entities.PnTaskItem", b =>
                 {
-                    b.HasOne("Propnex.Poster.WebServer.Entities.PnTask", "PnTask")
+                    b.HasOne("Propnex.Poster.WebServer.Entities.PnTask", null)
                         .WithMany("PnTaskItems")
                         .HasForeignKey("PnTaskId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("PnTask");
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLogAction", b =>

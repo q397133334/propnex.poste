@@ -5,7 +5,14 @@ namespace Propnex.Poster.WebServer.Entities
 {
     public class PnTask : AuditedAggregateRoot<Guid>
     {
+        public PnTask()
+        {
+            PnTaskItems=new List<PnTaskItem>();
+        }
+
         public string Number { get; set; }
+
+        public string ClientId { get; set; }
 
         public string AccountId { get; set; }
 
@@ -34,5 +41,20 @@ namespace Propnex.Poster.WebServer.Entities
         public string Number { get; set; }
 
         public Share.TaskStatus Status { get; set; }
+
+        public virtual PnTask PnTask { get; set; }
+    }
+
+    public class PnTaskLog: Entity<Guid>
+    {
+        public Guid PntaskId { get; set; }
+
+        public Guid MachineId { get; set; }
+
+        public string Ip { get; set; }
+
+        public string Message { get; set; }
+
+        public DateTime CreateTime { get; set; }
     }
 }

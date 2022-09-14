@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Propnex.Poster.WebServer.Data;
 using Volo.Abp.DependencyInjection;
 
 namespace Propnex.Poster.Data;

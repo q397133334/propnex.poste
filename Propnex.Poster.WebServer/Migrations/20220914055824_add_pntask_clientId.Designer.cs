@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Propnex.Poster.WebServer.Data;
 using Volo.Abp.EntityFrameworkCore;
@@ -11,9 +12,10 @@ using Volo.Abp.EntityFrameworkCore;
 namespace Propnex.Poster.Migrations
 {
     [DbContext(typeof(PosterDbContext))]
-    partial class PosterDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220914055824_add_pntask_clientId")]
+    partial class add_pntask_clientId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -145,31 +147,6 @@ namespace Propnex.Poster.Migrations
                     b.HasIndex("PnTaskId");
 
                     b.ToTable("PropnexPosterPnTaskItems", (string)null);
-                });
-
-            modelBuilder.Entity("Propnex.Poster.WebServer.Entities.PnTaskLog", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTime>("CreateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Ip")
-                        .HasColumnType("longtext");
-
-                    b.Property<Guid>("MachineId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("longtext");
-
-                    b.Property<Guid>("PntaskId")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PropnexPosterPnTaskLog", (string)null);
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLog", b =>

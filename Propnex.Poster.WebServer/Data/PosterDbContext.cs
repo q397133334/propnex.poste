@@ -11,13 +11,17 @@ using Propnex.Poster.WebServer.Entities;
 using Propnex.Poster.WebServer;
 using Volo.Abp.EntityFrameworkCore.Modeling;
 
-namespace Propnex.Poster.Data;
+namespace Propnex.Poster.WebServer.Data;
 
 public class PosterDbContext : AbpDbContext<PosterDbContext>
 {
     public DbSet<PnTask> PnTasks { get; set; }
 
     public DbSet<PnTaskItem> PnTaskItems { get; set; }
+
+    public DbSet<PnTaskLog> PnTaskLogs { get; set; }
+
+    public DbSet<Machine> Machines { get; set; }
     public PosterDbContext(DbContextOptions<PosterDbContext> options)
         : base(options)
     {
@@ -51,6 +55,18 @@ public class PosterDbContext : AbpDbContext<PosterDbContext>
             b.ToTable(WebServerConsts.DbTablePrefix + "PnTaskItems");
             b.ConfigureByConvention();
             b.Property(x => x.Number).IsRequired().HasMaxLength(128);
+        });
+
+        builder.Entity<PnTaskLog>(b =>
+        {
+            b.ToTable(WebServerConsts.DbTablePrefix + "PnTaskLog");
+            b.ConfigureByConvention();
+        });
+
+        builder.Entity<Machine>(b =>
+        {
+            b.ToTable(WebServerConsts.DbTablePrefix + "Machines");
+            b.ConfigureByConvention();
         });
     }
 }

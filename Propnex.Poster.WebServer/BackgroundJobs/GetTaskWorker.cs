@@ -22,7 +22,7 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
         {
             var _repositoryPntask = workerContext.ServiceProvider.GetService<IRepository<PnTask>>();
 
-            var pn = await "https://pa-production.propnex.net/index.php/tasks/fetchGuruTasks?xweb=1".GetStringAsync();
+            var pn = await (WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks).GetStringAsync();
             var list = pn.Split('\n');
             foreach (var item in list)
             {
@@ -34,6 +34,7 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
                         await _repositoryPntask.InsertAsync(new PnTask()
                         {
                             Number = tsk[0],
+                            ClientId = tsk[1],
                             Status = TaskStatus.Wait
                         });
                     }
