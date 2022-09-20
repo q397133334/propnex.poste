@@ -14,7 +14,7 @@ namespace Propnex.Poster.Guru.Api
 
         public static string BaseUrl = System.Configuration.ConfigurationManager.AppSettings["BaseUrl"];
 
-        public async Task<Dtos.PnTaskDto> GetTask()
+        public static async Task<Dtos.PnTaskDto> GetTask()
         {
             string url = $"{BaseUrl}/api/app/pn-task/pn-task";
 

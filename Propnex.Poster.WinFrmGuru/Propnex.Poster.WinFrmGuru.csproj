@@ -280,6 +280,7 @@
     <Compile Include="CefPoster.Designer.cs">
       <DependentUpon>CefPoster.cs</DependentUpon>
     </Compile>
+    <Compile Include="CefPosterAction.cs" />
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>

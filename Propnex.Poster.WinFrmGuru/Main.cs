@@ -12,6 +12,9 @@ namespace Propnex.Poster.Guru
 {
     public partial class Main : Form
     {
+
+        CefPoster cefPoster;
+
         public Main()
         {
             InitializeComponent();
@@ -19,8 +22,21 @@ namespace Propnex.Poster.Guru
 
         private void button1_Click(object sender, EventArgs e)
         {
-            CefPoster cefPoster = new CefPoster();
+            cefPoster = new CefPoster();
             cefPoster.Show();
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (cefPoster == null)
+            {
+                cefPoster = new CefPoster();
+                cefPoster.FormClosed += (s, ev) =>
+                {
+                    cefPoster = null;
+                };
+                cefPoster.Show();
+            }
         }
     }
 }
