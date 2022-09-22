@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeText.cs" />
+    <Compile Include="DefaultTitles.cs" />
     <Compile Include="IdModel.cs" />
     <Compile Include="Listing\Boost.cs" />
     <Compile Include="Listing\CreateOrUpdateListingResult.cs" />
@@ -60,9 +61,14 @@
     <Compile Include="Listing\RetrieveListing.cs" />
     <Compile Include="Listing\UpdateListing.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tasks\GuruTask.cs" />
+    <Compile Include="Tasks\GuruTaskListing.cs" />
+    <Compile Include="Tasks\GuruTaskListings.cs" />
+    <Compile Include="Tasks\GuruTasks.cs" />
     <Compile Include="TIdModel.cs" />
     <Compile Include="TUnitValueModel.cs" />
     <Compile Include="TValueModel.cs" />
+    <Compile Include="Xml\XDocumentExtend.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

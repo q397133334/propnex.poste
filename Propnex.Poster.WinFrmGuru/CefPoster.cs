@@ -20,7 +20,7 @@ namespace Propnex.Poster.Guru
         private async void CefPoster_Load(object sender, EventArgs e)
         {
             //await chromiumWebBrowser1.LoadUrlAsync("www.baidu.com");
-            CefPosterAction action = new CefPosterAction(chromiumWebBrowser1);
+            CefPosterGuruAction action = new CefPosterGuruAction(chromiumWebBrowser1);
             await action.Start();
             this.Close();
         }

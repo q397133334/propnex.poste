@@ -29,10 +29,12 @@ namespace Propnex.Poster.WebServer.Services
         private readonly AsyncLock _Mutex = new AsyncLock();//锁
 
         private readonly IPnTaskLogRepository _pnTaskLogRepository;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public PnTaskAppService(IRepository<PnTask, Guid> repository, IPnTaskLogRepository pnTaskLogRepository) : base(repository)
+        public PnTaskAppService(IRepository<PnTask, Guid> repository, IPnTaskLogRepository pnTaskLogRepository,IWebHostEnvironment webHostEnvironment) : base(repository)
         {
             _pnTaskLogRepository = pnTaskLogRepository;
+            _webHostEnvironment = webHostEnvironment;   
         }
 
 
@@ -60,11 +62,11 @@ namespace Propnex.Poster.WebServer.Services
                     };
                 }
                 //5. save task
-                if (Directory.Exists($"{Environment.CurrentDirectory}\\TaskXml") == false)
+                if (Directory.Exists($"{_webHostEnvironment.WebRootPath}\\taskxml") == false)
                 {
-                    Directory.CreateDirectory($"{Environment.CurrentDirectory}\\TaskXml");
+                    Directory.CreateDirectory($"{_webHostEnvironment.WebRootPath}\\taskxml");
                 }
-                File.WriteAllText($"{Environment.CurrentDirectory}\\taskxml\\{pnTask.Number}", taskContext, Encoding.UTF8);
+                File.WriteAllText($"{_webHostEnvironment.WebRootPath}\\taskxml\\{pnTask.Number}", taskContext, Encoding.UTF8);
                 return new Dtos.PnTaskDto()
                 {
                     Id = pnTask.Id,

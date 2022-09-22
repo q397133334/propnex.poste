@@ -280,7 +280,8 @@
     <Compile Include="CefPoster.Designer.cs">
       <DependentUpon>CefPoster.cs</DependentUpon>
     </Compile>
-    <Compile Include="CefPosterAction.cs" />
+    <Compile Include="CefPosterGuruAction.cs" />
+    <Compile Include="ICefPosterAction.cs" />
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -322,6 +323,10 @@
     <ProjectReference Include="..\Propnex.Poster.Dtos\Propnex.Poster.Dtos\Propnex.Poster.Dtos.csproj">
       <Project>{89f3fa46-1679-4166-ae83-e6a8bb0d8694}</Project>
       <Name>Propnex.Poster.Dtos</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Propnex.Poster.PropertyGuru\Propnex.Poster.PropertyGuru.csproj">
+      <Project>{2613d6f8-bf87-45e2-b696-6fa879bb09cc}</Project>
+      <Name>Propnex.Poster.PropertyGuru</Name>
     </ProjectReference>
     <ProjectReference Include="..\Propnex.Poster.Share\Propnex.Poster.Share.csproj">
       <Project>{62a446e9-b73c-4f3c-acf6-f625dba08129}</Project>

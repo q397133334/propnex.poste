@@ -26,5 +26,12 @@ namespace Propnex.Poster.Guru.Api
             }
             return result;
         }
+
+        public static async Task<string> GetTaskContent(Dtos.PnTaskDto pnTaskDto)
+        {
+            string url = $"{BaseUrl}/api/downloadtask?taskId={pnTaskDto.Id}&fileName={pnTaskDto.Number}";
+
+            return  await url.GetStringAsync();
+        }
     }
 }
