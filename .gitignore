@@ -261,3 +261,4 @@ Propnex.Poster/Logs/*
 
 # Use abp install-libs to restore.
 **/wwwroot/libs/*
+Propnex.Poster.WebServer/Logs/logs.txt
