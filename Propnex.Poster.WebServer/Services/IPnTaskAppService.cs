@@ -31,10 +31,10 @@ namespace Propnex.Poster.WebServer.Services
         private readonly IPnTaskLogRepository _pnTaskLogRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public PnTaskAppService(IRepository<PnTask, Guid> repository, IPnTaskLogRepository pnTaskLogRepository,IWebHostEnvironment webHostEnvironment) : base(repository)
+        public PnTaskAppService(IRepository<PnTask, Guid> repository, IPnTaskLogRepository pnTaskLogRepository, IWebHostEnvironment webHostEnvironment) : base(repository)
         {
             _pnTaskLogRepository = pnTaskLogRepository;
-            _webHostEnvironment = webHostEnvironment;   
+            _webHostEnvironment = webHostEnvironment;
         }
 
 
@@ -42,6 +42,7 @@ namespace Propnex.Poster.WebServer.Services
         {
             using (await _Mutex.LockAsync())
             {
+                var rootPath = Path.Combine(_webHostEnvironment.WebRootPath, "taskxml");
                 //1. get waiting pntask
                 var pnTask = await AsyncExecuter.FirstOrDefaultAsync((await Repository.GetQueryableAsync()).Where(q => q.Status == Share.TaskStatus.Wait));
                 if (pnTask == null)
@@ -51,7 +52,7 @@ namespace Propnex.Poster.WebServer.Services
                 //3. download task file
                 var taskContext = await downloadUrl.GetStringAsync();
                 //4. return pntasks
-                if (taskContext == "Can't find task file.")
+                if (taskContext == "Can't find task file." && File.Exists(Path.Combine(rootPath, pnTask.Number)) == false)
                 {
                     await _pnTaskLogRepository.InsertAsync(inputDto.MachineId, pnTask.Id, "Can't find task file.", "");
                     pnTask.Status = Share.TaskStatus.NotFind;
@@ -62,11 +63,20 @@ namespace Propnex.Poster.WebServer.Services
                     };
                 }
                 //5. save task
-                if (Directory.Exists($"{_webHostEnvironment.WebRootPath}\\taskxml") == false)
+                if (Directory.Exists(rootPath) == false)
                 {
-                    Directory.CreateDirectory($"{_webHostEnvironment.WebRootPath}\\taskxml");
+                    Directory.CreateDirectory(rootPath);
                 }
-                File.WriteAllText($"{_webHostEnvironment.WebRootPath}\\taskxml\\{pnTask.Number}", taskContext, Encoding.UTF8);
+                if (taskContext != "Can't find task file.")
+                {
+                    await _pnTaskLogRepository.InsertAsync(inputDto.MachineId, pnTask.Id, "Dwonload Success", "");
+                    File.WriteAllText(Path.Combine(rootPath, pnTask.Number), taskContext, Encoding.UTF8);
+                }
+                await _pnTaskLogRepository.InsertAsync(inputDto.MachineId, pnTask.Id, "Get PnTask", "");
+
+                pnTask.Status = Share.TaskStatus.Runing;
+                await Repository.UpdateAsync(pnTask);
+
                 return new Dtos.PnTaskDto()
                 {
                     Id = pnTask.Id,

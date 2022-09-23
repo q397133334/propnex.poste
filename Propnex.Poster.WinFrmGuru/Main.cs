@@ -28,15 +28,15 @@ namespace Propnex.Poster.Guru
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (cefPoster == null)
-            {
-                cefPoster = new CefPoster();
-                cefPoster.FormClosed += (s, ev) =>
-                {
-                    cefPoster = null;
-                };
-                cefPoster.Show();
-            }
+            //if (cefPoster == null)
+            //{
+            //    cefPoster = new CefPoster();
+            //    cefPoster.FormClosed += (s, ev) =>
+            //    {
+            //        cefPoster = null;
+            //    };
+            //    cefPoster.Show();
+            //}
         }
     }
 }
