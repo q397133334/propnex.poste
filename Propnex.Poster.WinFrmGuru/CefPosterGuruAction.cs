@@ -8,9 +8,11 @@ using CefSharp;
 using CefSharp.Dom;
 using CefSharp.WinForms;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Propnex.Poster.Dtos;
 using Propnex.Poster.PropertyGuru.Listing;
 using Propnex.Poster.PropertyGuru.Tasks;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Propnex.Poster.Guru
 {
@@ -26,10 +28,6 @@ namespace Propnex.Poster.Guru
         private string context = "";
 
         private string _token = "";
-        public string token
-        {
-            get => getJwt();
-        }
 
         private Random random;
 
@@ -134,7 +132,7 @@ namespace Propnex.Poster.Guru
             {
 
                 var func = @"()=>{
-                           return fetch('https://bff-mobile.propertyguru.com/v1/listingManagement?region=sg&locale=en&status_code=ACT&sort=start_date&order=desc&page=1&limit=20000&timestamp=1616142255393',{ headers:{'authorization':'Bearer {" + token + "}'}})" +
+                           return fetch('https://bff-mobile.propertyguru.com/v1/listingManagement?region=sg&locale=en&status_code=ACT&sort=start_date&order=desc&page=1&limit=20000&timestamp=1616142255393',{ headers:{'authorization':'Bearer {" + (await getJwt()) + "}'}})" +
                         "}";
 
                 //var func = @"()=>{
@@ -198,11 +196,11 @@ namespace Propnex.Poster.Guru
             guruTasks = new GuruTasks(context, taskContext);
         }
 
-        private string getJwt()
+        private async Task<string> getJwt()
         {
             if (_token == "")
             {
-                var result = AjaxJsonGet<object>("https://agentnet.propertyguru.com.sg/sf2-agent/ajax/agent/jwt");
+                var result =await AjaxJsonGet<object>("https://agentnet.propertyguru.com.sg/sf2-agent/ajax/agent/jwt");
                 var jsonResult = Newtonsoft.Json.JsonConvert.DeserializeObject<JwtResult>(JsonConvert.SerializeObject(result));
                 _token = jsonResult.accessToken;
             }
@@ -212,10 +210,28 @@ namespace Propnex.Poster.Guru
 
         private async Task<T> AjaxJsonGet<T>(string url, string data = "")
         {
-            string jscode = $@"()=>{{ return $.ajax({{url:'{url}',async:false,type:'GET',contentType: 'application/json' ,data:{(data == "" ? "''" : "JSON.stringify(" + data.Replace('\"', '"') + ")")}}});}}";
-           
-            var result = await devToolsContext.EvaluateFunctionAsync<T>(jscode);
-            return result;
+            try
+            {
+                var six = await devToolsContext.EvaluateFunctionAsync<int>("() =>{ return Promise.resolve(6) }");
+                string jscode = $@"()=> {{return fetch(""{url}"", {{
+                                  ""headers"": {{
+                                    ""accept"": ""application/json, text/plain, */*""
+                                  }},
+                                  ""method"": ""GET"",
+                                  ""mode"": ""cors""
+                                }}).then(res=>{{
+                                      return res.json()
+                                }})}}";
+
+                var result = await devToolsContext.EvaluateFunctionAsync<object>(jscode);
+
+                return default(T);
+            }
+            catch(Exception ex)
+            {
+                return default(T);
+            }
+
         }
 
         private void randoTime(int min = 500, int max = 5000)
