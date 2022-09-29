@@ -12,7 +12,6 @@ using Newtonsoft.Json.Linq;
 using Propnex.Poster.Dtos;
 using Propnex.Poster.PropertyGuru.Listing;
 using Propnex.Poster.PropertyGuru.Tasks;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Propnex.Poster.Guru
 {
@@ -48,70 +47,48 @@ namespace Propnex.Poster.Guru
 
             for (int i = 0; i < guruTasks.Tasks.Count; i++)
             {
-                await Login(guruTasks.Tasks[i]);
-                await GetLisints();
-            }
-        }
-
-        private async Task Login(GuruTask guruTask)
-        {
-            try
-            {
-                await ChromiumWebBrowser.LoadUrlAsync("https://agentnet.propertyguru.com.sg/ex_logout");
-                //ChromiumWebBrowser.Load("https://agentnet.propertyguru.com.sg/ex_logout");
-                randoTime();
-                await WatiForIsLoading();
-            }
-            catch (Exception ex)
-            {
-
-            }
-
-            var loginUserId = await devToolsContext.QuerySelectorAsync<HtmlInputElement>("#login-userid");
-            if (loginUserId == null)
-            {
-                System.Threading.Thread.Sleep(1000 * 10);
-            }
-            await loginUserId.ClickAsync();
-            await loginUserId.SetValueAsync(guruTask.Account.Replace("\n", "").Replace("\r", ""));
-            randoTime();
-            var loginUserPwd = await devToolsContext.QuerySelectorAsync<HtmlInputElement>("#login-password");
-            if (loginUserPwd != null)
-            {
-                await loginUserPwd.ClickAsync();
-                await loginUserPwd.SetValueAsync(guruTask.Password.Replace("\n", "").Replace("\r", ""));
-            }
-            randoTime();
-            var loginSubmit = await devToolsContext.QuerySelectorAsync<HtmlFormElement>("#login-form");
-            if (loginSubmit != null)
-            {
-                await loginSubmit.SubmitAsync();
-                await devToolsContext.WaitForNavigationAsync();
-
-                if (devToolsContext.Url != "https://agentnet.propertyguru.com.sg/dash?" &&
-                            devToolsContext.Url != "https://agentnet.propertyguru.com.sg/v2/dash")
+                var task = guruTasks.Tasks[i];
+                await login(guruTasks.Tasks[i]);
+                await getLisints();
+                if (task.TaskType.ToLower() == "post only")
                 {
 
                 }
             }
-
         }
 
-        private Task WatiForIsLoading()
+        #region task 任务功能
+
+        private async Task postOnly(GuruTask guruTask)
         {
-            while (ChromiumWebBrowser.IsLoading)
+            for (var i = 0; i < guruTask.Listings.Listings.Count; i++)
             {
-                randoTime(5000, 5000);
+                var item = guruTask.Listings.Listings[i];
+                await getAgentId(item);
             }
-            return Task.CompletedTask;
         }
 
-        private async Task GetLisints()
+        private async Task update(GuruTask guruTask) { }
+
+        private async Task repost(GuruTask guruTask) { }
+
+        private async Task remove(GuruTask guruTask) { }
+
+        private async Task post(GuruTask guruTask) { }
+
+        private async Task retrieve(GuruTask guruTask) { }
+
+        /// <summary>
+        /// 获取 listing
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        private async Task getLisints()
         {
 
             await devToolsContext.GoToAsync("https://agentnet.propertyguru.com.sg/v2/listing_management");
-    
-            await WatiForIsLoading();
+
+            await watiForIsLoading();
             var infos = new List<ListingInfo>();
             for (int i = 0; i < 3; i++)
             {
@@ -131,16 +108,17 @@ namespace Propnex.Poster.Guru
             async Task getListingsV2()
             {
 
-                var func = @"()=>{
-                           return fetch('https://bff-mobile.propertyguru.com/v1/listingManagement?region=sg&locale=en&status_code=ACT&sort=start_date&order=desc&page=1&limit=20000&timestamp=1616142255393',{ headers:{'authorization':'Bearer {" + (await getJwt()) + "}'}})" +
-                        "}";
+                var func = $@"()=>{{
+                           return fetch('https://bff-mobile.propertyguru.com/v1/listingManagement?region=sg&locale=en&status_code=ACT&sort=start_date&order=desc&page=1&limit=20000&timestamp=1616142255393',
+                        {{ headers:{{'authorization':'Bearer {await getJwt()}'}}}}).then(res=>{{
+                                      return res.json()
+                                }})}}";
 
-                //var func = @"()=>{
-                //           return fetch('https://bff-mobile.propertyguru.com/v1/listingManagement?region=sg&locale=en&status_code=ACT&sort=start_date&order=desc&page=1&limit=20000&timestamp=1616142255393')" +
-                //        "}";
-
-                var result = await devToolsContext.EvaluateFunctionAsync<object>(func);
-                var jsonResult = JsonConvert.DeserializeObject<ListingsResult>(JsonConvert.SerializeObject(result));
+                //var result1 = await devToolsContext.EvaluateFunctionAsync<TJson>(func);
+                var result = await devToolsContext.EvaluateFunctionAsync<ListingsResult>(func);
+                var jsonResult = result; // JsonConvert.DeserializeObject<ListingsResult>(JsonConvert.SerializeObject(result));
+                if (jsonResult.listings == null)
+                    return;
                 foreach (var item in jsonResult.listings)
                 {
                     var info = new ListingInfo();
@@ -180,6 +158,93 @@ namespace Propnex.Poster.Guru
             }
         }
 
+        private async Task getAgentId(GuruTaskListing guruTaskUpdateListing)
+        {
+            var agentId = await getCookie("PGID1");
+            if (agentId != null && agentId != "")
+                guruTaskUpdateListing.Listing.Agent.id = int.Parse(agentId);
+        }
+
+        /// <summary>
+        /// 获取jwt
+        /// </summary>
+        /// <returns></returns>
+        private async Task<string> getJwt()
+        {
+            if (_token == null || _token == "")
+            {
+                var result = await ajaxJsonGet<JwtResult>("https://agentnet.propertyguru.com.sg/sf2-agent/ajax/agent/jwt");
+                // var jsonResult = Newtonsoft.Json.JsonConvert.DeserializeObject<JwtResult>(JsonConvert.SerializeObject(result));
+                _token = result.accessToken;
+            }
+
+            return _token;
+        }
+
+        /// <summary>
+        /// 登陆账号
+        /// </summary>
+        /// <param name="guruTask"></param>
+        /// <returns></returns>
+        private async Task login(GuruTask guruTask)
+        {
+            try
+            {
+                await ChromiumWebBrowser.LoadUrlAsync("https://agentnet.propertyguru.com.sg/ex_logout");
+                randoTime();
+                await watiForIsLoading();
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            var loginUserId = await devToolsContext.QuerySelectorAsync<HtmlInputElement>("#login-userid");
+            if (loginUserId == null)
+            {
+                System.Threading.Thread.Sleep(1000 * 10);
+            }
+            await loginUserId.ClickAsync();
+            await loginUserId.SetValueAsync(guruTask.Account.Replace("\n", "").Replace("\r", ""));
+            randoTime();
+            var loginUserPwd = await devToolsContext.QuerySelectorAsync<HtmlInputElement>("#login-password");
+            if (loginUserPwd != null)
+            {
+                await loginUserPwd.ClickAsync();
+                await loginUserPwd.SetValueAsync(guruTask.Password.Replace("\n", "").Replace("\r", ""));
+            }
+            randoTime();
+            var loginSubmit = await devToolsContext.QuerySelectorAsync<HtmlFormElement>("#login-form");
+            if (loginSubmit != null)
+            {
+                await loginSubmit.SubmitAsync();
+                await devToolsContext.WaitForNavigationAsync();
+
+                if (devToolsContext.Url != "https://agentnet.propertyguru.com.sg/dash?" &&
+                            devToolsContext.Url != "https://agentnet.propertyguru.com.sg/v2/dash")
+                {
+
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// 解析xml
+        /// </summary>
+        /// <returns></returns>
+        private Task read()
+        {
+            var lenght = context.IndexOf("Xpressor-Listing-File===");
+            var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
+            guruTasks = new GuruTasks(context, taskContext);
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// 获取xml
+        /// </summary>
+        /// <returns></returns>
         private async Task get()
         {
             taskDto = await Api.WebServer.GetTask();
@@ -188,31 +253,73 @@ namespace Propnex.Poster.Guru
                 context = await Api.WebServer.GetTaskContent(taskDto);
             }
         }
+        #endregion
 
-        private async Task read()
-        {
-            var lenght = context.IndexOf("Xpressor-Listing-File===");
-            var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
-            guruTasks = new GuruTasks(context, taskContext);
-        }
 
-        private async Task<string> getJwt()
+        #region task 操作功能
+
+        private async Task<CreateOrUpdateListingResult> createListing(GuruTaskListing guruTaskUpdateListing)
         {
-            if (_token == "")
+            var jsonFomrate = new JsonSerializerSettings
             {
-                var result =await AjaxJsonGet<object>("https://agentnet.propertyguru.com.sg/sf2-agent/ajax/agent/jwt");
-                var jsonResult = Newtonsoft.Json.JsonConvert.DeserializeObject<JwtResult>(JsonConvert.SerializeObject(result));
-                _token = jsonResult.accessToken;
+                ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
+            };
+
+            await getAgentId(guruTaskUpdateListing);
+
+            var listing = new CreateOrUpdateListing();
+            listing.Create(guruTaskUpdateListing.Listing);
+            var json = JsonConvert.SerializeObject(listing, jsonFomrate);
+
+            var result = await AjaxJsonPost<object>("https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings", "", data: json);
+            if (result.GetType().Name == "String")
+            {
+                var r = new CreateOrUpdateListingResult()
+                {
+                    Id = 0,
+                    errors = result.ToString()
+                };
+                if (r.errors.ToString().ToLower().Contains("headline"))
+                {
+                    listing.localizedHeadline = "Call now to enquire";
+                    listing.headlines.En = "Call now to enquire";
+
+                    json = JsonConvert.SerializeObject(listing, jsonFomrate);
+                    result =await AjaxJsonPost<object>("https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings", "", data: json);
+                }
+                else
+                {
+                    return r;
+                }
+            }
+            if (result.GetType().Name == "String")
+            {
+                var r = new CreateOrUpdateListingResult()
+                {
+                    Id = 0,
+                    errors = result.ToString()
+                };
+                return r;
             }
 
-            return _token;
+            return JsonConvert.DeserializeObject<CreateOrUpdateListingResult>(JsonConvert.SerializeObject(result));
         }
 
-        private async Task<T> AjaxJsonGet<T>(string url, string data = "")
+        #endregion
+
+        #region 辅助功能
+
+        /// <summary>
+        /// 获取json数据
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="url"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private async Task<T> ajaxJsonGet<T>(string url, string data = "")
         {
             try
             {
-                var six = await devToolsContext.EvaluateFunctionAsync<int>("() =>{ return Promise.resolve(6) }");
                 string jscode = $@"()=> {{return fetch(""{url}"", {{
                                   ""headers"": {{
                                     ""accept"": ""application/json, text/plain, */*""
@@ -223,20 +330,75 @@ namespace Propnex.Poster.Guru
                                       return res.json()
                                 }})}}";
 
-                var result = await devToolsContext.EvaluateFunctionAsync<object>(jscode);
+                var result = await devToolsContext.EvaluateFunctionAsync<T>(jscode);
 
-                return default(T);
+                return result;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return default(T);
             }
 
         }
 
+        /// <summary>
+        /// 获取post 数据
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="url"></param>
+        /// <param name="referrerUrl"></param>
+        /// <param name="type"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private async Task<T> AjaxJsonPost<T>(string url, string referrerUrl, string type = "POST", string data = "")
+        {
+            string jscode = $"()=> fetch('{url}',{{ method:\"{type}\",referrer:'{referrerUrl}',headers:{{'authorization':'Bearer {await getJwt()}','content-type': 'application/json;charset=UTF-8'}},body:{(data == "" ? "''" : "JSON.stringify(" + data.Replace('\"', '"') + ")")}}}) .then(response => response.json());}}";
+            object result;
+            try
+            {
+                result = await devToolsContext.EvaluateFunctionAsync<T>(jscode);
+            }
+            catch (Exception ex)
+            {
+                result = default(T);
+            }
+            return (T)result;
+        }
+
+        /// <summary>
+        ///  等待页面加载完成
+        /// </summary>
+        /// <returns></returns>
+        private Task watiForIsLoading()
+        {
+            while (ChromiumWebBrowser.IsLoading)
+            {
+                randoTime(5000, 5000);
+            }
+            return Task.CompletedTask;
+        }
+
+
+        private async Task<string> getCookie(string nameKey)
+        {
+            var cookies = await devToolsContext.EvaluateFunctionAsync<JArray>("()=> window.cookieStore.getAll()");
+            var cookie = cookies.Where(q => q["name"].ToString() == nameKey).FirstOrDefault();
+            if (cookie != null)
+            {
+                return cookie.Value<string>("value");
+            }
+            return "";
+        }
+        /// <summary>
+        /// 随机延迟
+        /// </summary>
+        /// <param name="min">最小时间</param>
+        /// <param name="max">最大时间</param>
         private void randoTime(int min = 500, int max = 5000)
         {
             System.Threading.Thread.Sleep(random.Next(min, max));
         }
+        #endregion
+
     }
 }
