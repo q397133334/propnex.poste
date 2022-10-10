@@ -2,14 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core.Tokenizer;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using CefSharp;
 using CefSharp.Dom;
 using CefSharp.WinForms;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Propnex.Poster.Dtos;
+using Propnex.Poster.PropertyGuru;
 using Propnex.Poster.PropertyGuru.Listing;
 using Propnex.Poster.PropertyGuru.Tasks;
 
@@ -40,9 +43,7 @@ namespace Propnex.Poster.Guru
         {
             await get();
             await read();
-            devToolsContext = await ChromiumWebBrowser.CreateDevToolsContextAsync();
-            devToolsContext.DefaultTimeout = 6000 * 60;
-            devToolsContext.DefaultNavigationTimeout = 1000 * 60;
+            await getDevToolsContext();
             ChromiumWebBrowser.ShowDevTools();
 
             for (int i = 0; i < guruTasks.Tasks.Count; i++)
@@ -52,31 +53,147 @@ namespace Propnex.Poster.Guru
                 await getLisints();
                 if (task.TaskType.ToLower() == "post only")
                 {
-
+                    await postOnlyAsync(task);
+                }
+                if (task.TaskType.ToLower() == "repost")
+                {
+                    await repost(task);
                 }
             }
         }
 
         #region task 任务功能
 
-        private async Task postOnly(GuruTask guruTask)
+        private async Task postOnlyAsync(GuruTask guruTask)
         {
             for (var i = 0; i < guruTask.Listings.Listings.Count; i++)
             {
                 var item = guruTask.Listings.Listings[i];
-                await getAgentId(item);
+                var listing = IsExtis(item, guruTask);
+                if (listing == null)
+                {
+                    var result = await createListingAsync(item);
+
+                    if (result.Id == 0)
+                    {
+                        if (result.errors.ToString().ToLower().Contains("headline"))
+                        {
+                            item.Listing.LocalizedHeadline = DefaultTitles.GetTitle();
+                            item.Listing.Headlines.En = item.Listing.LocalizedHeadline;
+                        }
+                        result = await createListingAsync(item);
+                    }
+                    item.Listing.Id = result.Id;
+                    if (result.Id != 0)
+                    {
+
+                    }
+                }
             }
         }
 
         private async Task update(GuruTask guruTask) { }
 
-        private async Task repost(GuruTask guruTask) { }
+        private async Task repost(GuruTask guruTask)
+        {
+            for (int i = 0; i < guruTask.Listings.Listings.Count; i++)
+            {
+                var item = guruTask.Listings.Listings[i];
+                if (IsExtis(item, guruTask) != null)
+                {
+                    try
+                    {
+                        if (item.FastRepost == "0")
+                        {
+                            await getAgentId(item);
+                            await update(guruTask);
+                        }
+                        else
+                        {
+
+                        }
+
+                    }
+                    catch
+                    {
+
+                    }
+                }
+
+            }
+            await Task.CompletedTask;
+        }
 
         private async Task remove(GuruTask guruTask) { }
 
         private async Task post(GuruTask guruTask) { }
 
         private async Task retrieve(GuruTask guruTask) { }
+
+
+        List<ListingInfo> ListingInfos = null;
+        private ListingInfo IsExtis(GuruTaskListing guruTaskListing, GuruTask guruTask)
+        {
+            ListingInfo listingInfo = null;
+            if (guruTaskListing.Listing.Id.HasValue)
+            {
+                listingInfo = ListingInfos.Where(q => q.Id == guruTaskListing.Listing.Id).FirstOrDefault();
+            }
+
+            if (listingInfo == null)
+            {
+                if (guruTask.Source.ToLower() == "chope")
+                {
+                    listingInfo = ListingInfos.Where(q => q.Sqft == guruTaskListing.Listing.Sizes.floorArea[0].text.Trim()
+                                                 && q.Title == guruTaskListing.Listing.Property.name && q.TypeCode == guruTaskListing.Listing.TypeCode
+                                                 && q.Prece == guruTaskListing.Listing.Price.value.ToString()
+                                                 && q.StreetName == guruTaskListing.Listing.Location.streetName1
+                                                 && q.StreetNumber == guruTaskListing.Listing.Location.streetNumber
+                                                 && q.PostCode == guruTaskListing.Listing.Location.postalCode
+                                                 ).FirstOrDefault();
+                    if (listingInfo == null)
+                    {
+                        if (guruTaskListing.Listing.TypeCode.ToUpper() == "ROOM")
+                        {
+                            listingInfo = ListingInfos.Where(q => q.Sqft == guruTaskListing.Listing.Sizes.floorArea[0].text.Trim()
+                                                    && q.Title == guruTaskListing.Listing.Property.name && q.TypeCode == "RENT"
+                                                    && q.Prece == guruTaskListing.Listing.Price.value.ToString()
+                                                    && q.StreetName == guruTaskListing.Listing.Location.streetName1
+                                                    && q.StreetNumber == guruTaskListing.Listing.Location.streetNumber
+                                                    && q.PostCode == guruTaskListing.Listing.Location.postalCode
+                                                    ).FirstOrDefault();
+                        }
+                    }
+                }
+                else
+                {
+                    listingInfo = ListingInfos.Where(q => q.Sqft == guruTaskListing.Listing.Sizes.floorArea[0].text.Trim()
+                                                 && q.Title == guruTaskListing.Listing.Property.name && q.TypeCode == guruTaskListing.Listing.TypeCode
+                                                 && q.StreetName == guruTaskListing.Listing.Location.streetName1
+                                                    && q.StreetNumber == guruTaskListing.Listing.Location.streetNumber
+                                                    && q.PostCode == guruTaskListing.Listing.Location.postalCode
+                                                 ).FirstOrDefault();
+                    if (listingInfo == null)
+                    {
+                        if (guruTaskListing.Listing.TypeCode.ToUpper() == "ROOM")
+                        {
+                            listingInfo = ListingInfos.Where(q => q.Sqft == guruTaskListing.Listing.Sizes.floorArea[0].text.Trim()
+                                                 && q.Title == guruTaskListing.Listing.Property.name && q.TypeCode == "RENT"
+                                                 && q.StreetName == guruTaskListing.Listing.Location.streetName1
+                                                    && q.StreetNumber == guruTaskListing.Listing.Location.streetNumber
+                                                    && q.PostCode == guruTaskListing.Listing.Location.postalCode).FirstOrDefault();
+                        }
+                    }
+
+
+                }
+            }
+            if (listingInfo != null)
+            {
+                guruTaskListing.Listing.Id = listingInfo.Id;
+            }
+            return listingInfo;
+        }
 
         /// <summary>
         /// 获取 listing
@@ -85,9 +202,9 @@ namespace Propnex.Poster.Guru
         /// <exception cref="Exception"></exception>
         private async Task getLisints()
         {
-
+            await getDevToolsContext();
             await devToolsContext.GoToAsync("https://agentnet.propertyguru.com.sg/v2/listing_management");
-
+            await randoTime();
             await watiForIsLoading();
             var infos = new List<ListingInfo>();
             for (int i = 0; i < 3; i++)
@@ -155,14 +272,17 @@ namespace Propnex.Poster.Guru
                     }
                     infos.Add(info);
                 }
+                ListingInfos = infos;
             }
         }
 
         private async Task getAgentId(GuruTaskListing guruTaskUpdateListing)
         {
-            var agentId = await getCookie("PGID1");
-            if (agentId != null && agentId != "")
-                guruTaskUpdateListing.Listing.Agent.id = int.Parse(agentId);
+            // var agentId = await getCookie("PGID1");
+            await getDevToolsContext();
+            var agentId = await devToolsContext.EvaluateFunctionAsync<int>("()=> guruApp.user_id");
+            if (agentId != 0)
+                guruTaskUpdateListing.Listing.Agent.id = agentId;
         }
 
         /// <summary>
@@ -188,10 +308,11 @@ namespace Propnex.Poster.Guru
         /// <returns></returns>
         private async Task login(GuruTask guruTask)
         {
+            await getDevToolsContext();
             try
             {
                 await ChromiumWebBrowser.LoadUrlAsync("https://agentnet.propertyguru.com.sg/ex_logout");
-                randoTime();
+                await randoTime();
                 await watiForIsLoading();
             }
             catch (Exception ex)
@@ -206,19 +327,20 @@ namespace Propnex.Poster.Guru
             }
             await loginUserId.ClickAsync();
             await loginUserId.SetValueAsync(guruTask.Account.Replace("\n", "").Replace("\r", ""));
-            randoTime();
+            await randoTime();
             var loginUserPwd = await devToolsContext.QuerySelectorAsync<HtmlInputElement>("#login-password");
             if (loginUserPwd != null)
             {
                 await loginUserPwd.ClickAsync();
                 await loginUserPwd.SetValueAsync(guruTask.Password.Replace("\n", "").Replace("\r", ""));
             }
-            randoTime();
+            await randoTime();
             var loginSubmit = await devToolsContext.QuerySelectorAsync<HtmlFormElement>("#login-form");
             if (loginSubmit != null)
             {
                 await loginSubmit.SubmitAsync();
-                await devToolsContext.WaitForNavigationAsync();
+                await randoTime();
+                await watiForIsLoading();
 
                 if (devToolsContext.Url != "https://agentnet.propertyguru.com.sg/dash?" &&
                             devToolsContext.Url != "https://agentnet.propertyguru.com.sg/v2/dash")
@@ -258,57 +380,94 @@ namespace Propnex.Poster.Guru
 
         #region task 操作功能
 
-        private async Task<CreateOrUpdateListingResult> createListing(GuruTaskListing guruTaskUpdateListing)
+        private async Task getDevToolsContext()
         {
+            devToolsContext = await ChromiumWebBrowser.CreateDevToolsContextAsync();
+            devToolsContext.DefaultTimeout = 6000 * 60;
+            devToolsContext.DefaultNavigationTimeout = 1000 * 60;
+        }
+
+        private async Task<CreateOrUpdateListingResult> createListingAsync(GuruTaskListing guruTaskUpdateListing)
+        {
+            await getAgentId(guruTaskUpdateListing);
             var jsonFomrate = new JsonSerializerSettings
             {
                 ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
             };
-
-            await getAgentId(guruTaskUpdateListing);
-
-            var listing = new CreateOrUpdateListing();
-            listing.Create(guruTaskUpdateListing.Listing);
-            var json = JsonConvert.SerializeObject(listing, jsonFomrate);
-
-            var result = await AjaxJsonPost<object>("https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings", "", data: json);
-            if (result.GetType().Name == "String")
+            var createOrUpdateListing = new CreateOrUpdateListing();
+            createOrUpdateListing.Create(guruTaskUpdateListing.Listing);
+            var json = JsonConvert.SerializeObject(createOrUpdateListing, jsonFomrate);
+            var ajaxResult = await AjaxJsonPost<object>("https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings", "", data: json);
+            if (ajaxResult.GetType().Name == "String")
             {
                 var r = new CreateOrUpdateListingResult()
                 {
                     Id = 0,
-                    errors = result.ToString()
+                    errors = ajaxResult.ToString()
                 };
                 if (r.errors.ToString().ToLower().Contains("headline"))
                 {
-                    listing.localizedHeadline = "Call now to enquire";
-                    listing.headlines.En = "Call now to enquire";
+                    createOrUpdateListing.localizedHeadline = "Call now to enquire";
+                    createOrUpdateListing.headlines.En = "Call now to enquire";
 
-                    json = JsonConvert.SerializeObject(listing, jsonFomrate);
-                    result =await AjaxJsonPost<object>("https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings", "", data: json);
-                }
-                else
-                {
-                    return r;
+                    json = JsonConvert.SerializeObject(createOrUpdateListing, jsonFomrate);
+                    ajaxResult = await AjaxJsonPost<object>("https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings", "", data: json);
                 }
             }
-            if (result.GetType().Name == "String")
+            if (ajaxResult.GetType().Name == "String")
             {
                 var r = new CreateOrUpdateListingResult()
                 {
                     Id = 0,
-                    errors = result.ToString()
+                    errors = ajaxResult.ToString()
                 };
-                return r;
             }
-
-            return JsonConvert.DeserializeObject<CreateOrUpdateListingResult>(JsonConvert.SerializeObject(result));
+            return JsonConvert.DeserializeObject<CreateOrUpdateListingResult>(JsonConvert.SerializeObject(ajaxResult));
         }
 
+        private async Task uploadPhotosAsync(GuruTaskListing guruTaskListing)
+        {
+            bool result = true;
+            var taskId = guruTaskListing.Id.ToString();
+            var path = checkFileDirectory(taskId);
+            for (int i = 0; i < guruTaskListing.Photos.Count; i++)
+            {
+                // max upload photos
+                if (i == 20)
+                    break;
+
+                var filePath = $"{path}{i}_image.jpg";
+                try
+                {
+                    WebClientEx webClient = new WebClientEx();
+                    webClient.DownloadFile(guruTaskListing.Photos[i], filePath);
+                }
+                catch (Exception ex)
+                {
+                    result = false;
+                    continue;
+                }
+            }
+        }
+
+        private async Task uploadVideos(GuruTaskListing guruTaskListing) { }
+
+        private async Task uploadVirtualTours(GuruTaskListing guruTaskListing) { }
+
+        private async Task uploadFlooplan(GuruTaskListing guruTaskListing) { }
         #endregion
 
         #region 辅助功能
 
+        private string checkFileDirectory(string taskId)
+        {
+            var path = $"{AppDomain.CurrentDomain.BaseDirectory}\\task\\{taskId}file\\";
+            if (System.IO.Directory.Exists(path) == false)
+            {
+                System.IO.Directory.CreateDirectory(path);
+            }
+            return path;
+        }
         /// <summary>
         /// 获取json数据
         /// </summary>
@@ -352,8 +511,8 @@ namespace Propnex.Poster.Guru
         /// <returns></returns>
         private async Task<T> AjaxJsonPost<T>(string url, string referrerUrl, string type = "POST", string data = "")
         {
-            string jscode = $"()=> fetch('{url}',{{ method:\"{type}\",referrer:'{referrerUrl}',headers:{{'authorization':'Bearer {await getJwt()}','content-type': 'application/json;charset=UTF-8'}},body:{(data == "" ? "''" : "JSON.stringify(" + data.Replace('\"', '"') + ")")}}}) .then(response => response.json());}}";
-            object result;
+            string jscode = $"()=> fetch('{url}',{{ method:\"{type}\",referrer:'{referrerUrl}',headers:{{'authorization':'Bearer {await getJwt()}','content-type': 'application/json;charset=UTF-8'}},body:{(data == "" ? "''" : "JSON.stringify(" + data.Replace('\"', '"') + ")")}}}) .then(response => response.json())";
+            T result;
             try
             {
                 result = await devToolsContext.EvaluateFunctionAsync<T>(jscode);
@@ -369,13 +528,12 @@ namespace Propnex.Poster.Guru
         ///  等待页面加载完成
         /// </summary>
         /// <returns></returns>
-        private Task watiForIsLoading()
+        private async Task watiForIsLoading()
         {
             while (ChromiumWebBrowser.IsLoading)
             {
-                randoTime(5000, 5000);
+                await randoTime(5000, 5000);
             }
-            return Task.CompletedTask;
         }
 
 
@@ -394,9 +552,10 @@ namespace Propnex.Poster.Guru
         /// </summary>
         /// <param name="min">最小时间</param>
         /// <param name="max">最大时间</param>
-        private void randoTime(int min = 500, int max = 5000)
+        private Task randoTime(int min = 500, int max = 5000)
         {
-            System.Threading.Thread.Sleep(random.Next(min, max));
+            //System.Threading.Thread.Sleep();
+            return Task.Delay(random.Next(min, max));
         }
         #endregion
 
