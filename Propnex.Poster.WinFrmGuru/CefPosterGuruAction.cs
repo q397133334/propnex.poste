@@ -86,7 +86,7 @@ namespace Propnex.Poster.Guru
                     item.Listing.Id = result.Id;
                     if (result.Id != 0)
                     {
-
+                        await uploadPhotosAsync(item);
                     }
                 }
             }
@@ -441,6 +441,45 @@ namespace Propnex.Poster.Guru
                 {
                     WebClientEx webClient = new WebClientEx();
                     webClient.DownloadFile(guruTaskListing.Photos[i], filePath);
+                    await devToolsContext.EvaluateExpressionAsync(@"window.base64ToFile=function (dataurl, filename) { 
+	    var arr = dataurl.split(','),
+	        mime = arr[0].match(/:(.*?);/)[1],
+	        bstr = atob(arr[1]),
+	        n = bstr.length,
+	        u8arr = new Uint8Array(n);
+	    while (n--) {
+	        u8arr[n] = bstr.charCodeAt(n);
+	    }
+	    return new File([u8arr], filename, { type: mime });
+	}");
+                    string dataString = "data:image/jpeg;base64," + Convert.ToBase64String(System.IO.File.ReadAllBytes(filePath));
+                    await devToolsContext.EvaluateFunctionAsync($"(value)=>{{ window.file_{i}_fb=window.base64ToFile(value,'{i}_img.jpg')}}", dataString);
+                    var formData = new Dictionary<string, string>();
+                    formData.Add("ownerId", $"{guruTaskListing.Listing.Id}");
+                    formData.Add("mediaType", "'IMAGE'");// Videos=MOVIE ,Virtual Tours=VTOUR,Floorplan=IMAGE
+                    formData.Add("mediaClass", "'UPHO'");// Videos=UMOV,Virtual Tours=UTOUR,Floorplan=UFLOO
+                    formData.Add("source", "' AgentNet'");
+                    formData.Add("userId", $"{guruTaskListing.Listing.Agent.id}");
+                    formData.Add("caption", "''");
+                    formData.Add("language", "'en'");
+                    formData.Add("sortOrder", $"{i}");
+
+                    formData.Add("mediaFile", $"window.file_{i}_fb");
+                    //await devToolsContext.EvaluateExpressionAsync($"var file=window.document.createElement('input');file.type='file';file.id='file_1_img';document.body.appendChild(file)");
+
+                    //var file=await devToolsContext.QuerySelectorAsync<CefSharp.Dom.HtmlInputElement>("#file_1_img");
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append("var fd= new FormData();");
+                    foreach (var item in formData)
+                    {
+                        sb.Append($"fd.append('{item.Key}',{item.Value});");
+                    }
+                    //string jscode = @$"var t=new FormData();t.append('ownerId', '23280908');t.append('mediaType', 'IMAGE');t.append('mediaClass', 'UPHO');t.append('source',' AgentNet');t.append('userId', '375435');t.append('caption', '');t.append('sortOrder', 4);t.append('mediaFile', document.getElementById('text').files[0]);return $.ajax({{url:'{url}',async:false,data:t,method:'POST',processData: false, contentType: false}})".Replace('\n', ' ').Replace('\r', ' ');
+                    //sb.Append($"return $.ajax({{url:'{url}',async:false,data:fd,method:'POST',processData: false, contentType: false}})"/*.Replace('\n', ' ').Replace('\r', ' ')*/);
+                    sb.Append($"fetch(\"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{guruTaskListing.Listing.Id}/media\", {{ method: \"POST\", \"mode\": \"cors\",\"credentials\": \"include\",body: fd}}).then(response => response.json())");
+                    var jscode = sb.ToString();
+
+                    var r = await devToolsContext.EvaluateExpressionAsync<object>(jscode);
                 }
                 catch (Exception ex)
                 {
