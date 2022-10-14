@@ -35,7 +35,6 @@ namespace Propnex.Poster.Guru
             //var six2 = devToolsContext.EvaluateFunctionAsync<dynamic>("() => {return Promise.resolve(6);}");
             //var cookies = await devToolsContext.EvaluateFunctionAsync<JArray>("()=> window.cookieStore.getAll()");
             //var v = cookies.Where(q => q["name"].ToString() == "PSTM").FirstOrDefault();
-            var a =await devToolsContext.EvaluateExpressionAsync<int>("var a=1; Promise.resolve(a)");
             try
             {
                 await action.Start();

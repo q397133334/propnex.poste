@@ -331,7 +331,7 @@ public class PosterModule : AbpModule
         var app = context.GetApplicationBuilder();
 
         context.ServiceProvider.GetRequiredService<IBackgroundWorkerManager>()
-    .AddAsync(
+        .AddAsync(
         context
             .ServiceProvider
             .GetRequiredService<WebServer.BackgroundJobs.GetTaskWorker>()

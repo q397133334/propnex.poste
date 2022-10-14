@@ -87,6 +87,9 @@ namespace Propnex.Poster.Guru
                     if (result.Id != 0)
                     {
                         await uploadPhotosAsync(item);
+                        await uploadVideos(item);
+                        await uploadVirtualTours(item);
+                        await uploadFlooplan(item);
                     }
                 }
             }
@@ -453,7 +456,7 @@ namespace Propnex.Poster.Guru
 	    return new File([u8arr], filename, { type: mime });
 	}");
                     string dataString = "data:image/jpeg;base64," + Convert.ToBase64String(System.IO.File.ReadAllBytes(filePath));
-                    await devToolsContext.EvaluateFunctionAsync($"(value)=>{{ window.file_{i}_fb=window.base64ToFile(value,'{i}_img.jpg')}}", dataString);
+                    await devToolsContext.EvaluateFunctionAsync($"(value)=>{{ window.file_{i}_img=window.base64ToFile(value,'{i}_img.jpg')}}", dataString);
                     var formData = new Dictionary<string, string>();
                     formData.Add("ownerId", $"{guruTaskListing.Listing.Id}");
                     formData.Add("mediaType", "'IMAGE'");// Videos=MOVIE ,Virtual Tours=VTOUR,Floorplan=IMAGE
@@ -462,9 +465,9 @@ namespace Propnex.Poster.Guru
                     formData.Add("userId", $"{guruTaskListing.Listing.Agent.id}");
                     formData.Add("caption", "''");
                     formData.Add("language", "'en'");
-                    formData.Add("sortOrder", $"{i}");
+                    formData.Add("sortOrder", $"{i + 1}");
 
-                    formData.Add("mediaFile", $"window.file_{i}_fb");
+                    formData.Add("mediaFile", $"window.file_{i}_img");
                     //await devToolsContext.EvaluateExpressionAsync($"var file=window.document.createElement('input');file.type='file';file.id='file_1_img';document.body.appendChild(file)");
 
                     //var file=await devToolsContext.QuerySelectorAsync<CefSharp.Dom.HtmlInputElement>("#file_1_img");
@@ -489,11 +492,242 @@ namespace Propnex.Poster.Guru
             }
         }
 
-        private async Task uploadVideos(GuruTaskListing guruTaskListing) { }
+        private async Task uploadVideos(GuruTaskListing guruTaskListing)
+        {
+            bool result = true;
+            var taskId = guruTaskListing.Id.ToString();
+            var path = checkFileDirectory(taskId);
+            for (int i = 0; i < guruTaskListing.Videos.Count; i++)
+            {
+                // max upload photos
+                if (i == 20)
+                    break;
 
-        private async Task uploadVirtualTours(GuruTaskListing guruTaskListing) { }
+                var url = guruTaskListing.Videos[i].ToLower();
+                var formData = new Dictionary<string, string>();
+                formData.Add("ownerId", guruTaskListing.Listing.Id.ToString());
+                formData.Add("mediaType", "'MOVIE'");// Videos=MOVIE ,Virtual Tours=VTOUR,Floorplan=IMAGE
+                formData.Add("mediaClass", "'UMOV'");// Videos=UMOV,Virtual Tours=UTOUR,Floorplan=UFLOO
+                formData.Add("source", "' AgentNet'");
+                formData.Add("userId", $"'{guruTaskListing.Listing.Agent.id}'");
+                formData.Add("caption", "''");
+                formData.Add("language", "'en'");
+                formData.Add("sortOrder", $"{i + 1}");
 
-        private async Task uploadFlooplan(GuruTaskListing guruTaskListing) { }
+                if (url.Contains("youtube") ||
+                    url.Contains("vimeo") ||
+                    url.Contains("dailymotion") ||
+                    url.Contains("<iframe")
+                    )
+                {
+
+                    if (url.Contains("<iframe"))
+                    {
+                        formData.Add("videoEmbedHtml", $"\"{guruTaskListing.Videos[i]}\"");
+                    }
+                    else
+                    {
+                        formData.Add("videoEmbedHtml", $"'{guruTaskListing.Videos[i]}'");
+                    }
+                }
+                else
+                {
+                    var filePath = $"{path}{i}_movie.jpg";
+                    try
+                    {
+                        WebClientEx webClient = new WebClientEx();
+                        webClient.DownloadFile(guruTaskListing.Videos[i], filePath);
+                        await devToolsContext.EvaluateExpressionAsync(@"window.base64ToFile=function (dataurl, filename) { 
+	                            var arr = dataurl.split(','),
+	                                mime = arr[0].match(/:(.*?);/)[1],
+	                                bstr = atob(arr[1]),
+	                                n = bstr.length,
+	                                u8arr = new Uint8Array(n);
+	                            while (n--) {
+	                                u8arr[n] = bstr.charCodeAt(n);
+	                            }
+	                            return new File([u8arr], filename, { type: mime });
+	                        }");
+                        string dataString = "data:image/jpeg;base64," + Convert.ToBase64String(System.IO.File.ReadAllBytes(filePath));
+                        await devToolsContext.EvaluateFunctionAsync($"(value)=>{{ window.file_{i}_move=window.base64ToFile(value,'{i}_move.jpg')}}", dataString);
+
+                        formData.Add("mediaFile", $"window.file_{i}_move");
+                    }
+                    catch
+                    {
+
+                    }
+
+                }
+                StringBuilder sb = new StringBuilder();
+                sb.Append("var fd= new FormData();");
+                foreach (var item in formData)
+                {
+                    sb.Append($"fd.append('{item.Key}',{item.Value});");
+                }
+                sb.Append($"fetch(\"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{guruTaskListing.Listing.Id}/media\", {{ method: \"POST\", \"mode\": \"cors\",\"credentials\": \"include\",body: fd}}).then(response => response.json())");
+                var jscode = sb.ToString();
+
+                try
+                {
+
+
+                    var r = await devToolsContext.EvaluateExpressionAsync<object>(jscode);
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
+        }
+
+        private async Task uploadVirtualTours(GuruTaskListing guruTaskListing)
+        {
+            bool result = true;
+            var taskId = guruTaskListing.Id.ToString();
+            var path = checkFileDirectory(taskId);
+            for (int i = 0; i < guruTaskListing.Tours.Count; i++)
+            {
+                // max upload photos
+                if (i == 20)
+                    break;
+
+                var url = guruTaskListing.Tours[i].ToLower();
+                var formData = new Dictionary<string, string>();
+                formData.Add("ownerId", guruTaskListing.Listing.Id.ToString());
+                formData.Add("mediaType", "'VTOUR'");// Videos=MOVIE ,Virtual Tours=VTOUR,Floorplan=IMAGE
+                formData.Add("mediaClass", "'UTOUR'");// Videos=UMOV,Virtual Tours=UTOUR,Floorplan=UFLOO
+                formData.Add("source", "' AgentNet'");
+                formData.Add("userId", $"'{guruTaskListing.Listing.Agent.id}'");
+                formData.Add("caption", "''");
+                formData.Add("language", "'en'");
+                formData.Add("sortOrder", $"{i + 1}");
+
+                if (url.Contains("youtube") ||
+                    url.Contains("vimeo") ||
+                    url.Contains("dailymotion") ||
+                    url.Contains("<iframe")
+                    )
+                {
+
+                    if (url.Contains("<iframe"))
+                    {
+                        formData.Add("videoEmbedHtml", $"\"{guruTaskListing.Tours[i]}\"");
+                    }
+                    else
+                    {
+                        formData.Add("videoEmbedHtml", $"'{guruTaskListing.Tours[i]}'");
+                    }
+                }
+                else
+                {
+                    var filePath = $"{path}{i}_vt.jpg";
+                    try
+                    {
+                        WebClientEx webClient = new WebClientEx();
+                        webClient.DownloadFile(guruTaskListing.Tours[i], filePath);
+                        await devToolsContext.EvaluateExpressionAsync(@"window.base64ToFile=function (dataurl, filename) { 
+	                            var arr = dataurl.split(','),
+	                                mime = arr[0].match(/:(.*?);/)[1],
+	                                bstr = atob(arr[1]),
+	                                n = bstr.length,
+	                                u8arr = new Uint8Array(n);
+	                            while (n--) {
+	                                u8arr[n] = bstr.charCodeAt(n);
+	                            }
+	                            return new File([u8arr], filename, { type: mime });
+	                        }");
+                        string dataString = "data:image/jpeg;base64," + Convert.ToBase64String(System.IO.File.ReadAllBytes(filePath));
+                        await devToolsContext.EvaluateFunctionAsync($"(value)=>{{ window.file_{i}_vt=window.base64ToFile(value,'{i}_vt.jpg')}}", dataString);
+
+                        formData.Add("mediaFile", $"window.file_{i}_vt");
+                    }
+                    catch
+                    {
+
+                    }
+
+                }
+                StringBuilder sb = new StringBuilder();
+                sb.Append("var fd= new FormData();");
+                foreach (var item in formData)
+                {
+                    sb.Append($"fd.append('{item.Key}',{item.Value});");
+                }
+                sb.Append($"fetch(\"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{guruTaskListing.Listing.Id}/media\", {{ method: \"POST\", \"mode\": \"cors\",\"credentials\": \"include\",body: fd}}).then(response => response.json())");
+                var jscode = sb.ToString();
+
+                try
+                {
+
+
+                    var r = await devToolsContext.EvaluateExpressionAsync<object>(jscode);
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
+        }
+
+        private async Task uploadFlooplan(GuruTaskListing guruTaskListing)
+        {
+            bool result = true;
+            var taskId = guruTaskListing.Id.ToString();
+            var path = checkFileDirectory(taskId);
+            for (int i = 0; i < guruTaskListing.FloorPlan.Count; i++)
+            {
+                // max upload photos
+                if (i == 20)
+                    break;
+
+                var filePath = $"{path}{i}_fp.jpg";
+                try
+                {
+                    WebClientEx webClient = new WebClientEx();
+                    webClient.DownloadFile(guruTaskListing.FloorPlan[i], filePath);
+                    await devToolsContext.EvaluateExpressionAsync(@"window.base64ToFile=function (dataurl, filename) { 
+	    var arr = dataurl.split(','),
+	        mime = arr[0].match(/:(.*?);/)[1],
+	        bstr = atob(arr[1]),
+	        n = bstr.length,
+	        u8arr = new Uint8Array(n);
+	    while (n--) {
+	        u8arr[n] = bstr.charCodeAt(n);
+	    }
+	    return new File([u8arr], filename, { type: mime });
+	}");
+                    string dataString = "data:image/jpeg;base64," + Convert.ToBase64String(System.IO.File.ReadAllBytes(filePath));
+                    await devToolsContext.EvaluateFunctionAsync($"(value)=>{{ window.file_{i}_fp=window.base64ToFile(value,'{i}_fp.jpg')}}", dataString);
+                    var formData = new Dictionary<string, string>();
+                    formData.Add("ownerId", $"{guruTaskListing.Listing.Id}");
+                    formData.Add("mediaType", "'IMAGE'");// Videos=MOVIE ,Virtual Tours=VTOUR,Floorplan=IMAGE
+                    formData.Add("mediaClass", "'UFLOO'");// Videos=UMOV,Virtual Tours=UTOUR,Floorplan=UFLOO
+                    formData.Add("source", "' AgentNet'");
+                    formData.Add("userId", $"{guruTaskListing.Listing.Agent.id}");
+                    formData.Add("caption", "''");
+                    formData.Add("language", "'en'");
+                    formData.Add("sortOrder", $"{i + 1}");
+
+                    formData.Add("mediaFile", $"window.file_{i}_fp");
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append("var fd= new FormData();");
+                    foreach (var item in formData)
+                    {
+                        sb.Append($"fd.append('{item.Key}',{item.Value});");
+                    }
+                    sb.Append($"fetch(\"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{guruTaskListing.Listing.Id}/media\", {{ method: \"POST\", \"mode\": \"cors\",\"credentials\": \"include\",body: fd}}).then(response => response.json())");
+                    var jscode = sb.ToString();
+
+                    var r = await devToolsContext.EvaluateExpressionAsync<object>(jscode);
+                }
+                catch (Exception ex)
+                {
+                    result = false;
+                    continue;
+                }
+            }
+        }
         #endregion
 
         #region 辅助功能
