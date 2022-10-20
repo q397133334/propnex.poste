@@ -230,46 +230,46 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Volo.Abp.Auditing.Contracts, Version=6.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Volo.Abp.Auditing.Contracts.6.0.0-rc.3\lib\netstandard2.0\Volo.Abp.Auditing.Contracts.dll</HintPath>
+      <HintPath>..\packages\Volo.Abp.Auditing.Contracts.6.0.0\lib\netstandard2.0\Volo.Abp.Auditing.Contracts.dll</HintPath>
     </Reference>
     <Reference Include="Volo.Abp.Core, Version=6.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Volo.Abp.Core.6.0.0-rc.3\lib\netstandard2.0\Volo.Abp.Core.dll</HintPath>
+      <HintPath>..\packages\Volo.Abp.Core.6.0.0\lib\netstandard2.0\Volo.Abp.Core.dll</HintPath>
     </Reference>
     <Reference Include="Volo.Abp.Data, Version=6.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Volo.Abp.Data.6.0.0-rc.3\lib\netstandard2.0\Volo.Abp.Data.dll</HintPath>
+      <HintPath>..\packages\Volo.Abp.Data.6.0.0\lib\netstandard2.0\Volo.Abp.Data.dll</HintPath>
     </Reference>
     <Reference Include="Volo.Abp.Ddd.Application.Contracts, Version=6.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Volo.Abp.Ddd.Application.Contracts.6.0.0-rc.3\lib\netstandard2.0\Volo.Abp.Ddd.Application.Contracts.dll</HintPath>
+      <HintPath>..\packages\Volo.Abp.Ddd.Application.Contracts.6.0.0\lib\netstandard2.0\Volo.Abp.Ddd.Application.Contracts.dll</HintPath>
     </Reference>
     <Reference Include="Volo.Abp.EventBus.Abstractions, Version=6.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Volo.Abp.EventBus.Abstractions.6.0.0-rc.3\lib\netstandard2.0\Volo.Abp.EventBus.Abstractions.dll</HintPath>
+      <HintPath>..\packages\Volo.Abp.EventBus.Abstractions.6.0.0\lib\netstandard2.0\Volo.Abp.EventBus.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Volo.Abp.Localization, Version=6.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Volo.Abp.Localization.6.0.0-rc.3\lib\netstandard2.0\Volo.Abp.Localization.dll</HintPath>
+      <HintPath>..\packages\Volo.Abp.Localization.6.0.0\lib\netstandard2.0\Volo.Abp.Localization.dll</HintPath>
     </Reference>
     <Reference Include="Volo.Abp.Localization.Abstractions, Version=6.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Volo.Abp.Localization.Abstractions.6.0.0-rc.3\lib\netstandard2.0\Volo.Abp.Localization.Abstractions.dll</HintPath>
+      <HintPath>..\packages\Volo.Abp.Localization.Abstractions.6.0.0\lib\netstandard2.0\Volo.Abp.Localization.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Volo.Abp.MultiTenancy, Version=6.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Volo.Abp.MultiTenancy.6.0.0-rc.3\lib\netstandard2.0\Volo.Abp.MultiTenancy.dll</HintPath>
+      <HintPath>..\packages\Volo.Abp.MultiTenancy.6.0.0\lib\netstandard2.0\Volo.Abp.MultiTenancy.dll</HintPath>
     </Reference>
     <Reference Include="Volo.Abp.ObjectExtending, Version=6.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Volo.Abp.ObjectExtending.6.0.0-rc.3\lib\netstandard2.0\Volo.Abp.ObjectExtending.dll</HintPath>
+      <HintPath>..\packages\Volo.Abp.ObjectExtending.6.0.0\lib\netstandard2.0\Volo.Abp.ObjectExtending.dll</HintPath>
     </Reference>
     <Reference Include="Volo.Abp.Security, Version=6.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Volo.Abp.Security.6.0.0-rc.3\lib\netstandard2.0\Volo.Abp.Security.dll</HintPath>
+      <HintPath>..\packages\Volo.Abp.Security.6.0.0\lib\netstandard2.0\Volo.Abp.Security.dll</HintPath>
     </Reference>
     <Reference Include="Volo.Abp.Settings, Version=6.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Volo.Abp.Settings.6.0.0-rc.3\lib\netstandard2.0\Volo.Abp.Settings.dll</HintPath>
+      <HintPath>..\packages\Volo.Abp.Settings.6.0.0\lib\netstandard2.0\Volo.Abp.Settings.dll</HintPath>
     </Reference>
     <Reference Include="Volo.Abp.Uow, Version=6.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Volo.Abp.Uow.6.0.0-rc.3\lib\netstandard2.0\Volo.Abp.Uow.dll</HintPath>
+      <HintPath>..\packages\Volo.Abp.Uow.6.0.0\lib\netstandard2.0\Volo.Abp.Uow.dll</HintPath>
     </Reference>
     <Reference Include="Volo.Abp.Validation.Abstractions, Version=6.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Volo.Abp.Validation.Abstractions.6.0.0-rc.3\lib\netstandard2.0\Volo.Abp.Validation.Abstractions.dll</HintPath>
+      <HintPath>..\packages\Volo.Abp.Validation.Abstractions.6.0.0\lib\netstandard2.0\Volo.Abp.Validation.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Volo.Abp.VirtualFileSystem, Version=6.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Volo.Abp.VirtualFileSystem.6.0.0-rc.3\lib\netstandard2.0\Volo.Abp.VirtualFileSystem.dll</HintPath>
+      <HintPath>..\packages\Volo.Abp.VirtualFileSystem.6.0.0\lib\netstandard2.0\Volo.Abp.VirtualFileSystem.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

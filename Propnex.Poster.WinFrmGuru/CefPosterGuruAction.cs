@@ -95,7 +95,27 @@ namespace Propnex.Poster.Guru
             }
         }
 
-        private async Task update(GuruTask guruTask) { }
+        private async Task update(GuruTask guruTask)
+        {
+            for (var i = 0; i < guruTask.Listings.Listings.Count; i++)
+            {
+                var item = guruTask.Listings.Listings[i];
+                try
+                {
+                    //get adcredits 
+
+                    await getAgentId(item);
+                    await uploadPhotosAsync(item);
+                    await uploadVideos(item);
+                    await uploadVirtualTours(item);
+                    await uploadFlooplan(item);
+                }
+                catch
+                {
+
+                }
+            }
+        }
 
         private async Task repost(GuruTask guruTask)
         {
@@ -113,7 +133,7 @@ namespace Propnex.Poster.Guru
                         }
                         else
                         {
-
+                            await repost(guruTask);
                         }
 
                     }
@@ -121,6 +141,10 @@ namespace Propnex.Poster.Guru
                     {
 
                     }
+                }
+                else
+                {
+                    await createListingAsync(item);
                 }
 
             }
@@ -350,6 +374,10 @@ namespace Propnex.Poster.Guru
                 {
 
                 }
+                else
+                {
+
+                }
             }
 
         }
@@ -427,6 +455,36 @@ namespace Propnex.Poster.Guru
             }
             return JsonConvert.DeserializeObject<CreateOrUpdateListingResult>(JsonConvert.SerializeObject(ajaxResult));
         }
+
+        private async Task<CreateOrUpdateListingResult> updateListingAsync(GuruTaskListing guruTaskListing)
+        {
+            var jsonFomrate = new JsonSerializerSettings
+            {
+                ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
+            };
+            var listing =await getListing(guruTaskListing.Listing.Id.ToString());
+            listing.Update(guruTaskListing.Listing);
+            var json = JsonConvert.SerializeObject(listing, jsonFomrate);
+            var result =await AjaxJsonPost<object>($"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/update/{guruTaskListing.Listing.Id}", "https://agentnet.propertyguru.com.sg/create-listing/detail/{guruTaskUpdateListing.Listing.Id}", "PUT", json);
+            return JsonConvert.DeserializeObject<CreateOrUpdateListingResult>(JsonConvert.SerializeObject(result));
+        }
+
+        private async Task<CreateOrUpdateListing> getListing(string id)
+        {
+            var json = new object();
+            try
+            {
+                json=await ajaxJsonGet<object>($"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{id}");
+                var jsonStr = JsonConvert.SerializeObject(json);
+                return JsonConvert.DeserializeObject<CreateOrUpdateListing>(jsonStr);
+            }
+            catch(Exception ex)
+            {
+
+            }
+            return null;
+        }
+
 
         private async Task uploadPhotosAsync(GuruTaskListing guruTaskListing)
         {

@@ -24,6 +24,7 @@ namespace Propnex.Poster.Guru
         {
             cefPoster = new CefPoster();
             cefPoster.Show();
+            cefPoster.PosterStart();
         }
 
         private void timer1_Tick(object sender, EventArgs e)
