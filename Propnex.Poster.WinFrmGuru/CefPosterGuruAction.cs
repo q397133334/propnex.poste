@@ -59,6 +59,14 @@ namespace Propnex.Poster.Guru
                 {
                     await repost(task);
                 }
+                if (task.TaskType.ToLower() == "update")
+                {
+                    await update(task);
+                }
+                if (task.TaskType.ToLower() == "remove")
+                {
+                    await remove(task);
+                }
             }
         }
 
@@ -105,6 +113,7 @@ namespace Propnex.Poster.Guru
                     //get adcredits 
 
                     await getAgentId(item);
+                    await updateListingAsync(item);
                     await uploadPhotosAsync(item);
                     await uploadVideos(item);
                     await uploadVirtualTours(item);
@@ -229,6 +238,7 @@ namespace Propnex.Poster.Guru
         /// <exception cref="Exception"></exception>
         private async Task getLisints()
         {
+            ListingInfos = new List<ListingInfo>();
             await getDevToolsContext();
             await devToolsContext.GoToAsync("https://agentnet.propertyguru.com.sg/v2/listing_management");
             await randoTime();
@@ -310,6 +320,11 @@ namespace Propnex.Poster.Guru
             var agentId = await devToolsContext.EvaluateFunctionAsync<int>("()=> guruApp.user_id");
             if (agentId != 0)
                 guruTaskUpdateListing.Listing.Agent.id = agentId;
+        }
+
+        private async Task deleteMedias(int id)
+        {
+
         }
 
         /// <summary>
@@ -462,10 +477,10 @@ namespace Propnex.Poster.Guru
             {
                 ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
             };
-            var listing =await getListing(guruTaskListing.Listing.Id.ToString());
+            var listing = await getListing(guruTaskListing.Listing.Id.ToString());
             listing.Update(guruTaskListing.Listing);
             var json = JsonConvert.SerializeObject(listing, jsonFomrate);
-            var result =await AjaxJsonPost<object>($"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/update/{guruTaskListing.Listing.Id}", "https://agentnet.propertyguru.com.sg/create-listing/detail/{guruTaskUpdateListing.Listing.Id}", "PUT", json);
+            var result = await AjaxJsonPost<object>($"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/update/{guruTaskListing.Listing.Id}", "https://agentnet.propertyguru.com.sg/create-listing/detail/{guruTaskUpdateListing.Listing.Id}", "PUT", json);
             return JsonConvert.DeserializeObject<CreateOrUpdateListingResult>(JsonConvert.SerializeObject(result));
         }
 
@@ -474,11 +489,11 @@ namespace Propnex.Poster.Guru
             var json = new object();
             try
             {
-                json=await ajaxJsonGet<object>($"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{id}");
+                json = await ajaxJsonGet<object>($"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{id}");
                 var jsonStr = JsonConvert.SerializeObject(json);
                 return JsonConvert.DeserializeObject<CreateOrUpdateListing>(jsonStr);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
             }

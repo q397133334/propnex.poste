@@ -22,7 +22,11 @@ namespace Propnex.Poster.Guru
 
         private void button1_Click(object sender, EventArgs e)
         {
-            cefPoster = new CefPoster();
+            if(cefPoster==null)
+            {
+                cefPoster = new CefPoster();
+            }
+
             cefPoster.Show();
             cefPoster.PosterStart();
         }
