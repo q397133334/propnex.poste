@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Abp.Dependency;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,7 +11,7 @@ using System.Windows.Forms;
 
 namespace Propnex.Poster.Guru
 {
-    public partial class Main : Form
+    public partial class Main : Form, ITransientDependency
     {
 
         CefPoster cefPoster;

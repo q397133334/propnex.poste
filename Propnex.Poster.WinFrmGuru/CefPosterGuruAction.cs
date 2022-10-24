@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using CefSharp;
 using CefSharp.Dom;
 using CefSharp.WinForms;
+using log4net.Repository.Hierarchy;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -114,6 +115,7 @@ namespace Propnex.Poster.Guru
 
                     await getAgentId(item);
                     await updateListingAsync(item);
+                    await deleteMedias(item.Listing.Id.Value);
                     await uploadPhotosAsync(item);
                     await uploadVideos(item);
                     await uploadVirtualTours(item);
@@ -139,10 +141,16 @@ namespace Propnex.Poster.Guru
                         {
                             await getAgentId(item);
                             await update(guruTask);
+                            await deleteMedias(item.Listing.Id.Value);
+                            await uploadPhotosAsync(item);
+                            await uploadVideos(item);
+                            await uploadVirtualTours(item);
+                            await uploadFlooplan(item);
                         }
                         else
                         {
-                            await repost(guruTask);
+                            // await repost(guruTask);
+                            await AjaxJsonPost<object>($"https://agentnet.propertyguru.com.sg/repost_listing?listing_id[]={item.Listing.Id}&statusCode=ACT&expectedCredits=","");
                         }
 
                     }
@@ -324,8 +332,52 @@ namespace Propnex.Poster.Guru
 
         private async Task deleteMedias(int id)
         {
+            await ChromiumWebBrowser.LoadUrlAsync($"https://agentnet.propertyguru.com.sg/create-listing/media/{id}");
+            await watiForIsLoading();
+            var listing = await getListing(id.ToString());
+            var medias = await getListingMediaStatus(id.ToString());
+            if (listing != null)
+            {
+                if (listing.media != null && listing.media.listingVideos != null)
+                {
+                    for (var i = 0; i < listing.media.listingVideos.Count; i++)
+                    {
+                        var item = listing.media.listingVideos[i];
+                        await deleteMedia(item.id.ToString());
+                    }
+                }
+                if (listing.media != null && listing.media.listingVirtualTours != null)
+                {
+                    for (var i = 0; i < listing.media.listingVirtualTours.Count; i++)
+                    {
+                        var item = listing.media.listingVirtualTours[i];
+                        await deleteMedia(item.id.ToString());
+                    }
+                }
+            }
+            if (medias != null && medias.listing != null)
+            {
+                for (var i = 0; i < medias.listing.Count; i++)
+                {
+                    var item = medias.listing[i];
+                    await deleteMedia(item.id.ToString());
+                }
+            }
+            if (medias != null && medias.listingFloorplans != null)
+            {
+                for (var i = 0; i < medias.listingFloorplans.Count; i++)
+                {
+                    var item = medias.listingFloorplans[i];
+                    await deleteMedia(item.id.ToString());
+                }
+            }
 
+            async Task deleteMedia(string mediaId)
+            {
+               var result= await ajaxJsonDelete<object>($"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{id}/media/{mediaId}");
+            }
         }
+
 
         /// <summary>
         /// 获取jwt
@@ -500,6 +552,18 @@ namespace Propnex.Poster.Guru
             return null;
         }
 
+        private async Task<Media> getListingMediaStatus(string id)
+        {
+            try
+            {
+                return await ajaxJsonGet<Media>($"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{id}/media-status");
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return null;
+        }
 
         private async Task uploadPhotosAsync(GuruTaskListing guruTaskListing)
         {
@@ -869,6 +933,22 @@ namespace Propnex.Poster.Guru
             }
             return (T)result;
         }
+
+        private async Task<T> ajaxJsonDelete<T>(string url)
+        {
+            var jscode = $"()=>fetch('{url}',{{method:'DELETE'}}).then(response => response.json())";
+            try
+            {
+                var result = await devToolsContext.EvaluateFunctionAsync<T>(jscode);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Logger.Error(ex, "Delete Media Error ");
+            }
+            return default(T);
+        }
+
 
         /// <summary>
         ///  等待页面加载完成
