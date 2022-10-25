@@ -5,6 +5,7 @@ using System.Linq.Dynamic.Core.Tokenizer;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Abp.Dependency;
 using CefSharp;
 using CefSharp.Dom;
 using CefSharp.WinForms;
@@ -16,59 +17,35 @@ using Propnex.Poster.Dtos;
 using Propnex.Poster.PropertyGuru;
 using Propnex.Poster.PropertyGuru.Listing;
 using Propnex.Poster.PropertyGuru.Tasks;
+using Propnex.Poster.Share;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Propnex.Poster.Guru
 {
-    public class CefPosterGuruAction : ICefPosterAction
+    public class CefPosterGuruAction : IPosterAction, ITransientDependency
     {
         ChromiumWebBrowser ChromiumWebBrowser { get; set; }
         DevToolsContext devToolsContext { get; set; }
 
-        private PnTaskDto taskDto;
-
-        private GuruTasks guruTasks;
-
-        private string context = "";
+        private Random random;
 
         private string _token = "";
 
-        private Random random;
+        private readonly Serilog.ILogger _logger;
 
-        public CefPosterGuruAction(ChromiumWebBrowser chromiumWebBrowser)
+        public CefPosterGuruAction(ChromiumWebBrowser chromiumWebBrowser, Serilog.ILogger logger)
         {
             ChromiumWebBrowser = chromiumWebBrowser;
+            _logger = logger;
             random = new Random(this.GetHashCode());
         }
 
         public async Task Start()
         {
-            await get();
-            await read();
             await getDevToolsContext();
             ChromiumWebBrowser.ShowDevTools();
 
-            for (int i = 0; i < guruTasks.Tasks.Count; i++)
-            {
-                var task = guruTasks.Tasks[i];
-                await login(guruTasks.Tasks[i]);
-                await getLisints();
-                if (task.TaskType.ToLower() == "post only")
-                {
-                    await postOnlyAsync(task);
-                }
-                if (task.TaskType.ToLower() == "repost")
-                {
-                    await repost(task);
-                }
-                if (task.TaskType.ToLower() == "update")
-                {
-                    await update(task);
-                }
-                if (task.TaskType.ToLower() == "remove")
-                {
-                    await remove(task);
-                }
-            }
+
         }
 
         #region task 任务功能
@@ -150,7 +127,7 @@ namespace Propnex.Poster.Guru
                         else
                         {
                             // await repost(guruTask);
-                            await AjaxJsonPost<object>($"https://agentnet.propertyguru.com.sg/repost_listing?listing_id[]={item.Listing.Id}&statusCode=ACT&expectedCredits=","");
+                            await AjaxJsonPost<object>($"https://agentnet.propertyguru.com.sg/repost_listing?listing_id[]={item.Listing.Id}&statusCode=ACT&expectedCredits=", "");
                         }
 
                     }
@@ -374,7 +351,7 @@ namespace Propnex.Poster.Guru
 
             async Task deleteMedia(string mediaId)
             {
-               var result= await ajaxJsonDelete<object>($"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{id}/media/{mediaId}");
+                var result = await ajaxJsonDelete<object>($"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{id}/media/{mediaId}");
             }
         }
 
@@ -402,77 +379,10 @@ namespace Propnex.Poster.Guru
         /// <returns></returns>
         private async Task login(GuruTask guruTask)
         {
-            await getDevToolsContext();
-            try
-            {
-                await ChromiumWebBrowser.LoadUrlAsync("https://agentnet.propertyguru.com.sg/ex_logout");
-                await randoTime();
-                await watiForIsLoading();
-            }
-            catch (Exception ex)
-            {
 
-            }
-
-            var loginUserId = await devToolsContext.QuerySelectorAsync<HtmlInputElement>("#login-userid");
-            if (loginUserId == null)
-            {
-                System.Threading.Thread.Sleep(1000 * 10);
-            }
-            await loginUserId.ClickAsync();
-            await loginUserId.SetValueAsync(guruTask.Account.Replace("\n", "").Replace("\r", ""));
-            await randoTime();
-            var loginUserPwd = await devToolsContext.QuerySelectorAsync<HtmlInputElement>("#login-password");
-            if (loginUserPwd != null)
-            {
-                await loginUserPwd.ClickAsync();
-                await loginUserPwd.SetValueAsync(guruTask.Password.Replace("\n", "").Replace("\r", ""));
-            }
-            await randoTime();
-            var loginSubmit = await devToolsContext.QuerySelectorAsync<HtmlFormElement>("#login-form");
-            if (loginSubmit != null)
-            {
-                await loginSubmit.SubmitAsync();
-                await randoTime();
-                await watiForIsLoading();
-
-                if (devToolsContext.Url != "https://agentnet.propertyguru.com.sg/dash?" &&
-                            devToolsContext.Url != "https://agentnet.propertyguru.com.sg/v2/dash")
-                {
-
-                }
-                else
-                {
-
-                }
-            }
 
         }
 
-        /// <summary>
-        /// 解析xml
-        /// </summary>
-        /// <returns></returns>
-        private Task read()
-        {
-            var lenght = context.IndexOf("Xpressor-Listing-File===");
-            var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
-            guruTasks = new GuruTasks(context, taskContext);
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// 获取xml
-        /// </summary>
-        /// <returns></returns>
-        private async Task get()
-        {
-            taskDto = await Api.WebServer.GetTask();
-            if (taskDto != null)
-            {
-                context = await Api.WebServer.GetTaskContent(taskDto);
-            }
-        }
         #endregion
 
 
@@ -962,7 +872,6 @@ namespace Propnex.Poster.Guru
             }
         }
 
-
         private async Task<string> getCookie(string nameKey)
         {
             var cookies = await devToolsContext.EvaluateFunctionAsync<JArray>("()=> window.cookieStore.getAll()");
@@ -981,7 +890,120 @@ namespace Propnex.Poster.Guru
         private Task randoTime(int min = 500, int max = 5000)
         {
             //System.Threading.Thread.Sleep();
+            if (min > max)
+            {
+                return Task.Delay(min);
+            }
             return Task.Delay(random.Next(min, max));
+        }
+
+        public async Task<PosterActionResult> Login(string userName, string password)
+        {
+            await getDevToolsContext();
+            PosterActionResult result = new PosterActionResult();
+            result.Status = PosterActionResultStatus.Error;
+            for (int i = 0; i < 10; i++)
+            {
+                try
+                {
+                    await ChromiumWebBrowser.LoadUrlAsync("https://agentnet.propertyguru.com.sg/ex_logout");
+                    await randoTime();
+                    await watiForIsLoading();
+
+                    if (devToolsContext.Url.StartsWith("https://accounts.propertyguru.com.sg/login") == false)
+                    {
+                        await randoTime(1000 * 60 * 5);
+                        result.Message = "Verification Code";
+                        break;
+                    }
+
+                    var loginUserId = await devToolsContext.QuerySelectorAsync<HtmlInputElement>("#login-userid");
+                    if (loginUserId == null)
+                    {
+                        result.Message = "Verification Code";
+                        break;
+                    }
+                    await loginUserId.ClickAsync();
+                    await loginUserId.SetValueAsync(userName.Replace("\n", "").Replace("\r", ""));
+                    await randoTime();
+                    var loginUserPwd = await devToolsContext.QuerySelectorAsync<HtmlInputElement>("#login-password");
+                    if (loginUserPwd != null)
+                    {
+                        await loginUserPwd.ClickAsync();
+                        await loginUserPwd.SetValueAsync(password.Replace("\n", "").Replace("\r", ""));
+                    }
+                    await randoTime();
+                    var loginSubmit = await devToolsContext.QuerySelectorAsync<HtmlFormElement>("#login-form");
+                    if (loginSubmit != null)
+                    {
+                        await loginSubmit.SubmitAsync();
+                        await randoTime();
+                        await watiForIsLoading();
+
+                        if (devToolsContext.Url != "https://agentnet.propertyguru.com.sg/dash?" &&
+                                    devToolsContext.Url != "https://agentnet.propertyguru.com.sg/v2/dash")
+                        {
+                            var warningElement = await devToolsContext.QuerySelectorAsync<HtmlElement>(".warning");
+                            if (warningElement != null)
+                            {
+                                var text = await warningElement.GetInnerTextAsync();
+
+                                if (text == "Invalid captcha value." || text.Contains("attempts"))
+                                {
+                                    result.Message = "Verification Code";
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            var appdashboard = await devToolsContext.QuerySelectorAsync("#app-agent-dashboard");
+                            var dashboard = await devToolsContext.QuerySelectorAsync("#dashboard");
+                            if (dashboard==null && appdashboard==null)
+                            {
+                                result.Message = "not find app-agent-dashboard";
+                                break;
+                            }
+
+                            result.Status = PosterActionResultStatus.Success;                          
+                            result.Message = "login success";
+                            break;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "login error");
+                    result.Status = PosterActionResultStatus.Expection;
+                    result.Message = ex.Message;
+                }
+            }
+            return result;
+        }
+
+        public Task<PosterActionResult> PostOnly()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<PosterActionResult> Post()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<PosterActionResult> Update()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<PosterActionResult> Repost()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<PosterActionResult> Retrieve()
+        {
+            throw new NotImplementedException();
         }
         #endregion
 

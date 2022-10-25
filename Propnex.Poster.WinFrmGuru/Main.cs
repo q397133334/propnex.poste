@@ -15,17 +15,19 @@ namespace Propnex.Poster.Guru
     {
 
         CefPoster cefPoster;
+        Abp.Dependency.IIocManager _iocManager;
 
-        public Main()
+        public Main(IIocManager iocManager)
         {
             InitializeComponent();
+            _iocManager = iocManager;
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             if(cefPoster==null)
             {
-                cefPoster = new CefPoster();
+                cefPoster = _iocManager.Resolve<CefPoster>();
             }
 
             cefPoster.Show();
