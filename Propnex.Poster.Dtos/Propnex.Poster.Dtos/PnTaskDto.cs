@@ -20,6 +20,8 @@ namespace Propnex.Poster.Dtos
 
         public string Source { get; set; }
 
+        public int RetryCount { get; set; } = 0;
+
         public TaskStatus Status { get; set; } = TaskStatus.Wait;
     }
 }

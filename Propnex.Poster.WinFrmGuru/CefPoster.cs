@@ -43,8 +43,6 @@ namespace Propnex.Poster.Guru
             _iocResolver = iocResolver;
         }
 
-        IPosterAction action;
-
         Serilog.ILogger Logger;
 
         private void CefPoster_Load(object sender, EventArgs e)
@@ -57,11 +55,18 @@ namespace Propnex.Poster.Guru
             try
             {
                 await getGuruTasks();
+                if (taskDto == null)
+                {
+                    await Task.Delay(1000 * 60);
+                    Close();
+                    return;
+                }
+                    
                 Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.File($"logs\\task\\{taskDto.Number}.txt", rollingInterval: RollingInterval.Infinite)
                 .CreateLogger();
-                IPosterAction posterAction = new CefPosterGuruAction(cwb, Logger);
+                IPosterAction<GuruTaskListing> posterAction = new CefPosterGuruAction(cwb, Logger);
                 if (guruTasks != null)
                 {
                     for (int i = 0; i < guruTasks.Tasks.Count; i++)
@@ -84,38 +89,94 @@ namespace Propnex.Poster.Guru
                             }
                             else
                             {
+                                Api.WebServer.PostPntaskRetry(taskDto.Id, loginResult.Message);
                                 await Task.Delay(1000 * 60 * 5);
                                 Logger.Information($"waiting 5 min ,message {loginResult.Message}");
                             }
                         }
                         else
                         {
+                            var result = new PosterActionResult();
+                            if (guruTask.TaskType.ToLower() == "post only")
+                            {
+                                for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
+                                {
+                                    var item = guruTask.Listings.Listings[j];
+                                    result = await posterAction.PostOnly(item);
+                                    if (result.Status == PosterActionResultStatus.Success)
+                                    {
+                                        ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
+                                    }
+                                    else
+                                    {
+                                        ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
+                                    }
+                                    End(item.TaskItemId);
+                                }
+                            }
 
+                            if (guruTask.TaskType.ToLower() == "repost")
+                            {
+                                for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
+                                {
+                                    var item = guruTask.Listings.Listings[j];
+                                    result = await posterAction.Repost(item);
+                                    if (result.Status == PosterActionResultStatus.Success)
+                                    {
+                                        ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
+                                    }
+                                    else
+                                    {
+                                        ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
+                                    }
+                                    End(item.TaskItemId);
+                                }
+
+                            }
+
+                            if (guruTask.TaskType.ToLower() == "update")
+                            {
+                                for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
+                                {
+                                    var item = guruTask.Listings.Listings[j];
+                                    result = await posterAction.Update(item);
+                                    if (result.Status == PosterActionResultStatus.Success)
+                                    {
+                                        ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
+                                    }
+                                    else
+                                    {
+                                        ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
+                                    }
+                                    End(item.TaskItemId);
+                                }
+                            }
+
+                            if (guruTask.TaskType.ToLower() == "remove")
+                            {
+                                for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
+                                {
+                                    var item = guruTask.Listings.Listings[j];
+                                    result = await posterAction.Remove(item);
+                                    if (result.Status == PosterActionResultStatus.Success)
+                                    {
+                                        ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
+                                    }
+                                    else
+                                    {
+                                        ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
+                                    }
+                                    End(item.TaskItemId);
+                                }
+                            }
+                            XwebEnd();
                         }
-                        //await getLisints();
-                        //if (task.TaskType.ToLower() == "post only")
-                        //{
-                        //    await postOnlyAsync(task);
-                        //}
-                        //if (task.TaskType.ToLower() == "repost")
-                        //{
-                        //    await repost(task);
-                        //}
-                        //if (task.TaskType.ToLower() == "update")
-                        //{
-                        //    await update(task);
-                        //}
-                        //if (task.TaskType.ToLower() == "remove")
-                        //{
-                        //    await remove(task);
-                        //}
                     }
                 }
-
             }
             catch (Exception ex)
             {
-
+                Logger?.Error(ex, "PosterStart");
             }
 
             //Close();
@@ -144,8 +205,6 @@ namespace Propnex.Poster.Guru
                 guruTasks = null;
             }
         }
-
-
 
         private void ResultUpload(GuruTaskListing taskListing, string queue_id, string listing_id, string status = "Done", string memo = "")
         {

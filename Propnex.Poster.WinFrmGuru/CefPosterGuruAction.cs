@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Dynamic.Core.Tokenizer;
 using System.Reflection;
@@ -22,10 +23,11 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Propnex.Poster.Guru
 {
-    public class CefPosterGuruAction : IPosterAction, ITransientDependency
+    public class CefPosterGuruAction : IPosterAction<GuruTaskListing>, ITransientDependency
     {
         ChromiumWebBrowser ChromiumWebBrowser { get; set; }
         DevToolsContext devToolsContext { get; set; }
+        public string Source { get; set; }
 
         private Random random;
 
@@ -33,9 +35,10 @@ namespace Propnex.Poster.Guru
 
         private readonly Serilog.ILogger _logger;
 
-        public CefPosterGuruAction(ChromiumWebBrowser chromiumWebBrowser, Serilog.ILogger logger)
+        public CefPosterGuruAction(ChromiumWebBrowser chromiumWebBrowser, Serilog.ILogger logger, string source = "")
         {
             ChromiumWebBrowser = chromiumWebBrowser;
+            Source = source;
             _logger = logger;
             random = new Random(this.GetHashCode());
         }
@@ -44,116 +47,279 @@ namespace Propnex.Poster.Guru
         {
             await getDevToolsContext();
             ChromiumWebBrowser.ShowDevTools();
-
-
         }
 
         #region task 任务功能
 
-        private async Task postOnlyAsync(GuruTask guruTask)
+        public async Task<PosterActionResult> PostOnly(GuruTaskListing task)
         {
-            for (var i = 0; i < guruTask.Listings.Listings.Count; i++)
+
+            var listing = IsExtis(task);
+            if (listing == null)
             {
-                var item = guruTask.Listings.Listings[i];
-                var listing = IsExtis(item, guruTask);
-                if (listing == null)
+                var result = await createListingAsync(task);
+                if (result.Id == 0)
                 {
-                    var result = await createListingAsync(item);
-
-                    if (result.Id == 0)
+                    if (result.errors.ToString().ToLower().Contains("headline"))
                     {
-                        if (result.errors.ToString().ToLower().Contains("headline"))
-                        {
-                            item.Listing.LocalizedHeadline = DefaultTitles.GetTitle();
-                            item.Listing.Headlines.En = item.Listing.LocalizedHeadline;
-                        }
-                        result = await createListingAsync(item);
+                        task.Listing.LocalizedHeadline = DefaultTitles.GetTitle();
+                        task.Listing.Headlines.En = task.Listing.LocalizedHeadline;
                     }
-                    item.Listing.Id = result.Id;
-                    if (result.Id != 0)
-                    {
-                        await uploadPhotosAsync(item);
-                        await uploadVideos(item);
-                        await uploadVirtualTours(item);
-                        await uploadFlooplan(item);
-                    }
+                    result = await createListingAsync(task);
                 }
-            }
-        }
-
-        private async Task update(GuruTask guruTask)
-        {
-            for (var i = 0; i < guruTask.Listings.Listings.Count; i++)
-            {
-                var item = guruTask.Listings.Listings[i];
-                try
+                task.Listing.Id = result.Id;
+                if (result.Id != 0)
                 {
-                    //get adcredits 
-
-                    await getAgentId(item);
-                    await updateListingAsync(item);
-                    await deleteMedias(item.Listing.Id.Value);
-                    await uploadPhotosAsync(item);
-                    await uploadVideos(item);
-                    await uploadVirtualTours(item);
-                    await uploadFlooplan(item);
-                }
-                catch
-                {
-
-                }
-            }
-        }
-
-        private async Task repost(GuruTask guruTask)
-        {
-            for (int i = 0; i < guruTask.Listings.Listings.Count; i++)
-            {
-                var item = guruTask.Listings.Listings[i];
-                if (IsExtis(item, guruTask) != null)
-                {
-                    try
-                    {
-                        if (item.FastRepost == "0")
-                        {
-                            await getAgentId(item);
-                            await update(guruTask);
-                            await deleteMedias(item.Listing.Id.Value);
-                            await uploadPhotosAsync(item);
-                            await uploadVideos(item);
-                            await uploadVirtualTours(item);
-                            await uploadFlooplan(item);
-                        }
-                        else
-                        {
-                            // await repost(guruTask);
-                            await AjaxJsonPost<object>($"https://agentnet.propertyguru.com.sg/repost_listing?listing_id[]={item.Listing.Id}&statusCode=ACT&expectedCredits=", "");
-                        }
-
-                    }
-                    catch
-                    {
-
-                    }
+                    await uploadPhotosAsync(task);
+                    await uploadVideos(task);
+                    await uploadVirtualTours(task);
+                    await uploadFlooplan(task);
+                    await changeStatusAct(task);
                 }
                 else
                 {
-                    await createListingAsync(item);
+                    return new PosterActionResult()
+                    {
+                        Status = PosterActionResultStatus.Error,
+                        Message = result.errors.ToString()
+                    };
+                }
+
+                return new PosterActionResult()
+                {
+                    Status = PosterActionResultStatus.Success,
+                    Message = $"{result.Id}"
+                };
+            }
+            else
+            {
+                return new PosterActionResult()
+                {
+                    Status = PosterActionResultStatus.Error,
+                    Message = "Existing listing detected. Pls delete manually if you wish to create as new"
+                };
+            }
+        }
+
+
+        public async Task<PosterActionResult> Login(string userName, string password)
+        {
+            await getDevToolsContext();
+            PosterActionResult result = new PosterActionResult();
+            result.Status = PosterActionResultStatus.Error;
+            for (int i = 0; i < 10; i++)
+            {
+                try
+                {
+                    await ChromiumWebBrowser.LoadUrlAsync("https://agentnet.propertyguru.com.sg/ex_logout");
+                    await randoTime();
+                    await watiForIsLoading();
+
+                    if (devToolsContext.Url.StartsWith("https://accounts.propertyguru.com.sg/login") == false)
+                    {
+                        await randoTime(1000 * 60 * 5);
+                        result.Message = "Verification Code";
+                        break;
+                    }
+
+                    var loginUserId = await devToolsContext.QuerySelectorAsync<HtmlInputElement>("#login-userid");
+                    if (loginUserId == null)
+                    {
+                        result.Message = "Verification Code";
+                        break;
+                    }
+                    await loginUserId.ClickAsync();
+                    await loginUserId.SetValueAsync(userName.Replace("\n", "").Replace("\r", ""));
+                    await randoTime();
+                    var loginUserPwd = await devToolsContext.QuerySelectorAsync<HtmlInputElement>("#login-password");
+                    if (loginUserPwd != null)
+                    {
+                        await loginUserPwd.ClickAsync();
+                        await loginUserPwd.SetValueAsync(password.Replace("\n", "").Replace("\r", ""));
+                    }
+                    await randoTime();
+                    var loginSubmit = await devToolsContext.QuerySelectorAsync<HtmlFormElement>("#login-form");
+                    if (loginSubmit != null)
+                    {
+                        await loginSubmit.SubmitAsync();
+                        await randoTime();
+                        await watiForIsLoading();
+
+                        if (devToolsContext.Url != "https://agentnet.propertyguru.com.sg/dash?" &&
+                                    devToolsContext.Url != "https://agentnet.propertyguru.com.sg/v2/dash")
+                        {
+                            var warningElement = await devToolsContext.QuerySelectorAsync<HtmlElement>(".warning");
+                            if (warningElement != null)
+                            {
+                                var text = await warningElement.GetInnerTextAsync();
+
+                                if (text == "Invalid captcha value." || text.Contains("attempts"))
+                                {
+                                    result.Message = "Verification Code";
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            var appdashboard = await devToolsContext.QuerySelectorAsync("#app-agent-dashboard");
+                            var dashboard = await devToolsContext.QuerySelectorAsync("#dashboard");
+                            if (dashboard == null && appdashboard == null)
+                            {
+                                result.Message = "not find app-agent-dashboard";
+                                break;
+                            }
+
+                            result.Status = PosterActionResultStatus.Success;
+                            result.Message = "login success";
+                            await getLisints();
+                            await getJwt();
+                            break;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "login error");
+                    result.Status = PosterActionResultStatus.Expection;
+                    result.Message = ex.Message;
+                }
+            }
+            return result;
+        }
+
+        public Task<PosterActionResult> Retrieve()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<PosterActionResult> Post(GuruTaskListing task)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<PosterActionResult> Update(GuruTaskListing task)
+        {
+            try
+            {
+                //get adcredits 
+                if (IsExtis(task) != null)
+                {
+                    await getAgentId(task);
+                    await updateListingAsync(task);
+                    await deleteMedias(task.Listing.Id.Value);
+                    await uploadPhotosAsync(task);
+                    await uploadVideos(task);
+                    await uploadVirtualTours(task);
+                    await uploadFlooplan(task);
+                    await changeStatusActUpdate(task);
+                    return new PosterActionResult()
+                    {
+                        Status = PosterActionResultStatus.Success,
+                        Message = task.Listing.Id.ToString()
+                    };
+                }
+                else
+                {
+                    return new PosterActionResult()
+                    {
+                        Status = PosterActionResultStatus.Error,
+                        Message = "Oops, we can’t find and match the above listing to perform any action. Please check your guru direct as you could have modified previously."
+                    };
                 }
 
             }
-            await Task.CompletedTask;
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Update");
+                return new PosterActionResult()
+                {
+                    Status = PosterActionResultStatus.Error,
+                    Message = ex.Message
+                };
+            }
         }
 
-        private async Task remove(GuruTask guruTask) { }
+        public async Task<PosterActionResult> Repost(GuruTaskListing task)
+        {
+            if (IsExtis(task) != null)
+            {
+                try
+                {
+                    if (task.FastRepost == "0")
+                    {
+                        return await Update(task);
+                    }
+                    else
+                    {
+                        await AjaxJsonPost<object>($"https://agentnet.propertyguru.com.sg/repost_listing?listing_id[]={task.Listing.Id}&statusCode=ACT&expectedCredits=", "");
+                    }
+                    return new PosterActionResult()
+                    {
+                        Status = PosterActionResultStatus.Success,
+                        Message = task.Listing.Id.ToString()
+                    };
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Repost");
+                    return new PosterActionResult()
+                    {
+                        Status = PosterActionResultStatus.Expection,
+                        Message = ex.Message
+                    };
+                }
+            }
+            else
+            {
+                return await PostOnly(task);
+            }
+        }
 
-        private async Task post(GuruTask guruTask) { }
+        public Task<PosterActionResult> Retrieve(GuruTaskListing task)
+        {
+            throw new NotImplementedException();
+        }
 
-        private async Task retrieve(GuruTask guruTask) { }
+        public Task<PosterActionResult> Remove(GuruTaskListing task)
+        {
+            throw new NotImplementedException();
+        }
+
+        private async Task changeStatusAct(GuruTaskListing guruTask)
+        {
+            var tryCount = 0;
+            while (tryCount < 10)
+            {
+                try
+                {
+                    tryCount++;
+                    await ChromiumWebBrowser.LoadUrlAsync($"https://agentnet.propertyguru.com.sg/create-listing/media/{guruTask.Listing.Id}");
+                    await watiForIsLoading();
+
+                    tryCount = 100;
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "changeStatusAct");
+                }
+            }
+        }
+
+        private async Task changeStatusActUpdate(GuruTaskListing guruTask)
+        {
+
+        }
+
+        private async void remove(GuruTask guruTask) { }
+
+        private async void post(GuruTask guruTask) { }
+
+        private async void retrieve(GuruTask guruTask) { }
 
 
         List<ListingInfo> ListingInfos = null;
-        private ListingInfo IsExtis(GuruTaskListing guruTaskListing, GuruTask guruTask)
+        private ListingInfo IsExtis(GuruTaskListing guruTaskListing)
         {
             ListingInfo listingInfo = null;
             if (guruTaskListing.Listing.Id.HasValue)
@@ -163,7 +329,7 @@ namespace Propnex.Poster.Guru
 
             if (listingInfo == null)
             {
-                if (guruTask.Source.ToLower() == "chope")
+                if (Source.ToLower() == "chope")
                 {
                     listingInfo = ListingInfos.Where(q => q.Sqft == guruTaskListing.Listing.Sizes.floorArea[0].text.Trim()
                                                  && q.Title == guruTaskListing.Listing.Property.name && q.TypeCode == guruTaskListing.Listing.TypeCode
@@ -365,22 +531,10 @@ namespace Propnex.Poster.Guru
             if (_token == null || _token == "")
             {
                 var result = await ajaxJsonGet<JwtResult>("https://agentnet.propertyguru.com.sg/sf2-agent/ajax/agent/jwt");
-                // var jsonResult = Newtonsoft.Json.JsonConvert.DeserializeObject<JwtResult>(JsonConvert.SerializeObject(result));
                 _token = result.accessToken;
             }
 
             return _token;
-        }
-
-        /// <summary>
-        /// 登陆账号
-        /// </summary>
-        /// <param name="guruTask"></param>
-        /// <returns></returns>
-        private async Task login(GuruTask guruTask)
-        {
-
-
         }
 
         #endregion
@@ -897,114 +1051,6 @@ namespace Propnex.Poster.Guru
             return Task.Delay(random.Next(min, max));
         }
 
-        public async Task<PosterActionResult> Login(string userName, string password)
-        {
-            await getDevToolsContext();
-            PosterActionResult result = new PosterActionResult();
-            result.Status = PosterActionResultStatus.Error;
-            for (int i = 0; i < 10; i++)
-            {
-                try
-                {
-                    await ChromiumWebBrowser.LoadUrlAsync("https://agentnet.propertyguru.com.sg/ex_logout");
-                    await randoTime();
-                    await watiForIsLoading();
-
-                    if (devToolsContext.Url.StartsWith("https://accounts.propertyguru.com.sg/login") == false)
-                    {
-                        await randoTime(1000 * 60 * 5);
-                        result.Message = "Verification Code";
-                        break;
-                    }
-
-                    var loginUserId = await devToolsContext.QuerySelectorAsync<HtmlInputElement>("#login-userid");
-                    if (loginUserId == null)
-                    {
-                        result.Message = "Verification Code";
-                        break;
-                    }
-                    await loginUserId.ClickAsync();
-                    await loginUserId.SetValueAsync(userName.Replace("\n", "").Replace("\r", ""));
-                    await randoTime();
-                    var loginUserPwd = await devToolsContext.QuerySelectorAsync<HtmlInputElement>("#login-password");
-                    if (loginUserPwd != null)
-                    {
-                        await loginUserPwd.ClickAsync();
-                        await loginUserPwd.SetValueAsync(password.Replace("\n", "").Replace("\r", ""));
-                    }
-                    await randoTime();
-                    var loginSubmit = await devToolsContext.QuerySelectorAsync<HtmlFormElement>("#login-form");
-                    if (loginSubmit != null)
-                    {
-                        await loginSubmit.SubmitAsync();
-                        await randoTime();
-                        await watiForIsLoading();
-
-                        if (devToolsContext.Url != "https://agentnet.propertyguru.com.sg/dash?" &&
-                                    devToolsContext.Url != "https://agentnet.propertyguru.com.sg/v2/dash")
-                        {
-                            var warningElement = await devToolsContext.QuerySelectorAsync<HtmlElement>(".warning");
-                            if (warningElement != null)
-                            {
-                                var text = await warningElement.GetInnerTextAsync();
-
-                                if (text == "Invalid captcha value." || text.Contains("attempts"))
-                                {
-                                    result.Message = "Verification Code";
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            var appdashboard = await devToolsContext.QuerySelectorAsync("#app-agent-dashboard");
-                            var dashboard = await devToolsContext.QuerySelectorAsync("#dashboard");
-                            if (dashboard==null && appdashboard==null)
-                            {
-                                result.Message = "not find app-agent-dashboard";
-                                break;
-                            }
-
-                            result.Status = PosterActionResultStatus.Success;                          
-                            result.Message = "login success";
-                            break;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, "login error");
-                    result.Status = PosterActionResultStatus.Expection;
-                    result.Message = ex.Message;
-                }
-            }
-            return result;
-        }
-
-        public Task<PosterActionResult> PostOnly()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<PosterActionResult> Post()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<PosterActionResult> Update()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<PosterActionResult> Repost()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<PosterActionResult> Retrieve()
-        {
-            throw new NotImplementedException();
-        }
         #endregion
 
     }

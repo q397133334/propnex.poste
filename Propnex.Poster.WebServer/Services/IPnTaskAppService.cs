@@ -5,6 +5,7 @@ using Volo.Abp.Domain.Repositories;
 using Nito.AsyncEx;
 using Flurl.Http;
 using System.Text;
+using Propnex.Poster.Dtos;
 
 namespace Propnex.Poster.WebServer.Services
 {
@@ -15,7 +16,9 @@ namespace Propnex.Poster.WebServer.Services
             PagedAndSortedResultRequestDto, //Used for paging/sorting
             Dtos.CreateUpdatePnTaskDto> //Used
     {
+        Task<Dtos.PnTaskDto> GetPnTaskAsync(Dtos.InputGetTaskInfoDto inputDto);
 
+        Task PnTaskRetry(Guid Machineid, Guid pnTaskId, string message = "");
     }
 
     public class PnTaskAppService : CrudAppService<
@@ -88,6 +91,24 @@ namespace Propnex.Poster.WebServer.Services
                     Source = pnTask.Source,
                     Status = pnTask.Status
                 };
+            }
+        }
+
+        public async Task PnTaskRetry(Guid machineId, Guid pnTaskId, string message = "")
+        {
+            var pnTask = await AsyncExecuter.FirstOrDefaultAsync((await Repository.GetQueryableAsync()).Where(q => q.Id == pnTaskId));
+            if (pnTask != null && pnTask.RetryCount > 3)
+            {
+                pnTask.RetryCount += 1;
+                pnTask.Status = Share.TaskStatus.Wait;
+                await Repository.UpdateAsync(pnTask);
+                await _pnTaskLogRepository.InsertAsync(machineId, pnTask.Id, $"Set Retry {pnTask.RetryCount}, {message}", "");
+            }
+            else
+            {
+                pnTask.Status = Share.TaskStatus.Failure;
+                await Repository.UpdateAsync(pnTask);
+                await _pnTaskLogRepository.InsertAsync(machineId, pnTask.Id, $"set Retry,but retyr max count {pnTask.RetryCount},{message}", "");
             }
         }
     }

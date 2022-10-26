@@ -7,20 +7,22 @@ using System.Threading.Tasks;
 
 namespace Propnex.Poster.Share
 {
-    public interface IPosterAction
+    public interface IPosterAction<T>
     {
-        
+        string Source { get; set; }
 
-        Task<PosterActionResult> Login(string userName,string password);
+        Task<PosterActionResult> Login(string userName, string password);
 
-        Task<PosterActionResult> PostOnly();
+        Task<PosterActionResult> PostOnly(T task);
 
-        Task<PosterActionResult> Post();
+        Task<PosterActionResult> Post(T task);
 
-        Task<PosterActionResult> Update();
+        Task<PosterActionResult> Update(T task);
 
-        Task<PosterActionResult> Repost();
+        Task<PosterActionResult> Repost(T task);
 
-        Task<PosterActionResult> Retrieve();
+        Task<PosterActionResult> Remove(T task);
+
+        Task<PosterActionResult> Retrieve(T task);
     }
 }

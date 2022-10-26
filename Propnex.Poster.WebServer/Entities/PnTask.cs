@@ -24,6 +24,8 @@ namespace Propnex.Poster.WebServer.Entities
 
         public string Source { get; set; }
 
+        public int RetryCount { get; set; } = 0;
+
         public Share.TaskStatus Status { get; set; } = Share.TaskStatus.Wait;
 
         public ICollection<PnTaskItem> PnTaskItems { get; set; }
