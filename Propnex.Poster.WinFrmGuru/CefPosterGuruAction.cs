@@ -107,7 +107,7 @@ namespace Propnex.Poster.Guru
             await getDevToolsContext();
             PosterActionResult result = new PosterActionResult();
             result.Status = PosterActionResultStatus.Error;
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 5; i++)
             {
                 try
                 {
@@ -158,6 +158,13 @@ namespace Propnex.Poster.Guru
                                     result.Message = "Verification Code";
                                     break;
                                 }
+                                else
+                                {
+                                    result.Message = text;
+                                    _logger.Information(text);
+                                    await randoTime(1000 * 60 * 5);
+                                    break;
+                                }
                             }
                         }
                         else
@@ -166,7 +173,9 @@ namespace Propnex.Poster.Guru
                             var dashboard = await devToolsContext.QuerySelectorAsync("#dashboard");
                             if (dashboard == null && appdashboard == null)
                             {
+                                await randoTime(1000 * 60 * 5);
                                 result.Message = "not find app-agent-dashboard";
+                                _logger.Information(result.Message);
                                 break;
                             }
 
@@ -281,9 +290,36 @@ namespace Propnex.Poster.Guru
             throw new NotImplementedException();
         }
 
-        public Task<PosterActionResult> Remove(GuruTaskListing task)
+        public async Task<PosterActionResult> Remove(GuruTaskListing task)
         {
-            throw new NotImplementedException();
+            if (IsExtis(task) != null)
+            {
+
+                var listingInfo = IsExtis(task);
+                if (listingInfo.IsBoosted == false && listingInfo.IsTurbo == false)
+                {
+                    await getAgentId(task);
+                    var result = await AjaxJsonPost<object>("https://bff-mobile.propertyguru.com/v1/listingManagement/delist?region=sg", "", data: $"{{'listingIds':[{task.Listing.Id}],'statusCode':'DEL','agentId':{task.Listing.Agent.id}}}");
+                    return new PosterActionResult()
+                    {
+                        Status = PosterActionResultStatus.Success,
+                        Message = ""
+                    };
+                }
+                else
+                {
+                    return new PosterActionResult()
+                    {
+                        Status = PosterActionResultStatus.Error,
+                        Message = "Sorry, listing detected as boost/turbo. Please remove directly at PG. "
+                    };
+                }
+            }
+            return new PosterActionResult()
+            {
+                Status = PosterActionResultStatus.Error,
+                Message = "Oops, we can’t find and match the above listing to perform any action. Please check your guru direct as you could have modified previously."
+            };
         }
 
         private async Task changeStatusAct(GuruTaskListing guruTask)
@@ -297,6 +333,30 @@ namespace Propnex.Poster.Guru
                     await ChromiumWebBrowser.LoadUrlAsync($"https://agentnet.propertyguru.com.sg/create-listing/media/{guruTask.Listing.Id}");
                     await watiForIsLoading();
 
+                    var buttons = await devToolsContext.QuerySelectorAllAsync("#lcv2-bar-footer >div > div > button");
+                    if (buttons != null && buttons.Length == 3)
+                    {
+                        await buttons[2].ClickAsync();
+                        await randoTime(1000);
+                        await watiForIsLoading();
+
+                        var postButtons = await devToolsContext.QuerySelectorAllAsync("#lcv2-bar-footer >div > div > button");
+                        if (postButtons != null && postButtons.Length == 3)
+                        {
+                            await postButtons[2].ClickAsync();
+                            await randoTime(1000);
+                            await watiForIsLoading();
+
+                            var okButtons = await devToolsContext.QuerySelectorAllAsync("body > div > div > div > div > button");
+                            if (okButtons != null && okButtons.Length == 3)
+                            {
+                                await okButtons[2].ClickAsync();
+                                await randoTime(1000);
+                                await watiForIsLoading();
+                            }
+                        }
+                    }
+                    await randoTime(1000 * 10);
                     tryCount = 100;
                 }
                 catch (Exception ex)
@@ -308,14 +368,47 @@ namespace Propnex.Poster.Guru
 
         private async Task changeStatusActUpdate(GuruTaskListing guruTask)
         {
+            var tryCount = 0;
+            while (tryCount < 10)
+            {
+                try
+                {
+                    tryCount++;
+                    await ChromiumWebBrowser.LoadUrlAsync($"https://agentnet.propertyguru.com.sg/create-listing/media/{guruTask.Listing.Id}");
+                    await watiForIsLoading();
 
+                    var buttons = await devToolsContext.QuerySelectorAllAsync("#lcv2-bar-footer >div > div > button");
+                    if (buttons != null && buttons.Length == 3)
+                    {
+                        await buttons[2].ClickAsync();
+                        await randoTime(1000);
+                        await watiForIsLoading();
+
+                        var postButtons = await devToolsContext.QuerySelectorAllAsync("#lcv2-bar-footer >div > div > button");
+                        if (postButtons != null && postButtons.Length == 3)
+                        {
+                            await postButtons[1].ClickAsync();
+                            await randoTime(1000);
+                            await watiForIsLoading();
+
+                            //var okButtons = await devToolsContext.QuerySelectorAllAsync("body > div > div > div > div > button");
+                            //if (okButtons != null && okButtons.Length == 3)
+                            //{
+                            //    await okButtons[2].ClickAsync();
+                            //    await randoTime(1000);
+                            //    await watiForIsLoading();
+                            //}
+                        }
+                    }
+                    await randoTime(1000 * 10);
+                    tryCount = 100;
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "changeStatusAct");
+                }
+            }
         }
-
-        private async void remove(GuruTask guruTask) { }
-
-        private async void post(GuruTask guruTask) { }
-
-        private async void retrieve(GuruTask guruTask) { }
 
 
         List<ListingInfo> ListingInfos = null;

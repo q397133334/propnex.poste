@@ -97,7 +97,7 @@ namespace Propnex.Poster.WebServer.Services
         public async Task PnTaskRetry(Guid machineId, Guid pnTaskId, string message = "")
         {
             var pnTask = await AsyncExecuter.FirstOrDefaultAsync((await Repository.GetQueryableAsync()).Where(q => q.Id == pnTaskId));
-            if (pnTask != null && pnTask.RetryCount > 3)
+            if (pnTask != null && pnTask.RetryCount <= 3)
             {
                 pnTask.RetryCount += 1;
                 pnTask.Status = Share.TaskStatus.Wait;

@@ -46,6 +46,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1424, 861);
             this.Controls.Add(this.cwb);
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "CefPoster";
             this.Text = "CefPoster";
             this.Load += new System.EventHandler(this.CefPoster_Load);

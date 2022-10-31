@@ -25,26 +25,61 @@ namespace Propnex.Poster.Guru
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if(cefPoster==null)
+            if (cefPoster == null)
             {
                 cefPoster = _iocManager.Resolve<CefPoster>();
             }
 
             cefPoster.Show();
+            cefPoster.FormClosed += (s, ev) =>
+            {
+                cefPoster = null;
+            };
             cefPoster.PosterStart();
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            //if (cefPoster == null)
-            //{
-            //    cefPoster = new CefPoster();
-            //    cefPoster.FormClosed += (s, ev) =>
-            //    {
-            //        cefPoster = null;
-            //    };
-            //    cefPoster.Show();
-            //}
+
+            if (cefPoster == null && isStop == false)
+            {
+                isStop = false;
+                cefPoster = _iocManager.Resolve<CefPoster>();
+                cefPoster.FormClosed += (s, ev) =>
+                {
+                    cefPoster = null;
+                };
+                cefPoster.Show();
+                cefPoster.PosterStart();
+            }
+            else
+            {
+                if (cefPoster == null)
+                {
+                    this.Close();
+                }
+            }
+        }
+
+        bool isStop = false;
+
+        private void btnClose_Click(object sender, EventArgs e)
+        {
+            isStop = true;
+        }
+
+        private void Main_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (isStop == false)
+            {
+                e.Cancel = true;
+                MessageBox.Show("click close buttom");
+            }
+            if (cefPoster != null)
+            {
+                e.Cancel = true;
+                MessageBox.Show("click close buttom");
+            }
         }
     }
 }

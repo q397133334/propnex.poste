@@ -47,6 +47,7 @@ namespace Propnex.Poster.Guru
 
         private void CefPoster_Load(object sender, EventArgs e)
         {
+            //this.FormBorderStyle=FormBorderStyle.None;
             cwb.LoadUrl("http://www.baidu.com");
         }
 
@@ -61,7 +62,7 @@ namespace Propnex.Poster.Guru
                     Close();
                     return;
                 }
-                    
+
                 Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.File($"logs\\task\\{taskDto.Number}.txt", rollingInterval: RollingInterval.Infinite)
@@ -76,13 +77,15 @@ namespace Propnex.Poster.Guru
                         var loginResult = await posterAction.Login(guruTask.Account, guruTask.Password);
                         if (loginResult.Status != PosterActionResultStatus.Success)
                         {
+                            Logger.Information("login success");
                             if ((loginResult.Message != "Invalid captcha value." || !loginResult.Message.Contains("attempts")) && loginResult.Message != "Verification Code" && loginResult.Message != "")
                             {
                                 if (guruTask.Listings.Listings != null)
                                 {
+                                    loginResult.Message = string.IsNullOrEmpty(loginResult.Message) ? "Email or Password not valid.Please try again" : loginResult.Message;
                                     foreach (var item in guruTask.Listings.Listings)
                                     {
-                                        ResultUpload(item, item.TaskItemId, "", "Failed", "Email or Password not valid.Please try again");
+                                        ResultUpload(item, item.TaskItemId, "", "Failed", $"{loginResult.Message}");
                                         End(item.TaskItemId);
                                     }
                                 }
@@ -152,7 +155,7 @@ namespace Propnex.Poster.Guru
                                 }
                             }
 
-                            if (guruTask.TaskType.ToLower() == "remove")
+                            if (guruTask.TaskType.ToLower() == "remove from portals")
                             {
                                 for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
                                 {
@@ -169,7 +172,17 @@ namespace Propnex.Poster.Guru
                                     End(item.TaskItemId);
                                 }
                             }
+                            if (guruTask.TaskType.ToLower().IndexOf("retrieve") > -1)
+                            {
+                                for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
+                                {
+                                    var item = guruTask.Listings.Listings[j];
+                                    ResultUpload(item, item.TaskItemId, "", "Failed", "To realize the function, wait a few days");
+                                    End(item.TaskItemId);
+                                }
+                            }
                             XwebEnd();
+                            Logger.Information("Success");
                         }
                     }
                 }
@@ -179,7 +192,7 @@ namespace Propnex.Poster.Guru
                 Logger?.Error(ex, "PosterStart");
             }
 
-            //Close();
+            Close();
         }
 
 

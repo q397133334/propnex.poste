@@ -2,7 +2,7 @@
 @using Volo.Abp.Application.Dtos
 @using Dtos
 @inherits AbpCrudPageBase<WebServer.Services.IPnTaskAppService, PnTaskDto , Guid, PagedAndSortedResultRequestDto, CreateUpdatePnTaskDto>
-
+@inject AuthenticationStateProvider AuthenticationStateProvider
 <Card>
     <CardHeader>
         <h2>@L["Books"]</h2>

@@ -21,7 +21,7 @@ namespace Propnex.Poster.Guru.Api
 
             var result = await url.GetJsonAsync<Dtos.PnTaskDto>();
 
-            if (Guid.Empty == result.Id)
+            if (result==null || Guid.Empty == result.Id)
             {
                 return null;
             }
@@ -37,9 +37,9 @@ namespace Propnex.Poster.Guru.Api
 
         public static async void PostPntaskRetry(Guid pnTaskId, string message)
         {
-            string url = $"{BaseUrl}/api/app/pn-task/pn-task-retry";
+            string url = $"{BaseUrl}/api/app/pn-task/pn-task-retry?machineId={Id}&pnTaskId={pnTaskId}&message={message}";
 
-            await url.PostJsonAsync(new { machineId = Id, pnTaskId = pnTaskId, message = message });
+            await url.PostAsync();
         }
 
         public static async void UpdatePnTask(PnTaskDto pnTaskDto)
