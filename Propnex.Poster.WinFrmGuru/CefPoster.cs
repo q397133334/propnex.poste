@@ -58,6 +58,7 @@ namespace Propnex.Poster.Guru
                 await getGuruTasks();
                 if (taskDto == null)
                 {
+                    Console.WriteLine("Not find task ,delay 1 min");
                     await Task.Delay(1000 * 60);
                     Close();
                     return;
@@ -65,11 +66,13 @@ namespace Propnex.Poster.Guru
 
                 Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
+                .WriteTo.Console()
                 .WriteTo.File($"logs\\task\\{taskDto.Number}.txt", rollingInterval: RollingInterval.Infinite)
                 .CreateLogger();
                 IPosterAction<GuruTaskListing> posterAction = new CefPosterGuruAction(cwb, Logger);
                 if (guruTasks != null)
                 {
+                    Logger.Information($"start run task {taskDto.Number}");
                     for (int i = 0; i < guruTasks.Tasks.Count; i++)
                     {
                         guruTask = guruTasks.Tasks[i];
@@ -77,7 +80,8 @@ namespace Propnex.Poster.Guru
                         var loginResult = await posterAction.Login(guruTask.Account, guruTask.Password);
                         if (loginResult.Status != PosterActionResultStatus.Success)
                         {
-                            Logger.Information("login success");
+                            Logger.Information("login error");
+                            Logger.Information($"{loginResult.Message}");
                             if ((loginResult.Message != "Invalid captcha value." || !loginResult.Message.Contains("attempts")) && loginResult.Message != "Verification Code" && loginResult.Message != "")
                             {
                                 if (guruTask.Listings.Listings != null)
@@ -93,8 +97,8 @@ namespace Propnex.Poster.Guru
                             else
                             {
                                 Api.WebServer.PostPntaskRetry(taskDto.Id, loginResult.Message);
-                                await Task.Delay(1000 * 60 * 5);
                                 Logger.Information($"waiting 5 min ,message {loginResult.Message}");
+                                await Task.Delay(1000 * 60 * 5);
                             }
                         }
                         else
@@ -106,6 +110,7 @@ namespace Propnex.Poster.Guru
                                 {
                                     var item = guruTask.Listings.Listings[j];
                                     result = await posterAction.PostOnly(item);
+                                    Logger.Information($"{result.Status}--{result.Message}");
                                     if (result.Status == PosterActionResultStatus.Success)
                                     {
                                         ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
@@ -124,6 +129,7 @@ namespace Propnex.Poster.Guru
                                 {
                                     var item = guruTask.Listings.Listings[j];
                                     result = await posterAction.Repost(item);
+                                    Logger.Information($"{result.Status}--{result.Message}");
                                     if (result.Status == PosterActionResultStatus.Success)
                                     {
                                         ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
@@ -143,6 +149,7 @@ namespace Propnex.Poster.Guru
                                 {
                                     var item = guruTask.Listings.Listings[j];
                                     result = await posterAction.Update(item);
+                                    Logger.Information($"{result.Status}--{result.Message}");
                                     if (result.Status == PosterActionResultStatus.Success)
                                     {
                                         ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
@@ -161,6 +168,7 @@ namespace Propnex.Poster.Guru
                                 {
                                     var item = guruTask.Listings.Listings[j];
                                     result = await posterAction.Remove(item);
+                                    Logger.Information($"{result.Status}--{result.Message}");
                                     if (result.Status == PosterActionResultStatus.Success)
                                     {
                                         ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());

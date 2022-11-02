@@ -109,6 +109,7 @@ namespace Propnex.Poster.Guru
             result.Status = PosterActionResultStatus.Error;
             for (int i = 0; i < 5; i++)
             {
+                _logger.Information($"Login-{i}");
                 try
                 {
                     await ChromiumWebBrowser.LoadUrlAsync("https://agentnet.propertyguru.com.sg/ex_logout");
@@ -209,6 +210,7 @@ namespace Propnex.Poster.Guru
 
         public async Task<PosterActionResult> Update(GuruTaskListing task)
         {
+            _logger.Information("Update");
             try
             {
                 //get adcredits 
@@ -251,6 +253,7 @@ namespace Propnex.Poster.Guru
 
         public async Task<PosterActionResult> Repost(GuruTaskListing task)
         {
+            _logger.Information("Repost");
             if (IsExtis(task) != null)
             {
                 try
@@ -292,9 +295,9 @@ namespace Propnex.Poster.Guru
 
         public async Task<PosterActionResult> Remove(GuruTaskListing task)
         {
+            _logger.Information($"remove {task.Listing.Id}");
             if (IsExtis(task) != null)
             {
-
                 var listingInfo = IsExtis(task);
                 if (listingInfo.IsBoosted == false && listingInfo.IsTurbo == false)
                 {
@@ -324,11 +327,13 @@ namespace Propnex.Poster.Guru
 
         private async Task changeStatusAct(GuruTaskListing guruTask)
         {
+            _logger.Information("changeStatusAct");
             var tryCount = 0;
             while (tryCount < 10)
             {
                 try
                 {
+                    _logger.Information($"tryCount {tryCount}");
                     tryCount++;
                     await ChromiumWebBrowser.LoadUrlAsync($"https://agentnet.propertyguru.com.sg/create-listing/media/{guruTask.Listing.Id}");
                     await watiForIsLoading();
@@ -337,24 +342,37 @@ namespace Propnex.Poster.Guru
                     if (buttons != null && buttons.Length == 3)
                     {
                         await buttons[2].ClickAsync();
-                        await randoTime(1000);
+                        await randoTime(2000);
                         await watiForIsLoading();
 
                         var postButtons = await devToolsContext.QuerySelectorAllAsync("#lcv2-bar-footer >div > div > button");
                         if (postButtons != null && postButtons.Length == 3)
                         {
                             await postButtons[2].ClickAsync();
-                            await randoTime(1000);
+                            await randoTime(2000);
                             await watiForIsLoading();
+                            await randoTime(5000);
 
                             var okButtons = await devToolsContext.QuerySelectorAllAsync("body > div > div > div > div > button");
                             if (okButtons != null && okButtons.Length == 3)
                             {
                                 await okButtons[2].ClickAsync();
-                                await randoTime(1000);
+                                await randoTime(2000);
                                 await watiForIsLoading();
                             }
+                            else
+                            {
+                                _logger.Information("not find okButtons");
+                            }
                         }
+                        else
+                        {
+                            _logger.Information("not find postButton");
+                        }
+                    }
+                    else
+                    {
+                        _logger.Information("not find nextButton");
                     }
                     await randoTime(1000 * 10);
                     tryCount = 100;
@@ -368,11 +386,13 @@ namespace Propnex.Poster.Guru
 
         private async Task changeStatusActUpdate(GuruTaskListing guruTask)
         {
+            _logger.Information("changeStatusActUpdate");
             var tryCount = 0;
             while (tryCount < 10)
             {
                 try
                 {
+                    _logger.Information($"tryCount {tryCount}");
                     tryCount++;
                     await ChromiumWebBrowser.LoadUrlAsync($"https://agentnet.propertyguru.com.sg/create-listing/media/{guruTask.Listing.Id}");
                     await watiForIsLoading();
@@ -381,16 +401,16 @@ namespace Propnex.Poster.Guru
                     if (buttons != null && buttons.Length == 3)
                     {
                         await buttons[2].ClickAsync();
-                        await randoTime(1000);
+                        await randoTime(2000);
                         await watiForIsLoading();
 
                         var postButtons = await devToolsContext.QuerySelectorAllAsync("#lcv2-bar-footer >div > div > button");
                         if (postButtons != null && postButtons.Length == 3)
                         {
                             await postButtons[1].ClickAsync();
-                            await randoTime(1000);
+                            await randoTime(2000);
                             await watiForIsLoading();
-
+                            _logger.Information("not click save");
                             //var okButtons = await devToolsContext.QuerySelectorAllAsync("body > div > div > div > div > button");
                             //if (okButtons != null && okButtons.Length == 3)
                             //{
@@ -399,6 +419,14 @@ namespace Propnex.Poster.Guru
                             //    await watiForIsLoading();
                             //}
                         }
+                        else
+                        {
+                            _logger.Information("not find postButton");
+                        }
+                    }
+                    else
+                    {
+                        _logger.Information("not find nextButton");
                     }
                     await randoTime(1000 * 10);
                     tryCount = 100;
@@ -414,6 +442,7 @@ namespace Propnex.Poster.Guru
         List<ListingInfo> ListingInfos = null;
         private ListingInfo IsExtis(GuruTaskListing guruTaskListing)
         {
+            _logger.Information("IsExtis");
             ListingInfo listingInfo = null;
             if (guruTaskListing.Listing.Id.HasValue)
             {
@@ -560,14 +589,18 @@ namespace Propnex.Poster.Guru
         private async Task getAgentId(GuruTaskListing guruTaskUpdateListing)
         {
             // var agentId = await getCookie("PGID1");
+            _logger.Information("GetAgentId");
             await getDevToolsContext();
             var agentId = await devToolsContext.EvaluateFunctionAsync<int>("()=> guruApp.user_id");
             if (agentId != 0)
                 guruTaskUpdateListing.Listing.Agent.id = agentId;
+
+            _logger.Information($"AgentId is :{agentId}");
         }
 
         private async Task deleteMedias(int id)
         {
+            _logger.Information($"deleteMedias");
             await ChromiumWebBrowser.LoadUrlAsync($"https://agentnet.propertyguru.com.sg/create-listing/media/{id}");
             await watiForIsLoading();
             var listing = await getListing(id.ToString());
@@ -623,8 +656,10 @@ namespace Propnex.Poster.Guru
         {
             if (_token == null || _token == "")
             {
+              
                 var result = await ajaxJsonGet<JwtResult>("https://agentnet.propertyguru.com.sg/sf2-agent/ajax/agent/jwt");
                 _token = result.accessToken;
+                _logger.Information($"getJwt:{_token}");
             }
 
             return _token;
@@ -644,6 +679,7 @@ namespace Propnex.Poster.Guru
 
         private async Task<CreateOrUpdateListingResult> createListingAsync(GuruTaskListing guruTaskUpdateListing)
         {
+            _logger.Information($"createListingAsync");
             await getAgentId(guruTaskUpdateListing);
             var jsonFomrate = new JsonSerializerSettings
             {
@@ -682,6 +718,7 @@ namespace Propnex.Poster.Guru
 
         private async Task<CreateOrUpdateListingResult> updateListingAsync(GuruTaskListing guruTaskListing)
         {
+            _logger.Information($"updateListingAsync");
             var jsonFomrate = new JsonSerializerSettings
             {
                 ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
@@ -695,6 +732,7 @@ namespace Propnex.Poster.Guru
 
         private async Task<CreateOrUpdateListing> getListing(string id)
         {
+            _logger.Information($"getListing");
             var json = new object();
             try
             {
@@ -711,6 +749,7 @@ namespace Propnex.Poster.Guru
 
         private async Task<Media> getListingMediaStatus(string id)
         {
+            _logger.Information($"getListingMediaStatus");
             try
             {
                 return await ajaxJsonGet<Media>($"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{id}/media-status");
@@ -724,6 +763,7 @@ namespace Propnex.Poster.Guru
 
         private async Task uploadPhotosAsync(GuruTaskListing guruTaskListing)
         {
+            _logger.Information($"uploadPhotosAsync");
             bool result = true;
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
@@ -780,6 +820,7 @@ namespace Propnex.Poster.Guru
                 }
                 catch (Exception ex)
                 {
+                    _logger.Error(ex, "uploadPhotosAsync");
                     result = false;
                     continue;
                 }
@@ -788,6 +829,7 @@ namespace Propnex.Poster.Guru
 
         private async Task uploadVideos(GuruTaskListing guruTaskListing)
         {
+            _logger.Information($"uploadVideos");
             bool result = true;
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
@@ -847,9 +889,9 @@ namespace Propnex.Poster.Guru
 
                         formData.Add("mediaFile", $"window.file_{i}_move");
                     }
-                    catch
+                    catch(Exception ex)
                     {
-
+                        _logger.Error(ex, "");
                     }
 
                 }
@@ -870,13 +912,14 @@ namespace Propnex.Poster.Guru
                 }
                 catch (Exception ex)
                 {
-
+                    _logger.Error(ex, "");
                 }
             }
         }
 
         private async Task uploadVirtualTours(GuruTaskListing guruTaskListing)
         {
+            _logger.Information("uploadVirtualTours");
             bool result = true;
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
@@ -936,9 +979,9 @@ namespace Propnex.Poster.Guru
 
                         formData.Add("mediaFile", $"window.file_{i}_vt");
                     }
-                    catch
+                    catch(Exception ex)
                     {
-
+                        _logger.Error(ex,"uploadVirtualTours");
                     }
 
                 }
@@ -959,13 +1002,14 @@ namespace Propnex.Poster.Guru
                 }
                 catch (Exception ex)
                 {
-
+                    _logger.Error(ex,"uploadVirtualTours");
                 }
             }
         }
 
         private async Task uploadFlooplan(GuruTaskListing guruTaskListing)
         {
+            _logger.Information("uploadFlooplan");
             bool result = true;
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
@@ -1017,6 +1061,7 @@ namespace Propnex.Poster.Guru
                 }
                 catch (Exception ex)
                 {
+                    _logger.Error(ex,"uploadFlooplan");
                     result = false;
                     continue;
                 }
@@ -1116,7 +1161,9 @@ namespace Propnex.Poster.Guru
             while (ChromiumWebBrowser.IsLoading)
             {
                 await randoTime(5000, 5000);
+                _logger.Information("watiForIsLoading");
             }
+            await randoTime(5000, 5000);
         }
 
         private async Task<string> getCookie(string nameKey)
@@ -1137,11 +1184,17 @@ namespace Propnex.Poster.Guru
         private Task randoTime(int min = 500, int max = 5000)
         {
             //System.Threading.Thread.Sleep();
+            var value = min;
             if (min > max)
             {
-                return Task.Delay(min);
+                value = min;
             }
-            return Task.Delay(random.Next(min, max));
+            else
+            {
+                value = random.Next(min, max);
+            }
+            _logger.Information($"randoTime {value}");
+            return Task.Delay(value);
         }
 
         #endregion
