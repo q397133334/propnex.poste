@@ -2824,12 +2824,6 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_F2A46242D204E4F62BF4004E8A3DC375"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_CB28F51DFE6B4D39905ABDD23998D1FB"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -3883,6 +3877,12 @@
         "OwnerKey" = "8:_ECDBF1BF507567F5299BE3880BC81026"
         "MsmSig" = "8:_UNDEFINED"
         }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_F2A46242D204E4F62BF4004E8A3DC375"
+        "MsmSig" = "8:_UNDEFINED"
+        }
     }
     "Configurations"
     {
@@ -3901,6 +3901,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -10052,15 +10060,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Propnex.Poster.WinFrmGuru"
-        "ProductCode" = "8:{D4BBADF7-FCEF-4629-B0AC-D0126B79ECAB}"
-        "PackageCode" = "8:{EBD3BF5C-FF55-4217-A1BD-F0AC6B763A9B}"
+        "ProductCode" = "8:{5ED0F97B-0A2D-426B-9EB0-275822DD696E}"
+        "PackageCode" = "8:{9C22482E-7D68-49D9-957C-04BA9D8FF074}"
         "UpgradeCode" = "8:{0356711B-6B43-4CE2-A25A-709950F33ECD}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:FALSE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.0.8"
+        "ProductVersion" = "8:1.0.10"
         "Manufacturer" = "8:Propnex"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -10176,7 +10184,7 @@
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_2E74548256F84298B082E964CF5C60DC"
             {
             "Name" = "8:uninstall.exe"
-            "Arguments" = "8:/X {D4BBADF7-FCEF-4629-B0AC-D0126B79ECAB}"
+            "Arguments" = "8:/X {5ED0F97B-0A2D-426B-9EB0-275822DD696E}"
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
@@ -10204,7 +10212,7 @@
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_AAC139DFD62D491B9A025364974C739B"
             {
             "Name" = "8:uninstall.exe"
-            "Arguments" = "8:/X {D4BBADF7-FCEF-4629-B0AC-D0126B79ECAB}"
+            "Arguments" = "8:/X {5ED0F97B-0A2D-426B-9EB0-275822DD696E}"
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
@@ -10714,7 +10722,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_CB28F51DFE6B4D39905ABDD23998D1FB"
             {
-            "SourcePath" = "8:..\\..\\Propnex.Poster.WinFrmGuru\\obj\\Release\\Propnex.Poster.Guru.exe"
+            "SourcePath" = "8:..\\..\\Propnex.Poster.WinFrmGuru\\obj\\Debug\\Propnex.Poster.Guru.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_F61A42FDDECA4C9582445A1FB694552B"

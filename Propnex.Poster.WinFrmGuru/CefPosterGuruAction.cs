@@ -104,11 +104,12 @@ namespace Propnex.Poster.Guru
 
         public async Task<PosterActionResult> Login(string userName, string password)
         {
-            await getDevToolsContext();
+        
             PosterActionResult result = new PosterActionResult();
             result.Status = PosterActionResultStatus.Error;
             for (int i = 0; i < 5; i++)
             {
+                await getDevToolsContext();
                 _logger.Information($"Login-{i}");
                 try
                 {
@@ -116,30 +117,61 @@ namespace Propnex.Poster.Guru
                     await randoTime();
                     await watiForIsLoading();
 
-                    if (devToolsContext.Url.StartsWith("https://accounts.propertyguru.com.sg/login") == false)
+                    if (devToolsContext.Url == "chrome-error://chromewebdata/")
+                    {
+                        await Api.WebServer.PingAsync();
+                        i = 0;
+                        continue;
+                    }
+                    var add = ChromiumWebBrowser.Address;
+                    await devToolsContext.GoToAsync(add);
+
+                    if (ChromiumWebBrowser.Address.StartsWith("https://accounts.propertyguru.com.sg/account/login") == false)
                     {
                         await randoTime(1000 * 60 * 5);
                         result.Message = "Verification Code";
                         break;
                     }
 
-                    var loginUserId = await devToolsContext.QuerySelectorAsync<HtmlInputElement>("#login-userid");
+                    var loginUserId = await devToolsContext.QuerySelectorAsync<HtmlInputElement>("input[name='username']");
                     if (loginUserId == null)
                     {
                         result.Message = "Verification Code";
                         break;
                     }
-                    await loginUserId.ClickAsync();
-                    await loginUserId.SetValueAsync(userName.Replace("\n", "").Replace("\r", ""));
+                    //await loginUserId.ClickAsync();
                     await randoTime();
-                    var loginUserPwd = await devToolsContext.QuerySelectorAsync<HtmlInputElement>("#login-password");
+                    //await loginUserId.SetValueAsync(userName.Replace("\n", "").Replace("\r", ""));
+                    await devToolsContext.EvaluateExpressionAsync(@"window.setValue=function(query, value) { 
+                        let element=document.querySelector(query);
+                        let lastValue = element.value;
+                        element.value = value;
+                        let event = new Event('input', { target: element, bubbles: true });
+                        // React 15
+                        event.simulated = true;
+                        // React 16
+                        let tracker = element._valueTracker;
+                        if (tracker) {
+                            tracker.setValue(lastValue);
+                        }
+                        element.dispatchEvent(event);
+                    }");
+                    await devToolsContext.EvaluateFunctionAsync($@"()=>{{window.setValue(""input[name='username']"",'{userName.Replace("\n", "").Replace("\r", "")}')}}");
+                    await randoTime();
+                    //await loginUserId.ClickAsync();
+                    await randoTime();
+                    var loginUserPwd = await devToolsContext.QuerySelectorAsync<HtmlInputElement>("input[name='password']");
                     if (loginUserPwd != null)
                     {
-                        await loginUserPwd.ClickAsync();
-                        await loginUserPwd.SetValueAsync(password.Replace("\n", "").Replace("\r", ""));
+                        //await loginUserPwd.ClickAsync();
+                        await randoTime();
+                        //await loginUserPwd.SetValueAsync(password.Replace("\n", "").Replace("\r", ""));
+                        await devToolsContext.EvaluateFunctionAsync($@"()=>{{window.setValue(""input[name='password']"",'{password.Replace("\n", "").Replace("\r", "")}')}}");
+                        await randoTime();
+                        //await loginUserPwd.ClickAsync();
                     }
                     await randoTime();
-                    var loginSubmit = await devToolsContext.QuerySelectorAsync<HtmlFormElement>("#login-form");
+                    var loginSubmit = await devToolsContext.QuerySelectorAsync<HtmlFormElement>("form");
                     if (loginSubmit != null)
                     {
                         await loginSubmit.SubmitAsync();
@@ -149,24 +181,32 @@ namespace Propnex.Poster.Guru
                         if (devToolsContext.Url != "https://agentnet.propertyguru.com.sg/dash?" &&
                                     devToolsContext.Url != "https://agentnet.propertyguru.com.sg/v2/dash")
                         {
-                            var warningElement = await devToolsContext.QuerySelectorAsync<HtmlElement>(".warning");
+                            if (devToolsContext.Url == "chrome-error://chromewebdata/")
+                            {
+                                await Api.WebServer.PingAsync();
+                                i = 0;
+                                continue;
+                            }
+                            var warningElement = await devToolsContext.QuerySelectorAsync<HtmlElement>("#error-message > div");
                             if (warningElement != null)
                             {
                                 var text = await warningElement.GetInnerTextAsync();
 
-                                if (text == "Invalid captcha value." || text.Contains("attempts"))
+                                if (text == "Invalid captcha value" || text.Contains("attempts"))
                                 {
                                     result.Message = "Verification Code";
+                                    _logger.Information(text);
                                     break;
                                 }
                                 else
                                 {
                                     result.Message = text;
                                     _logger.Information(text);
-                                    await randoTime(1000 * 60 * 5);
+                                    //await randoTime(1000 * 60 * 3);
                                     break;
                                 }
                             }
+
                         }
                         else
                         {
@@ -438,6 +478,18 @@ namespace Propnex.Poster.Guru
             }
         }
 
+        private bool isErrorPage()
+        {
+            return devToolsContext.Url == "chrome-error://chromewebdata/";
+        }
+
+        private async Task GoToAsync(string url)
+        {
+            await getDevToolsContext();
+            await devToolsContext.GoToAsync(url);
+            await randoTime();
+            await watiForIsLoading();
+        }
 
         List<ListingInfo> ListingInfos = null;
         private ListingInfo IsExtis(GuruTaskListing guruTaskListing)
@@ -511,14 +563,18 @@ namespace Propnex.Poster.Guru
         /// <exception cref="Exception"></exception>
         private async Task getLisints()
         {
-            ListingInfos = new List<ListingInfo>();
-            await getDevToolsContext();
-            await devToolsContext.GoToAsync("https://agentnet.propertyguru.com.sg/v2/listing_management");
-            await randoTime();
-            await watiForIsLoading();
             var infos = new List<ListingInfo>();
             for (int i = 0; i < 3; i++)
             {
+                ListingInfos = new List<ListingInfo>();
+                await GoToAsync("https://agentnet.propertyguru.com.sg/v2/listing_management");
+                while (isErrorPage())
+                {
+                    await Api.WebServer.PingAsync();
+                    await GoToAsync("https://agentnet.propertyguru.com.sg/v2/listing_management");
+                }
+
+                infos = new List<ListingInfo>();
                 try
                 {
                     await getListingsV2();
@@ -529,7 +585,8 @@ namespace Propnex.Poster.Guru
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("GetListings error");
+                    //throw new Exception("GetListings error");
+                    await Api.WebServer.PingAsync();
                 }
             }
             async Task getListingsV2()
@@ -541,9 +598,8 @@ namespace Propnex.Poster.Guru
                                       return res.json()
                                 }})}}";
 
-                //var result1 = await devToolsContext.EvaluateFunctionAsync<TJson>(func);
                 var result = await devToolsContext.EvaluateFunctionAsync<ListingsResult>(func);
-                var jsonResult = result; // JsonConvert.DeserializeObject<ListingsResult>(JsonConvert.SerializeObject(result));
+                var jsonResult = result;
                 if (jsonResult.listings == null)
                     return;
                 foreach (var item in jsonResult.listings)
@@ -656,7 +712,7 @@ namespace Propnex.Poster.Guru
         {
             if (_token == null || _token == "")
             {
-              
+
                 var result = await ajaxJsonGet<JwtResult>("https://agentnet.propertyguru.com.sg/sf2-agent/ajax/agent/jwt");
                 _token = result.accessToken;
                 _logger.Information($"getJwt:{_token}");
@@ -889,7 +945,7 @@ namespace Propnex.Poster.Guru
 
                         formData.Add("mediaFile", $"window.file_{i}_move");
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         _logger.Error(ex, "");
                     }
@@ -979,9 +1035,9 @@ namespace Propnex.Poster.Guru
 
                         formData.Add("mediaFile", $"window.file_{i}_vt");
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
-                        _logger.Error(ex,"uploadVirtualTours");
+                        _logger.Error(ex, "uploadVirtualTours");
                     }
 
                 }
@@ -1002,7 +1058,7 @@ namespace Propnex.Poster.Guru
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(ex,"uploadVirtualTours");
+                    _logger.Error(ex, "uploadVirtualTours");
                 }
             }
         }
@@ -1061,7 +1117,7 @@ namespace Propnex.Poster.Guru
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(ex,"uploadFlooplan");
+                    _logger.Error(ex, "uploadFlooplan");
                     result = false;
                     continue;
                 }

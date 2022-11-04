@@ -15,11 +15,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Remoting.Contexts;
+using System.Security.Policy;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 using System.Windows.Forms;
 
 namespace Propnex.Poster.Guru
@@ -48,7 +52,7 @@ namespace Propnex.Poster.Guru
         private void CefPoster_Load(object sender, EventArgs e)
         {
             //this.FormBorderStyle=FormBorderStyle.None;
-            cwb.LoadUrl("http://www.baidu.com");
+            cwb.LoadUrl("https://propertyguru.com.sg");
         }
 
         public async void PosterStart()
@@ -82,15 +86,15 @@ namespace Propnex.Poster.Guru
                         {
                             Logger.Information("login error");
                             Logger.Information($"{loginResult.Message}");
-                            if ((loginResult.Message != "Invalid captcha value." || !loginResult.Message.Contains("attempts")) && loginResult.Message != "Verification Code" && loginResult.Message != "")
+                            if ((loginResult.Message != "Invalid captcha value" || !loginResult.Message.Contains("attempts")) && loginResult.Message != "Verification Code" && loginResult.Message != "")
                             {
                                 if (guruTask.Listings.Listings != null)
                                 {
                                     loginResult.Message = string.IsNullOrEmpty(loginResult.Message) ? "Email or Password not valid.Please try again" : loginResult.Message;
                                     foreach (var item in guruTask.Listings.Listings)
                                     {
-                                        ResultUpload(item, item.TaskItemId, "", "Failed", $"{loginResult.Message}");
-                                        End(item.TaskItemId);
+                                        await ResultUpload(item, item.TaskItemId, "", "Failed", $"{loginResult.Message}");
+                                        await End(item.TaskItemId);
                                     }
                                 }
                             }
@@ -113,14 +117,15 @@ namespace Propnex.Poster.Guru
                                     Logger.Information($"{result.Status}--{result.Message}");
                                     if (result.Status == PosterActionResultStatus.Success)
                                     {
-                                        ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
+                                        await ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
                                     }
                                     else
                                     {
-                                        ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
+                                        await ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
                                     }
-                                    End(item.TaskItemId);
+                                    await End(item.TaskItemId);
                                 }
+                                await XwebEnd();
                             }
 
                             if (guruTask.TaskType.ToLower() == "repost")
@@ -132,13 +137,13 @@ namespace Propnex.Poster.Guru
                                     Logger.Information($"{result.Status}--{result.Message}");
                                     if (result.Status == PosterActionResultStatus.Success)
                                     {
-                                        ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
+                                        await ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
                                     }
                                     else
                                     {
-                                        ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
+                                        await ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
                                     }
-                                    End(item.TaskItemId);
+                                    await End(item.TaskItemId);
                                 }
 
                             }
@@ -152,13 +157,13 @@ namespace Propnex.Poster.Guru
                                     Logger.Information($"{result.Status}--{result.Message}");
                                     if (result.Status == PosterActionResultStatus.Success)
                                     {
-                                        ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
+                                        await ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
                                     }
                                     else
                                     {
-                                        ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
+                                        await ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
                                     }
-                                    End(item.TaskItemId);
+                                    await End(item.TaskItemId);
                                 }
                             }
 
@@ -171,13 +176,13 @@ namespace Propnex.Poster.Guru
                                     Logger.Information($"{result.Status}--{result.Message}");
                                     if (result.Status == PosterActionResultStatus.Success)
                                     {
-                                        ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
+                                        await ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
                                     }
                                     else
                                     {
-                                        ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
+                                        await ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
                                     }
-                                    End(item.TaskItemId);
+                                    await End(item.TaskItemId);
                                 }
                             }
                             if (guruTask.TaskType.ToLower().IndexOf("retrieve") > -1)
@@ -185,11 +190,11 @@ namespace Propnex.Poster.Guru
                                 for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
                                 {
                                     var item = guruTask.Listings.Listings[j];
-                                    ResultUpload(item, item.TaskItemId, "", "Failed", "To realize the function, wait a few days");
-                                    End(item.TaskItemId);
+                                    await ResultUpload(item, item.TaskItemId, "", "Failed", "To realize the function, wait a few days");
+                                    await End(item.TaskItemId);
                                 }
                             }
-                            XwebEnd();
+                            await XwebEnd();
                             Logger.Information("Success");
                         }
                     }
@@ -227,28 +232,26 @@ namespace Propnex.Poster.Guru
             }
         }
 
-        private void ResultUpload(GuruTaskListing taskListing, string queue_id, string listing_id, string status = "Done", string memo = "")
+        private async Task ResultUpload(GuruTaskListing taskListing, string queue_id, string listing_id, string status = "Done", string memo = "")
         {
-
-
             Logger.Information($"result upload queue_id is {queue_id},listing_id is {listing_id} ,status is {status},memo is {memo}");
 
             if (guruTask.Source.ToLower() == "chope")
             {
-                chopeItem(queue_id, listing_id, status, memo);
+                await chopeItem(queue_id, listing_id, status, memo);
             }
             else
             {
-                xwebItem(taskListing, 0, status, memo);
+                await xwebItem(taskListing, 0, status, memo);
             }
         }
 
-        private void chopeItem(string queue_id, string listing_id, string status = "Done", string memo = "")
+        private async Task chopeItem(string queue_id, string listing_id, string status = "Done", string memo = "")
         {
             StringBuilder sbUrl = new StringBuilder("https://pa-production.propnex.net/index.php/pnapi/updateChopeTask?" +
-               "super=1&" +
-               $"queue_id={queue_id}&" +
-               $"portal_id={listing_id}&");
+           "super=1&" +
+           $"queue_id={queue_id}&" +
+           $"portal_id={listing_id}&");
             if (string.IsNullOrEmpty(listing_id) == false && status == "Done")
             {
                 sbUrl.Append($"portal_link=https://www.propertyguru.com.sg/listing/{listing_id}&");
@@ -264,49 +267,112 @@ namespace Propnex.Poster.Guru
                 $"memo={memo}");
             using (System.Net.WebClient webClient = new System.Net.WebClient())
             {
+                var net = true;
+                while (net)
+                {
+                    try
+                    {
+                        await sbUrl.ToString().GetStringAsync();
+                        webClient.DownloadString(sbUrl.ToString());
+                        net = false;
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger?.Error(ex, $"upload result error {ex.Message}");
+                        Api.WebServer.Ping();
+                    }
+                }
+            }
+        }
+
+        private async Task xwebItem(GuruTaskListing taskListing, int time_cost = 0, string status = "Done", string note = "")
+        {
+            var net = true;
+            while (net)
+            {
+                StringBuilder formData = new StringBuilder();
+                Dictionary<string, string> data = new Dictionary<string, string>();
+                formData.Append($"account_name={guruTask.Account}&");
+                data.Add("account_name", guruTask.Account);
+
+                formData.Append($"account_password={guruTask.Password}&");
+                data.Add("account_password", guruTask.Password);
+
+                formData.Append($"task_id={guruTask.Id}&");
+                data.Add("task_id", guruTask.Id);
+
+                formData.Append($"taskitem_id={taskListing.TaskItemId}&");
+                data.Add("taskitem_id", taskListing.TaskItemId);
+
+                formData.Append($"status={status}&");
+                data.Add("status", status);
+
+                formData.Append($"time_cost={time_cost}&");
+                data.Add("time_cost", time_cost.ToString());
+
+                formData.Append($"taskitem_note={note}&");
+                data.Add("taskitem_note", note);
+
+                if (taskListing.Listing.Id.HasValue && status == "Done")
+                {
+                    formData.Append($"portal_link=https://www.propertyguru.com.sg/listing/{taskListing.Listing.Id}&");
+                    data.Add("portal_link", $"https://www.propertyguru.com.sg/listing/{taskListing.Listing.Id}");
+                }
+                else
+                {
+                    formData.Append($"portal_link=&");
+                    data.Add("portal_link", "");
+                }
+                formData.Append($"listing_version={taskListing.UpdateTime}&");
+                data.Add("listing_version", taskListing.UpdateTime);
+
+                formData.Append("poster=cef");
+                data.Add("poster", "cef");
+                System.Net.Http.StringContent stringContent = new System.Net.Http.StringContent(formData.ToString());
+
+                //new
+                //{
+                //    account_name = guruTask.Account,
+                //    account_password = guruTask.Password,
+                //    task_id = guruTask.Id,
+                //    taskitem_id = taskListing.TaskItemId,
+                //    status = status,
+                //    time_cost = time_cost.ToString(),
+                //    taskitem_note = note,
+                //    portal_link = "",
+                //    listing_version = taskListing.UpdateTime,
+                //    poster = "cef"
+                //}
+
                 try
                 {
-                    webClient.DownloadString(sbUrl.ToString());
+                var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus".PostUrlEncodedAsync(new
+                        {
+                            account_name = guruTask.Account,
+                            account_password = guruTask.Password,
+                            task_id = guruTask.Id,
+                            taskitem_id = taskListing.TaskItemId,
+                            status = status,
+                            time_cost = time_cost.ToString(),
+                            taskitem_note = note,
+                            portal_link = "",
+                            listing_version = taskListing.UpdateTime,
+                            poster = "cef"
+                        });
+                    var s = await result.GetStringAsync();
+                    net = false;
+                    break;
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error(ex, $"upload result error {ex.Message}");
+                    Logger?.Error(ex, $"upload result error {ex.Message}");
+                    Api.WebServer.Ping();
                 }
             }
         }
 
-        private async void xwebItem(GuruTaskListing taskListing, int time_cost = 0, string status = "Done", string note = "")
-        {
-            StringBuilder formData = new StringBuilder();
-            formData.Append($"account_name={guruTask.Account}&");
-            formData.Append($"account_password={guruTask.Password}&");
-            formData.Append($"task_id={guruTask.Id}&");
-            formData.Append($"taskitem_id={taskListing.TaskItemId}&");
-            formData.Append($"status={status}&");
-            formData.Append($"time_cost={time_cost}&");
-            formData.Append($"taskitem_note={note}&");
-            if (taskListing.Listing.Id.HasValue && status == "Done")
-            {
-                formData.Append($"portal_link=https://www.propertyguru.com.sg/listing/{taskListing.Listing.Id}&");
-            }
-            else
-            {
-                formData.Append($"portal_link=&");
-            }
-            formData.Append($"listing_version={taskListing.UpdateTime}&");
-            formData.Append("poster=selenium");
-
-            try
-            {
-                var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus".PostStringAsync(formData.ToString());
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex, $"upload result error {ex.Message}");
-            }
-        }
-
-        private async void XwebEnd(string note = "")
+        private async Task XwebEnd(string note = "")
         {
             if (guruTask.Source.ToLower() == "chope")
                 return;
@@ -324,18 +390,20 @@ namespace Propnex.Poster.Guru
             {
                 try
                 {
-                    var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus".PostStringAsync(formData.ToString());
+                    var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus".PostUrlEncodedAsync(formData.ToString());
+                    var s =await result.GetStringAsync();
                     Logger.Information($"Xweb end success");
                     break;
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error(ex, $"Xweb end upload result error {ex.Message}");
+                    Logger?.Error(ex, $"Xweb end upload result error {ex.Message}");
+                    await Api.WebServer.PingAsync();
                 }
             }
         }
 
-        private void End(string queue_id)
+        private async Task End(string queue_id)
         {
             if (guruTask.Source.ToLower() == "chope")
             {
@@ -347,13 +415,14 @@ namespace Propnex.Poster.Guru
                     {
                         try
                         {
-                            webClient.DownloadString(url.ToString());
-                            Logger.Information($"chope end success");
+                            await url.GetStringAsync();
+                            Logger?.Information($"chope end success");
                             break;
                         }
                         catch (Exception ex)
                         {
-                            Logger.Error(ex, $"chope end upload result error {ex.Message}");
+                            Logger?.Error(ex, $"chope end upload result error {ex.Message}");
+                            Api.WebServer.Ping();
                         }
                     }
                 }
