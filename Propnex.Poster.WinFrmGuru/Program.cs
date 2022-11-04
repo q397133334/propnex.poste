@@ -42,6 +42,7 @@ namespace Propnex.Poster.Guru
 
         private static void Application_ApplicationExit(object sender, EventArgs e)
         {
+            Bootstrapper.IocManager.Resolve<ILogger>().Info("ApplicationExit");
             Bootstrapper.Dispose();
             Application.ExitThread();
             Environment.Exit(0);

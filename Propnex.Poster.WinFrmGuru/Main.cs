@@ -1,4 +1,5 @@
 ﻿using Abp.Dependency;
+using Castle.Core.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -25,21 +26,11 @@ namespace Propnex.Poster.Guru
             Console.SetOut(new ConsoleWrite(richTextBox1));
             Console.SetError(new ConsoleWrite(richTextBox1));
             richTextBox1.HideSelection = false;
+            this.Text = "Propnex.Poster " + Application.ProductVersion;
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            //if (cefPoster == null)
-            //{
-            //    cefPoster = _iocManager.Resolve<CefPoster>();
-            //}
-
-            //cefPoster.Show();
-            //cefPoster.FormClosed += (s, ev) =>
-            //{
-            //    cefPoster = null;
-            //};
-            //cefPoster.PosterStart();
             button1.Enabled = false;
             timer1.Start();
         }
@@ -88,10 +79,13 @@ namespace Propnex.Poster.Guru
             //    e.Cancel = true;
             //    MessageBox.Show("click close buttom");
             //}
-            if (cefPoster != null)
+            if (cefPoster != null || isStop == false)
             {
                 e.Cancel = true;
+                return;
             }
+
+            _iocManager.Resolve<ILogger>().Info("FormClosing");
         }
     }
 
