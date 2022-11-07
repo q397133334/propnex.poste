@@ -40,6 +40,24 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
                     }
                 }
             }
+
+            pn = await (WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks + "?xweb=1").GetStringAsync();
+            foreach (var item in list)
+            {
+                var tsk = item.Split('\t');
+                if (tsk.Length == 2)
+                {
+                    if ((await _repositoryPntask.FindAsync(q => q.Number == tsk[0])) == null)
+                    {
+                        await _repositoryPntask.InsertAsync(new PnTask()
+                        {
+                            Number = tsk[0],
+                            ClientId = tsk[1],
+                            Status = TaskStatus.Wait
+                        });
+                    }
+                }
+            }
         }
     }
 }

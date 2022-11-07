@@ -272,7 +272,7 @@ namespace Propnex.Poster.Guru
                     try
                     {
                         await sbUrl.ToString().GetStringAsync();
-                        webClient.DownloadString(sbUrl.ToString());
+                        var res=webClient.DownloadString(sbUrl.ToString());
                         break;
                     }
                     catch (Exception ex)
@@ -345,19 +345,7 @@ namespace Propnex.Poster.Guru
 
                 try
                 {
-                    var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus".PostUrlEncodedAsync(new
-                    {
-                        account_name = guruTask.Account,
-                        account_password = guruTask.Password,
-                        task_id = guruTask.Id,
-                        taskitem_id = taskListing.TaskItemId,
-                        status = status,
-                        time_cost = time_cost.ToString(),
-                        taskitem_note = note,
-                        portal_link = "",
-                        listing_version = taskListing.UpdateTime,
-                        poster = "cef"
-                    });
+                    var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus".PostUrlEncodedAsync(formData.ToString());
                     var s = await result.GetStringAsync();
                     net = false;
                     break;

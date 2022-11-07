@@ -84,7 +84,7 @@ namespace Propnex.Poster.Guru
                         Message = result.errors.ToString()
                     };
                 }
-
+        
                 return new PosterActionResult()
                 {
                     Status = PosterActionResultStatus.Success,
@@ -378,12 +378,24 @@ namespace Propnex.Poster.Guru
                     await ChromiumWebBrowser.LoadUrlAsync($"https://agentnet.propertyguru.com.sg/create-listing/media/{guruTask.Listing.Id}");
                     await watiForIsLoading();
 
-                    var buttons = await devToolsContext.QuerySelectorAllAsync("#lcv2-bar-footer >div > div > button");
-                    if (buttons != null && buttons.Length == 3)
+                    var nextButtons = await devToolsContext.QuerySelectorAllAsync("#lcv2-bar-footer >div > div > button");
+                    if (nextButtons != null && nextButtons.Length == 3)
                     {
-                        await buttons[2].ClickAsync();
+                        await nextButtons[2].ClickAsync();
                         await randoTime(2000);
                         await watiForIsLoading();
+
+                        var proceedButtons  = await devToolsContext.QuerySelectorAllAsync("body > div > div > div > div > button");
+                        if (proceedButtons != null && proceedButtons.Length == 3)
+                        {
+                            await proceedButtons[1].ClickAsync();
+                            await randoTime(5000);
+                            await watiForIsLoading();
+                        }
+                        else
+                        {
+                            _logger.Information("not find proceedButtons");
+                        }
 
                         var postButtons = await devToolsContext.QuerySelectorAllAsync("#lcv2-bar-footer >div > div > button");
                         if (postButtons != null && postButtons.Length == 3)
