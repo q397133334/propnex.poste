@@ -267,20 +267,18 @@ namespace Propnex.Poster.Guru
                 $"memo={memo}");
             using (System.Net.WebClient webClient = new System.Net.WebClient())
             {
-                var net = true;
-                while (net)
+                for (int i = 0; i < 3; i++)
                 {
                     try
                     {
                         await sbUrl.ToString().GetStringAsync();
                         webClient.DownloadString(sbUrl.ToString());
-                        net = false;
                         break;
                     }
                     catch (Exception ex)
                     {
                         Logger?.Error(ex, $"upload result error {ex.Message}");
-                        Api.WebServer.Ping();
+                        await Api.WebServer.PingAsync();
                     }
                 }
             }
@@ -289,7 +287,7 @@ namespace Propnex.Poster.Guru
         private async Task xwebItem(GuruTaskListing taskListing, int time_cost = 0, string status = "Done", string note = "")
         {
             var net = true;
-            while (net)
+            for (int i = 0; i < 3; i++)
             {
                 StringBuilder formData = new StringBuilder();
                 Dictionary<string, string> data = new Dictionary<string, string>();
@@ -347,19 +345,19 @@ namespace Propnex.Poster.Guru
 
                 try
                 {
-                var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus".PostUrlEncodedAsync(new
-                        {
-                            account_name = guruTask.Account,
-                            account_password = guruTask.Password,
-                            task_id = guruTask.Id,
-                            taskitem_id = taskListing.TaskItemId,
-                            status = status,
-                            time_cost = time_cost.ToString(),
-                            taskitem_note = note,
-                            portal_link = "",
-                            listing_version = taskListing.UpdateTime,
-                            poster = "cef"
-                        });
+                    var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus".PostUrlEncodedAsync(new
+                    {
+                        account_name = guruTask.Account,
+                        account_password = guruTask.Password,
+                        task_id = guruTask.Id,
+                        taskitem_id = taskListing.TaskItemId,
+                        status = status,
+                        time_cost = time_cost.ToString(),
+                        taskitem_note = note,
+                        portal_link = "",
+                        listing_version = taskListing.UpdateTime,
+                        poster = "cef"
+                    });
                     var s = await result.GetStringAsync();
                     net = false;
                     break;
@@ -367,7 +365,7 @@ namespace Propnex.Poster.Guru
                 catch (Exception ex)
                 {
                     Logger?.Error(ex, $"upload result error {ex.Message}");
-                    Api.WebServer.Ping();
+                    await Api.WebServer.PingAsync();
                 }
             }
         }
@@ -391,7 +389,7 @@ namespace Propnex.Poster.Guru
                 try
                 {
                     var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus".PostUrlEncodedAsync(formData.ToString());
-                    var s =await result.GetStringAsync();
+                    var s = await result.GetStringAsync();
                     Logger.Information($"Xweb end success");
                     break;
                 }
@@ -422,7 +420,7 @@ namespace Propnex.Poster.Guru
                         catch (Exception ex)
                         {
                             Logger?.Error(ex, $"chope end upload result error {ex.Message}");
-                            Api.WebServer.Ping();
+                            await Api.WebServer.PingAsync();
                         }
                     }
                 }
