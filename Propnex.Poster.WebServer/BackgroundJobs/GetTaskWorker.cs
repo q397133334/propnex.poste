@@ -29,7 +29,7 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
                 var tsk = item.Split('\t');
                 if (tsk.Length == 2)
                 {
-                    if ((await _repositoryPntask.FindAsync(q => q.Number == tsk[0])) == null)
+                    if ((await _repositoryPntask.FindAsync(q => q.Number == tsk[0] && q.Status == TaskStatus.Wait && (q.LastModificationTime == null || q.LastModificationTime < DateTime.Now.AddHours(-12)))) == null)
                     {
                         await _repositoryPntask.InsertAsync(new PnTask()
                         {
@@ -47,7 +47,7 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
                 var tsk = item.Split('\t');
                 if (tsk.Length == 2)
                 {
-                    if ((await _repositoryPntask.FindAsync(q => q.Number == tsk[0])) == null)
+                    if ((await _repositoryPntask.FindAsync(q => q.Number == tsk[0] && q.Status != TaskStatus.Wait && (q.LastModificationTime != null || q.LastModificationTime < DateTime.Now.AddHours(-12)))) == null)
                     {
                         await _repositoryPntask.InsertAsync(new PnTask()
                         {

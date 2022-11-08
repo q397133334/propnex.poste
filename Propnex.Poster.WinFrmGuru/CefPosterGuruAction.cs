@@ -226,7 +226,7 @@ namespace Propnex.Poster.Guru
                             await getJwt();
                             break;
                         }
-                    }
+                    } 
                 }
                 catch (Exception ex)
                 {
@@ -455,6 +455,18 @@ namespace Propnex.Poster.Guru
                         await buttons[2].ClickAsync();
                         await randoTime(2000);
                         await watiForIsLoading();
+
+                        var proceedButtons = await devToolsContext.QuerySelectorAllAsync("body > div > div > div > div > button");
+                        if (proceedButtons != null && proceedButtons.Length == 3)
+                        {
+                            await proceedButtons[1].ClickAsync();
+                            await randoTime(5000);
+                            await watiForIsLoading();
+                        }
+                        else
+                        {
+                            _logger.Information("not find proceedButtons");
+                        }
 
                         var postButtons = await devToolsContext.QuerySelectorAllAsync("#lcv2-bar-footer >div > div > button");
                         if (postButtons != null && postButtons.Length == 3)
