@@ -23,14 +23,38 @@ namespace Propnex.Poster.Guru
         {
             InitializeComponent();
             _iocManager = iocManager;
+            textBox1.Text = _iocManager.Resolve<ConfigurationJson<Setting>>().Value.AnyDesk;
             Console.SetOut(new ConsoleWrite(richTextBox1));
             Console.SetError(new ConsoleWrite(richTextBox1));
             richTextBox1.HideSelection = false;
             this.Text = "Propnex.Poster " + Application.ProductVersion;
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private async void button1_Click(object sender, EventArgs e)
         {
+            if(textBox1.Text=="")
+            {
+                MessageBox.Show("Please input AnyDesk Number,if not AnyDesk,input 7 digits at random");
+                return;
+            }
+            var setting = IocManager.Instance.Resolve<ConfigurationJson<Setting>>();
+            try
+            {
+                setting.Value.AnyDesk = textBox1.Text;
+                if(setting.Value.Id=="")
+                {
+                    setting.Value.Id=await Api.WebServer.GetMachineIdAsync(setting.Value.AnyDesk);
+                    setting.Value.Id = setting.Value.Id.Trim('\"');
+                }
+                setting.Save();
+            }
+            catch (Exception ex)
+            {
+                IocManager.Instance.Resolve<ILogger>().Error(ex.Message);
+
+                MessageBox.Show("save error");
+            }
+
             button1.Enabled = false;
             timer1.Start();
         }

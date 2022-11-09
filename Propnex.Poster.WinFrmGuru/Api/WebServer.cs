@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Linq;
+using System.Net.Http;
 using System.Net.NetworkInformation;
+using System.Net.WebSockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Propnex.Poster.Dtos;
@@ -14,7 +17,6 @@ namespace Propnex.Poster.Guru.Api
     {
 
         public static string Id = System.Configuration.ConfigurationManager.AppSettings["Id"];
-
         public static string BaseUrl = System.Configuration.ConfigurationManager.AppSettings["BaseUrl"];
 
         public static async Task<Dtos.PnTaskDto> GetTask()
@@ -30,14 +32,55 @@ namespace Propnex.Poster.Guru.Api
                 }
                 return result;
             }
-            catch
+            catch (FlurlHttpException ex)
             {
+                var exType = ex.GetType();
+                await PingAsync();
+            }
+            catch (Exception ex)
+            {
+                var exType = ex.GetType();
                 await PingAsync();
             }
 
             return null;
         }
 
+        public static async Task<T> CallBack<T>(Func<Task<T>> action)
+        {
+            int count = 0;
+            T context = default(T);
+            while (count < 10)
+            {
+                count++;
+                try
+                {
+                    context = await action();
+                }
+                catch (Exception ex)
+                {
+                    await PingAsync();
+                }
+            }
+            return context;
+        }
+
+        public static async Task CallBack(Action action)
+        {
+            int count = 0;
+            while (count < 10)
+            {
+                count++;
+                try
+                {
+                    action();
+                }
+                catch (Exception ex)
+                {
+                    await PingAsync();
+                }
+            }
+        }
         public static async Task<string> GetTaskContent(Dtos.PnTaskDto pnTaskDto)
         {
             int count = 0;
@@ -81,6 +124,16 @@ namespace Propnex.Poster.Guru.Api
         public static void UpdatePnTask(PnTaskDto pnTaskDto)
         {
             string url = $"{BaseUrl}/api/app/pn-task/";
+        }
+
+        public static async Task<string> GetMachineIdAsync(string anyDesk)
+        {
+            string url = $"{BaseUrl}/api/app/machine/id?anyDesk={anyDesk}";
+
+            return await CallBack<string>(async () =>
+            {
+                return await url.GetStringAsync();
+            });
         }
 
 

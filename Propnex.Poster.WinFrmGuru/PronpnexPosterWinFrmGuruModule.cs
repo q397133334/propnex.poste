@@ -11,6 +11,8 @@ using CefSharp.WinForms;
 using CefSharp;
 using System.IO;
 using System.Reflection;
+using Newtonsoft.Json;
+using Castle.MicroKernel.Registration;
 
 namespace Propnex.Poster.Guru
 {
@@ -32,11 +34,25 @@ namespace Propnex.Poster.Guru
         public override void Initialize()
         {
             IocManager.RegisterAssemblyByConvention(Assembly.GetExecutingAssembly());
+
+            if (File.Exists(Configuration.Get(ConfigPath) + "\\PronpnexPoster.json") == false)
+            {
+                File.Create(Configuration.Get(ConfigPath) + "\\PronpnexPoster.json").Close();
+                File.WriteAllText(Configuration.Get(ConfigPath) + "\\PronpnexPoster.json", JsonConvert.SerializeObject(new Setting()));
+            }
+
+            var setting = new ConfigurationJson<Setting>(Configuration.Get(ConfigPath) + "\\PronpnexPoster.json");
+            setting.Build();
+            setting.IsSaveEvent += () => { };
+            IocManager.IocContainer.Register(
+                Component.For<ConfigurationJson<Setting>>()
+                .Instance(setting)
+                );
         }
 
         public override void PostInitialize()
         {
-            if(Directory.Exists(Configuration.Get<string>(ConfigPath))==false)
+            if (Directory.Exists(Configuration.Get<string>(ConfigPath)) == false)
             {
                 Directory.CreateDirectory(Configuration.Get<string>(ConfigPath));
             }

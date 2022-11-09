@@ -71,7 +71,7 @@ namespace Propnex.Poster.Guru
                 Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
-                .WriteTo.File($"logs\\task\\{taskDto.Number}.txt", rollingInterval: RollingInterval.Infinite)
+                .WriteTo.File($"{Directory.GetDirectoryRoot(Application.StartupPath)}\\logs\\task\\{taskDto.Number}.txt", rollingInterval: RollingInterval.Infinite)
                 .CreateLogger();
                 IPosterAction<GuruTaskListing> posterAction = new CefPosterGuruAction(cwb, Logger);
                 if (guruTasks != null)
@@ -202,7 +202,9 @@ namespace Propnex.Poster.Guru
             }
             catch (Exception ex)
             {
+                Abp.Dependency.IocManager.Instance.Resolve<Castle.Core.Logging.ILogger>().Error("PosterStart--" + ex.Message);
                 Logger?.Error(ex, "PosterStart");
+                await Task.Delay(1000 * 60);
             }
 
             Close();
@@ -272,7 +274,7 @@ namespace Propnex.Poster.Guru
                     try
                     {
                         await sbUrl.ToString().GetStringAsync();
-                        var res=webClient.DownloadString(sbUrl.ToString());
+                        var res = webClient.DownloadString(sbUrl.ToString());
                         break;
                     }
                     catch (Exception ex)

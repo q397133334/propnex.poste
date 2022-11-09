@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Linq.Dynamic.Core.Tokenizer;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Abp.Dependency;
 using CefSharp;
 using CefSharp.Dom;
@@ -19,7 +21,6 @@ using Propnex.Poster.PropertyGuru;
 using Propnex.Poster.PropertyGuru.Listing;
 using Propnex.Poster.PropertyGuru.Tasks;
 using Propnex.Poster.Share;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Propnex.Poster.Guru
 {
@@ -187,7 +188,7 @@ namespace Propnex.Poster.Guru
                                 i = 0;
                                 continue;
                             }
-                            var warningElement = await devToolsContext.QuerySelectorAsync<HtmlElement>("#error-message > div");
+                            var warningElement = await devToolsContext.QuerySelectorAsync<CefSharp.Dom.HtmlElement>("#error-message > div");
                             if (warningElement != null)
                             {
                                 var text = await warningElement.GetInnerTextAsync();
@@ -1153,7 +1154,7 @@ namespace Propnex.Poster.Guru
 
         private string checkFileDirectory(string taskId)
         {
-            var path = $"{AppDomain.CurrentDomain.BaseDirectory}\\task\\{taskId}file\\";
+            var path = $"{Directory.GetDirectoryRoot(Application.StartupPath)}\\task\\{taskId}file\\";
             if (System.IO.Directory.Exists(path) == false)
             {
                 System.IO.Directory.CreateDirectory(path);

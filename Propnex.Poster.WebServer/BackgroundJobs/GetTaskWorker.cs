@@ -15,7 +15,7 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
     {
         public GetTaskWorker(AbpAsyncTimer timer, IServiceScopeFactory serviceScopeFactory) : base(timer, serviceScopeFactory)
         {
-            Timer.Period = 60 * 1000; //10 minutes
+            Timer.Period = 60 * 1000; //1 minutes
         }
 
         protected async override Task DoWorkAsync(PeriodicBackgroundWorkerContext workerContext)
@@ -42,12 +42,13 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
             }
 
             pn = await (WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks + "?xweb=1").GetStringAsync();
+            list = pn.Split('\n');
             foreach (var item in list)
             {
                 var tsk = item.Split('\t');
                 if (tsk.Length == 2)
                 {
-                    if ((await _repositoryPntask.FindAsync(q => q.Number == tsk[0] && q.Status != TaskStatus.Wait && (q.LastModificationTime != null || q.LastModificationTime < DateTime.Now.AddHours(-12)))) == null)
+                    if ((await _repositoryPntask.FindAsync(q => q.Number == tsk[0] && q.Status == TaskStatus.Wait && (q.LastModificationTime != null || q.LastModificationTime < DateTime.Now.AddHours(-12)))) == null)
                     {
                         await _repositoryPntask.InsertAsync(new PnTask()
                         {
