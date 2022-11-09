@@ -603,7 +603,7 @@ namespace Propnex.Poster.Guru
                 try
                 {
                     await getListingsV2();
-                    if (infos.Count > 0)
+                    if (ListingInfos.Count > 0)
                     {
                         break;
                     }

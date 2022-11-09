@@ -18,8 +18,12 @@ namespace Propnex.Poster.WebServer.Pages
         [HttpGet]
         public FileResult DownloadTask(Guid taskId, string fileName)
         {
-            var fileStrem =  System.IO.File.OpenRead(Path.Combine(_webHostEnvironment.WebRootPath, "taskxml",fileName));
-            return File(fileStrem, "text/plain", fileName);
+            var fileStrem = System.IO.File.ReadAllBytes(Path.Combine(_webHostEnvironment.WebRootPath, "taskxml", fileName));
+            var fileResult = File(fileStrem, "text/plain", fileName);
+
+            System.IO.File.Move(Path.Combine(_webHostEnvironment.WebRootPath, "taskxml", fileName), Path.Combine(_webHostEnvironment.WebRootPath, "usetaskxml", fileName));
+
+            return fileResult;
         }
     }
 }
