@@ -663,6 +663,7 @@ namespace Propnex.Poster.Guru
                     }
                     infos.Add(info);
                 }
+                _logger.Information($"get listings {ListingInfos.Count}");
                 ListingInfos = infos;
             }
         }

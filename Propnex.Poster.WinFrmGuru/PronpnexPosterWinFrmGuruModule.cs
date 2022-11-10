@@ -27,35 +27,41 @@ namespace Propnex.Poster.Guru
 
         public override void PreInitialize()
         {
+            var basePath = Path.Combine(Directory.GetDirectoryRoot(Application.StartupPath), "PropnexPoster");
             Configuration.Set("StartupPath", Application.StartupPath);
-            Configuration.Set("ConfigPath", Directory.GetDirectoryRoot(Application.StartupPath));
+            Configuration.Set("ConfigPath", basePath);
         }
 
         public override void Initialize()
         {
             IocManager.RegisterAssemblyByConvention(Assembly.GetExecutingAssembly());
 
-            if (File.Exists(Configuration.Get(ConfigPath) + "\\PronpnexPoster.json") == false)
+            if (Directory.Exists(Configuration.Get<string>(ConfigPath)) == false)
             {
-                File.Create(Configuration.Get(ConfigPath) + "\\PronpnexPoster.json").Close();
-                File.WriteAllText(Configuration.Get(ConfigPath) + "\\PronpnexPoster.json", JsonConvert.SerializeObject(new Setting()));
+                Directory.CreateDirectory(Configuration.Get<string>(ConfigPath));
             }
 
-            var setting = new ConfigurationJson<Setting>(Configuration.Get(ConfigPath) + "\\PronpnexPoster.json");
+        }
+
+        public override void PostInitialize()
+        {
+
+
+            var jsonPath = Path.Combine(Configuration.Get<string>("ConfigPath"), "PronpnexPoster.json");
+
+            if (File.Exists(jsonPath) == false)
+            {
+                File.Create(jsonPath).Close();
+                File.WriteAllText(jsonPath, JsonConvert.SerializeObject(new Setting()));
+            }
+
+            var setting = new ConfigurationJson<Setting>(jsonPath);
             setting.Build();
             setting.IsSaveEvent += () => { };
             IocManager.IocContainer.Register(
                 Component.For<ConfigurationJson<Setting>>()
                 .Instance(setting)
                 );
-        }
-
-        public override void PostInitialize()
-        {
-            if (Directory.Exists(Configuration.Get<string>(ConfigPath)) == false)
-            {
-                Directory.CreateDirectory(Configuration.Get<string>(ConfigPath));
-            }
             cefInitialize();
         }
 

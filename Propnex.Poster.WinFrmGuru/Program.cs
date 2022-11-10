@@ -36,7 +36,6 @@ namespace Propnex.Poster.Guru
                   f => f.UseAbpLog4Net().WithConfig(Environment.CurrentDirectory + "\\log4net.config")
               );
             Bootstrapper.Initialize();
-
             Application.Run(Bootstrapper.IocManager.Resolve<Main>());
         }
 

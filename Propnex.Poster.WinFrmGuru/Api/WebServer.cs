@@ -16,12 +16,12 @@ namespace Propnex.Poster.Guru.Api
     public class WebServer
     {
 
-        public static string Id = System.Configuration.ConfigurationManager.AppSettings["Id"];
+        //public static string Id = System.Configuration.ConfigurationManager.AppSettings["Id"];
         public static string BaseUrl = System.Configuration.ConfigurationManager.AppSettings["BaseUrl"];
 
         public static async Task<Dtos.PnTaskDto> GetTask()
         {
-            string url = $"{BaseUrl}/api/app/pn-task/pn-task?machineId={Id}";
+            string url = $"{BaseUrl}/api/app/pn-task/pn-task?machineId={Setting.Get().Id}";
 
             try
             {
@@ -90,7 +90,7 @@ namespace Propnex.Poster.Guru.Api
                 count++;
                 try
                 {
-                    string url = $"{BaseUrl}/api/downloadtask?machineId={Id}&taskId={pnTaskDto.Id}&fileName={pnTaskDto.Number}";
+                    string url = $"{BaseUrl}/api/downloadtask?machineId={Setting.Get().Id}&taskId={pnTaskDto.Id}&fileName={pnTaskDto.Number}";
                     context = await url.GetStringAsync();
                     count = 20;
                     break;
@@ -105,7 +105,7 @@ namespace Propnex.Poster.Guru.Api
 
         public static async void PostPntaskRetry(Guid pnTaskId, string message)
         {
-            string url = $"{BaseUrl}/api/app/pn-task/pn-task-retry?machineId={Id}&pnTaskId={pnTaskId}&message={message}";
+            string url = $"{BaseUrl}/api/app/pn-task/pn-task-retry?machineId={Setting.Get().Id}&pnTaskId={pnTaskId}&message={message}";
             int count = 0;
             while (count < 10)
             {
