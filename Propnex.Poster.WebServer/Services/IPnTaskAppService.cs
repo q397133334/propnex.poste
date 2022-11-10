@@ -103,6 +103,15 @@ namespace Propnex.Poster.WebServer.Services
                 pnTask.Status = Share.TaskStatus.Wait;
                 await Repository.UpdateAsync(pnTask);
                 await _pnTaskLogRepository.InsertAsync(machineId, pnTask.Id, $"Set Retry {pnTask.RetryCount}, {message}", "");
+
+
+
+                var rootPath = Path.Combine(_webHostEnvironment.WebRootPath, "taskxml");
+                var usePath = Path.Combine(_webHostEnvironment.WebRootPath, "usetaskxml");
+                if (File.Exists(Path.Combine(usePath, pnTask.Number)))
+                {
+                    System.IO.File.Move(Path.Combine(usePath, pnTask.Number), Path.Combine(rootPath, pnTask.Number));
+                }
             }
             else
             {
