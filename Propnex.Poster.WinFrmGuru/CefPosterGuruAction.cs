@@ -76,6 +76,23 @@ namespace Propnex.Poster.Guru
                     await uploadVirtualTours(task);
                     await uploadFlooplan(task);
                     await changeStatusAct(task);
+                    //await randoTime(1000 * 20);
+                    await getLisints();
+                    if (IsExtis(task) == null)
+                    {
+                        //await AjaxJsonPost<object>("https://agent-service.propertyguru.com/v1/sg/getPropertyNames", "",
+                        //    data: $@"{{""statusCode"":""DRAFT"",""agentId"":{task.Listing.Agent.id}}}");
+                        await devToolsContext.GoToAsync("https://agentnet.propertyguru.com.sg/v2/listing_management#draft");
+                        var postBtn = await devToolsContext.QuerySelectorAsync($"#listing-management-component > div > div > div > div > div > div > div.listing-card.listing-card-{result.Id} > div.listing-card-content > div > div > button");
+                        if (postBtn != null)
+                        {
+                            await postBtn.ClickAsync();
+                            await randoTime(1000 * 5);
+                            var postNewBtn = await devToolsContext.QuerySelectorAsync("document.querySelector(\".MuiDialog-root.component-listing-reactivation-dialog > div.MuiDialog-container.MuiDialog-scrollPaper > div > div.MuiDialogActions-root.MuiDialogActions-spacing > div.action-buttons.centered > button\")");
+                            await randoTime(1000 * 5);
+                            await postNewBtn.ClickAsync();
+                        }
+                    }
                 }
                 else
                 {
@@ -85,7 +102,7 @@ namespace Propnex.Poster.Guru
                         Message = result.errors.ToString()
                     };
                 }
-        
+
                 return new PosterActionResult()
                 {
                     Status = PosterActionResultStatus.Success,
@@ -105,7 +122,7 @@ namespace Propnex.Poster.Guru
 
         public async Task<PosterActionResult> Login(string userName, string password)
         {
-        
+
             PosterActionResult result = new PosterActionResult();
             result.Status = PosterActionResultStatus.Error;
             for (int i = 0; i < 5; i++)
@@ -227,7 +244,7 @@ namespace Propnex.Poster.Guru
                             await getJwt();
                             break;
                         }
-                    } 
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -386,7 +403,7 @@ namespace Propnex.Poster.Guru
                         await randoTime(2000);
                         await watiForIsLoading();
 
-                        var proceedButtons  = await devToolsContext.QuerySelectorAllAsync("body > div > div > div > div > button");
+                        var proceedButtons = await devToolsContext.QuerySelectorAllAsync("body > div > div > div > div > button");
                         if (proceedButtons != null && proceedButtons.Length == 3)
                         {
                             await proceedButtons[1].ClickAsync();
@@ -616,7 +633,7 @@ namespace Propnex.Poster.Guru
             }
             async Task getListingsV2()
             {
-
+                infos = new List<ListingInfo>();
                 var func = $@"()=>{{
                            return fetch('https://bff-mobile.propertyguru.com/v1/listingManagement?region=sg&locale=en&status_code=ACT&sort=start_date&order=desc&page=1&limit=20000&timestamp=1616142255393',
                         {{ headers:{{'authorization':'Bearer {await getJwt()}'}}}}).then(res=>{{
@@ -663,8 +680,8 @@ namespace Propnex.Poster.Guru
                     }
                     infos.Add(info);
                 }
-                _logger.Information($"get listings {ListingInfos.Count}");
                 ListingInfos = infos;
+                _logger.Information($"get listings {ListingInfos.Count}");
             }
         }
 
@@ -736,13 +753,9 @@ namespace Propnex.Poster.Guru
         /// <returns></returns>
         private async Task<string> getJwt()
         {
-            if (_token == null || _token == "")
-            {
-
-                var result = await ajaxJsonGet<JwtResult>("https://agentnet.propertyguru.com.sg/sf2-agent/ajax/agent/jwt");
-                _token = result.accessToken;
-                _logger.Information($"getJwt:{_token}");
-            }
+            var result = await ajaxJsonGet<JwtResult>("https://agentnet.propertyguru.com.sg/sf2-agent/ajax/agent/jwt");
+            _token = result.accessToken;
+            _logger.Information($"getJwt:{_token}");
 
             return _token;
         }
