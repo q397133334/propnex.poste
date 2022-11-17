@@ -73,6 +73,7 @@ namespace Propnex.Poster.Guru.Api
                 count++;
                 try
                 {
+                    Console.WriteLine($"{action.ToString()}");
                     action();
                 }
                 catch (Exception ex)

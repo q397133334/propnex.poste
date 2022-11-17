@@ -32,27 +32,27 @@ namespace Propnex.Poster.Guru
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            if(textBox1.Text=="")
+            if (textBox1.Text == "")
             {
                 MessageBox.Show("Please input AnyDesk Number,if not AnyDesk,input 7 digits at random");
                 return;
             }
             var setting = IocManager.Instance.Resolve<ConfigurationJson<Setting>>();
+            setting.Value.AnyDesk = textBox1.Text;
+            if (setting.Value.Id == "")
+            {
+                setting.Value.Id = await Api.WebServer.GetMachineIdAsync(setting.Value.AnyDesk);
+                setting.Value.Id = setting.Value.Id.Trim('\"');
+            }
             try
             {
-                setting.Value.AnyDesk = textBox1.Text;
-                if(setting.Value.Id=="")
-                {
-                    setting.Value.Id=await Api.WebServer.GetMachineIdAsync(setting.Value.AnyDesk);
-                    setting.Value.Id = setting.Value.Id.Trim('\"');
-                }
                 setting.Save();
             }
             catch (Exception ex)
             {
-                IocManager.Instance.Resolve<ILogger>().Error(ex.Message);
-
-                MessageBox.Show("save error");
+                IocManager.Instance.Resolve<ILogger>().Error(ex.Message, ex);
+                MessageBox.Show("save error" + ex.StackTrace);
+                return;
             }
 
             button1.Enabled = false;
