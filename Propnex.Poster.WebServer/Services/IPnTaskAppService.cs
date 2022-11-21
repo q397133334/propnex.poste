@@ -72,10 +72,10 @@ namespace Propnex.Poster.WebServer.Services
                 }
                 if (taskContext != "Can't find task file.")
                 {
-                    await _pnTaskLogRepository.InsertAsync(inputDto.MachineId, pnTask.Id, "Dwonload Success", "");
+                    await _pnTaskLogRepository.InsertAsync(pnTask.Id, inputDto.MachineId, "Dwonload Success", "");
                     File.WriteAllText(Path.Combine(rootPath, pnTask.Number), taskContext, Encoding.UTF8);
                 }
-                await _pnTaskLogRepository.InsertAsync(inputDto.MachineId, pnTask.Id, "Get PnTask", "");
+                await _pnTaskLogRepository.InsertAsync(pnTask.Id,inputDto.MachineId, "Get PnTask", "");
 
                 pnTask.Status = Share.TaskStatus.Runing;
                 await Repository.UpdateAsync(pnTask);
