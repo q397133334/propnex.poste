@@ -102,11 +102,14 @@ namespace Propnex.Poster.PropertyGuru.Tasks
 
                     try
                     {
-                        available_date = listingModel.Dates.available.Date = Convert.ToDateTime(available_date).ToString("yyyy-MM-dd 00:00:00");
+                        listingModel.Dates.available.Date = Convert.ToDateTime(available_date).ToString("yyyy-MM-dd 00:00:00");
                     }
                     catch { }
-
                     if (listingModel.Dates.available.Date == "")
+                    {
+                        listingModel.Dates.available.Date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    }
+                    if (Convert.ToDateTime(listingModel.Dates.available.Date) < DateTime.Now)
                     {
                         listingModel.Dates.available.Date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                     }
