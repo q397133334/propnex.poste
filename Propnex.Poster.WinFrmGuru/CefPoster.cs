@@ -96,6 +96,7 @@ namespace Propnex.Poster.Guru
                                         await ResultUpload(item, item.TaskItemId, "", "Failed", $"{loginResult.Message}");
                                         await End(item.TaskItemId);
                                     }
+                                    await XwebEnd();
                                 }
                             }
                             else
