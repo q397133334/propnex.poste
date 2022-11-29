@@ -555,9 +555,9 @@ namespace Propnex.Poster.Guru
                     listingInfo = ListingInfos.Where(q => q.Sqft == guruTaskListing.Listing.Sizes.floorArea[0].text.Trim()
                                                  && q.Title == guruTaskListing.Listing.Property.name && q.TypeCode == guruTaskListing.Listing.TypeCode
                                                  && q.Prece == guruTaskListing.Listing.Price.value.ToString()
-                                                 && q.StreetName == guruTaskListing.Listing.Location.streetName1
-                                                 && q.StreetNumber == guruTaskListing.Listing.Location.streetNumber
-                                                 && q.PostCode == guruTaskListing.Listing.Location.postalCode
+                                                 //&& q.StreetName == guruTaskListing.Listing.Location.streetName1
+                                                 //&& q.StreetNumber == guruTaskListing.Listing.Location.streetNumber
+                                                 //&& q.PostCode == guruTaskListing.Listing.Location.postalCode
                                                  ).FirstOrDefault();
                     if (listingInfo == null)
                     {
@@ -566,9 +566,9 @@ namespace Propnex.Poster.Guru
                             listingInfo = ListingInfos.Where(q => q.Sqft == guruTaskListing.Listing.Sizes.floorArea[0].text.Trim()
                                                     && q.Title == guruTaskListing.Listing.Property.name && q.TypeCode == "RENT"
                                                     && q.Prece == guruTaskListing.Listing.Price.value.ToString()
-                                                    && q.StreetName == guruTaskListing.Listing.Location.streetName1
-                                                    && q.StreetNumber == guruTaskListing.Listing.Location.streetNumber
-                                                    && q.PostCode == guruTaskListing.Listing.Location.postalCode
+                                                    //&& q.StreetName == guruTaskListing.Listing.Location.streetName1
+                                                    //&& q.StreetNumber == guruTaskListing.Listing.Location.streetNumber
+                                                    //&& q.PostCode == guruTaskListing.Listing.Location.postalCode
                                                     ).FirstOrDefault();
                         }
                     }
@@ -577,19 +577,21 @@ namespace Propnex.Poster.Guru
                 {
                     listingInfo = ListingInfos.Where(q => q.Sqft == guruTaskListing.Listing.Sizes.floorArea[0].text.Trim()
                                                  && q.Title == guruTaskListing.Listing.Property.name && q.TypeCode == guruTaskListing.Listing.TypeCode
-                                                 && q.StreetName == guruTaskListing.Listing.Location.streetName1
-                                                    && q.StreetNumber == guruTaskListing.Listing.Location.streetNumber
-                                                    && q.PostCode == guruTaskListing.Listing.Location.postalCode
+                                                 //&& q.StreetName == guruTaskListing.Listing.Location.streetName1
+                                                 //   && q.StreetNumber == guruTaskListing.Listing.Location.streetNumber
+                                                 //   && q.PostCode == guruTaskListing.Listing.Location.postalCode
                                                  ).FirstOrDefault();
                     if (listingInfo == null)
                     {
                         if (guruTaskListing.Listing.TypeCode.ToUpper() == "ROOM")
                         {
-                            listingInfo = ListingInfos.Where(q => q.Sqft == guruTaskListing.Listing.Sizes.floorArea[0].text.Trim()
+                            listingInfo = ListingInfos.Where(
+                                                    q => q.Sqft == guruTaskListing.Listing.Sizes.floorArea[0].text.Trim()
                                                  && q.Title == guruTaskListing.Listing.Property.name && q.TypeCode == "RENT"
-                                                 && q.StreetName == guruTaskListing.Listing.Location.streetName1
-                                                    && q.StreetNumber == guruTaskListing.Listing.Location.streetNumber
-                                                    && q.PostCode == guruTaskListing.Listing.Location.postalCode).FirstOrDefault();
+                                                 //&& q.StreetName == guruTaskListing.Listing.Location.streetName1
+                                                 //   && q.StreetNumber == guruTaskListing.Listing.Location.streetNumber
+                                                 //   && q.PostCode == guruTaskListing.Listing.Location.postalCode
+                                                   ).FirstOrDefault();
                         }
                     }
 
