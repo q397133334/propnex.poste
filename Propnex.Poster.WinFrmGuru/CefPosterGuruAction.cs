@@ -93,6 +93,11 @@ namespace Propnex.Poster.Guru
                             await postNewBtn.ClickAsync();
                         }
                     }
+                    await getLisints();
+                    if (IsExtis(task) == null)
+                    {
+                        _logger.Information($"lsting id is {result.Id},in draft");
+                    }
                 }
                 else
                 {
@@ -594,6 +599,10 @@ namespace Propnex.Poster.Guru
             if (listingInfo != null)
             {
                 guruTaskListing.Listing.Id = listingInfo.Id;
+            }
+            if (listingInfo == null)
+            {
+                _logger.Information("not find listingInfo");
             }
             return listingInfo;
         }
