@@ -111,7 +111,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     }
                     if (Convert.ToDateTime(listingModel.Dates.available.Date) < DateTime.Now)
                     {
-                        listingModel.Dates.available.Date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                        listingModel.Dates.available.Date = DateTime.Now.AddDays(+1).ToString("yyyy-MM-dd HH:mm:ss");
                     }
                 }
 

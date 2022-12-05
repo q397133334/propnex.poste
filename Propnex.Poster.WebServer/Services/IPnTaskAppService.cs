@@ -6,6 +6,7 @@ using Nito.AsyncEx;
 using Flurl.Http;
 using System.Text;
 using Propnex.Poster.Dtos;
+using System.Reflection.PortableExecutable;
 
 namespace Propnex.Poster.WebServer.Services
 {
@@ -19,6 +20,8 @@ namespace Propnex.Poster.WebServer.Services
         Task<Dtos.PnTaskDto> GetPnTaskAsync(Dtos.InputGetTaskInfoDto inputDto);
 
         Task PnTaskRetry(Guid Machineid, Guid pnTaskId, string message = "");
+
+        Task PnTaskXmlRetry(Guid pnTaskId, string message = "");
     }
 
     public class PnTaskAppService : CrudAppService<
@@ -118,6 +121,22 @@ namespace Propnex.Poster.WebServer.Services
                 pnTask.Status = Share.TaskStatus.Failure;
                 await Repository.UpdateAsync(pnTask);
                 await _pnTaskLogRepository.InsertAsync(machineId, pnTask.Id, $"set Retry,but retyr max count {pnTask.RetryCount},{message}", "");
+            }
+        }
+
+        public async Task PnTaskXmlRetry(Guid pnTaskId, string message = "")
+        {
+            var pnTask = await AsyncExecuter.FirstOrDefaultAsync((await Repository.GetQueryableAsync()).Where(q => q.Id == pnTaskId));
+            if (pnTask !=null)
+            {
+                await _pnTaskLogRepository.InsertAsync(Guid.Empty, pnTask.Id, $"{message}", "");
+
+                var rootPath = Path.Combine(_webHostEnvironment.WebRootPath, "taskxml");
+                var usePath = Path.Combine(_webHostEnvironment.WebRootPath, "usetaskxml");
+                if (File.Exists(Path.Combine(usePath, pnTask.Number)))
+                {
+                    System.IO.File.Move(Path.Combine(usePath, pnTask.Number), Path.Combine(rootPath, pnTask.Number));
+                }
             }
         }
     }

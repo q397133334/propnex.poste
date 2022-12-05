@@ -323,7 +323,15 @@ namespace Propnex.Poster.Guru
                 {
                     if (task.FastRepost == "0")
                     {
-                        return await Update(task);
+                        var result= await Update(task);
+                        if(result.Status==PosterActionResultStatus.Success)
+                        {
+                            await AjaxJsonPost<object>($"https://agentnet.propertyguru.com.sg/repost_listing?listing_id[]={task.Listing.Id}&statusCode=ACT&expectedCredits=", "");
+                        }
+                        else
+                        {
+                            return result;
+                        }
                     }
                     else
                     {
