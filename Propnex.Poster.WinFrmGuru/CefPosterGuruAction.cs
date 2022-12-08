@@ -94,9 +94,14 @@ namespace Propnex.Poster.Guru
                         }
                     }
                     await getLisints();
-                    if (IsExtis(task) == null)
+                    if (IsExtis(task, true) == null)
                     {
                         _logger.Information($"lsting id is {result.Id},in draft");
+                        return new PosterActionResult()
+                        {
+                            Status = PosterActionResultStatus.Error,
+                            Message = $"poster success ,but listing in draft. listing id is ${result.Id}"
+                        };
                     }
                 }
                 else
@@ -323,8 +328,8 @@ namespace Propnex.Poster.Guru
                 {
                     if (task.FastRepost == "0")
                     {
-                        var result= await Update(task);
-                        if(result.Status==PosterActionResultStatus.Success)
+                        var result = await Update(task);
+                        if (result.Status == PosterActionResultStatus.Success)
                         {
                             await AjaxJsonPost<object>($"https://agentnet.propertyguru.com.sg/repost_listing?listing_id[]={task.Listing.Id}&statusCode=ACT&expectedCredits=", "");
                         }
@@ -547,13 +552,17 @@ namespace Propnex.Poster.Guru
         }
 
         List<ListingInfo> ListingInfos = null;
-        private ListingInfo IsExtis(GuruTaskListing guruTaskListing)
+        private ListingInfo IsExtis(GuruTaskListing guruTaskListing, bool isPostOnly = false)
         {
             _logger.Information("IsExtis");
             ListingInfo listingInfo = null;
             if (guruTaskListing.Listing.Id.HasValue)
             {
                 listingInfo = ListingInfos.Where(q => q.Id == guruTaskListing.Listing.Id).FirstOrDefault();
+            }
+            if (isPostOnly)
+            {
+                return listingInfo;
             }
 
             if (listingInfo == null)
@@ -596,9 +605,9 @@ namespace Propnex.Poster.Guru
                             listingInfo = ListingInfos.Where(
                                                     q => q.Sqft == guruTaskListing.Listing.Sizes.floorArea[0].text.Trim()
                                                  && q.Title == guruTaskListing.Listing.Property.name && q.TypeCode == "RENT"
-                                                 //&& q.StreetName == guruTaskListing.Listing.Location.streetName1
-                                                 //   && q.StreetNumber == guruTaskListing.Listing.Location.streetNumber
-                                                 //   && q.PostCode == guruTaskListing.Listing.Location.postalCode
+                                                   //&& q.StreetName == guruTaskListing.Listing.Location.streetName1
+                                                   //   && q.StreetNumber == guruTaskListing.Listing.Location.streetNumber
+                                                   //   && q.PostCode == guruTaskListing.Listing.Location.postalCode
                                                    ).FirstOrDefault();
                         }
                     }

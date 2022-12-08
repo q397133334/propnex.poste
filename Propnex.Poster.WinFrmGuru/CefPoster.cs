@@ -221,12 +221,12 @@ namespace Propnex.Poster.Guru
         private async Task getGuruTasks()
         {
             string context = "";
-            //taskDto = await Api.WebServer.GetTask();
-            taskDto = new PnTaskDto()
-            {
-                Id = Guid.Parse("3a07d8e8-6a17-bcb8-878a-45bdb9dfd22b"),
-                Number = "858057.guru.tsk"
-            };
+            taskDto = await Api.WebServer.GetTask();
+            //taskDto = new PnTaskDto()
+            //{
+            //    Id = Guid.Parse("3a07d8e8-6a17-bcb8-878a-45bdb9dfd22b"),
+            //    Number = "858057.guru.tsk"
+            //};
 
             if (taskDto != null)
             {
