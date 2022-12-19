@@ -55,7 +55,7 @@ namespace Propnex.Poster.Guru
         public async Task<PosterActionResult> PostOnly(GuruTaskListing task)
         {
 
-            var listing = IsExtis(task);
+            var listing = IsExtis(task,true);
             if (listing == null)
             {
                 var result = await createListingAsync(task);
@@ -124,7 +124,7 @@ namespace Propnex.Poster.Guru
                 return new PosterActionResult()
                 {
                     Status = PosterActionResultStatus.Error,
-                    Message = "Existing listing detected. Pls delete manually if you wish to create as new"
+                    Message = $"Existing listing detected {listing.Id}. Pls delete manually if you wish to create as new"
                 };
             }
         }
