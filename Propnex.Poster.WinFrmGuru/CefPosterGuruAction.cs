@@ -54,6 +54,7 @@ namespace Propnex.Poster.Guru
 
         public async Task<PosterActionResult> PostOnly(GuruTaskListing task)
         {
+            //document.querySelector("#listing-management-component > div > div > div > div > div > div.headline > p > strong")
 
             var listing = IsExtis(task,true);
             if (listing == null)

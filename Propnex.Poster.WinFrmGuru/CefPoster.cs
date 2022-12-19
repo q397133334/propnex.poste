@@ -274,23 +274,22 @@ namespace Propnex.Poster.Guru
                 $"status={status}&" +
                 $"tm={unix_timestamp(DateTime.Now)}&" +
                 $"memo={memo}");
-            using (System.Net.WebClient webClient = new System.Net.WebClient())
+
+            for (int i = 0; i < 3; i++)
             {
-                for (int i = 0; i < 3; i++)
+                try
                 {
-                    try
-                    {
-                        var res = await sbUrl.ToString().GetStringAsync();
-                        //var res = webClient.DownloadString(sbUrl.ToString());
-                        break;
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger?.Error(ex, $"upload result error {ex.Message}");
-                        await Api.WebServer.PingAsync();
-                    }
+                    var res = await sbUrl.ToString().GetStringAsync();
+                    //var res = webClient.DownloadString(sbUrl.ToString());
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    Logger?.Error(ex, $"upload result error {ex.Message}");
+                    await Api.WebServer.PingAsync();
                 }
             }
+
         }
 
         private async Task xwebItem(GuruTaskListing taskListing, int time_cost = 0, string status = "Done", string note = "")
