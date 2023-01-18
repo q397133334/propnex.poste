@@ -137,6 +137,11 @@ namespace Propnex.Poster.Guru.Api
             });
         }
 
+        public static async Task UpdateMachineAsync()
+        {
+            string url = $"{BaseUrl}/api/app/machine/{Setting.Get().Id}/online";
+            await url.PutAsync();
+        }
 
         public static async Task PingAsync()
         {

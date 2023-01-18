@@ -60,6 +60,24 @@ namespace Propnex.Poster.Guru
             if (listing == null)
             {
                 var result = await createListingAsync(task);
+                if(result.errors!=null && result.errors.ToString().ToLower().Contains("postcode") && task.Listing.Location.id==null)
+                {
+                    var locales= await ajaxJsonGet<List<QueryLocale>>($"https://prefix-search.propertyguru.com/v1/sg/autocomplete?locale=en&limit=25&object_type=PROPERTY&query={task.Listing.Location.postalCode}&property_type_group_exclude=COMMERCIAL");
+                    if(locales.Count>0)
+                    {
+                        var t = await ajaxJsonGetWithJwt<QueryProject>($"https://projects-api-projectnet.propertyguru.com/v1/project?property_id={locales[0].ObjectId}&country=singapore&language=en");
+                        if(t!=null && t.Addresses!=null && t.Addresses.Count>0)
+                        {
+                            task.Listing.Location.id = int.Parse(t.Addresses[0].external_id);
+                            result = await createListingAsync(task);
+                        }
+                
+                    }
+                    
+                }
+                //await Start();
+                //await randoTime(1000 * 60);
+                
                 if (result.Id == 0)
                 {
                     if (result.errors.ToString().ToLower().Contains("headline"))
@@ -83,13 +101,16 @@ namespace Propnex.Poster.Guru
                     {
                         //await AjaxJsonPost<object>("https://agent-service.propertyguru.com/v1/sg/getPropertyNames", "",
                         //    data: $@"{{""statusCode"":""DRAFT"",""agentId"":{task.Listing.Agent.id}}}");
-                        await devToolsContext.GoToAsync("https://agentnet.propertyguru.com.sg/v2/listing_management#draft");
+                        await ChromiumWebBrowser.LoadUrlAsync($"https://agentnet.propertyguru.com.sg/v2/dash");
+                        await watiForIsLoading();
+                        await ChromiumWebBrowser.LoadUrlAsync("https://agentnet.propertyguru.com.sg/v2/listing_management#draft");
+                        await watiForIsLoading();
                         var postBtn = await devToolsContext.QuerySelectorAsync($"#listing-management-component > div > div > div > div > div > div > div.listing-card.listing-card-{result.Id} > div.listing-card-content > div > div > button");
                         if (postBtn != null)
                         {
                             await postBtn.ClickAsync();
                             await randoTime(1000 * 5);
-                            var postNewBtn = await devToolsContext.QuerySelectorAsync("document.querySelector(\".MuiDialog-root.component-listing-reactivation-dialog > div.MuiDialog-container.MuiDialog-scrollPaper > div > div.MuiDialogActions-root.MuiDialogActions-spacing > div.action-buttons.centered > button\")");
+                            var postNewBtn = await devToolsContext.QuerySelectorAsync(".MuiDialog-root.component-listing-reactivation-dialog > div.MuiDialog-container.MuiDialog-scrollPaper > div > div.MuiDialogActions-root.MuiDialogActions-spacing > div.action-buttons.centered > button");
                             await randoTime(1000 * 5);
                             await postNewBtn.ClickAsync();
                         }
@@ -101,7 +122,7 @@ namespace Propnex.Poster.Guru
                         return new PosterActionResult()
                         {
                             Status = PosterActionResultStatus.Error,
-                            Message = $"poster success ,but listing in draft. listing id is ${result.Id}"
+                            Message = "Listing couldn't be saved. Error: [listing] Duplicate listing detected: 24289160"// $"poster success ,but listing in draft. listing id is ${result.Id}"
                         };
                     }
                 }
@@ -1217,7 +1238,33 @@ namespace Propnex.Poster.Guru
             {
                 string jscode = $@"()=> {{return fetch(""{url}"", {{
                                   ""headers"": {{
-                                    ""accept"": ""application/json, text/plain, */*""
+                                    ""accept"": ""application/json, text/plain, */*"",
+                                  }},
+                                  ""method"": ""GET"",
+                                  ""mode"": ""cors""
+                                }}).then(res=>{{
+                                      return res.json()
+                                }})}}";
+
+                var result = await devToolsContext.EvaluateFunctionAsync<T>(jscode);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return default(T);
+            }
+
+        }
+
+        private async Task<T> ajaxJsonGetWithJwt<T>(string url, string data = "")
+        {
+            try
+            {
+                string jscode = $@"()=> {{return fetch(""{url}"", {{
+                                  ""headers"": {{
+                                    ""accept"": ""application/json, text/plain, */*"",
+                                    ""authorization"":""Bearer {await getJwt()}""
                                   }},
                                   ""method"": ""GET"",
                                   ""mode"": ""cors""

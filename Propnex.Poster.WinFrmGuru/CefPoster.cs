@@ -76,127 +76,145 @@ namespace Propnex.Poster.Guru
                 IPosterAction<GuruTaskListing> posterAction = new CefPosterGuruAction(cwb, Logger);
                 if (guruTasks != null)
                 {
-                    Logger.Information($"start run task {taskDto.Number}");
-                    for (int i = 0; i < guruTasks.Tasks.Count; i++)
+                    int retryCount = 0;
+                    while (retryCount < 3)
                     {
-                        guruTask = guruTasks.Tasks[i];
-
-                        var loginResult = await posterAction.Login(guruTask.Account, guruTask.Password);
-                        if (loginResult.Status != PosterActionResultStatus.Success)
+                        try
                         {
-                            Logger.Information("login error");
-                            Logger.Information($"{loginResult.Message}");
-                            if ((loginResult.Message != "Invalid captcha value" || !loginResult.Message.Contains("attempts")) && loginResult.Message != "Verification Code" && loginResult.Message != "")
+
+
+                            Logger.Information($"start run task {taskDto.Number}");
+                            for (int i = 0; i < guruTasks.Tasks.Count; i++)
                             {
-                                if (guruTask.Listings.Listings != null)
+                                guruTask = guruTasks.Tasks[i];
+
+                                var loginResult = await posterAction.Login(guruTask.Account, guruTask.Password);
+                                if (loginResult.Status != PosterActionResultStatus.Success)
                                 {
-                                    loginResult.Message = string.IsNullOrEmpty(loginResult.Message) ? "Email or Password not valid.Please try again" : loginResult.Message;
-                                    foreach (var item in guruTask.Listings.Listings)
+                                    Logger.Information("login error");
+                                    Logger.Information($"{loginResult.Message}");
+                                    if ((loginResult.Message != "Invalid captcha value" || !loginResult.Message.Contains("attempts")) && loginResult.Message != "Verification Code" && loginResult.Message != "")
                                     {
-                                        await ResultUpload(item, item.TaskItemId, "", "Failed", $"{loginResult.Message}");
-                                        await End(item.TaskItemId);
+                                        if (guruTask.Listings.Listings != null)
+                                        {
+                                            loginResult.Message = string.IsNullOrEmpty(loginResult.Message) ? "Email or Password not valid.Please try again" : loginResult.Message;
+                                            foreach (var item in guruTask.Listings.Listings)
+                                            {
+                                                await ResultUpload(item, item.TaskItemId, "", "Failed", $"{loginResult.Message}");
+                                                await End(item.TaskItemId);
+                                            }
+                                            await XwebEnd();
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Api.WebServer.PostPntaskRetry(taskDto.Id, loginResult.Message);
+                                        Logger.Information($"waiting 5 min ,message {loginResult.Message}");
+                                        await Task.Delay(1000 * 60 * 5);
+                                    }
+                                }
+                                else
+                                {
+                                    var result = new PosterActionResult();
+                                    if (guruTask.TaskType.ToLower() == "post only")
+                                    {
+                                        for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
+                                        {
+                                            var item = guruTask.Listings.Listings[j];
+                                            result = await posterAction.PostOnly(item);
+                                            Logger.Information($"{result.Status}--{result.Message}");
+                                            if (result.Status == PosterActionResultStatus.Success)
+                                            {
+                                                await ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
+                                            }
+                                            else
+                                            {
+                                                await ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
+                                            }
+                                            await End(item.TaskItemId);
+                                        }
+                                        await XwebEnd();
+                                    }
+
+                                    if (guruTask.TaskType.ToLower() == "repost")
+                                    {
+                                        for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
+                                        {
+                                            var item = guruTask.Listings.Listings[j];
+                                            result = await posterAction.Repost(item);
+                                            Logger.Information($"{result.Status}--{result.Message}");
+                                            if (result.Status == PosterActionResultStatus.Success)
+                                            {
+                                                await ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
+                                            }
+                                            else
+                                            {
+                                                await ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
+                                            }
+                                            await End(item.TaskItemId);
+                                        }
+
+                                    }
+
+                                    if (guruTask.TaskType.ToLower() == "update")
+                                    {
+                                        for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
+                                        {
+                                            var item = guruTask.Listings.Listings[j];
+                                            result = await posterAction.Update(item);
+                                            Logger.Information($"{result.Status}--{result.Message}");
+                                            if (result.Status == PosterActionResultStatus.Success)
+                                            {
+                                                await ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
+                                            }
+                                            else
+                                            {
+                                                await ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
+                                            }
+                                            await End(item.TaskItemId);
+                                        }
+                                    }
+
+                                    if (guruTask.TaskType.ToLower() == "remove from portals")
+                                    {
+                                        for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
+                                        {
+                                            var item = guruTask.Listings.Listings[j];
+                                            result = await posterAction.Remove(item);
+                                            Logger.Information($"{result.Status}--{result.Message}");
+                                            if (result.Status == PosterActionResultStatus.Success)
+                                            {
+                                                await ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
+                                            }
+                                            else
+                                            {
+                                                await ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
+                                            }
+                                            await End(item.TaskItemId);
+                                        }
+                                    }
+                                    if (guruTask.TaskType.ToLower().IndexOf("retrieve") > -1)
+                                    {
+                                        for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
+                                        {
+                                            var item = guruTask.Listings.Listings[j];
+                                            await ResultUpload(item, item.TaskItemId, "", "Failed", "To realize the function, wait a few days");
+                                            await End(item.TaskItemId);
+                                        }
                                     }
                                     await XwebEnd();
+                                    Logger.Information("Success");
                                 }
                             }
-                            else
-                            {
-                                Api.WebServer.PostPntaskRetry(taskDto.Id, loginResult.Message);
-                                Logger.Information($"waiting 5 min ,message {loginResult.Message}");
-                                await Task.Delay(1000 * 60 * 5);
-                            }
+                            retryCount = 3;
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            var result = new PosterActionResult();
-                            if (guruTask.TaskType.ToLower() == "post only")
-                            {
-                                for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
-                                {
-                                    var item = guruTask.Listings.Listings[j];
-                                    result = await posterAction.PostOnly(item);
-                                    Logger.Information($"{result.Status}--{result.Message}");
-                                    if (result.Status == PosterActionResultStatus.Success)
-                                    {
-                                        await ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
-                                    }
-                                    else
-                                    {
-                                        await ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
-                                    }
-                                    await End(item.TaskItemId);
-                                }
-                                await XwebEnd();
-                            }
-
-                            if (guruTask.TaskType.ToLower() == "repost")
-                            {
-                                for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
-                                {
-                                    var item = guruTask.Listings.Listings[j];
-                                    result = await posterAction.Repost(item);
-                                    Logger.Information($"{result.Status}--{result.Message}");
-                                    if (result.Status == PosterActionResultStatus.Success)
-                                    {
-                                        await ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
-                                    }
-                                    else
-                                    {
-                                        await ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
-                                    }
-                                    await End(item.TaskItemId);
-                                }
-
-                            }
-
-                            if (guruTask.TaskType.ToLower() == "update")
-                            {
-                                for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
-                                {
-                                    var item = guruTask.Listings.Listings[j];
-                                    result = await posterAction.Update(item);
-                                    Logger.Information($"{result.Status}--{result.Message}");
-                                    if (result.Status == PosterActionResultStatus.Success)
-                                    {
-                                        await ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
-                                    }
-                                    else
-                                    {
-                                        await ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
-                                    }
-                                    await End(item.TaskItemId);
-                                }
-                            }
-
-                            if (guruTask.TaskType.ToLower() == "remove from portals")
-                            {
-                                for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
-                                {
-                                    var item = guruTask.Listings.Listings[j];
-                                    result = await posterAction.Remove(item);
-                                    Logger.Information($"{result.Status}--{result.Message}");
-                                    if (result.Status == PosterActionResultStatus.Success)
-                                    {
-                                        await ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
-                                    }
-                                    else
-                                    {
-                                        await ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
-                                    }
-                                    await End(item.TaskItemId);
-                                }
-                            }
-                            if (guruTask.TaskType.ToLower().IndexOf("retrieve") > -1)
-                            {
-                                for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
-                                {
-                                    var item = guruTask.Listings.Listings[j];
-                                    await ResultUpload(item, item.TaskItemId, "", "Failed", "To realize the function, wait a few days");
-                                    await End(item.TaskItemId);
-                                }
-                            }
-                            await XwebEnd();
-                            Logger.Information("Success");
+                            Abp.Dependency.IocManager.Instance.Resolve<Castle.Core.Logging.ILogger>().Error("PosterStart--" + ex.Message);
+                            Logger?.Error(ex, "PosterStart");
+                            await Task.Delay(1000 * 60);
+                            await   Api.WebServer.PingAsync();
+                            retryCount++;
                         }
                     }
                 }
@@ -206,6 +224,7 @@ namespace Propnex.Poster.Guru
                 Abp.Dependency.IocManager.Instance.Resolve<Castle.Core.Logging.ILogger>().Error("PosterStart--" + ex.Message);
                 Logger?.Error(ex, "PosterStart");
                 await Task.Delay(1000 * 60);
+
             }
 
             Close();
@@ -224,8 +243,8 @@ namespace Propnex.Poster.Guru
             taskDto = await Api.WebServer.GetTask();
             //taskDto = new PnTaskDto()
             //{
-            //    Id = Guid.Parse("3a07d8e8-6a17-bcb8-878a-45bdb9dfd22b"),
-            //    Number = "858057.guru.tsk"
+            //    Id = Guid.Parse("3a08bb2d-a6b0-9be8-f90b-fe89c65f5c92"),
+            //    Number = "869828.guru.tsk"
             //};
 
             if (taskDto != null)

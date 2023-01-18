@@ -7,6 +7,7 @@ using Flurl.Http;
 using System.Text;
 using Propnex.Poster.Dtos;
 using System.Reflection.PortableExecutable;
+using System.Threading.Tasks;
 
 namespace Propnex.Poster.WebServer.Services
 {
@@ -22,6 +23,10 @@ namespace Propnex.Poster.WebServer.Services
         Task PnTaskRetry(Guid Machineid, Guid pnTaskId, string message = "");
 
         Task PnTaskXmlRetry(Guid pnTaskId, string message = "");
+
+        Task<List<PnTaskDto>> GetWaitPnTaskAsync();
+
+
     }
 
     public class PnTaskAppService : CrudAppService<
@@ -95,6 +100,29 @@ namespace Propnex.Poster.WebServer.Services
                     Status = pnTask.Status
                 };
             }
+        }
+
+        public async Task<List<PnTaskDto>> GetWaitPnTaskAsync()
+        {
+            var pnTasks = await AsyncExecuter.ToListAsync((await Repository.GetQueryableAsync()).Where(q => q.Status == Share.TaskStatus.Wait));
+
+            var lists=new List<PnTaskDto>();
+
+            foreach(var pnTask in pnTasks)
+            {
+                lists.Add(new PnTaskDto()
+                {
+                    //Id = pnTask.Id,
+                    //AccountId = pnTask.AccountId,
+                    Number = pnTask.Number,
+                    //Country = pnTask.Country,
+                    //CreationTime = pnTask.CreationTime,
+                    //Password = pnTask.Password,
+                    //Source = pnTask.Source,
+                    //Status = pnTask.Status
+                });
+            }
+            return lists;
         }
 
         public async Task PnTaskRetry(Guid machineId, Guid pnTaskId, string message = "")

@@ -1,6 +1,11 @@
-﻿namespace Propnex.Poster.WebServer.Entities
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using Volo.Abp.Application.Dtos;
+
+namespace Propnex.Poster.Dtos
 {
-    public class Machine : Volo.Abp.Domain.Entities.Auditing.AuditedEntity<Guid>
+    public class MachineDto: AuditedEntityDto<Guid>
     {
         public string Number { get; set; }
 

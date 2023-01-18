@@ -28,7 +28,26 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                 Document = XDocument.Parse(listsContext);
                 Init();
             }
-            catch { }
+            catch
+            {
+                StringBuilder info = new StringBuilder();
+                foreach (char cc in listsContext)
+                {
+                    int ss = (int)cc;
+                    if (((ss >= 0) && (ss <= 8)) || ((ss >= 11) && (ss <= 12)) || ((ss >= 14) && (ss <= 32)))
+                        info.AppendFormat(" ", ss);//&#x{0:X};
+                    else info.Append(cc);
+                }
+                try
+                {
+                    Document = XDocument.Parse(info.ToString());
+                    Init();
+                }
+                catch(Exception ex)
+                {
+
+                }
+            }
 
         }
 

@@ -5,12 +5,17 @@ using Volo.Abp.Domain.Repositories;
 using Nito.AsyncEx;
 using Flurl.Http;
 using System.Text;
+using System.Linq.Expressions;
 
 namespace Propnex.Poster.WebServer.Services
 {
     public interface IMachineAppService : Volo.Abp.Application.Services.IApplicationService
     {
         Task<Guid> GetIdAsync(string anyDesk);
+
+        Task<List<Dtos.MachineDto>> GetMachines();
+
+        Task UpdateOnline(Guid id);
     }
 
     public class MachineAppService : ApplicationService, IMachineAppService
@@ -35,6 +40,34 @@ namespace Propnex.Poster.WebServer.Services
                 machine = await _repositoryMachine.InsertAsync(machine);
             }
             return machine.Id;
+        }
+
+        public async Task<List<Dtos.MachineDto>> GetMachines()
+        {
+            var machines = await AsyncExecuter.ToListAsync((await _repositoryMachine.GetQueryableAsync()).Where(q => q.IsEnable));
+
+            var machinesDto = new List<Dtos.MachineDto>();
+
+            foreach (var machine in machines)
+            {
+
+                machinesDto.Add(new Dtos.MachineDto()
+                {
+                    Number = machine.Number,
+                    OnlineTime = machine.OnlineTime,
+                });
+            }
+            return machinesDto;
+        }
+
+        public async Task UpdateOnline(Guid id)
+        {
+            var machine = await _repositoryMachine.GetAsync(q => q.Id == id);
+            if (machine != null)
+            {
+                machine.OnlineTime = DateTime.Now;
+                await _repositoryMachine.UpdateAsync(machine);
+            }
         }
     }
 }

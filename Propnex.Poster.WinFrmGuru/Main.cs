@@ -111,6 +111,11 @@ namespace Propnex.Poster.Guru
 
             _iocManager.Resolve<ILogger>().Info("FormClosing");
         }
+
+        private async void timer2_Tick(object sender, EventArgs e)
+        {
+            await Api.WebServer.UpdateMachineAsync();
+        }
     }
 
 

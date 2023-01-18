@@ -79,6 +79,7 @@
     <Compile Include="Listing\RetrieveListing.cs" />
     <Compile Include="Listing\UpdateListing.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueryLocale.cs" />
     <Compile Include="Tasks\GuruTask.cs" />
     <Compile Include="Tasks\GuruTaskListing.cs" />
     <Compile Include="Tasks\GuruTaskListings.cs" />
