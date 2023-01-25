@@ -206,7 +206,7 @@ namespace Propnex.Poster.Guru
                                     Logger.Information("Success");
                                 }
                             }
-                            retryCount = 3;
+                            break;
                         }
                         catch (Exception ex)
                         {
@@ -215,6 +215,19 @@ namespace Propnex.Poster.Guru
                             await Task.Delay(1000 * 60);
                             await   Api.WebServer.PingAsync();
                             retryCount++;
+                            if(retryCount==3)
+                            {
+                                for (int i = 0; i < guruTasks.Tasks.Count; i++)
+                                {
+                                    for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
+                                    {
+                                        var item = guruTask.Listings.Listings[j];
+                                        await ResultUpload(item, item.TaskItemId, "", "Failed", "Is retry 3");
+                                        await End(item.TaskItemId);
+                                    }
+                                }   
+                                await XwebEnd();
+                            }
                         }
                     }
                 }
