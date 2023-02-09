@@ -145,13 +145,29 @@ namespace Propnex.Poster.Guru.Api
 
         public static async Task PingAsync()
         {
+
             Ping ping = new Ping();
-            var reply = await ping.SendPingAsync("61.147.37.1");
-            while (reply.Status != IPStatus.Success)
+            PingReply reply = null;
+            try
+            {
+                reply = await ping.SendPingAsync("8.8.8.8");
+            }
+            catch
+            {
+
+            }
+            while (reply == null || reply.Status != IPStatus.Success)
             {
                 Console.WriteLine("Ping" + reply.Status);
-                await Task.Delay(1000 * 10);
-                reply = await ping.SendPingAsync("61.147.37.1");
+                await Task.Delay(1000 * 60);
+                try
+                {
+                    reply = await ping.SendPingAsync("8.8.8.8");
+                }
+                catch
+                {
+
+                }
             }
         }
 
