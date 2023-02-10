@@ -5,6 +5,7 @@ using System.Drawing.Drawing2D;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using Flurl.Http;
 
 namespace Propnex.Poster.PropertyGuru.Listing
 {
@@ -258,7 +259,7 @@ namespace Propnex.Poster.PropertyGuru.Listing
         public Dictionary<string, string> Summary = new Dictionary<string, string>();
         public Dictionary<string, string> ProjectData = new Dictionary<string, string>();
 
-        public static RetrieveListing Converter(Listing.CreateOrUpdateListing createOrUpdate, string account, string portal)
+        public static async System.Threading.Tasks.Task<RetrieveListing> Converter(CreateOrUpdateListing createOrUpdate, string account, string portal,string id)
         {
             var listing = new RetrieveListing();
 
@@ -334,11 +335,11 @@ namespace Propnex.Poster.PropertyGuru.Listing
                 listing.Details["property_unit_number"] = ss.Length > 1 ? ss[1] : "";
             }
 
-            listing.Details["alternative_agent"] = createOrUpdate.agent.alternativeAgent; // (string)ht1["alternativeAgent"];
-            listing.Details["alternative_mobile"] = createOrUpdate.agent.alternativeMobile;// (string)ht1["alternativeMobile"];
+            listing.Details["alternative_agent"] = createOrUpdate.agent.alternativeAgent==null?"" : createOrUpdate.agent.alternativeAgent; // (string)ht1["alternativeAgent"];
+            listing.Details["alternative_mobile"] = createOrUpdate.agent.alternativeMobile == null ? "" : createOrUpdate.agent.alternativeMobile;// (string)ht1["alternativeMobile"];
             listing.Details["show_mobile"] = createOrUpdate.agent.showProfile.Value.ToString();// ht1["showProfile"].ToString();
-            listing.Details["alternative_phone"] = createOrUpdate.agent.alternativePhone;// (string)ht1["alternativePhone"];
-            listing.Details["alternative_email"] = createOrUpdate.agent.alternativeEmail;// (string)ht1["alternativeEmail"];
+            listing.Details["alternative_phone"] = createOrUpdate.agent.alternativePhone == null ? "" : createOrUpdate.agent.alternativePhone;// (string)ht1["alternativePhone"];
+            listing.Details["alternative_email"] = createOrUpdate.agent.alternativeEmail == null ? "" : createOrUpdate.agent.alternativeEmail;// (string)ht1["alternativeEmail"];
 
             string agent = "";
             if (listing.Details.ContainsKey("alternative_agent") && !string.IsNullOrEmpty(listing.Details["alternative_agent"]))
@@ -352,7 +353,7 @@ namespace Propnex.Poster.PropertyGuru.Listing
             if (createOrUpdate.media.listing.Count > 0)
             {
                 listing.UseFileName = true;
-                savepath = ""; //$"{$"{Environment.CurrentDirectory}\\task\\{jobContext.GuruPosterJob.Id}"}";    //System.IO.Path.Combine(pictureFolder, System.DateTime.Now.ToString("yyyyMMdd"));
+                savepath = $"{$"{Environment.CurrentDirectory}\\task\\{id}"}";    //System.IO.Path.Combine(pictureFolder, System.DateTime.Now.ToString("yyyyMMdd"));
                 if (!System.IO.Directory.Exists(savepath))
                 {
                     System.IO.Directory.CreateDirectory(savepath);
@@ -370,8 +371,9 @@ namespace Propnex.Poster.PropertyGuru.Listing
                 {
                     
 
-                    WebClientEx webClient = new WebClientEx();
-                    webClient.DownloadFile(p, filename);
+                    //WebClientEx webClient = new WebClientEx();
+                    //webClient.DownloadFile(p, filename);
+                    await p.DownloadFileAsync(filename);
                     filename = OverlayWatermark(filename);
                     pics.Append(filename).Append(Environment.NewLine);
                 }
@@ -391,8 +393,9 @@ namespace Propnex.Poster.PropertyGuru.Listing
                     listing.FloorPlan = p;
                     string filename = p.Substring(p.LastIndexOf("/") + 1);
                     filename = System.IO.Path.Combine(savepath, filename);
-                    WebClientEx webClient = new WebClientEx();
-                    webClient.DownloadFile(p, filename);
+                    //WebClientEx webClient = new WebClientEx();
+                    //webClient.DownloadFile(p, filename);
+                    await p.DownloadFileAsync(filename);
                     filename = OverlayWatermark(filename);
                     if (System.IO.File.Exists(filename))
                     {
@@ -430,8 +433,9 @@ namespace Propnex.Poster.PropertyGuru.Listing
                         try
                         {
                             //DoProgress(string.Format("Retrieve listing {0}, for {1},{2}...", id, User, savepath), -1, filename);
-                            WebClientEx webClient = new WebClientEx();
-                            webClient.DownloadFile(p, filename);
+                            //WebClientEx webClient = new WebClientEx();
+                            //webClient.DownloadFile(p, filename);
+                            await p.DownloadFileAsync(filename);
                             sbFile.Append(filename).Append("#").Append(title).Append(Environment.NewLine);
                         }
                         catch (Exception ex)
@@ -450,8 +454,9 @@ namespace Propnex.Poster.PropertyGuru.Listing
                     filename = System.IO.Path.Combine(savepath, filename);
                     if (turl.EndsWith(".jpg", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        WebClientEx webClient = new WebClientEx();
-                        webClient.DownloadFile(turl, filename);
+                        //WebClientEx webClient = new WebClientEx();
+                        //webClient.DownloadFile(turl, filename);
+                        await turl.DownloadFileAsync(filename);
                     };
                     if (System.IO.File.Exists(filename))
                     {
@@ -487,8 +492,9 @@ namespace Propnex.Poster.PropertyGuru.Listing
                         {
                             // DoProgress(string.Format("Retrieve listing {0}, for {1},{2}...", id, User, savepath), -1, filename);
                             //bot.DownloadImage(p, filename);
-                            WebClientEx webClient = new WebClientEx();
-                            webClient.DownloadFile(p, filename);
+                            //WebClientEx webClient = new WebClientEx();
+                            //webClient.DownloadFile(p, filename);
+                            await p.DownloadFileAsync(filename);
                             sbFile.Append(filename).Append("#").Append(title).Append(Environment.NewLine);
                         }
                         catch (Exception ex)
@@ -507,8 +513,9 @@ namespace Propnex.Poster.PropertyGuru.Listing
                     filename = System.IO.Path.Combine(savepath, filename);
                     if (turl.EndsWith(".jpg", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        WebClientEx webClient = new WebClientEx();
-                        webClient.DownloadFile(turl, filename);
+                        //WebClientEx webClient = new WebClientEx();
+                        //webClient.DownloadFile(turl, filename);
+                        await turl.DownloadFileAsync(filename);
                     };
                     if (System.IO.File.Exists(filename))
                     {

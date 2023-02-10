@@ -195,12 +195,24 @@ namespace Propnex.Poster.Guru
                                     }
                                     if (guruTask.TaskType.ToLower().IndexOf("retrieve") > -1)
                                     {
-                                        for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
-                                        {
-                                            var item = guruTask.Listings.Listings[j];
-                                            await ResultUpload(item, item.TaskItemId, "", "Failed", "To realize the function, wait a few days");
-                                            await End(item.TaskItemId);
-                                        }
+                                        //for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
+                                        //{
+                                        //var item = guruTask.Listings.Listings[j];
+                                        result = await posterAction.Retrieve(guruTask.Account,
+                                            guruTask.TargetPortal,
+                                            guruTask.Password,
+                                            guruTask.Id);
+
+                                        //if (result.Status == PosterActionResultStatus.Success)
+                                        //{
+                                        //    await ResultUpload(item, item.TaskItemId, item.Listing.Id.ToString());
+                                        //}
+                                        //else
+                                        //{
+                                        //    await ResultUpload(item, item.TaskItemId, "", "Failed", result.Message.ToString());
+                                        //}
+                                        //await End(item.TaskItemId);
+                                        //}
                                     }
                                     await XwebEnd();
                                     Logger.Information("Success");
@@ -213,19 +225,19 @@ namespace Propnex.Poster.Guru
                             Abp.Dependency.IocManager.Instance.Resolve<Castle.Core.Logging.ILogger>().Error("PosterStart--" + ex.Message);
                             Logger?.Error(ex, "PosterStart");
                             await Task.Delay(1000 * 60);
-                            await   Api.WebServer.PingAsync();
+                            await Api.WebServer.PingAsync();
                             retryCount++;
-                            if(retryCount==3)
+                            if (retryCount == 3)
                             {
                                 for (int i = 0; i < guruTasks.Tasks.Count; i++)
                                 {
                                     for (var j = 0; j < guruTask.Listings.Listings.Count; j++)
                                     {
                                         var item = guruTask.Listings.Listings[j];
-                                        await ResultUpload(item, item.TaskItemId, "", "Failed", "Is retry 3");
+                                        await ResultUpload(item, item.TaskItemId, "", "Failed", "Posting failed after multiple attempts. Please try again later or contact support. Thank you.");
                                         await End(item.TaskItemId);
                                     }
-                                }   
+                                }
                                 await XwebEnd();
                             }
                         }
@@ -236,7 +248,7 @@ namespace Propnex.Poster.Guru
             {
                 Abp.Dependency.IocManager.Instance.Resolve<Castle.Core.Logging.ILogger>().Error("PosterStart--" + ex.Message);
                 Logger?.Error(ex, "PosterStart");
-                await Task.Delay(1000 * 60);
+                await Task.Delay(5000 * 60);
 
             }
 
@@ -256,8 +268,8 @@ namespace Propnex.Poster.Guru
             taskDto = await Api.WebServer.GetTask();
             //taskDto = new PnTaskDto()
             //{
-            //    Id = Guid.Parse("3a08bb2d-a6b0-9be8-f90b-fe89c65f5c92"),
-            //    Number = "869828.guru.tsk"
+            //    Id = Guid.Parse("3a094b85-2399-16c1-3461-9e3284dc4b6f"),
+            //    Number = "878979.guru.tsk"
             //};
 
             if (taskDto != null)

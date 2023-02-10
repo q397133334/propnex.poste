@@ -23,6 +23,6 @@ namespace Propnex.Poster.Share
 
         Task<PosterActionResult> Remove(T task);
 
-        Task<PosterActionResult> Retrieve(T task);
+        Task<PosterActionResult> Retrieve(string account,string targetPortal, string password, string id);
     }
 }

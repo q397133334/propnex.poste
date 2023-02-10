@@ -32,7 +32,7 @@
     <InstallUrl>http://testposter.propnex.net/program/</InstallUrl>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>28</ApplicationRevision>
+    <ApplicationRevision>31</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -450,6 +450,9 @@
     <Compile Include="PronpnexPosterWinFrmGuruModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Setting.cs" />
+    <Content Include="480x80.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Logo.ico" />
     <EmbeddedResource Include="CefPoster.resx">
       <DependentUpon>CefPoster.cs</DependentUpon>

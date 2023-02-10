@@ -4,7 +4,9 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Linq.Dynamic.Core.Tokenizer;
+using System.Net.Http;
 using System.Reflection;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -56,28 +58,28 @@ namespace Propnex.Poster.Guru
         {
             //document.querySelector("#listing-management-component > div > div > div > div > div > div.headline > p > strong")
 
-            var listing = IsExtis(task,true);
+            var listing = IsExtis(task, true);
             if (listing == null)
             {
                 var result = await createListingAsync(task);
-                if(result.errors!=null && result.errors.ToString().ToLower().Contains("postcode") && task.Listing.Location.id==null)
+                if (result.errors != null && result.errors.ToString().ToLower().Contains("postcode") && task.Listing.Location.id == null)
                 {
-                    var locales= await ajaxJsonGet<List<QueryLocale>>($"https://prefix-search.propertyguru.com/v1/sg/autocomplete?locale=en&limit=25&object_type=PROPERTY&query={task.Listing.Location.postalCode}&property_type_group_exclude=COMMERCIAL");
-                    if(locales.Count>0)
+                    var locales = await ajaxJsonGet<List<QueryLocale>>($"https://prefix-search.propertyguru.com/v1/sg/autocomplete?locale=en&limit=25&object_type=PROPERTY&query={task.Listing.Location.postalCode}&property_type_group_exclude=COMMERCIAL");
+                    if (locales.Count > 0)
                     {
                         var t = await ajaxJsonGetWithJwt<QueryProject>($"https://projects-api-projectnet.propertyguru.com/v1/project?property_id={locales[0].ObjectId}&country=singapore&language=en");
-                        if(t!=null && t.Addresses!=null && t.Addresses.Count>0)
+                        if (t != null && t.Addresses != null && t.Addresses.Count > 0)
                         {
                             task.Listing.Location.id = int.Parse(t.Addresses[0].external_id);
                             result = await createListingAsync(task);
                         }
-                
+
                     }
-                    
+
                 }
                 //await Start();
                 //await randoTime(1000 * 60);
-                
+
                 if (result.Id == 0)
                 {
                     if (result.errors.ToString().ToLower().Contains("headline"))
@@ -386,9 +388,309 @@ namespace Propnex.Poster.Guru
             }
         }
 
-        public Task<PosterActionResult> Retrieve(GuruTaskListing task)
+        public async Task<PosterActionResult> Retrieve(string account, string targetPortal, string password, string id)
         {
-            throw new NotImplementedException();
+            var listing = this.ListingInfos;
+            foreach (var list in ListingInfos)
+            {
+                try
+                {
+                    var guruListing =await this.getListing(list.Id.ToString());
+                    await Retrieve(guruListing, account, targetPortal, password, id);
+                }
+                catch(Exception ex)
+                {
+                    _logger.Error(ex, "Retrieve Error" + list.Id);
+                }
+            }
+            return null;
+        }
+        public async Task<PosterActionResult> Retrieve(CreateOrUpdateListing task, string account, string targetPortal, string password, string id)
+        {
+            var postActionResult = new PosterActionResult()
+            {
+                Status = PosterActionResultStatus.Success
+            };
+            try
+            {
+                _logger.Information("Retrieve");
+                var url = "http://3.0.87.74/propnex/index.php/";
+                //var guruListing = await this.getListing(task.Id.ToString());
+                var retrieveListing =await RetrieveListing.Converter(task, account, targetPortal,id);
+                retrieveListing.Account = account;
+                var result = RetrieveListing.GetData(retrieveListing, account, password, id);
+                if (result.Item2)
+                {
+                    var data = result.Item1;
+
+                    FormUrlEncodedContent formUrlEncodedContent = new FormUrlEncodedContent(data);
+
+                    HttpClient httpClient = new HttpClient();
+                    var ok =await httpClient.PostAsync($"{url}listings/post", formUrlEncodedContent);
+                    var httpResult =await ok.Content.ReadAsStringAsync();
+                    string[] ss = httpResult.Split(new char[] { ',' });
+                    string xpid = "";
+                    if (ss.Length > 1 && ss[0] == "ok")
+                    {
+                        xpid = ss[1].Trim();
+                        retrieveListing.Details["xpressorID"] = xpid;
+
+                        Dictionary<string, string> files = new Dictionary<string, string>();
+                        if (string.IsNullOrEmpty(retrieveListing.Photos)) retrieveListing.Photos = "";
+                        string[] photos = retrieveListing.Photos.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                        int i = 0;
+                        var formName = "ListingAttachments";
+                        foreach (string photo in photos)
+                        {
+                            string[] vnames = photo.Split(new char[] { '#' });
+                            string p = vnames[0].Trim();
+                            if (!System.IO.File.Exists(p)) continue;
+                            files = new Dictionary<string, string>();
+                            files[formName + "[attachfile]"] = p;
+                            data = new Dictionary<string, string>();
+                            data[formName + "[category]"] = "photo";
+                            data["xpressor"] = "";
+
+                            data[formName + "[title]"] = "";
+                            if (retrieveListing.UseFileName)
+                            {
+                                string fn = System.IO.Path.GetFileName(p);
+                                string[] parts = fn.Split(new char[] { '.' });
+                                if (parts.Length > 0)
+                                {
+                                    data[formName + "[title]"] = parts[0].Replace("-", " ").Replace("_", " ");
+                                };
+                                if (vnames.Length > 1 && !string.IsNullOrEmpty(vnames[1].Trim()))
+                                {
+                                    data[formName + "[title]"] = vnames[1].Trim();
+                                }
+                            }
+                            try
+                            {
+                                using (var multipartFormDataContent = new MultipartFormDataContent())
+                                {
+                                    foreach (var content in data)
+                                    {
+                                        multipartFormDataContent.Add(new StringContent(content.Value), content.Key);
+                                    }
+                                    using (var client = new HttpClient())
+                                    {
+                                        using (var stream = new StreamContent(new System.IO.FileStream(p, System.IO.FileMode.Open)))
+                                        {
+                                            multipartFormDataContent.Add(stream, formName + "[attachfile]", System.IO.Path.GetFileName(p));
+                                            ok =await httpClient.PostAsync($"{url}listingAttachments/create/{xpid}", multipartFormDataContent);
+                                            httpResult =await ok.Content.ReadAsStringAsync();
+                                        }
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                //DoProgress("Exception in PostWebPageMultipart", -1, "");
+                                //throw;
+                            }
+                        }
+
+
+                        if (!string.IsNullOrEmpty(retrieveListing.FloorPlan))
+                        {
+                            string[] floorplans = retrieveListing.FloorPlan.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                            foreach (string floorplan in floorplans)
+                            {
+                                string[] vnames = floorplan.Split(new char[] { '#' });
+                                string p = vnames[0].Trim();
+                                if (System.IO.File.Exists(p))
+                                {
+                                    files = new Dictionary<string, string>();
+                                    files[formName + "[attachfile]"] = p;
+                                    data = new Dictionary<string, string>();
+                                    data[formName + "[category]"] = "floorplan";
+                                    data["xpressor"] = "";
+
+                                    data[formName + "[title]"] = "";
+                                    if (retrieveListing.UseFileName)
+                                    {
+                                        string fn = System.IO.Path.GetFileName(p);
+                                        string[] parts = fn.Split(new char[] { '.' });
+                                        data[formName + "[title]"] = parts[0].Replace("-", " ");
+                                    };
+                                    if (vnames.Length > 1 && !string.IsNullOrEmpty(vnames[1].Trim()))
+                                    {
+                                        data[formName + "[title]"] = vnames[1].Trim();
+                                    }
+                                    try
+                                    {
+                                        using (var multipartFormDataContent = new MultipartFormDataContent())
+                                        {
+                                            foreach (var content in data)
+                                            {
+                                                multipartFormDataContent.Add(new StringContent(content.Value), content.Key);
+                                            }
+                                            using (var client = new HttpClient())
+                                            {
+                                                using (var stream = new StreamContent(new System.IO.FileStream(p, System.IO.FileMode.Open)))
+                                                {
+                                                    multipartFormDataContent.Add(stream, formName + "[attachfile]", System.IO.Path.GetFileName(p));
+                                                    ok = await httpClient.PostAsync($"{url}listingAttachments/create/{xpid}", multipartFormDataContent);
+                                                    httpResult =await ok.Content.ReadAsStringAsync();
+                                                }
+                                            }
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        //DoProgress("Exception in PostWebPageMultipart", -1, "");
+                                        //throw;
+                                    }
+
+                                }
+                            }
+                        }
+
+                        string[] tours = retrieveListing.Tours.Split(new string[] { "\n" }, StringSplitOptions.None);
+                        string[] toursThumbnail = retrieveListing.TourThumbnails.Split(new string[] { "\n" }, StringSplitOptions.None);
+                        i = 0;
+                        for (i = 0; i < tours.Length; i++)
+                        {
+                            string tour = tours[i].Trim();
+                            if (string.IsNullOrEmpty(tour)) continue;
+                            string tourThumbnail = toursThumbnail[i].Trim();
+                            data = new Dictionary<string, string>();
+                            data[formName + "[category]"] = "tour";
+                            data[formName + "[thumbnail]"] = tourThumbnail;
+
+                            string[] vnames = tour.Split(new char[] { '#' });
+                            string p = vnames[0].Trim();
+                            if (vnames.Length > 2)
+                            {
+                                p = string.Join("#", vnames, 0, vnames.Length - 1);
+                            }
+                            files = new Dictionary<string, string>();
+                            data[formName + "[title]"] = "";
+                            if (p.EndsWith(".swf", StringComparison.InvariantCultureIgnoreCase) || p.EndsWith(".mov", StringComparison.InvariantCultureIgnoreCase) || p.EndsWith(".flv", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                if (!System.IO.File.Exists(p)) continue;
+                                files[formName + "[attachfile]"] = p.Trim();
+                                if (retrieveListing.UseFileName)
+                                {
+                                    string fn = System.IO.Path.GetFileName(p.Trim());
+                                    string[] parts = fn.Split(new char[] { '.' });
+                                    data[formName + "[title]"] = parts[0].Replace("-", " ");
+                                }
+                            }
+                            else
+                            {
+                                data[formName + "[embed_code]"] = p;
+                            }
+
+                            data["xpressor"] = "";
+
+                            if (vnames.Length > 1 && !string.IsNullOrEmpty(vnames[vnames.Length - 1].Trim()))
+                            {
+                                data[formName + "[title]"] = vnames[vnames.Length - 1].Trim();
+                            }
+                            try
+                            {
+                                using (var multipartFormDataContent = new MultipartFormDataContent())
+                                {
+                                    foreach (var content in data)
+                                    {
+                                        multipartFormDataContent.Add(new StringContent(content.Value), content.Key);
+                                    }
+                                    using (var client = new HttpClient())
+                                    {
+                                        using (var stream = new StreamContent(new System.IO.FileStream(p, System.IO.FileMode.Open)))
+                                        {
+                                            multipartFormDataContent.Add(stream, formName + "[attachfile]", System.IO.Path.GetFileName(p));
+                                            ok =await httpClient.PostAsync($"{url}listingAttachments/create/{xpid}", multipartFormDataContent);
+                                            httpResult =await ok.Content.ReadAsStringAsync();
+                                        }
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                //DoProgress("Exception in PostWebPageMultipart", -1, "");
+                                //throw;
+                            }
+                        }
+
+                        string[] videos = retrieveListing.Videos.Split(new string[] { "\n" }, StringSplitOptions.None);
+                        string[] videosThumbnail = retrieveListing.VideoThumbnails.Split(new string[] { "\n" }, StringSplitOptions.None);
+                        i = 0;
+                        for (i = 0; i < videos.Length; i++)
+                        {
+                            string video = videos[i];
+                            if (string.IsNullOrEmpty(video)) continue;
+                            string videoThumbnail = videosThumbnail.Length > i ? videosThumbnail[i] : "";
+                            data = new Dictionary<string, string>();
+                            data[formName + "[category]"] = "video";
+                            data[formName + "[thumbnail]"] = videoThumbnail;
+                            string[] vnames = video.Split(new char[] { '#' });
+                            string p = vnames[0].Trim();
+                            if (vnames.Length > 2) p = string.Join("#", vnames, 0, vnames.Length - 1);
+                            files = new Dictionary<string, string>();
+                            data[formName + "[title]"] = "";
+                            if (p.EndsWith(".swf", StringComparison.InvariantCultureIgnoreCase) || p.EndsWith(".mov", StringComparison.InvariantCultureIgnoreCase) || p.EndsWith(".flv", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                if (!System.IO.File.Exists(p)) continue;
+                                files[formName + "[attachfile]"] = p.Trim();
+                                if (retrieveListing.UseFileName)
+                                {
+                                    string fn = System.IO.Path.GetFileName(p.Trim());
+                                    string[] parts = fn.Split(new char[] { '.' });
+                                    data[formName + "[title]"] = parts[0].Replace("-", " ");
+                                };
+                            }
+                            else
+                            {
+                                data[formName + "[embed_code]"] = p;
+                            };
+                            data["xpressor"] = "";
+
+                            if (vnames.Length > 1 && !string.IsNullOrEmpty(vnames[vnames.Length - 1].Trim()))
+                            {
+                                data[formName + "[title]"] = vnames[vnames.Length - 1].Trim();
+                            };
+
+                            try
+                            {
+                                using (var multipartFormDataContent = new MultipartFormDataContent())
+                                {
+                                    foreach (var content in data)
+                                    {
+                                        multipartFormDataContent.Add(new StringContent(content.Value), content.Key);
+                                    }
+                                    using (var client = new HttpClient())
+                                    {
+                                        using (var stream = new StreamContent(new System.IO.FileStream(p, System.IO.FileMode.Open)))
+                                        {
+                                            multipartFormDataContent.Add(stream, formName + "[attachfile]", System.IO.Path.GetFileName(p));
+                                            ok =await httpClient.PostAsync($"{url}listingAttachments/create/{xpid}", multipartFormDataContent);
+                                            httpResult =await ok.Content.ReadAsStringAsync();
+                                        }
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                //DoProgress("Exception in PostWebPageMultipart", -1, "");
+                                //throw;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    _logger.Error(result.Item3);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.ToString());
+                postActionResult.Status = PosterActionResultStatus.Error;
+            }
+            return postActionResult;
         }
 
         public async Task<PosterActionResult> Remove(GuruTaskListing task)
