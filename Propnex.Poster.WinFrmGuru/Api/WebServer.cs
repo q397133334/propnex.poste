@@ -150,7 +150,7 @@ namespace Propnex.Poster.Guru.Api
             PingReply reply = null;
             try
             {
-                reply = await ping.SendPingAsync("8.8.8.8");
+                reply = await ping.SendPingAsync("1.1.1.1");
             }
             catch
             {
@@ -162,7 +162,7 @@ namespace Propnex.Poster.Guru.Api
                 await Task.Delay(1000 * 60);
                 try
                 {
-                    reply = await ping.SendPingAsync("8.8.8.8");
+                    reply = await ping.SendPingAsync("1.1.1.1");
                 }
                 catch
                 {

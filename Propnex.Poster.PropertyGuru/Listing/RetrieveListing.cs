@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -259,7 +260,7 @@ namespace Propnex.Poster.PropertyGuru.Listing
         public Dictionary<string, string> Summary = new Dictionary<string, string>();
         public Dictionary<string, string> ProjectData = new Dictionary<string, string>();
 
-        public static async System.Threading.Tasks.Task<RetrieveListing> Converter(CreateOrUpdateListing createOrUpdate, string account, string portal,string id)
+        public static async System.Threading.Tasks.Task<RetrieveListing> Converter(CreateOrUpdateListing createOrUpdate, string account, string portal, string id)
         {
             var listing = new RetrieveListing();
 
@@ -335,7 +336,7 @@ namespace Propnex.Poster.PropertyGuru.Listing
                 listing.Details["property_unit_number"] = ss.Length > 1 ? ss[1] : "";
             }
 
-            listing.Details["alternative_agent"] = createOrUpdate.agent.alternativeAgent==null?"" : createOrUpdate.agent.alternativeAgent; // (string)ht1["alternativeAgent"];
+            listing.Details["alternative_agent"] = createOrUpdate.agent.alternativeAgent == null ? "" : createOrUpdate.agent.alternativeAgent; // (string)ht1["alternativeAgent"];
             listing.Details["alternative_mobile"] = createOrUpdate.agent.alternativeMobile == null ? "" : createOrUpdate.agent.alternativeMobile;// (string)ht1["alternativeMobile"];
             listing.Details["show_mobile"] = createOrUpdate.agent.showProfile.Value.ToString();// ht1["showProfile"].ToString();
             listing.Details["alternative_phone"] = createOrUpdate.agent.alternativePhone == null ? "" : createOrUpdate.agent.alternativePhone;// (string)ht1["alternativePhone"];
@@ -353,7 +354,7 @@ namespace Propnex.Poster.PropertyGuru.Listing
             if (createOrUpdate.media.listing.Count > 0)
             {
                 listing.UseFileName = true;
-                savepath = $"{$"{Environment.CurrentDirectory}\\task\\{id}"}";    //System.IO.Path.Combine(pictureFolder, System.DateTime.Now.ToString("yyyyMMdd"));
+                savepath = $"{$"{Directory.GetDirectoryRoot(System.Windows.Forms.Application.StartupPath)}\\task\\{id}"}";    //System.IO.Path.Combine(pictureFolder, System.DateTime.Now.ToString("yyyyMMdd"));
                 if (!System.IO.Directory.Exists(savepath))
                 {
                     System.IO.Directory.CreateDirectory(savepath);
@@ -366,20 +367,24 @@ namespace Propnex.Poster.PropertyGuru.Listing
                 string filename = item.id.Value.ToString() + "." + System.IO.Path.GetFileName(p);//  ht2["id"].ToString() + "." + System.IO.Path.GetFileName(p);// p.Substring(p.LastIndexOf("/") + 1);
                 string title = item.caption?.Replace(" ", "-")?.Trim();//  ((string)ht2["caption"])?.Replace(" ", "-")?.Trim();
                 filename = MakeValidFileName(title + ".(RP)" + filename);
-                filename = System.IO.Path.Combine(savepath, filename);
+                //filename = System.IO.Path.Combine(savepath, filename);
                 try
                 {
-                    
+
 
                     //WebClientEx webClient = new WebClientEx();
                     //webClient.DownloadFile(p, filename);
-                    await p.DownloadFileAsync(filename);
-                    filename = OverlayWatermark(filename);
-                    pics.Append(filename).Append(Environment.NewLine);
+                    var result = await p.WithTimeout(30).DownloadFileAsync(savepath, filename);
+                    if (System.IO.File.Exists(result))
+                    {
+                        result = OverlayWatermark(result);
+                        pics.Append(result).Append(Environment.NewLine);
+                    }
+
                 }
                 catch (Exception ex)
                 {
-                   
+
                 }
             }
 
@@ -392,19 +397,26 @@ namespace Propnex.Poster.PropertyGuru.Listing
                     string p = item.V550;// ht2["V550"].ToString();
                     listing.FloorPlan = p;
                     string filename = p.Substring(p.LastIndexOf("/") + 1);
-                    filename = System.IO.Path.Combine(savepath, filename);
-                    //WebClientEx webClient = new WebClientEx();
-                    //webClient.DownloadFile(p, filename);
-                    await p.DownloadFileAsync(filename);
-                    filename = OverlayWatermark(filename);
-                    if (System.IO.File.Exists(filename))
+                    //filename = System.IO.Path.Combine(savepath, filename);
+                    try
                     {
-                        listing.FloorPlan = filename;
+                        //WebClientEx webClient = new WebClientEx();
+                        //webClient.DownloadFile(p, filename);
+                        var result = await p.WithTimeout(30).DownloadFileAsync(savepath, filename);
+                        if (System.IO.File.Exists(result))
+                        {
+                            result = OverlayWatermark(result);
+                            listing.FloorPlan = result;
+                        }
+                        else
+                        {
+                            listing.FloorPlan = "";
+                        };
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        listing.FloorPlan = "";
-                    };
+
+                    }
                     break;
                 }
             }
@@ -429,18 +441,18 @@ namespace Propnex.Poster.PropertyGuru.Listing
                         filename = p.Substring(p.LastIndexOf("/") + 1);
                         if (string.IsNullOrEmpty(filename)) continue;
                         string ext = System.IO.Path.GetExtension(filename);
-                        filename = System.IO.Path.Combine(savepath, MakeValidFileName(string.Format("{0}.{1}.{2}", title, DateTime.Now.ToString("yyyyMMdd"), filename)));
+                        filename = MakeValidFileName(string.Format("{0}.{1}.{2}", title, DateTime.Now.ToString("yyyyMMdd"), filename));
                         try
                         {
                             //DoProgress(string.Format("Retrieve listing {0}, for {1},{2}...", id, User, savepath), -1, filename);
                             //WebClientEx webClient = new WebClientEx();
                             //webClient.DownloadFile(p, filename);
-                            await p.DownloadFileAsync(filename);
-                            sbFile.Append(filename).Append("#").Append(title).Append(Environment.NewLine);
+                            var result = await p.WithTimeout(30).DownloadFileAsync(savepath, filename);
+                            sbFile.Append(result).Append("#").Append(title).Append(Environment.NewLine);
                         }
                         catch (Exception ex)
                         {
-                            
+
                         };
                     }
                     else//embed
@@ -451,12 +463,12 @@ namespace Propnex.Poster.PropertyGuru.Listing
                     //get thumbnail
                     string turl = item.thumb; //(string)ht2["thumb"];
                     filename = turl.Substring(turl.LastIndexOf("/") + 1);
-                    filename = System.IO.Path.Combine(savepath, filename);
+                    //filename = System.IO.Path.Combine(savepath, filename);
                     if (turl.EndsWith(".jpg", StringComparison.CurrentCultureIgnoreCase))
                     {
                         //WebClientEx webClient = new WebClientEx();
                         //webClient.DownloadFile(turl, filename);
-                        await turl.DownloadFileAsync(filename);
+                        filename = await turl.WithTimeout(30).DownloadFileAsync(savepath, filename);
                     };
                     if (System.IO.File.Exists(filename))
                     {
@@ -487,19 +499,19 @@ namespace Propnex.Poster.PropertyGuru.Listing
                         filename = p.Substring(p.LastIndexOf("/") + 1);
                         if (string.IsNullOrEmpty(filename)) continue;
                         string ext = System.IO.Path.GetExtension(filename);
-                        filename = System.IO.Path.Combine(savepath, MakeValidFileName(string.Format("{0}.{1}.{2}", title, DateTime.Now.ToString("yyyyMMdd"), filename)));
+                        filename = MakeValidFileName(string.Format("{0}.{1}.{2}", title, DateTime.Now.ToString("yyyyMMdd"), filename));
                         try
                         {
                             // DoProgress(string.Format("Retrieve listing {0}, for {1},{2}...", id, User, savepath), -1, filename);
                             //bot.DownloadImage(p, filename);
                             //WebClientEx webClient = new WebClientEx();
                             //webClient.DownloadFile(p, filename);
-                            await p.DownloadFileAsync(filename);
-                            sbFile.Append(filename).Append("#").Append(title).Append(Environment.NewLine);
+                            var result = await p.DownloadFileAsync(savepath, filename);
+                            sbFile.Append(result).Append("#").Append(title).Append(Environment.NewLine);
                         }
                         catch (Exception ex)
                         {
-                            
+
                         };
                     }
                     else//embed
@@ -510,12 +522,12 @@ namespace Propnex.Poster.PropertyGuru.Listing
                     //get thumbnail
                     string turl = item.thumb;//  (string)ht2["thumb"];
                     filename = turl.Substring(turl.LastIndexOf("/") + 1);
-                    filename = System.IO.Path.Combine(savepath, filename);
+                    //filename = System.IO.Path.Combine(savepath, filename);
                     if (turl.EndsWith(".jpg", StringComparison.CurrentCultureIgnoreCase))
                     {
                         //WebClientEx webClient = new WebClientEx();
                         //webClient.DownloadFile(turl, filename);
-                        await turl.DownloadFileAsync(filename);
+                        filename = await turl.DownloadFileAsync(savepath, filename);
                     };
                     if (System.IO.File.Exists(filename))
                     {
@@ -610,47 +622,47 @@ namespace Propnex.Poster.PropertyGuru.Listing
 
         private static string OverlayWatermark(string filename)
         {
-            if (filename.EndsWith("pdf")) return filename;
-            Image img = Bitmap.FromFile(filename);
-            int X, Y, H, W;
-            X = Y = H = W = 0;
-            Y = (int)System.Math.Round((img.Height * 0.6), 0);
-            X = (int)img.Width - (int)System.Math.Round(img.Height / 550.0 * 100, 0);
-            W = img.Width - X;
-            H = (int)System.Math.Round(img.Height * 0.1 + 1, 0);
-            int Width = (int)System.Math.Round(H * 6.18, 0);
-            if (img.Width - Width < 56)
+            try
             {
-                int newWidth = img.Width - 56;
-                int newH = H * newWidth / Width;
-                Y -= H - newH + 2;
-                H = newH + 2;
-                Width = newWidth;
-            };
-            //remove following 2 lines to overlay only right part
-            X = img.Width - Width - 5;
-            W = img.Width - X;
-            string photo = "";
-            using (Image src = Image.FromFile("480x80.png"))
-            using (Bitmap dst = new Bitmap(img.Width, img.Height))
-            using (Graphics g = Graphics.FromImage(dst))
-            {
-                g.SmoothingMode = SmoothingMode.AntiAlias;
-                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                g.DrawImage(img, 0, 0, dst.Width, dst.Height);
-                g.DrawImage(src, X, Y, W, H);
-                photo = System.IO.Path.GetDirectoryName(filename) + "\\" + System.IO.Path.GetFileNameWithoutExtension(filename) + "_fixed" + ".jpg";
-                dst.Save(photo, System.Drawing.Imaging.ImageFormat.Jpeg);
+                if (filename.EndsWith("pdf")) return filename;
+                Image img = Bitmap.FromFile(filename);
+                int X, Y, H, W;
+                X = Y = H = W = 0;
+                Y = (int)System.Math.Round((img.Height * 0.6), 0);
+                X = (int)img.Width - (int)System.Math.Round(img.Height / 550.0 * 100, 0);
+                W = img.Width - X;
+                H = (int)System.Math.Round(img.Height * 0.1 + 1, 0);
+                int Width = (int)System.Math.Round(H * 6.18, 0);
+                if (img.Width - Width < 56)
+                {
+                    int newWidth = img.Width - 56;
+                    int newH = H * newWidth / Width;
+                    Y -= H - newH + 2;
+                    H = newH + 2;
+                    Width = newWidth;
+                };
+                //remove following 2 lines to overlay only right part
+                X = img.Width - Width - 5;
+                W = img.Width - X;
+                string photo = "";
+                using (Image src = Image.FromFile("480x80.png"))
+                using (Bitmap dst = new Bitmap(img.Width, img.Height))
+                using (Graphics g = Graphics.FromImage(dst))
+                {
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    g.DrawImage(img, 0, 0, dst.Width, dst.Height);
+                    g.DrawImage(src, X, Y, W, H);
+                    photo = System.IO.Path.GetDirectoryName(filename) + "\\" + System.IO.Path.GetFileNameWithoutExtension(filename) + "_fixed" + ".jpg";
+                    dst.Save(photo, System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
+                img.Dispose();
+                return photo;
             }
-
-            //using (Graphics g = Graphics.FromImage(img))
-            //{
-            //    g.FillRectangle(Brushes.Black, new Rectangle(X, Y, W, H));
-            //}
-            //string photo = System.IO.Path.GetDirectoryName(filename) + "\\" + System.IO.Path.GetFileNameWithoutExtension(filename) + "_fixed" + ".jpg";
-            //img.Save(photo, System.Drawing.Imaging.ImageFormat.Jpeg);
-            img.Dispose();
-            return photo;
+            catch (Exception ex)
+            {
+                return "";
+            }
         }
 
         public static string MakeValidFileName(string name)

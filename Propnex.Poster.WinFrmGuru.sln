@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Propnex.Poster.PropertyGuru
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Propnex.Poster.WinFrmGuruInstall", "WinFromGuruInstall\Propnex.Poster.WinFrmGuruInstall\Propnex.Poster.WinFrmGuruInstall.vdproj", "{46E205EA-32D1-4A50-B275-5474A9201FF4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Propnex.Poster.PropertyGuru.Mobile", "Propnex.Poster.PropertyGuru.Mobile\Propnex.Poster.PropertyGuru.Mobile.csproj", "{58F24B59-EFCA-4032-A089-A33B1FEC90B2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,14 @@ Global
 		{46E205EA-32D1-4A50-B275-5474A9201FF4}.Release|Any CPU.ActiveCfg = Release
 		{46E205EA-32D1-4A50-B275-5474A9201FF4}.Release|x86.ActiveCfg = Release
 		{46E205EA-32D1-4A50-B275-5474A9201FF4}.Release|x86.Build.0 = Release
+		{58F24B59-EFCA-4032-A089-A33B1FEC90B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58F24B59-EFCA-4032-A089-A33B1FEC90B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58F24B59-EFCA-4032-A089-A33B1FEC90B2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{58F24B59-EFCA-4032-A089-A33B1FEC90B2}.Debug|x86.Build.0 = Debug|Any CPU
+		{58F24B59-EFCA-4032-A089-A33B1FEC90B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58F24B59-EFCA-4032-A089-A33B1FEC90B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58F24B59-EFCA-4032-A089-A33B1FEC90B2}.Release|x86.ActiveCfg = Release|Any CPU
+		{58F24B59-EFCA-4032-A089-A33B1FEC90B2}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

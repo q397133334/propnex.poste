@@ -268,8 +268,8 @@ namespace Propnex.Poster.Guru
             taskDto = await Api.WebServer.GetTask();
             //taskDto = new PnTaskDto()
             //{
-            //    Id = Guid.Parse("3a094b85-2399-16c1-3461-9e3284dc4b6f"),
-            //    Number = "878979.guru.tsk"
+            //    Id = Guid.Parse("3a095b64-b42d-646f-6695-52c03835c57e"),
+            //    Number = "880276.guru.tsk"
             //};
 
             if (taskDto != null)

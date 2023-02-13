@@ -290,10 +290,6 @@ namespace Propnex.Poster.Guru
             return result;
         }
 
-        public Task<PosterActionResult> Retrieve()
-        {
-            throw new NotImplementedException();
-        }
 
         public Task<PosterActionResult> Post(GuruTaskListing task)
         {
