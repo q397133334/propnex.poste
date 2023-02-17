@@ -19,16 +19,24 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             Logger = logger;
         }
 
-        public async Task<Token> Login(string username, string password)
+        public async Task<Token> Login(AuthLogin authLogin)
         {
             var request = GetRequest();
             request.Method = Method.Post;
-            request.AddParameter("username", username);
-            request.AddParameter("password", password);
+            request.Resource = "/v1/jwt/login";
+            request.AddParameter("username", authLogin.UserName);
+            request.AddParameter("password", authLogin.Password);
             request.AddParameter("grant_type", "password");
             request.AddParameter("scope", "singapore");
             var token = await client.PostAsync<Token>(request);
             return token;
         }
+    }
+
+    public class AuthLogin
+    {
+        public string UserName { get; set; }
+
+        public string Password { get; set; }
     }
 }
