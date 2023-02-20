@@ -1,4 +1,5 @@
-﻿using Propnex.Poster.PropertyGuru.Mobile.Dto;
+﻿using Propnex.Poster.PropertyGuru.Listing;
+using Propnex.Poster.PropertyGuru.Mobile.Dto;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -17,12 +18,21 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             Token = token;
         }
 
+        public Mobile() : base("https://bff-mobile.propertyguru.com")
+        {
 
-        public async Task ListingManagement(QueryListingManagement queryListingManagement)
+        }
+
+        public async Task<HttpResult<ListingsResult>> ListingManagementAsync(QueryListingManagement queryListingManagement)
         {
 
             var request = GetRequest();
-            request.AddHeader("authorization", $"Bearer {Token.accessToken}");
+            request.Method = Method.Get;
+            request.Resource = "/v1/listingManagement";
+            request.AddHeader("Authorization", $"Bearer {Token.accessToken}");
+            request.AddHeader("Accept", "*/*");
+            request.AddHeader("Host", "bff-mobile.propertyguru.com");
+            request.AddHeader("Connection", "keep-alive");
             request.AddQueryParameter("locale", queryListingManagement.Locale);
             request.AddQueryParameter("region", queryListingManagement.Region);
             request.AddQueryParameter("agent", queryListingManagement.Agent);
@@ -33,15 +43,17 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddQueryParameter("sort", queryListingManagement.Sort);
 
             var response = await client.ExecuteAsync(request);
-            switch(response.StatusCode)
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                case System.Net.HttpStatusCode.OK:
-                    break;
-                case System.Net.HttpStatusCode.Forbidden: 
-                    break;
-                case System.Net.HttpStatusCode.NotFound: 
-                    break;
+                var listingResult = Newtonsoft.Json.JsonConvert.DeserializeObject<ListingsResult>(response.Content);
+                return new HttpResult<ListingsResult>()
+                {
+                    Data = listingResult,
+                    HttpStatusCode = response.StatusCode
+                };
             }
+
+            return GetHttpResult<ListingsResult>(response);
         }
     }
 
@@ -51,15 +63,15 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 
         public string Region { get; set; } = "sg";
 
-        public string Agent { get; set; }
+        public string Agent { get; set; } = "153282";
 
         public string StatusCode { get; set; } = "ACT";
 
         public string Order { get; set; } = "desc";
 
-        public string Limit { get; set; }
+        public string Limit { get; set; } = "100";
 
-        public string Page { get; set; }
+        public string Page { get; set; } = "1";
 
         public string Sort { get; set; } = "start_date";
     }

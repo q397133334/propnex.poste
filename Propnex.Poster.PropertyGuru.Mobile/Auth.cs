@@ -12,14 +12,14 @@ namespace Propnex.Poster.PropertyGuru.Mobile
     public class Auth : ClientBase
     {
 
-        private ILogger Logger;
+        public ILogger<Auth> _logger { get; set; }
 
-        public Auth(ILogger logger) : base("https://auth.propertyguru.com")
+        public Auth(ILogger<Auth> logger) : base("https://auth.propertyguru.com")
         {
-            Logger = logger;
+            _logger = logger;
         }
 
-        public async Task<Token> Login(AuthLogin authLogin)
+        public async Task<Token> LoginAsync(AuthLogin authLogin)
         {
             var request = GetRequest();
             request.Method = Method.Post;

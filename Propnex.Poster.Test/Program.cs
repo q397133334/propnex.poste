@@ -1,18 +1,69 @@
-﻿using Microsoft.Extensions.Logging;
-using Propnex.Poster.PropertyGuru;
+﻿using Propnex.Poster.PropertyGuru;
 using Propnex.Poster.PropertyGuru.Mobile;
 using Propnex.Poster.PropertyGuru.Mobile.Dto;
+using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Serilog;
-using Serilog.Extensions.Hosting;
+using Serilog.Events;
+using Volo.Abp;
 
 namespace Propnex.Poster.Test
 {
-    internal class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public async static Task<int> Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
-            // Auth auth = new Auth();
+            Log.Logger = new LoggerConfiguration()
+#if DEBUG
+            .MinimumLevel.Debug()
+#else
+            .MinimumLevel.Information()
+#endif
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            .Enrich.FromLogContext()
+            .WriteTo.File("Logs/logs.txt")
+            .WriteTo.Console()
+            .CreateLogger();
+
+            try
+            {
+                Log.Information("Starting console host.");
+
+                var builder = Host.CreateDefaultBuilder(args);
+
+                builder.ConfigureServices(services =>
+                {
+                    services.AddHostedService<TestHostedService>();
+                    services.AddApplicationAsync<TestModule>(options =>
+                    {
+                        options.Services.ReplaceConfiguration(services.GetConfiguration());
+                        options.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog());
+                    });
+                }).AddAppSettingsSecretsJson().UseAutofac().UseConsoleLifetime();
+
+                var host = builder.Build();
+                await host.Services.GetRequiredService<IAbpApplicationWithExternalServiceProvider>().InitializeAsync(host.Services);
+
+                await host.RunAsync();
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                if (ex is HostAbortedException)
+                {
+                    throw;
+                }
+
+                Log.Fatal(ex, "Host terminated unexpectedly!");
+                return 1;
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
 
         }
     }

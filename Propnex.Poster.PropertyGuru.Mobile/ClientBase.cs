@@ -25,6 +25,15 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             return request;
         }
 
+        public HttpResult<T> GetHttpResult<T>(RestResponse restResponse)
+        {
+            return new HttpResult<T>()
+            {
+                HttpStatusCode = restResponse.StatusCode,
+                Message = restResponse.Content
+            };
+        }
+
         public void Dispose()
         {
             client.Dispose();
