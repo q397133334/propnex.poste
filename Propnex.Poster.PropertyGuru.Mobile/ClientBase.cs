@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Propnex.Poster.PropertyGuru.Mobile.Dto;
 using RestSharp;
 
 namespace Propnex.Poster.PropertyGuru.Mobile

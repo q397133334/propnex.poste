@@ -81,8 +81,6 @@ namespace Propnex.Poster.Guru
                     {
                         try
                         {
-
-
                             Logger.Information($"start run task {taskDto.Number}");
                             for (int i = 0; i < guruTasks.Tasks.Count; i++)
                             {

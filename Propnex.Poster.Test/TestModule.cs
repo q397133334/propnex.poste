@@ -15,7 +15,7 @@ namespace Propnex.Poster.Test
 )]
     public class TestModule : Volo.Abp.Modularity.AbpModule
     {
-        public override Task OnApplicationInitializationAsync(ApplicationInitializationContext context)
+        public override async Task OnApplicationInitializationAsync(ApplicationInitializationContext context)
         {
             var logger = context.ServiceProvider.GetRequiredService<ILogger<TestModule>>();
             var configuration = context.ServiceProvider.GetRequiredService<IConfiguration>();
@@ -24,9 +24,7 @@ namespace Propnex.Poster.Test
             var hostEnvironment = context.ServiceProvider.GetRequiredService<IHostEnvironment>();
             logger.LogInformation($"EnvironmentName => {hostEnvironment.EnvironmentName}");
 
-       
-
-            return Task.CompletedTask;
+          
         }
 
         public override void ConfigureServices(ServiceConfigurationContext context)
@@ -34,6 +32,8 @@ namespace Propnex.Poster.Test
             //注册一个singleton实例
             context.Services.AddTransient<Auth>();
             context.Services.AddTransient<Mobile>();
+            context.Services.AddTransient<Api>();
+            context.Services.AddTransient<ProjectsApi>();
         }
     }
 }

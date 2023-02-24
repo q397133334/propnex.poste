@@ -59,6 +59,12 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 
     public class QueryListingManagement
     {
+
+        public QueryListingManagement(string agent)
+        {
+            Agent=agent;
+        }
+
         public string Locale { get; set; } = "en";
 
         public string Region { get; set; } = "sg";
