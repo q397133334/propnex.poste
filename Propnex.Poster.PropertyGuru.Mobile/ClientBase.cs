@@ -26,6 +26,16 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             return request;
         }
 
+        public RestRequest GetRequest(Method method, string resource)
+        {
+            RestRequest request = new RestRequest();
+            request.AddHeader("x-clientid", "L7C9YKV9-ESF3606Q-GHF9H1F5-8LJMKRO5");
+            request.AddHeader("x-clientsecret", "jjiF916yVwfCRQEJtS6loHVDZ16mWPWf");
+            request.Method = method;
+            request.Resource = resource;
+            return request;
+        }
+
         public HttpResult<T> GetHttpResult<T>(RestResponse restResponse)
         {
             return new HttpResult<T>()

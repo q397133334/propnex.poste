@@ -47,73 +47,41 @@ namespace Propnex.Poster.Test
         {
             _projectsApi.Token = new PropertyGuru.Mobile.Dto.Token()
             {
-                accessToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6Ikw3QzlZS1Y5LUVTRjM2MDZRLUdIRjlIMUY1LThMSk1LUk81IiwiY2xpZW50TmFtZSI6Im1vYmlsZS1pb3MiLCJyZWdpb24iOiJzZyIsInNjb3BlIjpbInNpbmdhcG9yZSJdLCJ1c2VybmFtZSI6InN1bml0YUBzZ2x1eHVyeWhvbWVzLmNvbS5zZyIsImFnZW50SWQiOjE1MzI4MiwidXNlcklkIjoxNTMyODIsImlkIjoiYjkxNGJkMWEtZmFkMS00Y2M4LTg5OTUtYWJkODVkNWJkOGVlIiwidW1zdGlkIjoiZDhkM2EyNDctYjEwZC00MWMwLWE1ZDgtMTE3YzIzMjU3MmFjIiwicm9sZXMiOlsiQUdFTlQiLCJVU0VSIl0sImdyYW50VHlwZSI6InBhc3N3b3JkIiwiaWF0IjoxNjc1ODQyNDIxLCJleHAiOjE2NzcxMzg0MjEsImlzcyI6ImF1dGhvcml6YXRpb24tc2VydmVyIn0.lLuo3a0oETdVaQRbtdwbkZZZhD4Tqkhm5-_GLTeSG427DBs0OygblPkg3ZWZk1YVysZHVG3Q5s45EtD-nzqkftSrY2sglAKtWWESXM_PNBypY-yg6pOWJJhWxznrNpVVJSris57CXMHRcQFPOFP2VjEyoYvhw11W3iz5Z-qGYsRzSrAZL0kCcihPu3gQ5W5mOCqcIaNOwCokIcH3cq1ScrjYX35EVKWRzy2i9p8Hi0HVT9CgHj9jY1seAUfi9A3aXBlmTXBvVVg2fYSh_ZhXXwg-SfGEvkFne_3oSTRl1SIzLVl35_iYSzvUkUdh7deteQLZgLYda3Ye67fiAHwbkrUxHLQEVVEAi_z1_ppvJfH6tOUL4ndu_CbzkeUP_4RMEAoI8QiFr1WCMX79Px3kRC6fNpPCS8ZPKDYGKENz5g2Xb_WeLVbJSD-RH5e3tjfk5ddFSSeTDlITJdtXRgKREq2KcHPZ72BQ0gzPAYWwbMHj1uKyxs0ppEMDDB9uAb4HkSWWsQQ1g9hupUWZVEIL2ZNQM44P4W6fFtsH2w6U3Sz--0UthHIzX-tWw0BUXYU3WFerYJKhoph44UjcKgGBR-FIaqGmJm6zRRSX2aAO_DjewNX1rIUPQrb9Vbtrex-SvkidU1TA7VLJ-m13neEjPIEJw07rt3gM0SrJwXQmBxo"
+                accessToken= "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6Ikw3QzlZS1Y5LUVTRjM2MDZRLUdIRjlIMUY1LThMSk1LUk81IiwiY2xpZW50TmFtZSI6Im1vYmlsZS1pb3MiLCJyZWdpb24iOiJzZyIsInNjb3BlIjpbInNpbmdhcG9yZSJdLCJ1c2VybmFtZSI6ImRhdmlkcHJvcGVydHlAcHJvcG5leC5jb20iLCJhZ2VudElkIjo4NTUwMCwidXNlcklkIjo4NTUwMCwiaWQiOiJkZmIxMWQ5Mi04NjhiLTRiZjMtYjg5My1jZTQ0YzQ5ZTkyNjMiLCJ1bXN0aWQiOiJhYjE5NDgwMC1kNzIzLTQxZDQtYmNkYy0zYWI1YTRhMzVlMGMiLCJyb2xlcyI6WyJBR0VOVCIsIlVTRVIiXSwiZ3JhbnRUeXBlIjoicGFzc3dvcmQiLCJpYXQiOjE2Nzc0NjEyMTIsImV4cCI6MTY3ODc1NzIxMiwiaXNzIjoiYXV0aG9yaXphdGlvbi1zZXJ2ZXIifQ.p_4c6ul7_iyckA_juGXO0EEZknSTTU57Wlq8THUXWUSXm6ke9m7DELuGIJj14gE-zPQa0FQ2yWTCzzNCf-VOeWZi8wZuq1KDMURE2kgaRPDn_fhu_Rt1L77S07GdOY0QELDCGplQzZ5CKSLE0iFbTmDjB5xCIJy0wQUjFfA0s0MAW3Ih9enM4HR153ubbPSUzJWFBiv2L1Lxh00G1cTFPFUUSNKIOJWtBJ_GRgRGyboto7nFVUU3_3jy0Tx4UmoVCprCtPqtLVwe3Nt4_0xtsD0ir2SFi-KHLvY2dN3dLkF_VdEe5P1eXzIEjAtTjUT31FpAK-Ms7aUTjn3SFC4oB-HWJCpO2BKm0SfM6M0ZWt1__cuJMQCquQoqfN5ACl71dAwW-2AQ4GT4NKeYi1RCg1uyTu06fCXTlegXrNzwefybvyEFco16LiF-sXuhJlc7c6jfMkD8B6OQ5IKNtS6XMrEfMre7ptS89rFhCfb1yKCRtt1YkpRAZS75phzfDCOxpUPowmbdPT6HB3zGT4aOxFaonwG92v3L9Ba9YfziQ1NgQPwKf5uoFAfRV7wFmCzOKEV2bAIgqC5EOLgXQGzyS53HVYbtc2DCCU8ADS2BEHHucutqjA-c51XznTwUscUJOFh4TpUPrO7rZUzaqqO0_INXm0URHvov0Sk9KAIKSiE"
             };
-            var context = await File.ReadAllTextAsync("E:\\885002.guru.tsk");
-            var lenght = context.IndexOf("Xpressor-Listing-File===");
-            var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
-            var guruTasks = new GuruTasks(context, taskContext);
-            foreach (var task in guruTasks.Tasks)
-            {
-                var token = await _auth.LoginAsync(new AuthLogin()
-                {
-                    UserName = task.Account,
-                    Password = task.Password
-                });
-                _api.Token = token;
-                _mobile.Token = token;
-                _projectsApi.Token = token;
-                if (task.TaskType.ToLower() == "post only")
-                {
-                    foreach (var listing in task.Listings.Listings)
-                    {
-                        //var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
-                        //1. 获取邮政编号
-                        var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
-                        var locale = locales.Data.FirstOrDefault();
-                        //2. 获取loca 信息
-                        var project = (await _projectsApi.GetProjectAsync(int.Parse(locale.ObjectId))).Data;
-                        //3. 组织 createlisting
-                        var createListing = new CreateListing()
-                        {
-                            StatusCode = "DRAFT",
-                            Property = new CreateProperty()
-                            {
-                                Id = project.property_id,
-                                Name = project.name,
-                                TenureCode = project.tenure_code,
-                                TypeGroup = project.property_type_group,
-                                TypeText = project.derived_info.property_type.property_sub_group.Name,
-                                DeveloperName = project.developer_name
-                            },
-                            Location = new CreateLocation()
-                            {
-                                Id = project.addresses[0].external_id,
-                                Name = project.name,
-                                Latitude = project.location.lat.ToString(),
-                                Longitude = project.location.lon.ToString(),
-                                PostalCode = project.postcode,
-                                HdbEstateCode = project.addresses[0].estate_code,
-                                StreetName1 = project.streetname,
-                                StreetNumber = project.streetnumber,
-                                Unit = listing.Listing.Location.unit
-                            },
-                            Agent = new CreateAgent()
-                            {
-                                Id = token.User.AgentId,
-                                Name = ""
-                            },
-                            TypeCode = listing.Listing.TypeCode,
-                            PropertyUnit = new CreatePropertyUnit()
-                            {
-                                Tenancy = new Tenancy() { value = listing.Listing.PropertyUnit.tenancy.value },
-
-                            }
-                        };
-                        //4. 发布
-                    }
-                }
-            }
+            _api.Token = _projectsApi.Token;
+            var listing = await _api.ListingsAsync(24233221, new QueryListing() { status_code= "DRAFT" });
+            await _api.CreateAsync(listing.Data);
+            //var context = await File.ReadAllTextAsync("E:\\885002.guru.tsk");
+            //var lenght = context.IndexOf("Xpressor-Listing-File===");
+            //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
+            //var guruTasks = new GuruTasks(context, taskContext);
+            //foreach (var task in guruTasks.Tasks)
+            //{
+            //    var token = await _auth.LoginAsync(new AuthLogin()
+            //    {
+            //        UserName = task.Account,
+            //        Password = task.Password
+            //    });
+            //    _api.Token = token;
+            //    _mobile.Token = token;
+            //    _projectsApi.Token = token;
+            //    if (task.TaskType.ToLower() == "post only")
+            //    {
+            //        foreach (var listing in task.Listings.Listings)
+            //        {
+            //            //var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
+            //            //1. 获取邮政编号
+            //            var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
+            //            var locale = locales.Data.FirstOrDefault();
+            //            //2. 获取loca 信息
+            //            var project = (await _projectsApi.GetProjectAsync(int.Parse(locale.ObjectId))).Data;
+            //            //3. 组织 createlisting
+            //            };
+            //            //4. 发布
+            //        }
+            //    }
+            //}
         }
 
         public async Task ApiTest()

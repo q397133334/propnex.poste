@@ -129,7 +129,7 @@
     <None Include="autocomplete.json" />
     <None Include="createlisting.json" />
     <None Include="packages.config" />
-    <None Include="project.json" />
+    <None Include="projects.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Propnex.Poster.PropertyGuru\Propnex.Poster.PropertyGuru.csproj">

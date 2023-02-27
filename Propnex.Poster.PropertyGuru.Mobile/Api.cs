@@ -69,26 +69,77 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             return GetHttpResult<List<QueryLocale>>(response);
         }
 
-        public async Task<HttpResult<CreateOrUpdateListingResult>> CreateAsync(CreateListing createListing)
+        public async Task<HttpResult<CreateOrUpdateListingResult>> CreateAsync(CreateOrUpdateListing createListing)
         {
             var request = GetRequest();
             request.Resource = "/v1/listings";
             request.Method = Method.Post;
             request.AddHeader(KnownHeaders.Authorization, $"Bearer {Token.accessToken}");
-            request.AddParameter("region", "sg");
-            request.AddJsonBody(createListing);
-
+            //request.AddParameter("region", "sg");
+            //request.AddJsonBody(createListing);
+            request.AddStringBody(Newtonsoft.Json.JsonConvert.SerializeObject(createListing), DataFormat.Json);
             var response = await client.ExecuteAsync(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 return new HttpResult<CreateOrUpdateListingResult>()
                 {
                     Data = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateOrUpdateListingResult>(response.Content),
-                    HttpStatusCode = System.Net.HttpStatusCode.OK                   
+                    HttpStatusCode = System.Net.HttpStatusCode.OK
                 };
             }
             return GetHttpResult<CreateOrUpdateListingResult>(response);
 
+        }
+
+        public async Task UploadPhotoAsync(string ownerId, string sortOrder, string filePath)
+        {
+            await UploadMediaAsync(ownerId, "UPHO", "IMAGE", sortOrder, filePath);
+        }
+        public async Task UploadVideosAsync(string ownerId, string sortOrder, string filePath)
+        {
+            await UploadMediaAsync(ownerId, "MOVIE", "UMOV", sortOrder, filePath);
+        }
+
+        public async Task UplaodVirtualTours(string ownerId, string sortOrder, string filePath)
+        {
+            await UploadMediaAsync(ownerId, "VTOUR", "UTOUR", sortOrder, filePath);
+        }
+
+        public async Task UploadFlooplan(string ownerId, string sortOrder, string filePath)
+        {
+            await UploadMediaAsync(ownerId, "IMAGE", "UFLOO", sortOrder, filePath);
+        }
+
+        private async Task<HttpResult<string>> UploadMediaAsync(
+            string ownerid,
+            string mediaClass,
+            string mediaType,
+            string sortOrder,
+            string filePath
+            )
+        {
+            var request = GetRequest(Method.Post, "/v0/media");
+            request.AddParameter("locale", "en");
+            request.AddParameter("ownerid", ownerid);
+            request.AddParameter("region", "");
+            request.AddParameter("mediaClass", mediaClass);
+            request.AddParameter("mediaType", mediaType);
+            request.AddParameter("userId", $"{Token.User.AgentId}");
+            request.AddParameter("source", "AgentNet-android");
+            request.AddParameter("sortOrder", sortOrder);
+            request.AddParameter("statusCode", "ACT");
+            request.AddFile($"medialFile_{mediaClass}_{mediaType}_{sortOrder}", filePath);
+
+            var response = await client.ExecuteAsync(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                return new HttpResult<string>()
+                {
+                    Data = response.Content,
+                    HttpStatusCode = System.Net.HttpStatusCode.OK
+                };
+            }
+            return GetHttpResult<string>(response);
         }
     }
 
