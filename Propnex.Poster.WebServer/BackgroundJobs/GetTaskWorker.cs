@@ -30,75 +30,8 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
             var _repositoryPntask = workerContext.ServiceProvider.GetService<IRepository<PnTask>>();
             IPnTaskLogRepository _pnTaskLogRepository = workerContext.ServiceProvider.GetService<IPnTaskLogRepository>();
 
-
             await getPnTasks(workerContext, WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks);
             await getPnTasks(workerContext, WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks + "?xweb=1");
-
-            //var pn = await (WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks).GetStringAsync();
-            //var list = pn.Split('\n');
-            //foreach (var item in list)
-            //{
-            //    var tsk = item.Split('\t');
-            //    if (tsk.Length == 2)
-            //    {
-            //        var waitTask = (await _repositoryPntask.GetQueryableAsync()).Where(q => q.Number == tsk[0] && q.ClientId == tsk[1]).OrderByDescending(q => q.CreationTime).FirstOrDefault();
-            //        if (waitTask == null)
-            //        {
-            //            waitTask = await _repositoryPntask.InsertAsync(new PnTask()
-            //            {
-            //                Number = tsk[0],
-            //                ClientId = tsk[1],
-            //                Status = TaskStatus.Wait
-            //            });
-            //            await _pnTaskLogRepository.InsertAsync(waitTask.Id, Guid.Empty, "Init Task", "");
-            //        }
-            //        else
-            //        {
-            //            if (waitTask.Status != TaskStatus.Wait)
-            //            {
-            //                if ((waitTask.LastModificationTime.HasValue && waitTask.LastModificationTime < DateTime.Now.AddDays(-1)) || waitTask.Status == TaskStatus.NotFind)
-            //                {
-            //                    waitTask.Status = TaskStatus.Wait;
-            //                    await _repositoryPntask.UpdateAsync(waitTask);
-            //                    await _pnTaskLogRepository.InsertAsync(waitTask.Id, Guid.Empty, "Reset Task", "");
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
-
-            //pn = await (WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks + "?xweb=1").GetStringAsync();
-            //list = pn.Split('\n');
-            //foreach (var item in list)
-            //{
-            //    var tsk = item.Split('\t');
-            //    if (tsk.Length == 2)
-            //    {
-            //        var waitTask = (await _repositoryPntask.GetQueryableAsync()).Where(q => q.Number == tsk[0] && q.ClientId == tsk[1]).OrderByDescending(q => q.CreationTime).FirstOrDefault();
-            //        if (waitTask == null)
-            //        {
-            //            waitTask = await _repositoryPntask.InsertAsync(new PnTask()
-            //            {
-            //                Number = tsk[0],
-            //                ClientId = tsk[1],
-            //                Status = TaskStatus.Wait
-            //            });
-            //            await _pnTaskLogRepository.InsertAsync(waitTask.Id, Guid.Empty, "Init Task", "");
-            //        }
-            //        else
-            //        {
-            //            if (waitTask.Status != TaskStatus.Wait)
-            //            {
-            //                if ((waitTask.LastModificationTime.HasValue && waitTask.LastModificationTime < DateTime.Now.AddDays(-1)) || waitTask.Status == TaskStatus.NotFind)
-            //                {
-            //                    waitTask.Status = TaskStatus.Wait;
-            //                    await _repositoryPntask.UpdateAsync(waitTask);
-            //                    await _pnTaskLogRepository.InsertAsync(waitTask.Id, Guid.Empty, "Reset Task", "");
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
         }
 
 
