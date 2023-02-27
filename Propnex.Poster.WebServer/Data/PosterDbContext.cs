@@ -22,6 +22,8 @@ public class PosterDbContext : AbpDbContext<PosterDbContext>
     public DbSet<PnTaskLog> PnTaskLogs { get; set; }
 
     public DbSet<Machine> Machines { get; set; }
+
+    public DbSet<PnUser> PnUsers { get; set; }
     public PosterDbContext(DbContextOptions<PosterDbContext> options)
         : base(options)
     {
@@ -66,6 +68,12 @@ public class PosterDbContext : AbpDbContext<PosterDbContext>
         builder.Entity<Machine>(b =>
         {
             b.ToTable(WebServerConsts.DbTablePrefix + "Machines");
+            b.ConfigureByConvention();
+        });
+
+        builder.Entity<PnUser>(b =>
+        {
+            b.ToTable(WebServerConsts.DbTablePrefix + "PnUsers");
             b.ConfigureByConvention();
         });
     }

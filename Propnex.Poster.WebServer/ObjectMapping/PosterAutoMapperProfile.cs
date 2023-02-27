@@ -10,5 +10,6 @@ public class PosterAutoMapperProfile : Profile
 
         CreateMap<Entities.PnTask, Dtos.PnTaskDto>();
         CreateMap<Dtos.CreateUpdatePnTaskDto, Entities.PnTask>();
+        CreateMap<Entities.PnUser,Dtos.PnUserDto>().ReverseMap();
     }
 }
