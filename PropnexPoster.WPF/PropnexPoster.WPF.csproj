@@ -49,6 +49,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Flurl.Http" Version="3.2.4" />
     <PackageReference Include="HandyControl" Version="3.4.0" />
     <PackageReference Include="HandyControl.Lang.en" Version="3.4.0" />
     <PackageReference Include="HandyControls.Lang.zh-CN" Version="3.4.4" />
@@ -62,8 +63,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Propnex.Poster.Dtos\Propnex.Poster.Dtos\Propnex.Poster.Dtos.csproj" />
     <ProjectReference Include="..\Propnex.Poster.PropertyGuru\Propnex.Poster.PropertyGuru.csproj" />
     <ProjectReference Include="..\Propnex.Poster.Share\Propnex.Poster.Share.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -7,7 +7,7 @@
         xmlns:hc="https://handyorg.github.io/handycontrol" 
         x:Class="PropnexPoster.WPF.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" Height="500" Width="800" Loaded="Window_Loaded">
+        Title="MainWindow" Height="500" Width="800" Loaded="Window_Loaded" Closing="Window_Closing">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"></ColumnDefinition>
@@ -20,8 +20,8 @@
                 <RowDefinition></RowDefinition>
             </Grid.RowDefinitions>
             <Canvas Grid.Row="0">
-                <Button Width="100" hc:IconElement.Geometry="{StaticResource SaveGeometry }" Canvas.Top="5" Canvas.Left="10">开始</Button>
-                <Button Width="100" hc:IconElement.Geometry="{StaticResource CloseGeometry}" Canvas.Top="5" Canvas.Right="10">停止</Button>
+                <Button x:Name="btnStart" Width="100" hc:IconElement.Geometry="{StaticResource SaveGeometry }" Canvas.Top="5" Canvas.Left="10" Click="btnStart_Click">开始</Button>
+                <Button x:Name="btnStop" Width="100" hc:IconElement.Geometry="{StaticResource CloseGeometry}" Canvas.Top="5" Canvas.Right="10" Click="btnStop_Click">停止</Button>
             </Canvas>
             <TextBox  Grid.Row="1" Style="{StaticResource TextBoxExtend}"
                          hc:TitleElement.TitleWidth="70" 
@@ -31,7 +31,13 @@
             <GroupBox Grid.Row="2" Style="{StaticResource BaseStyle}" Header="Run Info:"></GroupBox>
         </Grid>
         <GroupBox Style="{StaticResource BaseStyle}" Grid.Column="1" Header="Log">
-            <RichTextBox></RichTextBox>
+            <RichTextBox x:Name="logBox"  Style="{StaticResource BaseStyle}"
+                  AcceptsReturn="False"
+                  VerticalAlignment="Stretch"
+                  VerticalScrollBarVisibility="Visible" AutoWordSelection="False" IsReadOnly="True">
+                <FlowDocument Focusable="True" LineHeight="1">
+                </FlowDocument>
+            </RichTextBox>
         </GroupBox>
     </Grid>
 </Window>
