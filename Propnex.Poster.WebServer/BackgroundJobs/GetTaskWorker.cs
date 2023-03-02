@@ -24,9 +24,9 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
         [Volo.Abp.Uow.UnitOfWork(false)]
         protected async override Task DoWorkAsync(PeriodicBackgroundWorkerContext workerContext)
         {
-            //#if DEBUG
-            //            return;
-            //#endif
+#if DEBUG
+            return;
+#endif
             var _repositoryPntask = workerContext.ServiceProvider.GetService<IRepository<PnTask>>();
             IPnTaskLogRepository _pnTaskLogRepository = workerContext.ServiceProvider.GetService<IPnTaskLogRepository>();
 

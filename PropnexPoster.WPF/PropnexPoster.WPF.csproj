@@ -64,6 +64,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Propnex.Poster.Dtos\Propnex.Poster.Dtos\Propnex.Poster.Dtos.csproj" />
+    <ProjectReference Include="..\Propnex.Poster.PropertyGuru.Mobile\Propnex.Poster.PropertyGuru.Mobile.csproj" />
     <ProjectReference Include="..\Propnex.Poster.PropertyGuru\Propnex.Poster.PropertyGuru.csproj" />
     <ProjectReference Include="..\Propnex.Poster.Share\Propnex.Poster.Share.csproj" />
   </ItemGroup>

@@ -33,9 +33,6 @@ namespace Propnex.Poster.WebServer.Pages
                     System.IO.File.Delete(Path.Combine(_webHostEnvironment.WebRootPath, "usetaskxml", fileName));
                 }
             }
-
-
-
             return fileResult;
         }
     }

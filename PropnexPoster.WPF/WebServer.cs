@@ -58,6 +58,7 @@ namespace PropnexPoster.WPF
                 try
                 {
                     context = await action();
+                    break;
                 }
                 catch (Exception ex)
                 {
@@ -75,8 +76,8 @@ namespace PropnexPoster.WPF
                 count++;
                 try
                 {
-                    Console.WriteLine($"{action.ToString()}");
                     action();
+                    break;
                 }
                 catch (Exception ex)
                 {
@@ -143,6 +144,33 @@ namespace PropnexPoster.WPF
         {
             string url = $"{BaseUrl}/api/app/machine/{MachindNumber}/online";
             await url.PutAsync();
+        }
+
+        public static async Task<PnUserDto> GetUser(string account)
+        {
+            return await CallBack<PnUserDto>(async () =>
+            {
+                var userDto= await $"{BaseUrl}/api/app/pn-user/user?account={account}".GetJsonAsync<PnUserDto>();
+                if(userDto.Account!="")
+                    return userDto;
+                return null;
+            });
+        }
+
+        public static async Task PnUser(PnUserDto userDto)
+        {
+            await CallBack(async () =>
+            {
+                await $"{BaseUrl}/api/app/pn-user".PutJsonAsync(userDto);
+            });
+        }
+
+        public static async Task UpdatePnUserToken(PnUserDto userDto)
+        {
+            await CallBack(async () =>
+            {
+                await $"{BaseUrl}/api/app/pn-user/upate-token".PostJsonAsync(userDto);
+            });
         }
 
         public static async Task PingAsync()

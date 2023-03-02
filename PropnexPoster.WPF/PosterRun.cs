@@ -1,5 +1,8 @@
-﻿using Castle.Core.Configuration;
+﻿using Flurl.Http;
 using Propnex.Poster.Dtos;
+using Propnex.Poster.PropertyGuru.Listing;
+using Propnex.Poster.PropertyGuru.Mobile;
+using Propnex.Poster.PropertyGuru.Mobile.Dto;
 using Propnex.Poster.PropertyGuru.Tasks;
 using Serilog;
 using System;
@@ -8,7 +11,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace PropnexPoster.WPF
 {
@@ -33,8 +35,16 @@ namespace PropnexPoster.WPF
         {
             Log("Get Task .....");
             //1.获取任务信息
-            var task = await getGuruTasks();
-            if (task == null)
+            //var guruTasks = await getGuruTasks();
+            taskDto = new PnTaskDto()
+            {
+                Number = "885002.guru.tsk"
+            };
+            var context = await File.ReadAllTextAsync("E:\\885002.guru.tsk");
+            var lenght = context.IndexOf("Xpressor-Listing-File===");
+            var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
+            var guruTasks = new GuruTasks(context, taskContext);
+            if (guruTasks == null)
             {
                 Log("Not find task ,delay 1 min");
                 await Task.Delay(1000 * 60); return;
@@ -47,15 +57,121 @@ namespace PropnexPoster.WPF
             .WriteTo.File($"{Directory.GetDirectoryRoot(System.AppDomain.CurrentDomain.BaseDirectory)}\\logs\\task\\{taskDto.Number}.txt", rollingInterval: RollingInterval.Infinite)
             .CreateLogger();
             //4.处理任务
-            for (int i = 0; i < task.Tasks.Count; i++)
+            for (int i = 0; i < guruTasks.Tasks.Count; i++)
             {
                 //1.获取用户信息
-                //2.验证用户信息
+                var task = guruTasks.Tasks[i];
                 //3.登陆
+                Log("Get Token .......");
+                var token = await Login(task);
+                Log("Token success");
+
+                Log($"{task.TaskType.ToLower()}");
+
                 //4.执行操作
+                if (task.TaskType.ToLower() == "post only")
+                {
+                    var _api = new Api() { Token = token };
+                    var _projectsApi = new ProjectsApi() { Token = token };
+                    foreach (var listing in task.Listings.Listings)
+                    {
+                        //var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
+                        //1. 获取邮政编号
+                        //var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
+                        //var locale = locales.Data.FirstOrDefault();
+                        ////2. 获取loca 信息
+                        //var project = (await _projectsApi.GetProjectAsync(int.Parse(locale.ObjectId))).Data;
+                        //3. 组织 createlisting
+                        var createOrUpdateListing = new CreateOrUpdateListing();
+                        listing.Listing.Agent.id = token.User.AgentId;
+                        createOrUpdateListing.Create(listing.Listing);
+                        var result= await _api.CreateAsync(createOrUpdateListing);
+                        if(result.HttpStatusCode!=System.Net.HttpStatusCode.OK)
+                        {
+
+                        }
+                        else
+                        {
+
+                        }
+                    };
+                    //4. 发布
+                }
             }
             //5.
         }
+
+        private async Task<Propnex.Poster.PropertyGuru.Mobile.Dto.Token> Login(GuruTask guruTask)
+        {
+            var pnUser = await getUser();
+            var _Token = string.IsNullOrEmpty(pnUser.TokenJson) ? await auth() : await checkToken();
+
+
+            async Task<PnUserDto> getUser()
+            {
+                var pnUser = await WebServer.GetUser(guruTask.Account);
+                //2.验证用户信息
+                if (pnUser == null)
+                {
+                    pnUser = new PnUserDto();
+                    pnUser.Account = guruTask.Account;
+                    pnUser.Password = guruTask.Password;
+                    await WebServer.PnUser(pnUser);
+                    pnUser = await WebServer.GetUser(guruTask.Account);
+                }
+                return pnUser;
+            }
+
+            async Task<Propnex.Poster.PropertyGuru.Mobile.Dto.Token> auth()
+            {
+                var _auth = new Auth();
+                var loginResult = await _auth.LoginAsync(new AuthLogin()
+                {
+                    UserName = guruTask.Account,
+                    Password = guruTask.Password
+                });
+                if (loginResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    _Token = loginResult.Data;
+                    pnUser.TokenJson = Newtonsoft.Json.JsonConvert.SerializeObject(_Token);
+                    await WebServer.UpdatePnUserToken(pnUser);
+                    return loginResult.Data;
+                }
+                else
+                {
+                    //登陆失败
+                    return null;
+                }
+            }
+            async Task<Token> checkToken()
+            {
+                var token = Newtonsoft.Json.JsonConvert.DeserializeObject<Token>(pnUser.TokenJson);
+                if (DateTime.Parse(token.accessTokenExpiresAt).AddHours(-1) < DateTime.Now)
+                {
+                    return await auth();
+                }
+                listings = await getListing();
+                if (listings == null)
+                    return await auth();
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<Token>(pnUser.TokenJson);
+            }
+
+
+            async Task<List<ListingsListing>> getListing()
+            {
+                var token = Newtonsoft.Json.JsonConvert.DeserializeObject<Token>(pnUser.TokenJson);
+                var mobile = new Mobile() { Token = token };
+                var result = await mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
+                if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    return result.Data.listings;
+                }
+                return null;
+            }
+            return _Token;
+        }
+
+        private List<ListingsListing> listings = null;
 
         private async Task<GuruTasks> getGuruTasks()
         {
@@ -78,6 +194,195 @@ namespace PropnexPoster.WPF
             {
                 return null;
             }
+        }
+
+        private async Task ResultUpload(GuruTask guruTask, GuruTaskListing taskListing, string queue_id, string listing_id, string status = "Done", string memo = "")
+        {
+            _logger?.Information($"result upload queue_id is {queue_id},listing_id is {listing_id} ,status is {status},memo is {memo}");
+
+            if (guruTask.Source.ToLower() == "chope")
+            {
+                await chopeItem(guruTask, queue_id, listing_id, status, memo);
+            }
+            else
+            {
+                await xwebItem(guruTask,taskListing, 0, status, memo);
+            }
+        }
+
+        private async Task chopeItem(GuruTask guruTask, string queue_id, string listing_id, string status = "Done", string memo = "")
+        {
+            StringBuilder sbUrl = new StringBuilder("https://pa-production.propnex.net/index.php/pnapi/updateChopeTask?" +
+           "super=1&" +
+           $"queue_id={queue_id}&" +
+           $"portal_id={listing_id}&");
+            if (string.IsNullOrEmpty(listing_id) == false && status == "Done")
+            {
+                sbUrl.Append($"portal_link=https://www.propertyguru.com.sg/listing/{listing_id}&");
+            }
+            else
+            {
+                sbUrl.Append($"portal_link=&");
+            }
+            sbUrl.Append($"account_id={guruTask.AccountId}&portal=GURU&" +
+                $"action={guruTask.TaskType}&" +
+                $"status={status}&" +
+                $"tm={unix_timestamp(DateTime.Now)}&" +
+                $"memo={memo}");
+
+            for (int i = 0; i < 3; i++)
+            {
+                try
+                {
+                    var res = await sbUrl.ToString().GetStringAsync();
+                    //var res = webClient.DownloadString(sbUrl.ToString());
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    _logger?.Error(ex, $"upload result error {ex.Message}");
+                    await WebServer.PingAsync();
+                }
+            }
+
+        }
+
+        private async Task xwebItem(GuruTask guruTask, GuruTaskListing taskListing, int time_cost = 0, string status = "Done", string note = "")
+        {
+            var net = true;
+            for (int i = 0; i < 3; i++)
+            {
+                StringBuilder formData = new StringBuilder();
+                Dictionary<string, string> data = new Dictionary<string, string>();
+                formData.Append($"account_name={guruTask.Account}&");
+                data.Add("account_name", guruTask.Account);
+
+                formData.Append($"account_password={guruTask.Password}&");
+                data.Add("account_password", guruTask.Password);
+
+                formData.Append($"task_id={guruTask.Id}&");
+                data.Add("task_id", guruTask.Id);
+
+                formData.Append($"taskitem_id={taskListing.TaskItemId}&");
+                data.Add("taskitem_id", taskListing.TaskItemId);
+
+                formData.Append($"status={status}&");
+                data.Add("status", status);
+
+                formData.Append($"time_cost={time_cost}&");
+                data.Add("time_cost", time_cost.ToString());
+
+                formData.Append($"taskitem_note={note}&");
+                data.Add("taskitem_note", note);
+
+                if (taskListing.Listing.Id.HasValue && status == "Done")
+                {
+                    formData.Append($"portal_link=https://www.propertyguru.com.sg/listing/{taskListing.Listing.Id}&");
+                    data.Add("portal_link", $"https://www.propertyguru.com.sg/listing/{taskListing.Listing.Id}");
+                }
+                else
+                {
+                    formData.Append($"portal_link=&");
+                    data.Add("portal_link", "");
+                }
+                formData.Append($"listing_version={taskListing.UpdateTime}&");
+                data.Add("listing_version", taskListing.UpdateTime);
+
+                formData.Append("poster=mobileApi");
+                data.Add("poster", "mobileApi");
+                System.Net.Http.StringContent stringContent = new System.Net.Http.StringContent(formData.ToString());
+
+                //new
+                //{
+                //    account_name = guruTask.Account,
+                //    account_password = guruTask.Password,
+                //    task_id = guruTask.Id,
+                //    taskitem_id = taskListing.TaskItemId,
+                //    status = status,
+                //    time_cost = time_cost.ToString(),
+                //    taskitem_note = note,
+                //    portal_link = "",
+                //    listing_version = taskListing.UpdateTime,
+                //    poster = "cef"
+                //}
+
+                try
+                {
+                    var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus".PostUrlEncodedAsync(formData.ToString());
+                    var s = await result.GetStringAsync();
+                    net = false;
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    _logger?.Error(ex, $"upload result error {ex.Message}");
+                    await WebServer.PingAsync();
+                }
+            }
+        }
+
+        private async Task XwebEnd(GuruTask guruTask, string note = "")
+        {
+            if (guruTask.Source.ToLower() == "chope")
+                return;
+
+            StringBuilder formData = new StringBuilder();
+            formData.Append($"account_name={guruTask.Account}&");
+            formData.Append($"account_password={guruTask.Password}&");
+            formData.Append($"task_id={guruTask.Id}&");
+            formData.Append($"status=Done&");
+            formData.Append($"time_cost=&");
+            formData.Append($"note={note}&");
+            formData.Append("poster=selenium");
+
+            for (int i = 0; i < 3; i++)
+            {
+                try
+                {
+                    var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus".PostUrlEncodedAsync(formData.ToString());
+                    var s = await result.GetStringAsync();
+                    _logger.Information($"Xweb end success");
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    _logger?.Error(ex, $"Xweb end upload result error {ex.Message}");
+                    await WebServer.PingAsync();
+                }
+            }
+        }
+
+        private async Task End(GuruTask guruTask, string queue_id)
+        {
+            if (guruTask.Source.ToLower() == "chope")
+            {
+                string url = "https://pa-production.propnex.net/index.php/pnapi/updateChopeTask?" +
+    $"super=1&queue_id={queue_id}&portal=GURU&&memo=&tm={unix_timestamp(DateTime.Now)}";
+                for (int i = 0; i < 3; i++)
+                {
+                    using (var webClient = new System.Net.WebClient())
+                    {
+                        try
+                        {
+                            await url.GetStringAsync();
+                            _logger?.Information($"chope end success");
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger?.Error(ex, $"chope end upload result error {ex.Message}");
+                            await WebServer.PingAsync();
+                        }
+                    }
+                }
+
+            }
+        }
+
+        public long unix_timestamp(DateTime dt)
+        {
+            TimeSpan unix_time = (dt.Date - new DateTime(1970, 1, 1, 0, 0, 0));
+            return (long)unix_time.TotalSeconds;
         }
 
         private void Log(string message)

@@ -19,7 +19,12 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             _logger = logger;
         }
 
-        public async Task<Token> LoginAsync(AuthLogin authLogin)
+        public Auth() : base("https://auth.propertyguru.com")
+        {
+
+        }
+
+        public async Task<HttpResult<Token>> LoginAsync(AuthLogin authLogin)
         {
             var request = GetRequest();
             request.Method = Method.Post;
@@ -28,8 +33,19 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddParameter("password", authLogin.Password);
             request.AddParameter("grant_type", "password");
             request.AddParameter("scope", "singapore");
-            var token = await client.PostAsync<Token>(request);
-            return token;
+
+            var response = await client.PostAsync(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                return new HttpResult<Token>()
+                {
+                    Data = Newtonsoft.Json.JsonConvert.DeserializeObject<Token>(response.Content),
+                    HttpStatusCode = response.StatusCode
+                };
+            }
+            return GetHttpResult<Token>(response);
+
+
         }
     }
 
