@@ -38,16 +38,17 @@ namespace PropnexPoster.WPF
             //var guruTasks = await getGuruTasks();
             taskDto = new PnTaskDto()
             {
-                Number = "885002.guru.tsk"
+                Number = "888478.guru.tsk"
             };
-            var context = await File.ReadAllTextAsync("E:\\885002.guru.tsk");
+            var context = await File.ReadAllTextAsync("E:\\888478.guru.tsk");
             var lenght = context.IndexOf("Xpressor-Listing-File===");
             var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
             var guruTasks = new GuruTasks(context, taskContext);
             if (guruTasks == null)
             {
                 Log("Not find task ,delay 1 min");
-                await Task.Delay(1000 * 60); return;
+                await Task.Delay(1000 * 10); 
+                return;
             }
             TaskInfoEvent?.Invoke(taskDto.Number, "", "");
             Log($"Get Tas success,{taskDto.Number}");
@@ -86,19 +87,150 @@ namespace PropnexPoster.WPF
                         listing.Listing.Agent.id = token.User.AgentId;
                         createOrUpdateListing.Create(listing.Listing);
                         var result= await _api.CreateAsync(createOrUpdateListing);
-                        if(result.HttpStatusCode!=System.Net.HttpStatusCode.OK)
+                        if(result.HttpStatusCode==System.Net.HttpStatusCode.OK)
                         {
-
+                            listing.Listing.Id = result.Data.Id;
+                            if(result.Data.Id!=0)
+                            {
+                                await uploadPhotosAsync(listing, _api);
+                                await uploadVideos(listing, _api);
+                                await uploadVirtualTours(listing, _api);
+                                await uploadFloorPlanAsync(listing, _api);
+                            }
                         }
                         else
                         {
 
                         }
                     };
-                    //4. 发布
+                }
+
+                if (task.TaskType.ToLower() == "repost")
+                {
+
+                }
+
+                if (task.TaskType.ToLower() == "update")
+                {
+
+                }
+
+                //remove from portals
+                if (task.TaskType.ToLower() == "remove from portals")
+                {
+
+                }
+
+                if (task.TaskType.ToLower().IndexOf("retrieve") > -1)
+                {
+
                 }
             }
             //5.
+        }
+
+        private async Task uploadPhotosAsync(GuruTaskListing guruTaskListing, Api _api)
+        {
+            bool result = true;
+            var taskId = guruTaskListing.Id.ToString();
+            var path = checkFileDirectory(taskId);
+            for (int i = 0; i < guruTaskListing.Photos.Count; i++)
+            {
+                // max upload photos
+                if (i == 20)
+                    break;
+
+                var filePath = $"{path}{i}_image.jpg";
+                await guruTaskListing.Photos[i].DownloadFileAsync(path, $"{i}_image.jpg");
+
+                await _api.UploadPhotoAsync($"{guruTaskListing.Listing.Id}", $"{i+1}", filePath);
+            }
+        }
+
+        private async Task uploadVideos(GuruTaskListing guruTaskListing, Api _api)
+        {
+            bool result = true;
+            var taskId = guruTaskListing.Id.ToString();
+            var path = checkFileDirectory(taskId);
+            for (int i = 0; i < guruTaskListing.Videos.Count; i++)
+            {
+                // max upload photos
+                if (i == 20)
+                    break;
+
+                var url = guruTaskListing.Videos[i].ToLower();
+                var filePath = $"{path}{i}_move.jpg";
+                if (url.Contains("youtube") ||
+                    url.Contains("vimeo") ||
+                    url.Contains("dailymotion") ||
+                    url.Contains("<iframe")
+                    )
+                {
+                    filePath = guruTaskListing.Videos[i];
+                }
+                else
+                {
+                    await guruTaskListing.Videos[i].DownloadFileAsync(path, $"{i}_movie.jpg");
+                }
+                await _api.UploadVideosAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
+            }
+        }
+
+        private async Task uploadVirtualTours(GuruTaskListing guruTaskListing, Api _api)
+        {
+            bool result = true;
+            var taskId = guruTaskListing.Id.ToString();
+            var path = checkFileDirectory(taskId);
+            for (int i = 0; i < guruTaskListing.Tours.Count; i++)
+            {
+                // max upload photos
+                if (i == 20)
+                    break;
+
+                var url = guruTaskListing.Videos[i].ToLower();
+                var filePath = $"{path}{i}_vt.jpg";
+                if (url.Contains("youtube") ||
+                    url.Contains("vimeo") ||
+                    url.Contains("dailymotion") ||
+                    url.Contains("<iframe")
+                    )
+                {
+                    filePath = guruTaskListing.Tours[i];
+                }
+                else
+                {
+                    await guruTaskListing.Tours[i].DownloadFileAsync(path, $"{i}_movie.jpg");
+                }
+                await _api.UplaodVirtualTours($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
+            }
+        }
+
+        private async Task uploadFloorPlanAsync(GuruTaskListing guruTaskListing, Api _api)
+        {
+            bool result = true;
+            var taskId = guruTaskListing.Id.ToString();
+            var path = checkFileDirectory(taskId);
+            for (int i = 0; i < guruTaskListing.FloorPlan.Count; i++)
+            {
+                // max upload photos
+                if (i == 20)
+                    break;
+
+                var filePath = $"{path}{i}_fp.jpg";
+                await guruTaskListing.FloorPlan[i].DownloadFileAsync(path, $"{i}_fp.jpg");
+
+                await _api.UploadPhotoAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
+            }
+        }
+
+        private string checkFileDirectory(string taskId)
+        {
+            var path = $"{Directory.GetDirectoryRoot(AppDomain.CurrentDomain.BaseDirectory)}task\\{taskId}file\\";
+            if (System.IO.Directory.Exists(path) == false)
+            {
+                System.IO.Directory.CreateDirectory(path);
+            }
+            return path;
         }
 
         private async Task<Propnex.Poster.PropertyGuru.Mobile.Dto.Token> Login(GuruTask guruTask)
@@ -111,7 +243,7 @@ namespace PropnexPoster.WPF
             {
                 var pnUser = await WebServer.GetUser(guruTask.Account);
                 //2.验证用户信息
-                if (pnUser == null)
+                if (pnUser.Id == Guid.Empty)
                 {
                     pnUser = new PnUserDto();
                     pnUser.Account = guruTask.Account;
@@ -170,18 +302,17 @@ namespace PropnexPoster.WPF
             }
             return _Token;
         }
-
         private List<ListingsListing> listings = null;
 
         private async Task<GuruTasks> getGuruTasks()
         {
             string context = "";
-            //taskDto = await Api.WebServer.GetTask();
-            var taskDto = new PnTaskDto()
-            {
-                Id = Guid.Parse("3a096f11-6583-7283-5eea-693372dab84c"),
-                Number = "881997.guru.tsk"
-            };
+            taskDto = await WebServer.GetTask();
+            //var taskDto = new PnTaskDto()
+            //{
+            //    Id = Guid.Parse("3a096f11-6583-7283-5eea-693372dab84c"),
+            //    Number = "881997.guru.tsk"
+            //};
 
             if (taskDto != null)
             {

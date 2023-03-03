@@ -2,10 +2,13 @@
 using Propnex.Poster.PropertyGuru.Listing;
 using Propnex.Poster.PropertyGuru.Mobile.Dto;
 using RestSharp;
+using RestSharp.Authenticators;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -74,7 +77,8 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             var request = GetRequest();
             request.Resource = "/v1/listings";
             request.Method = Method.Post;
-            request.AddHeader(KnownHeaders.Authorization, $"Bearer {Token.accessToken}");
+            //request.AddHeader(KnownHeaders.Authorization, $"Bearer {Token.accessToken}");
+            request.Authenticator = new JwtAuthenticator(Token.accessToken);
             //request.AddParameter("region", "sg");
             //request.AddJsonBody(createListing);
             request.AddStringBody(Newtonsoft.Json.JsonConvert.SerializeObject(createListing), DataFormat.Json);
@@ -97,17 +101,17 @@ namespace Propnex.Poster.PropertyGuru.Mobile
         }
         public async Task UploadVideosAsync(string ownerId, string sortOrder, string filePath)
         {
-            await UploadMediaAsync(ownerId, "MOVIE", "UMOV", sortOrder, filePath);
+            await UploadMediaAsync(ownerId, "UMOV", "MOVIE", sortOrder, filePath);
         }
 
         public async Task UplaodVirtualTours(string ownerId, string sortOrder, string filePath)
         {
-            await UploadMediaAsync(ownerId, "VTOUR", "UTOUR", sortOrder, filePath);
+            await UploadMediaAsync(ownerId, "UTOUR", "VTOUR", sortOrder, filePath);
         }
 
         public async Task UploadFlooplan(string ownerId, string sortOrder, string filePath)
         {
-            await UploadMediaAsync(ownerId, "IMAGE", "UFLOO", sortOrder, filePath);
+            await UploadMediaAsync(ownerId, "UFLOO", "IMAGE", sortOrder, filePath);
         }
 
         private async Task<HttpResult<string>> UploadMediaAsync(
@@ -119,27 +123,49 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             )
         {
             var request = GetRequest(Method.Post, "/v0/media");
+            request.Authenticator = new JwtAuthenticator(Token.accessToken);
             request.AddParameter("locale", "en");
-            request.AddParameter("ownerid", ownerid);
-            request.AddParameter("region", "");
+            request.AddParameter("ownerId", ownerid);
+            request.AddParameter("region", "sg");
             request.AddParameter("mediaClass", mediaClass);
             request.AddParameter("mediaType", mediaType);
             request.AddParameter("userId", $"{Token.User.AgentId}");
             request.AddParameter("source", "AgentNet-android");
             request.AddParameter("sortOrder", sortOrder);
             request.AddParameter("statusCode", "ACT");
-            request.AddFile($"medialFile_{mediaClass}_{mediaType}_{sortOrder}", filePath);
-
-            var response = await client.ExecuteAsync(request);
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            if (filePath.Contains("youtube") ||
+            filePath.Contains("vimeo") ||
+                    filePath.Contains("dailymotion") ||
+                    filePath.Contains("<iframe")
+                    )
             {
-                return new HttpResult<string>()
-                {
-                    Data = response.Content,
-                    HttpStatusCode = System.Net.HttpStatusCode.OK
-                };
+                request.AddParameter("videoEmbedHtml", filePath);
+                request.AlwaysMultipartFormData = true;
             }
-            return GetHttpResult<string>(response);
+            else
+            {
+                var files = File.ReadAllBytes(filePath);
+                var fileName = Path.GetExtension(filePath);
+                request.AddFile("mediaFile", files, $"{Guid.NewGuid()}{filePath}");
+            }
+            try
+            {
+                var response = await client.ExecuteAsync(request);
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    return new HttpResult<string>()
+                    {
+                        Data = response.Content,
+                        HttpStatusCode = System.Net.HttpStatusCode.OK
+                    };
+                }
+                return GetHttpResult<string>(response);
+            }
+            catch(Exception ex)
+            {
+
+            }
+            return null;
         }
     }
 
