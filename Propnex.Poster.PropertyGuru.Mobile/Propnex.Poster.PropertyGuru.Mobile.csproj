@@ -115,6 +115,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdsProduct.cs" />
     <Compile Include="Api.cs" />
     <Compile Include="Auth.cs" />
     <Compile Include="Client.cs" />

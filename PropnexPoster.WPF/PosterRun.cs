@@ -38,16 +38,16 @@ namespace PropnexPoster.WPF
             //var guruTasks = await getGuruTasks();
             taskDto = new PnTaskDto()
             {
-                Number = "888478.guru.tsk"
+                Number = "889988.guru.tsk"
             };
-            var context = await File.ReadAllTextAsync("E:\\888478.guru.tsk");
+            var context = await File.ReadAllTextAsync("E:\\889988.guru.tsk");
             var lenght = context.IndexOf("Xpressor-Listing-File===");
             var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
             var guruTasks = new GuruTasks(context, taskContext);
             if (guruTasks == null)
             {
                 Log("Not find task ,delay 1 min");
-                await Task.Delay(1000 * 10); 
+                await Task.Delay(1000 * 10);
                 return;
             }
             TaskInfoEvent?.Invoke(taskDto.Number, "", "");
@@ -74,6 +74,7 @@ namespace PropnexPoster.WPF
                 {
                     var _api = new Api() { Token = token };
                     var _projectsApi = new ProjectsApi() { Token = token };
+                    var _adsProject = new AdsProduct(token);
                     foreach (var listing in task.Listings.Listings)
                     {
                         //var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
@@ -86,28 +87,47 @@ namespace PropnexPoster.WPF
                         var createOrUpdateListing = new CreateOrUpdateListing();
                         listing.Listing.Agent.id = token.User.AgentId;
                         createOrUpdateListing.Create(listing.Listing);
-                        var result= await _api.CreateAsync(createOrUpdateListing);
-                        if(result.HttpStatusCode==System.Net.HttpStatusCode.OK)
+                        var result = await _api.CreateAsync(createOrUpdateListing);
+                        result = new HttpResult<CreateOrUpdateListingResult>() { Data = new CreateOrUpdateListingResult { Id = 24371139 } };
+                        if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
                         {
                             listing.Listing.Id = result.Data.Id;
-                            if(result.Data.Id!=0)
+                            if (result.Data.Id != 0)
                             {
                                 await uploadPhotosAsync(listing, _api);
                                 await uploadVideos(listing, _api);
                                 await uploadVirtualTours(listing, _api);
                                 await uploadFloorPlanAsync(listing, _api);
                             }
+                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
                         }
                         else
                         {
 
                         }
-                    };
+                        await End(task, listing.TaskItemId);
+                    }
+                    await XwebEnd(task);
                 }
 
                 if (task.TaskType.ToLower() == "repost")
                 {
+                    foreach (var listing in task.Listings.Listings)
+                    {
+                        if(IsExtis(task,listing)!=null)
+                        {
+                            if(listing.FastRepost=="0")
+                            {
+                                //更新任务
 
+                            }
+                            //Repost
+                        }
+                        else
+                        {
+                            //Post Only
+                        }
+                    }
                 }
 
                 if (task.TaskType.ToLower() == "update")
@@ -128,6 +148,80 @@ namespace PropnexPoster.WPF
             }
             //5.
         }
+        private List<ListingInfo> ListingInfos = new List<ListingInfo>();
+
+        private ListingInfo IsExtis(GuruTask guruTask, GuruTaskListing guruTaskListing, bool isPostOnly = false)
+        {
+            ListingInfo listingInfo = null;
+            if (guruTaskListing.Listing.Id.HasValue)
+            {
+                listingInfo = ListingInfos.Where(q => q.Id == guruTaskListing.Listing.Id).FirstOrDefault();
+            }
+            if (isPostOnly)
+            {
+                return listingInfo;
+            }
+
+            if (listingInfo == null)
+            {
+                if (guruTask.Source.ToLower() == "chope")
+                {
+                    listingInfo = ListingInfos.Where(q => q.Sqft == guruTaskListing.Listing.Sizes.floorArea[0].text.Trim()
+                                                 && q.Title == guruTaskListing.Listing.Property.name && q.TypeCode == guruTaskListing.Listing.TypeCode
+                                                 && q.Prece == guruTaskListing.Listing.Price.value.ToString()
+                                                 //&& q.StreetName == guruTaskListing.Listing.Location.streetName1
+                                                 //&& q.StreetNumber == guruTaskListing.Listing.Location.streetNumber
+                                                 //&& q.PostCode == guruTaskListing.Listing.Location.postalCode
+                                                 ).FirstOrDefault();
+                    if (listingInfo == null)
+                    {
+                        if (guruTaskListing.Listing.TypeCode.ToUpper() == "ROOM")
+                        {
+                            listingInfo = ListingInfos.Where(q => q.Sqft == guruTaskListing.Listing.Sizes.floorArea[0].text.Trim()
+                                                    && q.Title == guruTaskListing.Listing.Property.name && q.TypeCode == "RENT"
+                                                    && q.Prece == guruTaskListing.Listing.Price.value.ToString()
+                                                    //&& q.StreetName == guruTaskListing.Listing.Location.streetName1
+                                                    //&& q.StreetNumber == guruTaskListing.Listing.Location.streetNumber
+                                                    //&& q.PostCode == guruTaskListing.Listing.Location.postalCode
+                                                    ).FirstOrDefault();
+                        }
+                    }
+                }
+                else
+                {
+                    listingInfo = ListingInfos.Where(q => q.Sqft == guruTaskListing.Listing.Sizes.floorArea[0].text.Trim()
+                                                 && q.Title == guruTaskListing.Listing.Property.name && q.TypeCode == guruTaskListing.Listing.TypeCode
+                                                 //&& q.StreetName == guruTaskListing.Listing.Location.streetName1
+                                                 //   && q.StreetNumber == guruTaskListing.Listing.Location.streetNumber
+                                                 //   && q.PostCode == guruTaskListing.Listing.Location.postalCode
+                                                 ).FirstOrDefault();
+                    if (listingInfo == null)
+                    {
+                        if (guruTaskListing.Listing.TypeCode.ToUpper() == "ROOM")
+                        {
+                            listingInfo = ListingInfos.Where(
+                                                    q => q.Sqft == guruTaskListing.Listing.Sizes.floorArea[0].text.Trim()
+                                                 && q.Title == guruTaskListing.Listing.Property.name && q.TypeCode == "RENT"
+                                                   //&& q.StreetName == guruTaskListing.Listing.Location.streetName1
+                                                   //   && q.StreetNumber == guruTaskListing.Listing.Location.streetNumber
+                                                   //   && q.PostCode == guruTaskListing.Listing.Location.postalCode
+                                                   ).FirstOrDefault();
+                        }
+                    }
+
+
+                }
+            }
+            if (listingInfo != null)
+            {
+                guruTaskListing.Listing.Id = listingInfo.Id;
+            }
+            if (listingInfo == null)
+            {
+                _logger.Information("not find listingInfo");
+            }
+            return listingInfo;
+        }
 
         private async Task uploadPhotosAsync(GuruTaskListing guruTaskListing, Api _api)
         {
@@ -143,7 +237,7 @@ namespace PropnexPoster.WPF
                 var filePath = $"{path}{i}_image.jpg";
                 await guruTaskListing.Photos[i].DownloadFileAsync(path, $"{i}_image.jpg");
 
-                await _api.UploadPhotoAsync($"{guruTaskListing.Listing.Id}", $"{i+1}", filePath);
+                await _api.UploadPhotoAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
             }
         }
 
@@ -159,7 +253,7 @@ namespace PropnexPoster.WPF
                     break;
 
                 var url = guruTaskListing.Videos[i].ToLower();
-                var filePath = $"{path}{i}_move.jpg";
+                var filePath = $"{path}{i}_movie.mp4";
                 if (url.Contains("youtube") ||
                     url.Contains("vimeo") ||
                     url.Contains("dailymotion") ||
@@ -170,7 +264,7 @@ namespace PropnexPoster.WPF
                 }
                 else
                 {
-                    await guruTaskListing.Videos[i].DownloadFileAsync(path, $"{i}_movie.jpg");
+                    await guruTaskListing.Videos[i].DownloadFileAsync(path, $"{i}_movie.mp4");
                 }
                 await _api.UploadVideosAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
             }
@@ -296,7 +390,43 @@ namespace PropnexPoster.WPF
                 var result = await mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
                 if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    return result.Data.listings;
+                    foreach (var item in result.Data.listings)
+                    {
+                        var info = new ListingInfo();
+                        info.Id = item.id.Value;
+                        info.Title = item.localizedTitle;
+                        info.Score = item.qualityScore.ToString();
+                        info.TypeCode = item.typeCode;
+                        info.StatusCode = item.statusCode;
+                        info.PropertyTypeCode = item.property.typeCode;
+                        info.Prece = item.price.value.ToString();
+                        info.StreetNumber = item.location.streetNumber;
+                        info.StreetName = item.location.streetName1;
+                        info.PostCode = item.location.postalCode;
+                        if (item.products != null && item.products.Count > 0)
+                        {
+                            info.IsBoosted = item.products[0].productType == "boost-v2";
+                        }
+                        //turbo
+                        if (item.products != null && item.products.Count > 0)
+                        {
+                            info.IsTurbo = item.products[0].productType == "turbo";
+                        }
+                        if (item.charges != null)
+                        {
+                            info.RepostCharge = item.charges.repost;
+                        }
+                        try
+                        {
+                            info.Sqft = Convert.ToInt32(item.sizes.floorArea[0].value).ToString();
+                        }
+                        catch
+                        {
+                            info.Sqft = Convert.ToInt32(item.sizes.landArea[0].value).ToString();
+                        }
+                        ListingInfos.Add(info);
+                        return result.Data.listings;
+                    }
                 }
                 return null;
             }
@@ -329,7 +459,7 @@ namespace PropnexPoster.WPF
 
         private async Task ResultUpload(GuruTask guruTask, GuruTaskListing taskListing, string queue_id, string listing_id, string status = "Done", string memo = "")
         {
-            _logger?.Information($"result upload queue_id is {queue_id},listing_id is {listing_id} ,status is {status},memo is {memo}");
+            Log($"result upload queue_id is {queue_id},listing_id is {listing_id} ,status is {status},memo is {memo}");
 
             if (guruTask.Source.ToLower() == "chope")
             {
@@ -337,7 +467,7 @@ namespace PropnexPoster.WPF
             }
             else
             {
-                await xwebItem(guruTask,taskListing, 0, status, memo);
+                await xwebItem(guruTask, taskListing, 0, status, memo);
             }
         }
 

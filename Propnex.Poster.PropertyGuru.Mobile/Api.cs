@@ -77,8 +77,8 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             var request = GetRequest();
             request.Resource = "/v1/listings";
             request.Method = Method.Post;
-            //request.AddHeader(KnownHeaders.Authorization, $"Bearer {Token.accessToken}");
-            request.Authenticator = new JwtAuthenticator(Token.accessToken);
+            request.AddHeader(KnownHeaders.Authorization, $"Bearer {Token.accessToken}");
+            //request.Authenticator = new JwtAuthenticator(Token.accessToken);
             //request.AddParameter("region", "sg");
             //request.AddJsonBody(createListing);
             request.AddStringBody(Newtonsoft.Json.JsonConvert.SerializeObject(createListing), DataFormat.Json);
