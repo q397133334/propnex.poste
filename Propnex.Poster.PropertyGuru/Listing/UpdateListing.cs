@@ -1110,7 +1110,7 @@ namespace Propnex.Poster.PropertyGuru.Listing
             }
             this.dates = listing.Dates;
             this.sizes = listing.Sizes;
-            this.agent = listing.Agent;
+            //this.agent = listing.Agent;
             this.descriptions = listing.Descriptions;
             this.leaseTermCode = listing.LeaseTermCode;
             headlines = listing.Headlines;

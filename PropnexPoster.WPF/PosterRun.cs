@@ -1,4 +1,5 @@
 ﻿using Flurl.Http;
+using Microsoft.Extensions.Logging;
 using Propnex.Poster.Dtos;
 using Propnex.Poster.PropertyGuru.Listing;
 using Propnex.Poster.PropertyGuru.Mobile;
@@ -11,10 +12,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ILogger = Serilog.ILogger;
 
 namespace PropnexPoster.WPF
 {
-    public class PosterRun
+    public class PosterRun : Volo.Abp.DependencyInjection.ITransientDependency
     {
 
         public Action<string>? MessageEvent { get; set; }
@@ -22,6 +24,8 @@ namespace PropnexPoster.WPF
         public Action<string, string, string> TaskInfoEvent { get; set; }
 
         private ILogger? _logger;
+
+        private readonly ILogger<PosterRun> globleLogger;
 
         private PnTaskDto taskDto;
 
@@ -35,15 +39,15 @@ namespace PropnexPoster.WPF
         {
             Log("Get Task .....");
             //1.获取任务信息
-            //var guruTasks = await getGuruTasks();
-            taskDto = new PnTaskDto()
-            {
-                Number = "889988.guru.tsk"
-            };
-            var context = await File.ReadAllTextAsync("E:\\889988.guru.tsk");
-            var lenght = context.IndexOf("Xpressor-Listing-File===");
-            var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
-            var guruTasks = new GuruTasks(context, taskContext);
+            var guruTasks = await getGuruTasks();
+            //taskDto = new PnTaskDto()
+            //{
+            //    Number = "890991.guru.tsk"
+            //};
+            //var context = await File.ReadAllTextAsync("D:\\外包项目\\新加坡\\propnex.poster\\Propnex.Poster.WebServer\\wwwroot\\taskxml\\890991.guru.tsk");
+            //var lenght = context.IndexOf("Xpressor-Listing-File===");
+            //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
+            //var guruTasks = new GuruTasks(context, taskContext);
             if (guruTasks == null)
             {
                 Log("Not find task ,delay 1 min");
@@ -65,16 +69,29 @@ namespace PropnexPoster.WPF
                 //3.登陆
                 Log("Get Token .......");
                 var token = await Login(task);
+                if (token == null)
+                {
+
+                    foreach (var listing in task.Listings.Listings)
+                    {
+                        await ResultUpload(task, listing, listing.TaskItemId, "", "Failed", "Login Faile ,Please check password");
+                        await End(task, listing.TaskItemId);
+                    }
+                    await XwebEnd(task);
+                    return;
+                }
                 Log("Token success");
 
                 Log($"{task.TaskType.ToLower()}");
 
+                var _api = new Api() { Token = token };
+                var _projectsApi = new ProjectsApi() { Token = token };
+                var _adsProject = new AdsProduct(token);
+                var _mobile = new Mobile(token);
                 //4.执行操作
                 if (task.TaskType.ToLower() == "post only")
                 {
-                    var _api = new Api() { Token = token };
-                    var _projectsApi = new ProjectsApi() { Token = token };
-                    var _adsProject = new AdsProduct(token);
+
                     foreach (var listing in task.Listings.Listings)
                     {
                         //var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
@@ -88,7 +105,7 @@ namespace PropnexPoster.WPF
                         listing.Listing.Agent.id = token.User.AgentId;
                         createOrUpdateListing.Create(listing.Listing);
                         var result = await _api.CreateAsync(createOrUpdateListing);
-                        result = new HttpResult<CreateOrUpdateListingResult>() { Data = new CreateOrUpdateListingResult { Id = 24371139 } };
+                        //result = new HttpResult<CreateOrUpdateListingResult>() { Data = new CreateOrUpdateListingResult { Id = 24371139 } };
                         if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
                         {
                             listing.Listing.Id = result.Data.Id;
@@ -98,12 +115,20 @@ namespace PropnexPoster.WPF
                                 await uploadVideos(listing, _api);
                                 await uploadVirtualTours(listing, _api);
                                 await uploadFloorPlanAsync(listing, _api);
+                                var activateResult = await _adsProject.Activate(result.Data.Id);
+                                if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                {
+                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                }
+                                else
+                                {
+                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Data);
+                                }
                             }
-                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
                         }
                         else
                         {
-
+                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
                         }
                         await End(task, listing.TaskItemId);
                     }
@@ -114,25 +139,80 @@ namespace PropnexPoster.WPF
                 {
                     foreach (var listing in task.Listings.Listings)
                     {
-                        if(IsExtis(task,listing)!=null)
+                        if (IsExtis(task, listing) != null)
                         {
-                            if(listing.FastRepost=="0")
+                            var listInfo = IsExtis(task, listing);
+                            var taskListing = await _api.GetListing(listing.Listing.Id.Value);
+                            if (listing.FastRepost == "0")
                             {
                                 //更新任务
 
+                                taskListing.Data.Update(listing.Listing);
+                                await _api.UpdateAsync(taskListing.Data);
+                                await _mobile.DeleteMediaAll(taskListing.Data);
+                                await uploadPhotosAsync(listing, _api);
+                                await uploadVideos(listing, _api);
+                                await uploadVirtualTours(listing, _api);
+                                await uploadFloorPlanAsync(listing, _api);
                             }
                             //Repost
+                            await _adsProject.Repost(taskListing.Data.id.Value, listInfo.RepostCharge);
                         }
                         else
                         {
                             //Post Only
+                            var createOrUpdateListing = new CreateOrUpdateListing();
+                            listing.Listing.Agent.id = token.User.AgentId;
+                            createOrUpdateListing.Create(listing.Listing);
+                            var result = await _api.CreateAsync(createOrUpdateListing);
+                            //result = new HttpResult<CreateOrUpdateListingResult>() { Data = new CreateOrUpdateListingResult { Id = 24371139 } };
+                            if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                            {
+                                listing.Listing.Id = result.Data.Id;
+                                if (result.Data.Id != 0)
+                                {
+                                    await uploadPhotosAsync(listing, _api);
+                                    await uploadVideos(listing, _api);
+                                    await uploadVirtualTours(listing, _api);
+                                    await uploadFloorPlanAsync(listing, _api);
+                                    await _adsProject.Activate(result.Data.Id);
+                                }
+                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                            }
+                            else
+                            {
+
+                            }
                         }
+                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                        await End(task, listing.TaskItemId);
                     }
+                    await XwebEnd(task);
                 }
 
                 if (task.TaskType.ToLower() == "update")
                 {
+                    foreach (var listing in task.Listings.Listings)
+                    {
+                        if (IsExtis(task, listing) != null)
+                        {
 
+                            var taskListing = await _api.GetListing(listing.Listing.Id.Value);
+                            //更新任务
+
+                            taskListing.Data.Update(listing.Listing);
+                            await _api.UpdateAsync(taskListing.Data);
+                            await _mobile.DeleteMediaAll(taskListing.Data);
+                            await _mobile.DeleteMediaAll(taskListing.Data);
+                            await uploadPhotosAsync(listing, _api);
+                            await uploadVideos(listing, _api);
+                            await uploadVirtualTours(listing, _api);
+                            await uploadFloorPlanAsync(listing, _api);
+                        }
+                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                        await End(task, listing.TaskItemId);
+                    }
+                    await XwebEnd(task);
                 }
 
                 //remove from portals
@@ -155,7 +235,7 @@ namespace PropnexPoster.WPF
             ListingInfo listingInfo = null;
             if (guruTaskListing.Listing.Id.HasValue)
             {
-                listingInfo = ListingInfos.Where(q => q.Id == guruTaskListing.Listing.Id).FirstOrDefault();
+                listingInfo = ListingInfos.FirstOrDefault(q => q.Id == guruTaskListing.Listing.Id);
             }
             if (isPostOnly)
             {
@@ -331,7 +411,9 @@ namespace PropnexPoster.WPF
         {
             var pnUser = await getUser();
             var _Token = string.IsNullOrEmpty(pnUser.TokenJson) ? await auth() : await checkToken();
-
+            if (_Token == null)
+                return null;
+            await getListing();
 
             async Task<PnUserDto> getUser()
             {
@@ -425,8 +507,8 @@ namespace PropnexPoster.WPF
                             info.Sqft = Convert.ToInt32(item.sizes.landArea[0].value).ToString();
                         }
                         ListingInfos.Add(info);
-                        return result.Data.listings;
                     }
+                    return result.Data.listings;
                 }
                 return null;
             }

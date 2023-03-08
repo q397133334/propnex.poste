@@ -1,6 +1,7 @@
 ﻿using Propnex.Poster.PropertyGuru.Listing;
 using Propnex.Poster.PropertyGuru.Mobile.Dto;
 using RestSharp;
+using RestSharp.Authenticators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,6 +55,40 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             }
 
             return GetHttpResult<ListingsResult>(response);
+        }
+    
+
+        public async Task DeleteMediaAll(CreateOrUpdateListing listing)
+        {
+            foreach(var item in listing.media.listing)
+            {
+                await DeleteMedia(item.id.Value);
+            }
+            if (listing.media != null && listing.media.listingVideos != null)
+            {
+                for (var i = 0; i < listing.media.listingVideos.Count; i++)
+                {
+                    var item = listing.media.listingVideos[i];
+                    await DeleteMedia(item.id.Value);
+                }
+            }
+            if (listing.media != null && listing.media.listingVirtualTours != null)
+            {
+                for (var i = 0; i < listing.media.listingVirtualTours.Count; i++)
+                {
+                    var item = listing.media.listingVirtualTours[i];
+                    await DeleteMedia(item.id.Value);
+                }
+            }
+
+        }
+        public async Task DeleteMedia(int mediaId)
+        {
+            var request = GetRequest();
+            request.Method=Method.Delete;
+            request.Resource = $"/v1/media?region=sg&mediaId={mediaId}";
+            request.Authenticator = new JwtAuthenticator(Token.accessToken);
+            var response = await client.ExecuteAsync(request);
         }
     }
 

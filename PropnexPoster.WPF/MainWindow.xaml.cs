@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,8 +14,11 @@ namespace PropnexPoster.WPF
     /// </summary>
     public partial class MainWindow : Window
     {
+        private IServiceProvider _serviceProvider;
+
         public MainWindow(IServiceProvider serviceProvider ,IConfiguration  configuration)
         {
+            _serviceProvider=serviceProvider;
             InitializeComponent();
         }
 
@@ -46,7 +50,7 @@ namespace PropnexPoster.WPF
             while (IsStart)
             {
                 IsRun = true;
-                var run = new PosterRun();
+                var run = _serviceProvider.GetService<PosterRun>();//  new PosterRun();
                 run.MessageEvent = Log;
                 run.Run().Wait();
                 IsRun = false;

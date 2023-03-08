@@ -92,7 +92,47 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 };
             }
             return GetHttpResult<CreateOrUpdateListingResult>(response);
+        }
 
+        public async Task<HttpResult<CreateOrUpdateListing>> GetListing(int listingId)
+        {
+            var request = GetRequest();
+            request.Resource = $"/v1/listings/{listingId}";
+            request.Method = Method.Get;
+            request.Authenticator = new JwtAuthenticator(Token.accessToken);
+            request.AddParameter("locale", "en");
+            request.AddParameter("region", "sg");
+            request.AddParameter("include_suspended_photos", "true");
+            request.AddParameter("status_code", "ACT");
+            var response = await client.ExecuteAsync(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                return new HttpResult<CreateOrUpdateListing>()
+                {
+                    Data = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateOrUpdateListing>(response.Content),
+                    HttpStatusCode = System.Net.HttpStatusCode.OK
+                };
+            }
+            return GetHttpResult<CreateOrUpdateListing>(response);
+        }
+
+        public async Task<HttpResult<CreateOrUpdateListingResult>> UpdateAsync(CreateOrUpdateListing createListing)
+        {
+            var request = GetRequest();
+            request.Resource = $"/v1/listings/{createListing.id}?region=sg";
+            request.Method = Method.Put;
+            request.Authenticator = new JwtAuthenticator(Token.accessToken);
+            request.AddStringBody(Newtonsoft.Json.JsonConvert.SerializeObject(createListing), DataFormat.Json);
+            var response = await client.ExecuteAsync(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                return new HttpResult<CreateOrUpdateListingResult>()
+                {
+                    Data = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateOrUpdateListingResult>(response.Content),
+                    HttpStatusCode = System.Net.HttpStatusCode.OK
+                };
+            }
+            return GetHttpResult<CreateOrUpdateListingResult>(response);
         }
 
         public async Task UploadPhotoAsync(string ownerId, string sortOrder, string filePath)
@@ -161,7 +201,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 }
                 return GetHttpResult<string>(response);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
             }
