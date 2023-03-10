@@ -188,7 +188,6 @@ namespace PropnexPoster.WPF
             }
             while (reply == null || reply.Status != IPStatus.Success)
             {
-                Console.WriteLine("Ping" + reply.Status);
                 await Task.Delay(1000 * 60);
                 try
                 {

@@ -1,4 +1,5 @@
-﻿using Propnex.Poster.PropertyGuru.Listing;
+﻿using Microsoft.Extensions.Logging;
+using Propnex.Poster.PropertyGuru.Listing;
 using Propnex.Poster.PropertyGuru.Mobile.Dto;
 using RestSharp;
 using RestSharp.Authenticators;
@@ -57,6 +58,26 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             return GetHttpResult<ListingsResult>(response);
         }
     
+        public async Task<HttpResult<string>> DeleteListing(List<int> ids)
+        {
+            var request = GetRequest();
+            request.Method = Method.Post;
+            request.Resource = "/v1/listingManagement/delist?region=sg";
+            request.Authenticator = new JwtAuthenticator(Token.accessToken);
+            request.AddJsonBody(new
+            {
+                listingIds = ids,
+                agentId=Token.User.AgentId,
+                statusCode="DEL",
+                origin= "mobile-android-bulk"
+            }) ;
+            var reponse=await client.ExecuteAsync(request);
+            if(reponse.StatusCode==System.Net.HttpStatusCode.OK)
+            {
+                return new HttpResult<string>() { };
+            }
+            return GetHttpResult<string>(reponse);
+        }
 
         public async Task DeleteMediaAll(CreateOrUpdateListing listing)
         {

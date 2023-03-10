@@ -174,9 +174,10 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddParameter("sortOrder", sortOrder);
             request.AddParameter("statusCode", "ACT");
             if (filePath.Contains("youtube") ||
-            filePath.Contains("vimeo") ||
+                filePath.Contains("vimeo") ||
                     filePath.Contains("dailymotion") ||
-                    filePath.Contains("<iframe")
+                    filePath.Contains("<iframe") ||
+                    filePath.Contains("havelock2")
                     )
             {
                 request.AddParameter("videoEmbedHtml", filePath);
@@ -184,6 +185,10 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             }
             else
             {
+                if (filePath == "")
+                {
+                    return new HttpResult<string>() { };
+                }
                 var files = File.ReadAllBytes(filePath);
                 var fileName = Path.GetExtension(filePath);
                 request.AddFile("mediaFile", files, $"{Guid.NewGuid()}{filePath}");

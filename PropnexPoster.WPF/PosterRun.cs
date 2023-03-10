@@ -42,9 +42,9 @@ namespace PropnexPoster.WPF
             var guruTasks = await getGuruTasks();
             //taskDto = new PnTaskDto()
             //{
-            //    Number = "890849.guru.tsk"
+            //    Number = "cp1678427027131.guru.tsk"
             //};
-            //var context = await File.ReadAllTextAsync("D:\\外包项目\\新加坡\\propnex.poster\\Propnex.Poster.WebServer\\wwwroot\\taskxml\\890849.guru.tsk");
+            //var context = await File.ReadAllTextAsync("D:\\外包项目\\新加坡\\propnex.poster\\Propnex.Poster.WebServer\\wwwroot\\taskxml\\cp1678427027131.guru.tsk");
             //var lenght = context.IndexOf("Xpressor-Listing-File===");
             //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
             //var guruTasks = new GuruTasks(context, taskContext);
@@ -67,140 +67,45 @@ namespace PropnexPoster.WPF
                 //4.处理任务
                 for (int i = 0; i < guruTasks.Tasks.Count; i++)
                 {
-                    //1.获取用户信息
-                    var task = guruTasks.Tasks[i];
-                    //3.登陆
-                    Log("Get Token .......");
-                    var token = await Login(task);
-                    if (token == null)
+                    try
                     {
-
-                        foreach (var listing in task.Listings.Listings)
+                        //1.获取用户信息
+                        var task = guruTasks.Tasks[i];
+                        //3.登陆
+                        Log("Get Token .......");
+                        var token = await Login(task);
+                        if (token == null)
                         {
-                            await ResultUpload(task, listing, listing.TaskItemId, "", "Failed", "Login Faile ,Please check password");
-                            await End(task, listing.TaskItemId);
+
+                            foreach (var listing in task.Listings.Listings)
+                            {
+                                await ResultUpload(task, listing, listing.TaskItemId, "", "Failed", "Login Faile ,Please check password or account info");
+                                await End(task, listing.TaskItemId);
+                            }
+                            await XwebEnd(task);
+                            return;
                         }
-                        await XwebEnd(task);
-                        return;
-                    }
-                    Log("Token success");
+                        Log("Token success");
 
-                    Log($"{task.TaskType.ToLower()}");
+                        Log($"{task.TaskType.ToLower()}");
 
-                    var _api = new Api() { Token = token };
-                    var _projectsApi = new ProjectsApi() { Token = token };
-                    var _adsProject = new AdsProduct(token);
-                    var _mobile = new Mobile(token);
-                    //4.执行操作
-                    if (task.TaskType.ToLower() == "post only")
-                    {
-
-                        foreach (var listing in task.Listings.Listings)
+                        var _api = new Api() { Token = token };
+                        var _projectsApi = new ProjectsApi() { Token = token };
+                        var _adsProject = new AdsProduct(token);
+                        var _mobile = new Mobile(token);
+                        //4.执行操作
+                        if (task.TaskType.ToLower() == "post only")
                         {
-                            //var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
-                            //1. 获取邮政编号
-                            //var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
-                            //var locale = locales.Data.FirstOrDefault();
-                            ////2. 获取loca 信息
-                            //var project = (await _projectsApi.GetProjectAsync(int.Parse(locale.ObjectId))).Data;
-                            //3. 组织 createlisting
-                            var createOrUpdateListing = new CreateOrUpdateListing();
-                            listing.Listing.Agent.id = token.User.AgentId;
-                            createOrUpdateListing.Create(listing.Listing);
-                            var result = await _api.CreateAsync(createOrUpdateListing);
-                            //result = new HttpResult<CreateOrUpdateListingResult>() { Data = new CreateOrUpdateListingResult { Id = 24371139 } };
-                            if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
+
+                            foreach (var listing in task.Listings.Listings)
                             {
-                                listing.Listing.Id = result.Data.Id;
-                                if (result.Data.Id != 0)
-                                {
-                                    await uploadPhotosAsync(listing, _api);
-                                    await uploadVideos(listing, _api);
-                                    await uploadVirtualTours(listing, _api);
-                                    await uploadFloorPlanAsync(listing, _api);
-                                    var activateResult = await _adsProject.Activate(result.Data.Id);
-                                    if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                    {
-                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-                                    }
-                                    else
-                                    {
-
-                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Data);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if(result.Message.Contains("Postal code is already being used"))
-                                {
-                                    var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
-                                    //1.获取邮政编号
-                                    var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
-                                    var locale = locales.Data.FirstOrDefault();
-                                    //2. 获取loca 信息
-                                    var project = (await _projectsApi.GetProjectAsync(int.Parse(locale.ObjectId))).Data;
-                                    if (project != null && project.addresses != null && project.addresses.Count > 0)
-                                    {
-                                        createOrUpdateListing.location.id = int.Parse(project.addresses[0].external_id);
-                                        result = await _api.CreateAsync(createOrUpdateListing);
-                                        if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                        {
-                                            listing.Listing.Id = result.Data.Id;
-                                            if (result.Data.Id != 0)
-                                            {
-                                                await uploadPhotosAsync(listing, _api);
-                                                await uploadVideos(listing, _api);
-                                                await uploadVirtualTours(listing, _api);
-                                                await uploadFloorPlanAsync(listing, _api);
-                                                var activateResult = await _adsProject.Activate(result.Data.Id);
-                                                if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                                {
-                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-                                                }
-                                                else
-                                                {
-
-                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Data);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
-                            }
-                            await End(task, listing.TaskItemId);
-                        }
-                        await XwebEnd(task);
-                    }
-
-                    if (task.TaskType.ToLower() == "repost")
-                    {
-                        foreach (var listing in task.Listings.Listings)
-                        {
-                            if (IsExtis(task, listing) != null)
-                            {
-                                var listInfo = IsExtis(task, listing);
-                                var taskListing = await _api.GetListing(listing.Listing.Id.Value);
-                                if (listing.FastRepost == "0")
-                                {
-                                    //更新任务
-
-                                    taskListing.Data.Update(listing.Listing);
-                                    await _api.UpdateAsync(taskListing.Data);
-                                    await _mobile.DeleteMediaAll(taskListing.Data);
-                                    await uploadPhotosAsync(listing, _api);
-                                    await uploadVideos(listing, _api);
-                                    await uploadVirtualTours(listing, _api);
-                                    await uploadFloorPlanAsync(listing, _api);
-                                }
-                                //Repost
-                                await _adsProject.Repost(taskListing.Data.id.Value, listInfo.RepostCharge);
-                            }
-                            else
-                            {
-                                //Post Only
+                                //var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
+                                //1. 获取邮政编号
+                                //var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
+                                //var locale = locales.Data.FirstOrDefault();
+                                ////2. 获取loca 信息
+                                //var project = (await _projectsApi.GetProjectAsync(int.Parse(locale.ObjectId))).Data;
+                                //3. 组织 createlisting
                                 var createOrUpdateListing = new CreateOrUpdateListing();
                                 listing.Listing.Agent.id = token.User.AgentId;
                                 createOrUpdateListing.Create(listing.Listing);
@@ -215,74 +120,182 @@ namespace PropnexPoster.WPF
                                         await uploadVideos(listing, _api);
                                         await uploadVirtualTours(listing, _api);
                                         await uploadFloorPlanAsync(listing, _api);
-                                        await _adsProject.Activate(result.Data.Id);
+                                        var activateResult = await _adsProject.Activate(result.Data.Id);
+                                        if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                        {
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                        }
+                                        else
+                                        {
+
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Data);
+                                        }
                                     }
+                                }
+                                else
+                                {
+                                    if (result.Message.Contains("Postal code is already being used"))
+                                    {
+                                        var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
+                                        //1.获取邮政编号
+                                        var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
+                                        var locale = locales.Data.FirstOrDefault();
+                                        //2. 获取loca 信息
+                                        var project = (await _projectsApi.GetProjectAsync(int.Parse(locale.ObjectId))).Data;
+                                        if (project != null && project.addresses != null && project.addresses.Count > 0)
+                                        {
+                                            createOrUpdateListing.location.id = int.Parse(project.addresses[0].external_id);
+                                            result = await _api.CreateAsync(createOrUpdateListing);
+                                            if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                            {
+                                                listing.Listing.Id = result.Data.Id;
+                                                if (result.Data.Id != 0)
+                                                {
+                                                    await uploadPhotosAsync(listing, _api);
+                                                    await uploadVideos(listing, _api);
+                                                    await uploadVirtualTours(listing, _api);
+                                                    await uploadFloorPlanAsync(listing, _api);
+                                                    var activateResult = await _adsProject.Activate(result.Data.Id);
+                                                    if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                                    {
+                                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                                    }
+                                                    else
+                                                    {
+
+                                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Data);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                }
+                                await End(task, listing.TaskItemId);
+                            }
+                            await XwebEnd(task);
+                        }
+
+                        if (task.TaskType.ToLower() == "repost")
+                        {
+                            foreach (var listing in task.Listings.Listings)
+                            {
+                                if (IsExtis(task, listing) != null)
+                                {
+                                    var listInfo = IsExtis(task, listing);
+                                    var taskListing = await _api.GetListing(listing.Listing.Id.Value);
+                                    if (listing.FastRepost == "0")
+                                    {
+                                        //更新任务
+
+                                        taskListing.Data.Update(listing.Listing);
+                                        await _api.UpdateAsync(taskListing.Data);
+                                        await _mobile.DeleteMediaAll(taskListing.Data);
+                                        await uploadPhotosAsync(listing, _api);
+                                        await uploadVideos(listing, _api);
+                                        await uploadVirtualTours(listing, _api);
+                                        await uploadFloorPlanAsync(listing, _api);
+                                    }
+                                    //Repost
+                                    await _adsProject.Repost(taskListing.Data.id.Value, listInfo.RepostCharge);
+                                }
+                                else
+                                {
+                                    //Post Only
+                                    var createOrUpdateListing = new CreateOrUpdateListing();
+                                    listing.Listing.Agent.id = token.User.AgentId;
+                                    createOrUpdateListing.Create(listing.Listing);
+                                    var result = await _api.CreateAsync(createOrUpdateListing);
+                                    //result = new HttpResult<CreateOrUpdateListingResult>() { Data = new CreateOrUpdateListingResult { Id = 24371139 } };
+                                    if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                    {
+                                        listing.Listing.Id = result.Data.Id;
+                                        if (result.Data.Id != 0)
+                                        {
+                                            await uploadPhotosAsync(listing, _api);
+                                            await uploadVideos(listing, _api);
+                                            await uploadVirtualTours(listing, _api);
+                                            await uploadFloorPlanAsync(listing, _api);
+                                            await _adsProject.Activate(result.Data.Id);
+                                        }
+                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                    }
+                                    else
+                                    {
+                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
+                                    }
+                                }
+                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                await End(task, listing.TaskItemId);
+                            }
+                            await XwebEnd(task);
+                        }
+
+                        if (task.TaskType.ToLower() == "update")
+                        {
+                            foreach (var listing in task.Listings.Listings)
+                            {
+                                if (IsExtis(task, listing) != null)
+                                {
+
+                                    var taskListing = await _api.GetListing(listing.Listing.Id.Value);
+                                    //更新任务
+
+                                    taskListing.Data.Update(listing.Listing);
+                                    await _api.UpdateAsync(taskListing.Data);
+                                    await _mobile.DeleteMediaAll(taskListing.Data);
+                                    await _mobile.DeleteMediaAll(taskListing.Data);
+                                    await uploadPhotosAsync(listing, _api);
+                                    await uploadVideos(listing, _api);
+                                    await uploadVirtualTours(listing, _api);
+                                    await uploadFloorPlanAsync(listing, _api);
+                                }
+                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                await End(task, listing.TaskItemId);
+                            }
+                            await XwebEnd(task);
+                        }
+
+                        //remove from portals
+                        if (task.TaskType.ToLower() == "remove from portals")
+                        {
+                            foreach (var listing in task.Listings.Listings)
+                            {
+                                if (IsExtis(task, listing) != null)
+                                {
+                                    var listingInfo = IsExtis(task, listing);
+                                    var ids = new List<int>();
+                                    ids.Add(listingInfo.Id);
+                                    await _mobile.DeleteListing(ids);
                                     await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
                                 }
                                 else
                                 {
-                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
+                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "Not find listing ");
                                 }
+                                await End(task, listing.TaskItemId);
                             }
-                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-                            await End(task, listing.TaskItemId);
+                            await XwebEnd(task);
                         }
-                        await XwebEnd(task);
-                    }
 
-                    if (task.TaskType.ToLower() == "update")
-                    {
-                        foreach (var listing in task.Listings.Listings)
+                        if (task.TaskType.ToLower().IndexOf("retrieve") > -1)
                         {
-                            if (IsExtis(task, listing) != null)
-                            {
 
-                                var taskListing = await _api.GetListing(listing.Listing.Id.Value);
-                                //更新任务
-
-                                taskListing.Data.Update(listing.Listing);
-                                await _api.UpdateAsync(taskListing.Data);
-                                await _mobile.DeleteMediaAll(taskListing.Data);
-                                await _mobile.DeleteMediaAll(taskListing.Data);
-                                await uploadPhotosAsync(listing, _api);
-                                await uploadVideos(listing, _api);
-                                await uploadVirtualTours(listing, _api);
-                                await uploadFloorPlanAsync(listing, _api);
-                            }
-                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-                            await End(task, listing.TaskItemId);
                         }
-                        await XwebEnd(task);
                     }
-
-                    //remove from portals
-                    if (task.TaskType.ToLower() == "remove from portals")
+                    catch (Exception ex)
                     {
-                        foreach (var listing in task.Listings.Listings)
-                        {
-                            if (IsExtis(task, listing) != null)
-                            { }
-                            else
-                            {
-                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "Not find listing ");
-                            }
-                            await End(task, listing.TaskItemId);
-                        }
-                        await XwebEnd(task);
-                    }
-
-                    if (task.TaskType.ToLower().IndexOf("retrieve") > -1)
-                    {
-
+                        _logger.Error("",ex);
                     }
                 }
                 //5.
             }
             catch (Exception ex)
             {
-                globleLogger.LogError(ex.Message,ex);
+                globleLogger.LogError(ex.Message, ex);
             }
-          
+
         }
         private List<ListingInfo> ListingInfos = new List<ListingInfo>();
 
@@ -378,7 +391,7 @@ namespace PropnexPoster.WPF
                 }
                 catch { }
 
-         
+
             }
         }
 
@@ -398,10 +411,11 @@ namespace PropnexPoster.WPF
                 if (url.Contains("youtube") ||
                     url.Contains("vimeo") ||
                     url.Contains("dailymotion") ||
-                    url.Contains("<iframe")
+                    url.Contains("<iframe") ||
+                    url.Contains("havelock2")
                     )
                 {
-                    filePath = guruTaskListing.Videos[i];
+                    filePath = url;
                 }
                 else
                 {
@@ -434,7 +448,7 @@ namespace PropnexPoster.WPF
                     url.Contains("<iframe")
                     )
                 {
-                    filePath = guruTaskListing.Tours[i];
+                    filePath = url;//guruTaskListing.Tours[i];
                 }
                 else
                 {
@@ -442,7 +456,10 @@ namespace PropnexPoster.WPF
                     {
                         await guruTaskListing.Tours[i].DownloadFileAsync(path, $"{i}_vt.mp4");
                     }
-                    catch { }
+                    catch
+                    {
+                        filePath = "";
+                    }
                 }
                 await _api.UplaodVirtualTours($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
             }
@@ -463,10 +480,11 @@ namespace PropnexPoster.WPF
                 try
                 {
                     await guruTaskListing.FloorPlan[i].DownloadFileAsync(path, $"{i}_fp.jpg");
+                    await _api.UploadPhotoAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
                 }
                 catch { }
 
-                await _api.UploadPhotoAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
+
             }
         }
 
