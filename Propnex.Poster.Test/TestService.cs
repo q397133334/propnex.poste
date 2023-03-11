@@ -45,13 +45,14 @@ namespace Propnex.Poster.Test
 
         public async Task ProjectApiTest()
         {
-            _projectsApi.Token = new PropertyGuru.Mobile.Dto.Token()
-            {
-                accessToken= "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6Ikw3QzlZS1Y5LUVTRjM2MDZRLUdIRjlIMUY1LThMSk1LUk81IiwiY2xpZW50TmFtZSI6Im1vYmlsZS1pb3MiLCJyZWdpb24iOiJzZyIsInNjb3BlIjpbInNpbmdhcG9yZSJdLCJ1c2VybmFtZSI6ImRhdmlkcHJvcGVydHlAcHJvcG5leC5jb20iLCJhZ2VudElkIjo4NTUwMCwidXNlcklkIjo4NTUwMCwiaWQiOiJkZmIxMWQ5Mi04NjhiLTRiZjMtYjg5My1jZTQ0YzQ5ZTkyNjMiLCJ1bXN0aWQiOiJhYjE5NDgwMC1kNzIzLTQxZDQtYmNkYy0zYWI1YTRhMzVlMGMiLCJyb2xlcyI6WyJBR0VOVCIsIlVTRVIiXSwiZ3JhbnRUeXBlIjoicGFzc3dvcmQiLCJpYXQiOjE2Nzc0NjEyMTIsImV4cCI6MTY3ODc1NzIxMiwiaXNzIjoiYXV0aG9yaXphdGlvbi1zZXJ2ZXIifQ.p_4c6ul7_iyckA_juGXO0EEZknSTTU57Wlq8THUXWUSXm6ke9m7DELuGIJj14gE-zPQa0FQ2yWTCzzNCf-VOeWZi8wZuq1KDMURE2kgaRPDn_fhu_Rt1L77S07GdOY0QELDCGplQzZ5CKSLE0iFbTmDjB5xCIJy0wQUjFfA0s0MAW3Ih9enM4HR153ubbPSUzJWFBiv2L1Lxh00G1cTFPFUUSNKIOJWtBJ_GRgRGyboto7nFVUU3_3jy0Tx4UmoVCprCtPqtLVwe3Nt4_0xtsD0ir2SFi-KHLvY2dN3dLkF_VdEe5P1eXzIEjAtTjUT31FpAK-Ms7aUTjn3SFC4oB-HWJCpO2BKm0SfM6M0ZWt1__cuJMQCquQoqfN5ACl71dAwW-2AQ4GT4NKeYi1RCg1uyTu06fCXTlegXrNzwefybvyEFco16LiF-sXuhJlc7c6jfMkD8B6OQ5IKNtS6XMrEfMre7ptS89rFhCfb1yKCRtt1YkpRAZS75phzfDCOxpUPowmbdPT6HB3zGT4aOxFaonwG92v3L9Ba9YfziQ1NgQPwKf5uoFAfRV7wFmCzOKEV2bAIgqC5EOLgXQGzyS53HVYbtc2DCCU8ADS2BEHHucutqjA-c51XznTwUscUJOFh4TpUPrO7rZUzaqqO0_INXm0URHvov0Sk9KAIKSiE"
-            };
-            _api.Token = _projectsApi.Token;
-            var listing = await _api.ListingsAsync(24233221, new QueryListing() { status_code= "DRAFT" });
-            await _api.CreateAsync(listing.Data);
+            
+            //_projectsApi.Token = new PropertyGuru.Mobile.Dto.Token()
+            //{
+            //    accessToken= "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6Ikw3QzlZS1Y5LUVTRjM2MDZRLUdIRjlIMUY1LThMSk1LUk81IiwiY2xpZW50TmFtZSI6Im1vYmlsZS1pb3MiLCJyZWdpb24iOiJzZyIsInNjb3BlIjpbInNpbmdhcG9yZSJdLCJ1c2VybmFtZSI6ImRhdmlkcHJvcGVydHlAcHJvcG5leC5jb20iLCJhZ2VudElkIjo4NTUwMCwidXNlcklkIjo4NTUwMCwiaWQiOiJkZmIxMWQ5Mi04NjhiLTRiZjMtYjg5My1jZTQ0YzQ5ZTkyNjMiLCJ1bXN0aWQiOiJhYjE5NDgwMC1kNzIzLTQxZDQtYmNkYy0zYWI1YTRhMzVlMGMiLCJyb2xlcyI6WyJBR0VOVCIsIlVTRVIiXSwiZ3JhbnRUeXBlIjoicGFzc3dvcmQiLCJpYXQiOjE2Nzc0NjEyMTIsImV4cCI6MTY3ODc1NzIxMiwiaXNzIjoiYXV0aG9yaXphdGlvbi1zZXJ2ZXIifQ.p_4c6ul7_iyckA_juGXO0EEZknSTTU57Wlq8THUXWUSXm6ke9m7DELuGIJj14gE-zPQa0FQ2yWTCzzNCf-VOeWZi8wZuq1KDMURE2kgaRPDn_fhu_Rt1L77S07GdOY0QELDCGplQzZ5CKSLE0iFbTmDjB5xCIJy0wQUjFfA0s0MAW3Ih9enM4HR153ubbPSUzJWFBiv2L1Lxh00G1cTFPFUUSNKIOJWtBJ_GRgRGyboto7nFVUU3_3jy0Tx4UmoVCprCtPqtLVwe3Nt4_0xtsD0ir2SFi-KHLvY2dN3dLkF_VdEe5P1eXzIEjAtTjUT31FpAK-Ms7aUTjn3SFC4oB-HWJCpO2BKm0SfM6M0ZWt1__cuJMQCquQoqfN5ACl71dAwW-2AQ4GT4NKeYi1RCg1uyTu06fCXTlegXrNzwefybvyEFco16LiF-sXuhJlc7c6jfMkD8B6OQ5IKNtS6XMrEfMre7ptS89rFhCfb1yKCRtt1YkpRAZS75phzfDCOxpUPowmbdPT6HB3zGT4aOxFaonwG92v3L9Ba9YfziQ1NgQPwKf5uoFAfRV7wFmCzOKEV2bAIgqC5EOLgXQGzyS53HVYbtc2DCCU8ADS2BEHHucutqjA-c51XznTwUscUJOFh4TpUPrO7rZUzaqqO0_INXm0URHvov0Sk9KAIKSiE"
+            //};
+            //_api.Token = _projectsApi.Token;
+            //var listing = await _api.ListingsAsync(24233221, new QueryListing() { status_code= "DRAFT" });
+            //await _api.CreateAsync(listing.Data);
             //var context = await File.ReadAllTextAsync("E:\\885002.guru.tsk");
             //var lenght = context.IndexOf("Xpressor-Listing-File===");
             //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);

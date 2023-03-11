@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Flurl.Http;
+using Polly;
 using Propnex.Poster.Dtos;
 
 namespace PropnexPoster.WPF
@@ -150,8 +151,8 @@ namespace PropnexPoster.WPF
         {
             return await CallBack<PnUserDto>(async () =>
             {
-                var userDto= await $"{BaseUrl}/api/app/pn-user/user?account={account}".GetJsonAsync<PnUserDto>();
-                if(userDto.Account!="")
+                var userDto = await $"{BaseUrl}/api/app/pn-user/user?account={account}".GetJsonAsync<PnUserDto>();
+                if (userDto.Account != "")
                     return userDto;
                 return null;
             });
@@ -175,41 +176,15 @@ namespace PropnexPoster.WPF
 
         public static async Task PingAsync()
         {
-
             Ping ping = new Ping();
-            PingReply reply = null;
-            try
-            {
-                reply = await ping.SendPingAsync("8.8.8.8");
-            }
-            catch
-            {
-
-            }
-            while (reply == null || reply.Status != IPStatus.Success)
-            {
-                await Task.Delay(1000 * 60);
-                try
-                {
-                    reply = await ping.SendPingAsync("8.8.8.8");
-                }
-                catch
-                {
-
-                }
-            }
-        }
-
-        public static void Ping()
-        {
-            Ping ping = new Ping();
-            var reply = ping.Send("61.147.37.1");
-            while (reply.Status != IPStatus.Success)
-            {
-                Console.WriteLine("Ping" + reply.Status);
-                System.Threading.Thread.Sleep(1000 * 10);
-                reply = ping.Send("61.147.37.1");
-            }
+            var pingRetryPolicy = Policy
+                .Handle<Exception>()
+                .OrResult<PingReply>(pr => pr.Status != IPStatus.Success)
+                .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60));
+            await pingRetryPolicy.ExecuteAsync(async () =>
+             {
+                 return await ping.SendPingAsync("8.8.8.8");
+             });
         }
     }
 }

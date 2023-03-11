@@ -21,7 +21,7 @@ public class WPFModule : AbpModule
         var configuration = context.ServiceProvider.GetService<IConfiguration>();
         WebServer.BaseUrl = configuration["BaseUrl"];
         WebServer.MachindNumber = (await WebServer.GetMachineIdAsync(configuration["MachineNumber"])).Trim('\"');
-
+        await WebServer.PingAsync();
            
     }
 }
