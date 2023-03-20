@@ -1,28 +1,75 @@
 ﻿using Flurl.Http;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Polly;
 using Propnex.Poster.Dtos;
 using Propnex.Poster.PropertyGuru.Listing;
 using Propnex.Poster.PropertyGuru.Mobile;
 using Propnex.Poster.PropertyGuru.Mobile.Dto;
 using Propnex.Poster.PropertyGuru.Tasks;
+using RestSharp;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls.Ribbon;
 using ILogger = Serilog.ILogger;
 
 namespace PropnexPoster.WPF
 {
+
+    public class PosterRunInfo
+    {
+        private string taskNumber;
+        private string account;
+        private string agentId;
+        private string taskType;
+        private int listingCount = 0;
+        private string taskItemId;
+
+        public string TaskNumber { get => taskNumber; set => taskNumber = value; }
+
+        public string Account
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(account))
+                {
+                    return "";
+                }
+                else
+                {
+                    return $"Account: {account}";
+                }
+            }
+            set => account = value;
+        }
+
+        public string AgentId
+        {
+            get => string.IsNullOrEmpty(agentId) ? "" : $"AgentId: {agentId}";
+
+            set => agentId = value;
+        }
+
+        public string TaskType { get => string.IsNullOrEmpty(agentId) ? "" : $"TaskType: {taskType}"; set => taskType = value; }
+
+        public string TaskItemId { get => string.IsNullOrEmpty(taskItemId) ? "" : $"ListingNumber: {taskItemId}"; set => taskItemId = value; }
+
+        public string ListingCount { get => listingCount == 0 ? "" : $"ListingCount: {listingCount}"; set => listingCount = int.Parse(value); }
+    }
+
     public class PosterRun : Volo.Abp.DependencyInjection.ITransientDependency
     {
 
-        public Action<string>? MessageEvent { get; set; }
+        public Action<string> MessageEvent { get; set; }
 
-        public Action<string, string, string> TaskInfoEvent { get; set; }
+        public Action<PosterRunInfo> TaskInfoEvent { get; set; }
 
         private ILogger? _logger;
 
@@ -30,8 +77,15 @@ namespace PropnexPoster.WPF
 
         private PnTaskDto taskDto;
 
+        private PosterRunInfo posterRunInfo;
+
         public PosterRun()
         {
+            posterRunInfo = new PosterRunInfo()
+            {
+                TaskNumber = "Get Task ...."
+            };
+            TaskInfoEvent?.Invoke(posterRunInfo);
         }
 
 
@@ -42,19 +96,20 @@ namespace PropnexPoster.WPF
             var guruTasks = await getGuruTasks();
             //taskDto = new PnTaskDto()
             //{
-            //    Number = "cp1678427027131.guru.tsk"
+            //    Number = "893489.guru.tsk"
             //};
-            //var context = await File.ReadAllTextAsync("D:\\外包项目\\新加坡\\propnex.poster\\Propnex.Poster.WebServer\\wwwroot\\taskxml\\cp1678427027131.guru.tsk");
+            //var context = await File.ReadAllTextAsync("E:\\893489.guru.tsk");
             //var lenght = context.IndexOf("Xpressor-Listing-File===");
             //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
             //var guruTasks = new GuruTasks(context, taskContext);
             if (guruTasks == null)
             {
                 Log("Not find task ,delay 1 min");
-                await Task.Delay(1000 * 10);
+                await Task.Delay(6000 * 10);
                 return;
             }
-            TaskInfoEvent?.Invoke(taskDto.Number, "", "");
+            posterRunInfo.TaskNumber = taskDto.Number;
+            TaskInfoEvent?.Invoke(posterRunInfo);
             Log($"Get Tas success,{taskDto.Number}");
             //2.生成日志
 
@@ -62,7 +117,7 @@ namespace PropnexPoster.WPF
             {
                 _logger = new LoggerConfiguration()
           .MinimumLevel.Debug()
-          .WriteTo.File($"{Directory.GetDirectoryRoot(System.AppDomain.CurrentDomain.BaseDirectory)}\\logs\\task\\{taskDto.Number}.txt", rollingInterval: RollingInterval.Infinite)
+          .WriteTo.Async(c => c.File($"{Directory.GetDirectoryRoot(System.AppDomain.CurrentDomain.BaseDirectory)}\\logs\\task\\{taskDto.Number}.txt"))
           .CreateLogger();
                 //4.处理任务
                 for (int i = 0; i < guruTasks.Tasks.Count; i++)
@@ -74,31 +129,40 @@ namespace PropnexPoster.WPF
                         //3.登陆
                         Log("Get Token .......");
                         var token = await Login(task);
+
                         if (token == null)
                         {
-
-                            foreach (var listing in task.Listings.Listings)
+                            if (task.Listings.Listings != null)
                             {
-                                await ResultUpload(task, listing, listing.TaskItemId, "", "Failed", "Login Faile ,Please check password or account info");
-                                await End(task, listing.TaskItemId);
+                                foreach (var listing in task.Listings.Listings)
+                                {
+                                    await ResultUpload(task, listing, listing.TaskItemId, "", "Failed", "Login Faile ,Please check password or account info");
+                                    await End(task, listing.TaskItemId);
+                                }
                             }
                             await XwebEnd(task);
                             return;
                         }
+                        posterRunInfo.Account = task.Account;
+                        posterRunInfo.AgentId = token.User.AgentId.ToString();
+                        posterRunInfo.TaskType = task.TaskType;
+                        posterRunInfo.ListingCount = ListingInfos.Count.ToString();
+                        TaskInfoEvent?.Invoke(posterRunInfo);
                         Log("Token success");
 
                         Log($"{task.TaskType.ToLower()}");
 
-                        var _api = new Api() { Token = token };
-                        var _projectsApi = new ProjectsApi() { Token = token };
-                        var _adsProject = new AdsProduct(token);
-                        var _mobile = new Mobile(token);
+                        var _api = new Api() { Token = token, Log = Log };
+                        var _projectsApi = new ProjectsApi() { Token = token, Log = Log };
+                        var _adsProject = new AdsProduct(token) { Log = Log };
+                        var _mobile = new Mobile(token) { Log = Log };
                         //4.执行操作
                         if (task.TaskType.ToLower() == "post only")
                         {
-
                             foreach (var listing in task.Listings.Listings)
                             {
+                                posterRunInfo.TaskItemId = listing.TaskItemId.ToString();
+                                TaskInfoEvent?.Invoke(posterRunInfo);
                                 //var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
                                 //1. 获取邮政编号
                                 //var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
@@ -169,8 +233,12 @@ namespace PropnexPoster.WPF
                                             }
                                         }
                                     }
+                                    else
+                                    {
+                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
+                                    }
 
-                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+
                                 }
                                 await End(task, listing.TaskItemId);
                             }
@@ -181,10 +249,13 @@ namespace PropnexPoster.WPF
                         {
                             foreach (var listing in task.Listings.Listings)
                             {
+                                posterRunInfo.TaskItemId = listing.TaskItemId.ToString();
+                                TaskInfoEvent?.Invoke(posterRunInfo);
                                 if (IsExtis(task, listing) != null)
                                 {
                                     var listInfo = IsExtis(task, listing);
                                     var taskListing = await _api.GetListing(listing.Listing.Id.Value);
+
                                     if (listing.FastRepost == "0")
                                     {
                                         //更新任务
@@ -197,7 +268,12 @@ namespace PropnexPoster.WPF
                                         await uploadVirtualTours(listing, _api);
                                         await uploadFloorPlanAsync(listing, _api);
                                     }
+                                    else
+                                    {
+                                        Log("FastRepost");
+                                    }
                                     //Repost
+                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
                                     await _adsProject.Repost(taskListing.Data.id.Value, listInfo.RepostCharge);
                                 }
                                 else
@@ -226,7 +302,7 @@ namespace PropnexPoster.WPF
                                         await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
                                     }
                                 }
-                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                               
                                 await End(task, listing.TaskItemId);
                             }
                             await XwebEnd(task);
@@ -236,6 +312,8 @@ namespace PropnexPoster.WPF
                         {
                             foreach (var listing in task.Listings.Listings)
                             {
+                                posterRunInfo.TaskItemId = listing.TaskItemId.ToString();
+                                TaskInfoEvent?.Invoke(posterRunInfo);
                                 if (IsExtis(task, listing) != null)
                                 {
 
@@ -262,6 +340,8 @@ namespace PropnexPoster.WPF
                         {
                             foreach (var listing in task.Listings.Listings)
                             {
+                                posterRunInfo.TaskItemId = listing.TaskItemId.ToString();
+                                TaskInfoEvent?.Invoke(posterRunInfo);
                                 if (IsExtis(task, listing) != null)
                                 {
                                     var listingInfo = IsExtis(task, listing);
@@ -286,7 +366,7 @@ namespace PropnexPoster.WPF
                     }
                     catch (Exception ex)
                     {
-                        _logger.Error("",ex);
+                        _logger.Error("", ex);
                     }
                 }
                 //5.
@@ -294,6 +374,10 @@ namespace PropnexPoster.WPF
             catch (Exception ex)
             {
                 globleLogger.LogError(ex.Message, ex);
+            }
+            finally
+            {
+
             }
 
         }
@@ -374,7 +458,6 @@ namespace PropnexPoster.WPF
 
         private async Task uploadPhotosAsync(GuruTaskListing guruTaskListing, Api _api)
         {
-            bool result = true;
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
             for (int i = 0; i < guruTaskListing.Photos.Count; i++)
@@ -386,6 +469,7 @@ namespace PropnexPoster.WPF
                 var filePath = $"{path}{i}_image.jpg";
                 try
                 {
+                    Log($"download photo {filePath}");
                     await guruTaskListing.Photos[i].DownloadFileAsync(path, $"{i}_image.jpg");
                     await _api.UploadPhotoAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
                 }
@@ -397,7 +481,6 @@ namespace PropnexPoster.WPF
 
         private async Task uploadVideos(GuruTaskListing guruTaskListing, Api _api)
         {
-            bool result = true;
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
             for (int i = 0; i < guruTaskListing.Videos.Count; i++)
@@ -421,9 +504,14 @@ namespace PropnexPoster.WPF
                 {
                     try
                     {
+                        Log($"download move {filePath}");
                         await guruTaskListing.Videos[i].DownloadFileAsync(path, $"{i}_movie.mp4");
                     }
                     catch { }
+                    if (System.IO.File.Exists(filePath) == false)
+                    {
+                        continue;
+                    }
                 }
                 await _api.UploadVideosAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
             }
@@ -431,7 +519,6 @@ namespace PropnexPoster.WPF
 
         private async Task uploadVirtualTours(GuruTaskListing guruTaskListing, Api _api)
         {
-            bool result = true;
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
             for (int i = 0; i < guruTaskListing.Tours.Count; i++)
@@ -467,7 +554,6 @@ namespace PropnexPoster.WPF
 
         private async Task uploadFloorPlanAsync(GuruTaskListing guruTaskListing, Api _api)
         {
-            bool result = true;
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
             for (int i = 0; i < guruTaskListing.FloorPlan.Count; i++)
@@ -480,7 +566,7 @@ namespace PropnexPoster.WPF
                 try
                 {
                     await guruTaskListing.FloorPlan[i].DownloadFileAsync(path, $"{i}_fp.jpg");
-                    await _api.UploadPhotoAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
+                    await _api.UploadFlooplan($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
                 }
                 catch { }
 
@@ -508,22 +594,28 @@ namespace PropnexPoster.WPF
 
             async Task<PnUserDto> getUser()
             {
+                Log("get user ....");
                 var pnUser = await WebServer.GetUser(guruTask.Account);
+
                 //2.验证用户信息
                 if (pnUser.Id == Guid.Empty)
                 {
+                    Log("not find user ");
                     pnUser = new PnUserDto();
                     pnUser.Account = guruTask.Account;
                     pnUser.Password = guruTask.Password;
+                    Log("insert user ....");
                     await WebServer.PnUser(pnUser);
                     pnUser = await WebServer.GetUser(guruTask.Account);
                 }
+                Log("user success .");
                 return pnUser;
             }
 
             async Task<Propnex.Poster.PropertyGuru.Mobile.Dto.Token> auth()
             {
-                var _auth = new Auth();
+                var _auth = new Auth() { Log = Log };
+                Log("Login ....");
                 var loginResult = await _auth.LoginAsync(new AuthLogin()
                 {
                     UserName = guruTask.Account,
@@ -531,13 +623,17 @@ namespace PropnexPoster.WPF
                 });
                 if (loginResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
                 {
+                    Log("Login success .");
                     _Token = loginResult.Data;
+                    Log("Token :" + _Token.accessToken);
                     pnUser.TokenJson = Newtonsoft.Json.JsonConvert.SerializeObject(_Token);
+                    Log("UpdatePnUserToken");
                     await WebServer.UpdatePnUserToken(pnUser);
                     return loginResult.Data;
                 }
                 else
                 {
+                    Log("Login Error" + loginResult.Message);
                     //登陆失败
                     return null;
                 }
@@ -558,6 +654,7 @@ namespace PropnexPoster.WPF
 
             async Task<List<ListingsListing>> getListing()
             {
+                Log("Get Listings ....");
                 var token = Newtonsoft.Json.JsonConvert.DeserializeObject<Token>(pnUser.TokenJson);
                 var mobile = new Mobile() { Token = token };
                 var result = await mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
@@ -663,96 +760,64 @@ namespace PropnexPoster.WPF
                 $"status={status}&" +
                 $"tm={unix_timestamp(DateTime.Now)}&" +
                 $"memo={memo}");
-
-            for (int i = 0; i < 3; i++)
-            {
-                try
-                {
-                    var res = await sbUrl.ToString().GetStringAsync();
-                    //var res = webClient.DownloadString(sbUrl.ToString());
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    _logger?.Error(ex, $"upload result error {ex.Message}");
-                    await WebServer.PingAsync();
-                }
-            }
-
+            await Polly.Policy.Handle<Exception>()
+                  .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
+                  {
+                      _logger?.Error($"Retry count {retry},{ex.Message}", ex);
+                  }).ExecuteAsync(async () =>
+                  {
+                      var res = await sbUrl.ToString().GetStringAsync();
+                      Log("chopeItem success" + res);
+                  });
         }
 
         private async Task xwebItem(GuruTask guruTask, GuruTaskListing taskListing, int time_cost = 0, string status = "Done", string note = "")
         {
             var net = true;
-            for (int i = 0; i < 3; i++)
+
+
+            StringBuilder formData = new StringBuilder();
+            Dictionary<string, string> data = new Dictionary<string, string>();
+            formData.Append($"account_name={guruTask.Account}&");
+
+            formData.Append($"account_password={guruTask.Password}&");
+
+            formData.Append($"task_id={guruTask.Id}&");
+
+            formData.Append($"taskitem_id={taskListing.TaskItemId}&");
+
+            formData.Append($"status={status}&");
+
+
+            formData.Append($"time_cost={time_cost}&");
+
+            formData.Append($"taskitem_note={note}&");
+
+            if (taskListing.Listing.Id.HasValue && status == "Done")
             {
-                StringBuilder formData = new StringBuilder();
-                Dictionary<string, string> data = new Dictionary<string, string>();
-                formData.Append($"account_name={guruTask.Account}&");
-                data.Add("account_name", guruTask.Account);
-
-                formData.Append($"account_password={guruTask.Password}&");
-                data.Add("account_password", guruTask.Password);
-
-                formData.Append($"task_id={guruTask.Id}&");
-                data.Add("task_id", guruTask.Id);
-
-                formData.Append($"taskitem_id={taskListing.TaskItemId}&");
-                data.Add("taskitem_id", taskListing.TaskItemId);
-
-                formData.Append($"status={status}&");
-                data.Add("status", status);
-
-                formData.Append($"time_cost={time_cost}&");
-                data.Add("time_cost", time_cost.ToString());
-
-                formData.Append($"taskitem_note={note}&");
-                data.Add("taskitem_note", note);
-
-                if (taskListing.Listing.Id.HasValue && status == "Done")
-                {
-                    formData.Append($"portal_link=https://www.propertyguru.com.sg/listing/{taskListing.Listing.Id}&");
-                    data.Add("portal_link", $"https://www.propertyguru.com.sg/listing/{taskListing.Listing.Id}");
-                }
-                else
-                {
-                    formData.Append($"portal_link=&");
-                    data.Add("portal_link", "");
-                }
-                formData.Append($"listing_version={taskListing.UpdateTime}&");
-                data.Add("listing_version", taskListing.UpdateTime);
-
-                formData.Append("poster=mobileApi");
-                data.Add("poster", "mobileApi");
-                System.Net.Http.StringContent stringContent = new System.Net.Http.StringContent(formData.ToString());
-
-                //new
-                //{
-                //    account_name = guruTask.Account,
-                //    account_password = guruTask.Password,
-                //    task_id = guruTask.Id,
-                //    taskitem_id = taskListing.TaskItemId,
-                //    status = status,
-                //    time_cost = time_cost.ToString(),
-                //    taskitem_note = note,
-                //    portal_link = "",
-                //    listing_version = taskListing.UpdateTime,
-                //    poster = "cef"
-                //}
-
-                try
-                {
-                    var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus".PostUrlEncodedAsync(formData.ToString());
-                    var s = await result.GetStringAsync();
-                    net = false;
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    _logger?.Error(ex, $"upload result error {ex.Message}");
-                    await WebServer.PingAsync();
-                }
+                formData.Append($"portal_link=https://www.propertyguru.com.sg/listing/{taskListing.Listing.Id}&");
             }
+            else
+            {
+                formData.Append($"portal_link=&");
+            }
+            formData.Append($"listing_version={taskListing.UpdateTime}&");
+
+            formData.Append("poster=mobileApi");
+            System.Net.Http.StringContent stringContent = new System.Net.Http.StringContent(formData.ToString());
+
+
+            await Polly.Policy.Handle<Exception>()
+                .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
+                {
+                    _logger?.Error($"Retry count {retry},{ex.Message}", ex);
+                }).ExecuteAsync(async () =>
+                {
+                    var result =await "https://pa-production.propnex.net/index.php/tasks/updateStatus"
+                    .PostUrlEncodedAsync(formData.ToString());
+                    Log("xwebItem success");
+                });
+
         }
 
         private async Task XwebEnd(GuruTask guruTask, string note = "")
@@ -767,23 +832,19 @@ namespace PropnexPoster.WPF
             formData.Append($"status=Done&");
             formData.Append($"time_cost=&");
             formData.Append($"note={note}&");
-            formData.Append("poster=selenium");
+            formData.Append("poster=mobileApi");
 
-            for (int i = 0; i < 3; i++)
-            {
-                try
-                {
-                    var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus".PostUrlEncodedAsync(formData.ToString());
-                    var s = await result.GetStringAsync();
-                    _logger.Information($"Xweb end success");
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    _logger?.Error(ex, $"Xweb end upload result error {ex.Message}");
-                    await WebServer.PingAsync();
-                }
-            }
+
+            await Polly.Policy.Handle<Exception>()
+                      .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
+                      {
+                          Log($"Retry count {retry},{ex.Message}");
+                      }).ExecuteAsync(async () =>
+                      {
+                          var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus".PostUrlEncodedAsync(formData.ToString());
+                          Log("xwebItem success " + await result.GetStringAsync());
+                          return result;
+                      });
         }
 
         private async Task End(GuruTask guruTask, string queue_id)
@@ -792,24 +853,16 @@ namespace PropnexPoster.WPF
             {
                 string url = "https://pa-production.propnex.net/index.php/pnapi/updateChopeTask?" +
     $"super=1&queue_id={queue_id}&portal=GURU&&memo=&tm={unix_timestamp(DateTime.Now)}";
-                for (int i = 0; i < 3; i++)
-                {
-                    using (var webClient = new System.Net.WebClient())
-                    {
-                        try
-                        {
-                            await url.GetStringAsync();
-                            _logger?.Information($"chope end success");
-                            break;
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger?.Error(ex, $"chope end upload result error {ex.Message}");
-                            await WebServer.PingAsync();
-                        }
-                    }
-                }
 
+                await Polly.Policy.Handle<Exception>()
+                      .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
+                      {
+                          Log($"Retry count {retry},{ex.Message}");
+                      }).ExecuteAsync(async () =>
+                      {
+                          var result = await url.GetStringAsync();
+                          Log($"chope end success" + result);
+                      });
             }
         }
 
@@ -823,6 +876,7 @@ namespace PropnexPoster.WPF
         {
             MessageEvent?.Invoke(message);
             _logger?.Information(message);
+            MessageEvent?.Invoke(".........................");
         }
     }
 }

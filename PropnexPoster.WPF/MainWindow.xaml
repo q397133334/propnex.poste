@@ -7,13 +7,15 @@
         xmlns:hc="https://handyorg.github.io/handycontrol" 
         x:Class="PropnexPoster.WPF.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" Height="500" Width="800" Loaded="Window_Loaded" Closing="Window_Closing">
+        Title="PropnexPoster" Height="500" Width="800" Loaded="Window_Loaded" Closing="Window_Closing" Icon="/Logo.ico">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="143.17"></ColumnDefinition>
+            <ColumnDefinition Width="106.83"/>
+            <ColumnDefinition Width="49*"></ColumnDefinition>
+            <ColumnDefinition Width="501*"/>
         </Grid.ColumnDefinitions>
-        <Grid Grid.Column="0">
+        <Grid Grid.Column="0" Grid.ColumnSpan="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="40"></RowDefinition>
                 <RowDefinition Height="40"></RowDefinition>
@@ -28,9 +30,18 @@
                          hc:InfoElement.TitlePlacement="Left" 
                          hc:InfoElement.Title="Number:" 
                          Margin="0,5,0,5" Canvas.Left="10" Width="230"></TextBox>
-            <GroupBox Grid.Row="2" Style="{StaticResource BaseStyle}" Header="Run Info:"></GroupBox>
+            <GroupBox Grid.Row="2" Style="{StaticResource BaseStyle}" Header="Run Info:">
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+                    <Label Name="lblTaskNumber"  Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
+                    <Label Name="lblAccount"  Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
+                    <Label Name="lblAgentId" Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
+                    <Label Name="lblTaskType" Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
+                    <Label Name="lblListingCount" Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
+                    <Label Name="lblTaskItemId" Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
+                </StackPanel>
+            </GroupBox>
         </Grid>
-        <GroupBox Style="{StaticResource BaseStyle}" Grid.Column="1" Header="Log">
+        <GroupBox Style="{StaticResource BaseStyle}" Grid.Column="2" Header="Log" Grid.ColumnSpan="2">
             <RichTextBox x:Name="logBox"  Style="{StaticResource BaseStyle}"
                   AcceptsReturn="False"
                   VerticalAlignment="Stretch"
@@ -39,5 +50,6 @@
                 </FlowDocument>
             </RichTextBox>
         </GroupBox>
+        <StackPanel/>
     </Grid>
 </Window>

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using AutoUpdaterDotNET;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using Volo.Abp;
@@ -21,7 +22,11 @@ public class WPFModule : AbpModule
         var configuration = context.ServiceProvider.GetService<IConfiguration>();
         WebServer.BaseUrl = configuration["BaseUrl"];
         WebServer.MachindNumber = (await WebServer.GetMachineIdAsync(configuration["MachineNumber"])).Trim('\"');
-        await WebServer.PingAsync();
-           
+
+    }
+    public override async Task OnPreApplicationInitializationAsync(ApplicationInitializationContext context)
+    {
+        AutoUpdater.Start("http://testposter.propnex.net/PropnexPoster.WPF.AutoUpdater.xml");
+        await Task.CompletedTask;
     }
 }

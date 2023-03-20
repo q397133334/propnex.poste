@@ -34,7 +34,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddParameter("grant_type", "password");
             request.AddParameter("scope", "singapore");
 
-            var response = await client.ExecuteAsync(request);
+            var response = await ExecuteAsync(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 return new HttpResult<Token>()

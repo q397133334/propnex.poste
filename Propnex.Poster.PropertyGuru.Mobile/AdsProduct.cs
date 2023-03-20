@@ -34,13 +34,13 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 origin = "listing-creation-mobile-android"
             });
 
-            var response = await client.ExecuteAsync(request);
+            var response = await ExecuteAsync(request);
             if (response.IsSuccessStatusCode)
             {
                 return new HttpResult<string>()
                 {
                     HttpStatusCode = response.StatusCode,
-                    Data = ""
+                    Data = response.Content
                 };
             }
             return GetHttpResult<string>(response);
@@ -60,7 +60,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 origin = "listing-creation-mobile-android"
             });
 
-            var response = await client.ExecuteAsync(request);
+            var response = await ExecuteAsync(request);
             if (response.IsSuccessStatusCode)
             {
                 return new HttpResult<string>()

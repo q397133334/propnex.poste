@@ -180,7 +180,10 @@ namespace PropnexPoster.WPF
             var pingRetryPolicy = Policy
                 .Handle<Exception>()
                 .OrResult<PingReply>(pr => pr.Status != IPStatus.Success)
-                .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60));
+                .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
+                {
+                    
+                });
             await pingRetryPolicy.ExecuteAsync(async () =>
              {
                  return await ping.SendPingAsync("8.8.8.8");

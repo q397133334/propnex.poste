@@ -44,7 +44,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddQueryParameter("page", queryListingManagement.Page);
             request.AddQueryParameter("sort", queryListingManagement.Sort);
 
-            var response = await client.ExecuteAsync(request);
+            var response = await ExecuteAsync(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 var listingResult = Newtonsoft.Json.JsonConvert.DeserializeObject<ListingsResult>(response.Content);
@@ -71,7 +71,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 statusCode="DEL",
                 origin= "mobile-android-bulk"
             }) ;
-            var reponse=await client.ExecuteAsync(request);
+            var reponse=await ExecuteAsync(request);
             if(reponse.StatusCode==System.Net.HttpStatusCode.OK)
             {
                 return new HttpResult<string>() { };
@@ -109,7 +109,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.Method=Method.Delete;
             request.Resource = $"/v1/media?region=sg&mediaId={mediaId}";
             request.Authenticator = new JwtAuthenticator(Token.accessToken);
-            var response = await client.ExecuteAsync(request);
+            var response = await ExecuteAsync(request);
         }
     }
 

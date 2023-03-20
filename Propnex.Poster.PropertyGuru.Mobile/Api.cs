@@ -40,7 +40,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddParameter("include_suspended_photos", queryListing.include_suspended_photos);
             request.AddParameter("status_code", queryListing.status_code);
 
-            var response = await client.ExecuteAsync(request);
+            var response = await ExecuteAsync(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 var listing = Newtonsoft.Json.JsonConvert.DeserializeObject<Listing.CreateOrUpdateListing>(response.Content);
@@ -60,7 +60,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddParameter("query", queryAutocomplete.Query);
             request.AddParameter("limit", queryAutocomplete.Limit);
             request.AddParameter("objectType", queryAutocomplete.ObjectType);
-            var response = await client.ExecuteAsync(request);
+            var response = await ExecuteAsync(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 return new HttpResult<List<QueryLocale>>()
@@ -82,7 +82,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             //request.AddParameter("region", "sg");
             //request.AddJsonBody(createListing);
             request.AddStringBody(Newtonsoft.Json.JsonConvert.SerializeObject(createListing), DataFormat.Json);
-            var response = await client.ExecuteAsync(request);
+            var response = await ExecuteAsync(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 return new HttpResult<CreateOrUpdateListingResult>()
@@ -104,7 +104,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddParameter("region", "sg");
             request.AddParameter("include_suspended_photos", "true");
             request.AddParameter("status_code", "ACT");
-            var response = await client.ExecuteAsync(request);
+            var response = await ExecuteAsync(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 return new HttpResult<CreateOrUpdateListing>()
@@ -123,7 +123,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.Method = Method.Put;
             request.Authenticator = new JwtAuthenticator(Token.accessToken);
             request.AddStringBody(Newtonsoft.Json.JsonConvert.SerializeObject(createListing), DataFormat.Json);
-            var response = await client.ExecuteAsync(request);
+            var response = await ExecuteAsync(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 return new HttpResult<CreateOrUpdateListingResult>()
@@ -189,28 +189,24 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 {
                     return new HttpResult<string>() { };
                 }
+                if (File.Exists(filePath) == false)
+                {
+                    return new HttpResult<string>() { };
+                }
                 var files = File.ReadAllBytes(filePath);
                 var fileName = Path.GetExtension(filePath);
                 request.AddFile("mediaFile", files, $"{Guid.NewGuid()}{filePath}");
             }
-            try
+            var response = await ExecuteAsync(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                var response = await client.ExecuteAsync(request);
-                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                return new HttpResult<string>()
                 {
-                    return new HttpResult<string>()
-                    {
-                        Data = response.Content,
-                        HttpStatusCode = System.Net.HttpStatusCode.OK
-                    };
-                }
-                return GetHttpResult<string>(response);
+                    Data = response.Content,
+                    HttpStatusCode = System.Net.HttpStatusCode.OK
+                };
             }
-            catch (Exception ex)
-            {
-
-            }
-            return null;
+            return GetHttpResult<string>(response);
         }
     }
 

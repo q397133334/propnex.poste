@@ -30,7 +30,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddParameter("country", "singapore");
             request.AddParameter("language", "en");
 
-            var respones = await client.ExecuteAsync(request);
+            var respones = await ExecuteAsync(request);
             if (respones.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 return new HttpResult<Model.Project>()

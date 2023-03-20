@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -16,9 +17,9 @@ namespace PropnexPoster.WPF
     {
         private IServiceProvider _serviceProvider;
 
-        public MainWindow(IServiceProvider serviceProvider ,IConfiguration  configuration)
+        public MainWindow(IServiceProvider serviceProvider, IConfiguration configuration)
         {
-            _serviceProvider=serviceProvider;
+            _serviceProvider = serviceProvider;
             InitializeComponent();
         }
 
@@ -26,6 +27,7 @@ namespace PropnexPoster.WPF
         {
             btnStart.IsEnabled = true;
             btnStop.IsEnabled = false;
+            Title += $" Version{Assembly.GetEntryAssembly().GetFileVersion()}";
         }
 
         private void btnStop_Click(object sender, RoutedEventArgs e)
@@ -52,6 +54,7 @@ namespace PropnexPoster.WPF
                 IsRun = true;
                 var run = _serviceProvider.GetService<PosterRun>();//  new PosterRun();
                 run.MessageEvent = Log;
+                run.TaskInfoEvent = TaskInfoEvent;
                 run.Run().Wait();
                 IsRun = false;
             }
@@ -65,12 +68,25 @@ namespace PropnexPoster.WPF
         {
             logBox.Dispatcher.BeginInvoke((Action)delegate
              {
+                 logBox.ScrollToEnd();
                  logBox.AppendText($"[{DateTime.Now.ToString()}]");
                  logBox.AppendText("-----");
                  logBox.AppendText(message);
                  logBox.AppendText(Environment.NewLine);
-                 logBox.ScrollToEnd();
              });
+        }
+
+        public void TaskInfoEvent(PosterRunInfo posterRunInfo)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                lblTaskNumber.Content = posterRunInfo.TaskNumber;
+                lblAccount.Content = posterRunInfo.Account;
+                lblAgentId.Content = posterRunInfo.AgentId;
+                lblTaskType.Content = posterRunInfo.TaskType;
+                lblListingCount.Content = posterRunInfo.ListingCount;
+                lblTaskItemId.Content = posterRunInfo.TaskItemId;
+            });
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
