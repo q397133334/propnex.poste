@@ -96,9 +96,9 @@ namespace PropnexPoster.WPF
             //var guruTasks = await getGuruTasks();
             taskDto = new PnTaskDto()
             {
-                Number = "895903.guru.tsk"
+                Number = "896622.guru.tsk"
             };
-            var context = await File.ReadAllTextAsync("E:\\895903.guru.tsk");
+            var context = await File.ReadAllTextAsync("E:\\896622.guru.tsk");
             var lenght = context.IndexOf("Xpressor-Listing-File===");
             var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
             var guruTasks = new GuruTasks(context, taskContext);
@@ -192,7 +192,7 @@ namespace PropnexPoster.WPF
                                         else
                                         {
 
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Data);
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
                                         }
                                     }
                                 }
