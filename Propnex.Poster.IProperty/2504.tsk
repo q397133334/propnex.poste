@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Tasks>
+	<Task>
+		<id>2504</id>
+		<task_type>Post Only</task_type>
+		<max_delay>0</max_delay>
+		<end_time>00:00:00</end_time>
+		<account_id>4</account_id>
+		<account>evonheng@gmail.com</account>
+		<password>Evon1980</password>
+		<target_portal>MyIP</target_portal>
+		<account_notes></account_notes>
+		<username>1000117</username>
+		<user_group>propnex</user_group>
+		<listing_file>2504_4_lst</listing_file>
+		<listing_category></listing_category>
+		<country>MY</country>
+		<status>Pending</status>
+	</Task>
+</Tasks>
+
+Xpressor-Listing-File===2504_4_lst
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Listings>
+  <Listing>
+    <iPropertyStatus></iPropertyStatus>
+    <stPropertyStatus></stPropertyStatus>
+    <RefencesNotes></RefencesNotes>
+    <NoGuruPhotos>false</NoGuruPhotos>
+    <NoiPropertyPhotos>false</NoiPropertyPhotos>
+    <NostPropertyPhotos>false</NostPropertyPhotos>
+    <UseFileName>true</UseFileName>
+    <ID>861</ID>
+    <LastPost></LastPost>
+    <PostCount></PostCount>
+    <XID>DAF31CF9-0E8B-A9F5-FE19-CB327AA1BBCB</XID>
+    <ListingName>The Tamarind @ Sentul East</ListingName>
+    <ListingType>SALE</ListingType>
+    <PropertyType>Apartment / Condo / Service Residence</PropertyType>
+    <PhotosTime>2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+</PhotosTime>
+    <Photos>https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418014image695110814.318162.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418014image695110814.498528.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418014image695110814.677023.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418015image695110814.894107.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418073image695110873.524527.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418073image695110873.685953.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418074image695110873.834238.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418074image695110874.02618.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418009image695110809.288036.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418069image695110869.374056.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418010image695110809.803932.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418069image695110869.66176.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418010image695110810.142746.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418070image695110869.893408.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418010image695110810.351675.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418070image695110870.092801.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418011image695110810.907138.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418070image695110870.309235.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418011image695110811.295999.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418070image695110870.575631.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418011image695110811.479397.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418070image695110870.766064.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418011image695110811.754653.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418071image695110871.014376.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418012image695110811.887637.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418071image695110871.209942.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418012image695110812.04683.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418071image695110871.376461.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418012image695110812.229228.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418071image695110871.53865.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418012image695110812.377433.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418071image695110871.728381.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418012image695110812.581752.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418072image695110871.920669.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418012image695110812.746458.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418072image695110872.078833.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418013image695110812.976924.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418072image695110872.284425.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418013image695110813.170183.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418072image695110872.476682.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418013image695110813.378841.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418072image695110872.627946.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418013image695110813.571643.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418072image695110872.807088.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418013image695110813.744706.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418073image695110872.972896.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418014image695110813.939536.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418073image695110873.14034.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418014image695110814.114559.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/67/1673418073image695110873.310804.jpg
+</Photos>
+    <Tours></Tours>
+    <ToursThumbnail></ToursThumbnail>
+    <Videos></Videos>
+    <VideosThumbnail></VideosThumbnail>
+    <FloorPlan></FloorPlan>
+    <Price>650000</Price>
+    <BedRooms>4</BedRooms>
+    <FloorArea>1345</FloorArea>
+    <Status></Status>
+    <Account></Account>
+    <IPropertyAccount></IPropertyAccount>
+    <stPropertyAccount></stPropertyAccount>
+    <EmbedVideo></EmbedVideo>
+	<ProjectData>
+			</ProjectData>
+    <Details>
+	<Field Name="cboLandTitleType" Value="" />
+<Field Name="ddlBath" Value="3" />
+<Field Name="cboOccupied" Value="" />
+<Field Name="cboTitleType" Value="" />
+<Field Name="listing_title" Value="The Tamarind @ Sentul East " />
+<Field Name="cboTenure" Value="F" />
+<Field Name="cboDirection" Value="" />
+<Field Name="cboFurnishing" Value="U" />
+<Field Name="ddlBed" Value="4.0" />
+<Field Name="cboLayType" Value="" />
+<Field Name="cb24hrSecurity,checked" Value="Checked" />
+<Field Name="cbBBQ,checked" Value="Checked" />
+<Field Name="cbGymnasium,checked" Value="Checked" />
+<Field Name="cbTennisCourt,checked" Value="Checked" />
+<Field Name="cbJacuzzi,checked" Value="Checked" />
+<Field Name="cbMiniMarket,checked" Value="Checked" />
+<Field Name="cbPlayground,checked" Value="Checked" />
+<Field Name="cbClubHouse,checked" Value="Checked" />
+<Field Name="cbParking,checked" Value="Checked" />
+<Field Name="data_step1" Value="{&quot;operationName&quot;:&quot;addListingMutation&quot;,&quot;variables&quot;:{&quot;input&quot;:{&quot;channelCode&quot;:1,&quot;propertyGroupTypeCode&quot;:1,&quot;propertyTypeCode&quot;:3,&quot;listingRefNo&quot;:&quot;&quot;,&quot;propertyCategoryTypeCode&quot;:1,&quot;extension&quot;:{&quot;isCoAgency&quot;:false,&quot;listingExclusivityCode&quot;:1},&quot;isAuction&quot;:false,&quot;auctionDate&quot;:null,&quot;storeyCode&quot;:null,&quot;location&quot;:[],&quot;saleableAreaMeasurementCode&quot;:1}},&quot;extensions&quot;:{&quot;persistedQuery&quot;:{&quot;version&quot;:1,&quot;sha256Hash&quot;:&quot;d6797c24744e9c772977451f0dd7270ab0e622a483ffc8676d6accdd997036ae&quot;}},&quot;query&quot;:&quot;mutation addListingMutation($input: AddListingInput!) {\n  addListing(input: $input) {\n    listing {\n      id\n      channel {\n        id\n        code\n        description\n        label\n        __typename\n      }\n      propertyType {\n        id\n        code\n        description\n        label\n        __typename\n      }\n      lister {\n        id\n        firstName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        lastName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        fullName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        email\n        __typename\n      }\n      representationLister {\n        id\n        firstName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        lastName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        fullName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        email\n        __typename\n      }\n      listingRefNo\n      extension {\n        isCoAgency\n        listingExclusivity {\n          id\n          code\n          description\n          label\n          __typename\n        }\n        __typename\n      }\n      propertyCategoryType {\n        id\n        code\n        description\n        label\n        __typename\n      }\n      isAuction\n      auctionDate\n      postedDate\n      __typename\n    }\n    __typename\n  }\n}\n&quot;}" />
+<Field Name="data_location" Value="{&quot;operationName&quot;:&quot;updateListingInfo&quot;,&quot;variables&quot;:{&quot;shouldExtendsFields&quot;:true,&quot;input&quot;:{&quot;extension&quot;:[],&quot;location&quot;:{&quot;level1&quot;:{&quot;id&quot;:&quot;3&quot;},&quot;level2&quot;:{&quot;id&quot;:null,&quot;text&quot;:{&quot;en_GB&quot;:&quot;Sentul&quot;}},&quot;level3&quot;:{&quot;text&quot;:{&quot;en_GB&quot;:null}},&quot;level5&quot;:{&quot;text&quot;:{&quot;en_GB&quot;:null}},&quot;address&quot;:{&quot;en_GB&quot;:&quot;- Jalan Sentul&quot;},&quot;postalCode&quot;:&quot;51000&quot;,&quot;block&quot;:&quot;- Jalan Sentul&quot;,&quot;unit&quot;:&quot;-&quot;,&quot;floor&quot;:null,&quot;hideUnitFloor&quot;:true,&quot;latitude&quot;:3.1805382,&quot;longitude&quot;:3.1805382},&quot;saleableAreaMeasurementCode&quot;:1,&quot;buildingFacilityCodes&quot;:[],&quot;id&quot;:&quot;101811349&quot;}},&quot;extensions&quot;:{&quot;persistedQuery&quot;:{&quot;version&quot;:1,&quot;sha256Hash&quot;:&quot;91db1d2acdc19fea80293bcdbc6d092dba25928c84941fbcae7ec39e087545ea&quot;}}}" />
+<Field Name="data_details" Value="{&quot;operationName&quot;:&quot;updateListingInfo&quot;,&quot;variables&quot;:{&quot;shouldExtendsFields&quot;:true,&quot;input&quot;:{&quot;extension&quot;:{&quot;saleableAreaDimension&quot;:{&quot;width&quot;:null,&quot;length&quot;:null},&quot;grossAreaDimension&quot;:{&quot;width&quot;:null,&quot;length&quot;:null},&quot;unexpiredLeaseYear&quot;:null,&quot;titleTypeCode&quot;:1,&quot;isBumiLot&quot;:false},&quot;location&quot;:[],&quot;salePrice&quot;:{&quot;currencyCode&quot;:&quot;MYR&quot;,&quot;fixed&quot;:650000},&quot;rentPrice&quot;:{&quot;currencyCode&quot;:&quot;MYR&quot;,&quot;fixed&quot;:null},&quot;maintenanceFee&quot;:{&quot;currencyCode&quot;:&quot;MYR&quot;,&quot;fixed&quot;:null},&quot;saleableAreaMeasurementCode&quot;:1,&quot;saleableArea&quot;:1345,&quot;grossArea&quot;:null,&quot;bedroomCode&quot;:4,&quot;storeRoom&quot;:null,&quot;bathroom&quot;:3,&quot;carPark&quot;:0,&quot;tenureCode&quot;:1,&quot;buildingFacilityCodes&quot;:[5,21,26,10,27,11,6,1,22],&quot;unitFeatureCodes&quot;:[],&quot;images&quot;:[],&quot;floorPlans&quot;:[],&quot;photo360s&quot;:[],&quot;id&quot;:&quot;101811349&quot;}},&quot;extensions&quot;:{&quot;persistedQuery&quot;:{&quot;version&quot;:1,&quot;sha256Hash&quot;:&quot;91db1d2acdc19fea80293bcdbc6d092dba25928c84941fbcae7ec39e087545ea&quot;}}}" />
+<Field Name="data_media" Value="{&quot;operationName&quot;:&quot;updateListingInfo&quot;,&quot;variables&quot;:{&quot;shouldExtendsFields&quot;:true,&quot;input&quot;:{&quot;extension&quot;:[],&quot;location&quot;:[],&quot;saleableAreaMeasurementCode&quot;:1,&quot;description&quot;:{&quot;en_GB&quot;:&quot;For SALES - The Tamarind @ Sentul East\n\n4 Bedrooms   3 Bathrooms - 1,345 sq ft\n\n31 floors\n498 units\n\nTransportation (within 1km):\n-Sentul (KTM)\n-Sentul (LRT)\n-Sentul Timur (LRT)\n\nHospital (10min)\n-Kuala Lumpur General Hospital\n-Tawakal Medical Centre\n\nUniversity (10min)\n-International University of Malaya-Wales\n\nMall (15min)\n-Menara Sentul\n-Sunway Putra\n\nPlease contact me to know more &amp; Exclusive Units \/ Just to Viewing the Unit. Thank You!\n\nOwners are welcome to list with us. Thank you!\n\nHave a beautiful day!\n\nEVON HENG (E 2309)\n010 225 7565  \nwww.wasap.my\/60102257565\nevonheng@propnex.com.my&quot;,&quot;ms_MY&quot;:&quot;&quot;},&quot;images&quot;:[],&quot;floorPlans&quot;:[],&quot;photo360s&quot;:[],&quot;videos&quot;:[],&quot;id&quot;:&quot;101705111&quot;}},&quot;extensions&quot;:{&quot;persistedQuery&quot;:{&quot;version&quot;:1,&quot;sha256Hash&quot;:&quot;91db1d2acdc19fea80293bcdbc6d092dba25928c84941fbcae7ec39e087545ea&quot;}}}" />
+<Field Name="taskitem_id" Value="10191" />
+		<Field Name="LastPost" Value="0000-00-00 00:00:00" />
+		<Field Name="UpdateTime" Value="2023-03-02 17:52:18"/>
+		<Field Name="FastRepost" Value="0"/>
+    </Details>
+	<Basic>
+	<Field Name="ddlProGrpType" Value="E" />
+<Field Name="ddlProType" Value="CO" />
+<Field Name="txtBuilding" Value="The Tamarind @ Sentul East" />
+<Field Name="txtLandArea" Value="0" />
+<Field Name="txtTownship" Value="" />
+<Field Name="txtRemarks" Value="For SALES - The Tamarind @ Sentul East&#xA;&#xA;4 Bedrooms   3 Bathrooms - 1,345 sq ft&#xA;&#xA;31 floors&#xA;498 units&#xA;&#xA;Transportation (within 1km):&#xA;-Sentul (KTM)&#xA;-Sentul (LRT)&#xA;-Sentul Timur (LRT)&#xA;&#xA;Hospital (10min)&#xA;-Kuala Lumpur General Hospital&#xA;-Tawakal Medical Centre&#xA;&#xA;University (10min)&#xA;-International University of Malaya-Wales&#xA;&#xA;Mall (15min)&#xA;-Menara Sentul&#xA;-Sunway Putra&#xA;&#xA;Please contact me to know more &amp; Exclusive Units / Just to Viewing the Unit. Thank You!&#xA;&#xA;Owners are welcome to list with us. Thank you!&#xA;&#xA;Have a beautiful day!&#xA;&#xA;EVON HENG (E 2309)&#xA;010 225 7565  &#xA;www.wasap.my/60102257565&#xA;evonheng@propnex.com.my" />
+<Field Name="txtAddress" Value="- Jalan Sentul" />
+<Field Name="ddlCity" Value="Sentul" />
+<Field Name="ddlState" Value="KL" />
+<Field Name="txtMapLon" Value="3.1805382" />
+<Field Name="txtAskingPrice" Value="650000" />
+<Field Name="txtBuiltUp" Value="1345" />
+<Field Name="txtMapLat" Value="3.1805382" />
+<Field Name="ddlListing" Value="G" />
+<Field Name="txtPostCode" Value="51000" />
+<Field Name="listtype,cbForSale" Value="Checked" />
+<Field Name="txtRentalPrice" Value="650000" />
+<Field Name="txtBuildingCom" Value="The Tamarind @ Sentul East" />
+<Field Name="iscaprotype" Value="cbResidential" />
+<Field Name="ddlCoBroke" Value="False" />
+	</Basic>
+	<Location>
+		</Location>
+	<Media>
+	<Field Name="with_watermark" Value="" />
+	</Media>
+	<Sales>
+		</Sales>
+	<Summary>
+		</Summary>
+  </Listing>
+  <Listing>
+    <iPropertyStatus></iPropertyStatus>
+    <stPropertyStatus></stPropertyStatus>
+    <RefencesNotes></RefencesNotes>
+    <NoGuruPhotos>false</NoGuruPhotos>
+    <NoiPropertyPhotos>false</NoiPropertyPhotos>
+    <NostPropertyPhotos>false</NostPropertyPhotos>
+    <UseFileName>true</UseFileName>
+    <ID>37</ID>
+    <LastPost></LastPost>
+    <PostCount></PostCount>
+    <XID>6689E7AF-32D9-C985-108A-8284B45BCD8E</XID>
+    <ListingName>Inspirasi</ListingName>
+    <ListingType>RENT</ListingType>
+    <PropertyType>Apartment / Condo / Service Residence</PropertyType>
+    <PhotosTime>2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+2023-03-24T19:36:16+08:00
+</PhotosTime>
+    <Photos>https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/37/1673321031image695013831.777541.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/37/1673321032image695013832.035638.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/37/1673321032image695013832.235802.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/37/1673321032image695013832.467657.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/37/1673321032image695013832.8163.jpg
+https://s3.ap-southeast-1.amazonaws.com/propnex-xserver-img/frimgs/listing/1000117/2301/37/1673321033image695013833.032832.jpg
+</Photos>
+    <Tours></Tours>
+    <ToursThumbnail></ToursThumbnail>
+    <Videos></Videos>
+    <VideosThumbnail></VideosThumbnail>
+    <FloorPlan></FloorPlan>
+    <Price>3300</Price>
+    <BedRooms>3</BedRooms>
+    <FloorArea>1015</FloorArea>
+    <Status></Status>
+    <Account></Account>
+    <IPropertyAccount></IPropertyAccount>
+    <stPropertyAccount></stPropertyAccount>
+    <EmbedVideo></EmbedVideo>
+	<ProjectData>
+			</ProjectData>
+    <Details>
+	<Field Name="cboOccupied" Value="" />
+<Field Name="cboLayType" Value="" />
+<Field Name="cboTenure" Value="" />
+<Field Name="cboDirection" Value="" />
+<Field Name="ddlBath" Value="2" />
+<Field Name="cboFurnishing" Value="F" />
+<Field Name="ddlBed" Value="3.0" />
+<Field Name="cboLandTitleType" Value="" />
+<Field Name="listing_title" Value="Good Price, Good Location, Good View " />
+<Field Name="cboTitleType" Value="S" />
+<Field Name="cb24hrSecurity,checked" Value="Checked" />
+<Field Name="cbGymnasium,checked" Value="Checked" />
+<Field Name="data_step1" Value="{&quot;operationName&quot;:&quot;addListingMutation&quot;,&quot;variables&quot;:{&quot;input&quot;:{&quot;channelCode&quot;:2,&quot;propertyGroupTypeCode&quot;:1,&quot;propertyTypeCode&quot;:3,&quot;listingRefNo&quot;:&quot;&quot;,&quot;propertyCategoryTypeCode&quot;:1,&quot;extension&quot;:{&quot;isCoAgency&quot;:false,&quot;listingExclusivityCode&quot;:1},&quot;isAuction&quot;:false,&quot;auctionDate&quot;:null,&quot;storeyCode&quot;:null,&quot;location&quot;:[],&quot;saleableAreaMeasurementCode&quot;:1}},&quot;extensions&quot;:{&quot;persistedQuery&quot;:{&quot;version&quot;:1,&quot;sha256Hash&quot;:&quot;d6797c24744e9c772977451f0dd7270ab0e622a483ffc8676d6accdd997036ae&quot;}},&quot;query&quot;:&quot;mutation addListingMutation($input: AddListingInput!) {\n  addListing(input: $input) {\n    listing {\n      id\n      channel {\n        id\n        code\n        description\n        label\n        __typename\n      }\n      propertyType {\n        id\n        code\n        description\n        label\n        __typename\n      }\n      lister {\n        id\n        firstName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        lastName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        fullName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        email\n        __typename\n      }\n      representationLister {\n        id\n        firstName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        lastName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        fullName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        email\n        __typename\n      }\n      listingRefNo\n      extension {\n        isCoAgency\n        listingExclusivity {\n          id\n          code\n          description\n          label\n          __typename\n        }\n        __typename\n      }\n      propertyCategoryType {\n        id\n        code\n        description\n        label\n        __typename\n      }\n      isAuction\n      auctionDate\n      postedDate\n      __typename\n    }\n    __typename\n  }\n}\n&quot;}" />
+<Field Name="data_location" Value="{&quot;operationName&quot;:&quot;updateListingInfo&quot;,&quot;variables&quot;:{&quot;shouldExtendsFields&quot;:true,&quot;input&quot;:{&quot;extension&quot;:[],&quot;location&quot;:{&quot;level1&quot;:{&quot;id&quot;:&quot;3&quot;},&quot;level2&quot;:{&quot;id&quot;:null,&quot;text&quot;:{&quot;en_GB&quot;:&quot;Mont Kiara&quot;}},&quot;level3&quot;:{&quot;text&quot;:{&quot;en_GB&quot;:null}},&quot;level5&quot;:{&quot;text&quot;:{&quot;en_GB&quot;:null}},&quot;address&quot;:{&quot;en_GB&quot;:&quot; Jalan Kiara 3&quot;},&quot;postalCode&quot;:&quot;50480&quot;,&quot;block&quot;:&quot; Jalan Kiara 3&quot;,&quot;unit&quot;:&quot;-&quot;,&quot;floor&quot;:null,&quot;hideUnitFloor&quot;:true,&quot;latitude&quot;:3.171949,&quot;longitude&quot;:3.171949},&quot;saleableAreaMeasurementCode&quot;:1,&quot;buildingFacilityCodes&quot;:[],&quot;id&quot;:&quot;101811349&quot;}},&quot;extensions&quot;:{&quot;persistedQuery&quot;:{&quot;version&quot;:1,&quot;sha256Hash&quot;:&quot;91db1d2acdc19fea80293bcdbc6d092dba25928c84941fbcae7ec39e087545ea&quot;}}}" />
+<Field Name="data_details" Value="{&quot;operationName&quot;:&quot;updateListingInfo&quot;,&quot;variables&quot;:{&quot;shouldExtendsFields&quot;:true,&quot;input&quot;:{&quot;extension&quot;:{&quot;saleableAreaDimension&quot;:{&quot;width&quot;:null,&quot;length&quot;:null},&quot;grossAreaDimension&quot;:{&quot;width&quot;:null,&quot;length&quot;:null},&quot;unexpiredLeaseYear&quot;:null,&quot;titleTypeCode&quot;:2,&quot;isBumiLot&quot;:false},&quot;location&quot;:[],&quot;salePrice&quot;:{&quot;currencyCode&quot;:&quot;MYR&quot;,&quot;fixed&quot;:null},&quot;rentPrice&quot;:{&quot;currencyCode&quot;:&quot;MYR&quot;,&quot;fixed&quot;:3300},&quot;maintenanceFee&quot;:{&quot;currencyCode&quot;:&quot;MYR&quot;,&quot;fixed&quot;:null},&quot;saleableAreaMeasurementCode&quot;:1,&quot;saleableArea&quot;:1015,&quot;grossArea&quot;:null,&quot;bedroomCode&quot;:3,&quot;storeRoom&quot;:null,&quot;bathroom&quot;:2,&quot;carPark&quot;:0,&quot;tenureCode&quot;:2,&quot;buildingFacilityCodes&quot;:[5,26],&quot;unitFeatureCodes&quot;:[8,14,13],&quot;images&quot;:[],&quot;floorPlans&quot;:[],&quot;photo360s&quot;:[],&quot;id&quot;:&quot;101811349&quot;}},&quot;extensions&quot;:{&quot;persistedQuery&quot;:{&quot;version&quot;:1,&quot;sha256Hash&quot;:&quot;91db1d2acdc19fea80293bcdbc6d092dba25928c84941fbcae7ec39e087545ea&quot;}}}" />
+<Field Name="data_media" Value="{&quot;operationName&quot;:&quot;updateListingInfo&quot;,&quot;variables&quot;:{&quot;shouldExtendsFields&quot;:true,&quot;input&quot;:{&quot;extension&quot;:[],&quot;location&quot;:[],&quot;saleableAreaMeasurementCode&quot;:1,&quot;description&quot;:{&quot;en_GB&quot;:&quot;Good Price, Good Location, Good View \n\nWalking distances to arcoris, 163 Retail Parks&quot;,&quot;ms_MY&quot;:&quot;&quot;},&quot;images&quot;:[],&quot;floorPlans&quot;:[],&quot;photo360s&quot;:[],&quot;videos&quot;:[],&quot;id&quot;:&quot;101705111&quot;}},&quot;extensions&quot;:{&quot;persistedQuery&quot;:{&quot;version&quot;:1,&quot;sha256Hash&quot;:&quot;91db1d2acdc19fea80293bcdbc6d092dba25928c84941fbcae7ec39e087545ea&quot;}}}" />
+<Field Name="taskitem_id" Value="10192" />
+		<Field Name="LastPost" Value="0000-00-00 00:00:00" />
+		<Field Name="UpdateTime" Value="2023-01-10 11:23:51"/>
+		<Field Name="FastRepost" Value="0"/>
+    </Details>
+	<Basic>
+	<Field Name="txtMapLat" Value="3.171949" />
+<Field Name="txtBuilding" Value="Inspirasi" />
+<Field Name="ddlProType" Value="CO" />
+<Field Name="ddlProGrpType" Value="A" />
+<Field Name="txtLandArea" Value="0" />
+<Field Name="txtTownship" Value="" />
+<Field Name="ddlCoBroke" Value="True" />
+<Field Name="txtAddress" Value=" Jalan Kiara 3" />
+<Field Name="txtBuiltUp" Value="1015" />
+<Field Name="txtMapLon" Value="3.171949" />
+<Field Name="txtAskingPrice" Value="3300" />
+<Field Name="txtRemarks" Value="Good Price, Good Location, Good View &#xA;&#xA;Walking distances to arcoris, 163 Retail Parks" />
+<Field Name="ddlCity" Value="Mont Kiara" />
+<Field Name="ddlState" Value="KL" />
+<Field Name="ddlListing" Value="G" />
+<Field Name="txtPostCode" Value="50480" />
+<Field Name="listtype,cbForRent" Value="Checked" />
+<Field Name="txtRentalPrice" Value="3300" />
+<Field Name="txtBuildingCom" Value="Inspirasi" />
+<Field Name="iscaprotype" Value="cbResidential" />
+	</Basic>
+	<Location>
+		</Location>
+	<Media>
+	<Field Name="with_watermark" Value="" />
+	</Media>
+	<Sales>
+		</Sales>
+	<Summary>
+		</Summary>
+  </Listing>
+</Listings>
+
