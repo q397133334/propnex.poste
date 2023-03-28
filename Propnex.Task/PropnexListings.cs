@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
-namespace Propnex.Task
+namespace Propnex
 {
     public class PropnexListings
     {
@@ -151,6 +151,8 @@ namespace Propnex.Task
             Details= new Dictionary<string, string>();
             Basic = new Dictionary<string, string>();
             Location = new Dictionary<string, string>();
+            Media=new Dictionary<string, string>();
+            Sales=new Dictionary<string, string>();
             Summary= new Dictionary<string, string>();
         }
 

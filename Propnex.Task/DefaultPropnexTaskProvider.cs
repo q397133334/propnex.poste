@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
 
-namespace Propnex.Task
+namespace Propnex
 {
     public class DefaultPropnexTaskProvider : IPropnexTaskProvider
     {
@@ -17,6 +17,8 @@ namespace Propnex.Task
 
         public PropnexTasks GetTasks(string content)
         {
+
+            Tasks = new PropnexTasks(content);
 
             return Tasks;
         }
