@@ -93,15 +93,15 @@ namespace PropnexPoster.WPF
         {
             Log("Get Task .....");
             //1.获取任务信息
-            var guruTasks = await getGuruTasks();
-            //taskDto = new PnTaskDto()
-            //{
-            //    Number = "895903.guru.tsk"
-            //};
-            //var context = await File.ReadAllTextAsync("E:\\895903.guru.tsk");
-            //var lenght = context.IndexOf("Xpressor-Listing-File===");
-            //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
-            //var guruTasks = new GuruTasks(context, taskContext);
+            //var guruTasks = await getGuruTasks();
+            taskDto = new PnTaskDto()
+            {
+                Number = "896622.guru.tsk"
+            };
+            var context = await File.ReadAllTextAsync("E:\\896622.guru.tsk");
+            var lenght = context.IndexOf("Xpressor-Listing-File===");
+            var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
+            var guruTasks = new GuruTasks(context, taskContext);
             if (guruTasks == null)
             {
                 Log("Not find task ,delay 1 min");
@@ -192,7 +192,7 @@ namespace PropnexPoster.WPF
                                         else
                                         {
 
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Data);
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
                                         }
                                     }
                                 }

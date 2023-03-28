@@ -34,6 +34,7 @@ namespace Propnex.Poster.Test
             context.Services.AddTransient<Mobile>();
             context.Services.AddTransient<Api>();
             context.Services.AddTransient<ProjectsApi>();
+            context.Services.AddTransient<IPropnexTaskProvider,DefaultPropnexTaskProvider>();
         }
     }
 }
