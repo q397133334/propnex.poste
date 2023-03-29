@@ -28,30 +28,26 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.chromiumWebBrowser1 = new CefSharp.WinForms.ChromiumWebBrowser();
-            this.chromiumWebBrowser2 = new CefSharp.WinForms.ChromiumWebBrowser();
-            this.chromiumWebBrowser3 = new CefSharp.WinForms.ChromiumWebBrowser();
+            this.chromiumWebBrowser = new CefSharp.WinForms.ChromiumWebBrowser();
             this.SuspendLayout();
             // 
             // chromiumWebBrowser1
             // 
-            this.chromiumWebBrowser1.ActivateBrowserOnCreation = false;
-            this.chromiumWebBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chromiumWebBrowser1.Location = new System.Drawing.Point(0, 0);
-            this.chromiumWebBrowser1.Name = "chromiumWebBrowser1";
-            this.chromiumWebBrowser1.Size = new System.Drawing.Size(800, 450);
-            this.chromiumWebBrowser1.TabIndex = 0;
-            this.chromiumWebBrowser1.Text = "chromiumWebBrowser1";
+            this.chromiumWebBrowser.ActivateBrowserOnCreation = false;
+            this.chromiumWebBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chromiumWebBrowser.Location = new System.Drawing.Point(0, 0);
+            this.chromiumWebBrowser.Name = "chromiumWebBrowser1";
+            this.chromiumWebBrowser.Size = new System.Drawing.Size(1008, 661);
+            this.chromiumWebBrowser.TabIndex = 0;
+            this.chromiumWebBrowser.Text = "chromiumWebBrowser1";
             // 
-            // Form1
+            // IPropertyCefPoster
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.chromiumWebBrowser3);
-            this.Controls.Add(this.chromiumWebBrowser2);
-            this.Controls.Add(this.chromiumWebBrowser1);
-            this.Name = "Form1";
+            this.ClientSize = new System.Drawing.Size(1008, 661);
+            this.Controls.Add(this.chromiumWebBrowser);
+            this.Name = "IPropertyCefPoster";
             this.Text = "Form1";
             this.ResumeLayout(false);
 
@@ -59,8 +55,6 @@
 
         #endregion
 
-        private CefSharp.WinForms.ChromiumWebBrowser chromiumWebBrowser1;
-        private CefSharp.WinForms.ChromiumWebBrowser chromiumWebBrowser2;
-        private CefSharp.WinForms.ChromiumWebBrowser chromiumWebBrowser3;
+        private CefSharp.WinForms.ChromiumWebBrowser chromiumWebBrowser;
     }
 }

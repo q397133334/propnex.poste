@@ -24,7 +24,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 
 
         public ClientBase(string baseUrl)
-        {
+        { 
             client = new RestSharp.RestClient(new RestClientOptions()
             {
                 BaseUrl = new Uri(baseUrl),
@@ -41,7 +41,29 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 {
                     LogHttpResponseMessage?.Invoke($"{ex.Result.Request.Resource}", ex.Result);
                 });
+        }
 
+        public ClientBase(string baseUrl, string proxyIp) : this(baseUrl)
+        {
+            var ip = proxyIp.Split(':')[0];
+            var port = proxyIp.Split(':')[1];
+            client = new RestSharp.RestClient(new RestClientOptions()
+            {
+                BaseUrl = new Uri(baseUrl),
+                MaxTimeout = 1000 * 60 * 10,
+                Proxy = new System.Net.WebProxy(ip, int.Parse(port))
+            });
+            client.AddDefaultHeader("User-Agent", "sg;agentnet;android;23.2.10;HD1910;null");
+            Log?.Invoke($"client {baseUrl}");
+            clientRetryPolicy = Policy
+                .Handle<Exception>()
+                 .OrResult<RestResponse>(response =>
+                 response.ResponseStatus == ResponseStatus.TimedOut ||
+                 response.ResponseStatus == ResponseStatus.Aborted)
+                .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
+                {
+                    LogHttpResponseMessage?.Invoke($"{ex.Result.Request.Resource}", ex.Result);
+                });
         }
 
         public async Task<RestResponse> ExecuteAsync(RestRequest restRequest)

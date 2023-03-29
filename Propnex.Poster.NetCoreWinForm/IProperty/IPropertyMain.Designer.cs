@@ -1,6 +1,6 @@
 ﻿namespace Propnex.Poster.NetCoreWinForm
 {
-    partial class IPropertyMain
+    partial class IPropertyMain : Volo.Abp.DependencyInjection.ITransientDependency
     {
         /// <summary>
         /// Required designer variable.
@@ -29,20 +29,35 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(IPropertyMain));
+            this.mainControl1 = new Propnex.Poster.NetCoreWinForm.MainControl();
             this.SuspendLayout();
             // 
-            // Main
+            // mainControl1
+            // 
+            this.mainControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.mainControl1.GetForm = null;
+            this.mainControl1.Location = new System.Drawing.Point(0, 0);
+            this.mainControl1.Name = "mainControl1";
+            this.mainControl1.Size = new System.Drawing.Size(784, 461);
+            this.mainControl1.TabIndex = 0;
+            this.mainControl1.Load += new System.EventHandler(this.mainControl1_Load);
+            // 
+            // IPropertyMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(784, 461);
+            this.Controls.Add(this.mainControl1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "Main";
+            this.Name = "IPropertyMain";
             this.Text = "IPropertyPoster";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.IPropertyMain_FormClosing);
             this.ResumeLayout(false);
 
         }
 
         #endregion
+
+        private MainControl mainControl1;
     }
 }

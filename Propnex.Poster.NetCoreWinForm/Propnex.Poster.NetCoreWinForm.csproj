@@ -24,6 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Propnex.Poster.Share\Propnex.Poster.Share.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="favicon.ico">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>

@@ -48,7 +48,7 @@ namespace Propnex.Poster.NetCoreWinForm
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new IPropertyCefPoster());
+            //Application.Run(new IPropertyCefPoster());
 
             Serilog.Log.Logger = new LoggerConfiguration()
 #if DEBUG
@@ -72,7 +72,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 });
                 await _abpApplication.InitializeAsync();
 
-                _abpApplication.Services.GetRequiredService<IPropertyMain>()?.Show();
+                Application.Run(_abpApplication.Services.GetRequiredService<IPropertyMain>());
 
             }
             catch (Exception ex)

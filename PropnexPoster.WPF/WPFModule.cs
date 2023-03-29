@@ -1,6 +1,7 @@
 ﻿using AutoUpdaterDotNET;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Propnex.Poster.Share;
 using System.Threading.Tasks;
 using Volo.Abp;
 using Volo.Abp.Autofac;
@@ -14,14 +15,17 @@ public class WPFModule : AbpModule
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
         context.Services.AddSingleton<MainWindow>();
-        context.Services.AddTransient<PosterRun>();
+        //context.Services.AddTransient<PosterRun>();
+        context.Services.AddSingleton<Propnex.Poster.Share.AppConfiguration>();
     }
 
     public override async Task OnPostApplicationInitializationAsync(ApplicationInitializationContext context)
     {
         var configuration = context.ServiceProvider.GetService<IConfiguration>();
+        var appConfiguration = context.ServiceProvider.GetService<AppConfiguration>();
         WebServer.BaseUrl = configuration["BaseUrl"];
         WebServer.MachindNumber = (await WebServer.GetMachineIdAsync(configuration["MachineNumber"])).Trim('\"');
+        appConfiguration = configuration.Get<AppConfiguration>();
 
     }
     public override async Task OnPreApplicationInitializationAsync(ApplicationInitializationContext context)

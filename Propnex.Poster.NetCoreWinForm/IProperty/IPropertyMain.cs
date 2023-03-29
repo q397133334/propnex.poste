@@ -16,5 +16,18 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             InitializeComponent();
         }
+
+        private void mainControl1_Load(object sender, EventArgs e)
+        {
+            mainControl1.GetForm = () =>
+            {
+                return new IPropertyCefPoster();
+            };
+        }
+
+        private void IPropertyMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel= true;
+        }
     }
 }

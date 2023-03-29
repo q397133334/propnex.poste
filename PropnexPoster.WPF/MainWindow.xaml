@@ -32,12 +32,12 @@
                          Margin="0,5,0,5" Canvas.Left="10" Width="230"></TextBox>
             <GroupBox Grid.Row="2" Style="{StaticResource BaseStyle}" Header="Run Info:">
                 <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
-                    <Label Name="lblTaskNumber"  Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
-                    <Label Name="lblAccount"  Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
+                    <Label Name="lblTaskNumber"  Style="{StaticResource BaseStyle}" Content="111" HorizontalAlignment="Left"></Label>
+                    <Label Name="lblAccount"  Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"/>
                     <Label Name="lblAgentId" Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
                     <Label Name="lblTaskType" Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
                     <Label Name="lblListingCount" Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
-                    <Label Name="lblTaskItemId" Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
+                    <Label Name="lblTaskItemId" Style="{StaticResource BaseStyle}" Content="sss" HorizontalAlignment="Left"></Label>
                 </StackPanel>
             </GroupBox>
         </Grid>
