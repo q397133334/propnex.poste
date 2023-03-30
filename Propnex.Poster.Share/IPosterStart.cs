@@ -6,6 +6,6 @@ namespace Propnex.Poster.Share
 {
     public interface IPosterStart
     {
-        void Start();
+        System.Threading.Tasks.Task Start();
     }
 }

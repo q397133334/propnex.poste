@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,13 +8,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Volo.Abp.EventBus;
 
 namespace Propnex.Poster.NetCoreWinForm
 {
-    public partial class IPropertyMain : Form
+    public partial class IPropertyMain : Form,Volo.Abp.DependencyInjection.ITransientDependency
     {
-        public IPropertyMain()
+        IServiceProvider _serviceProvider;
+        public IPropertyMain(IServiceProvider serviceProvider)
         {
+            _serviceProvider = serviceProvider;
             InitializeComponent();
         }
 
@@ -21,13 +25,18 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             mainControl1.GetForm = () =>
             {
-                return new IPropertyCefPoster();
+                return _serviceProvider.GetService<IPropertyCefPoster>();
             };
         }
 
         private void IPropertyMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            e.Cancel= true;
+            e.Cancel = true;
+        }
+
+        public async Task HandleEventAsync(LogEvent eventData)
+        {
+            await Task.CompletedTask;
         }
     }
 }

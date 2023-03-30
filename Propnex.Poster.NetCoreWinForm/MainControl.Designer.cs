@@ -1,6 +1,9 @@
-﻿namespace Propnex.Poster.NetCoreWinForm
+﻿using Volo.Abp.DependencyInjection;
+using Volo.Abp.EventBus;
+
+namespace Propnex.Poster.NetCoreWinForm
 {
-    partial class MainControl
+    partial class MainControl : ILocalEventHandler<LogEvent>, ISingletonDependency
     {
         /// <summary> 
         /// 必需的设计器变量。
@@ -36,8 +39,8 @@
             this.btnStop = new System.Windows.Forms.Button();
             this.gbRunInfo = new System.Windows.Forms.GroupBox();
             this.gbLog = new System.Windows.Forms.GroupBox();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.timerWorker = new System.Windows.Forms.Timer(this.components);
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -131,6 +134,11 @@
             this.gbLog.TabStop = false;
             this.gbLog.Text = "Log";
             // 
+            // timerWorker
+            // 
+            this.timerWorker.Interval = 1000;
+            this.timerWorker.Tick += new System.EventHandler(this.timerWorker_Tick);
+            // 
             // richTextBox1
             // 
             this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -139,11 +147,6 @@
             this.richTextBox1.Size = new System.Drawing.Size(551, 438);
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "";
-            // 
-            // timerWorker
-            // 
-            this.timerWorker.Interval = 1000;
-            this.timerWorker.Tick += new System.EventHandler(this.timerWorker_Tick);
             // 
             // MainControl
             // 
@@ -168,11 +171,11 @@
         private SplitContainer splitContainer1;
         private GroupBox gbLog;
         private TableLayoutPanel tableLayoutPanel1;
-        private RichTextBox richTextBox1;
         private FlowLayoutPanel flowLayoutPanel1;
         private Button btnStart;
         private Button btnStop;
         private GroupBox gbRunInfo;
         private System.Windows.Forms.Timer timerWorker;
+        private RichTextBox richTextBox1;
     }
 }

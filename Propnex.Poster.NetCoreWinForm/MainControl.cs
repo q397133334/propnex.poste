@@ -1,4 +1,5 @@
-﻿using Propnex.Poster.Share;
+﻿using CefSharp.DevTools.CSS;
+using Propnex.Poster.Share;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,10 +9,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Volo.Abp.DependencyInjection;
+using Volo.Abp.EventBus;
 
 namespace Propnex.Poster.NetCoreWinForm
 {
-    public partial class MainControl : UserControl
+    public partial class MainControl : UserControl, ILocalEventHandler<LogEvent>, ISingletonDependency
     {
         private bool IsRun = false;
         private bool IsStop = false;
@@ -59,8 +62,7 @@ namespace Propnex.Poster.NetCoreWinForm
                     }
                 };
                 CefPoster.Show();
-                Console.WriteLine("PosterStart");
-                if(CefPoster!=null)
+                if (CefPoster != null)
                 {
                     (CefPoster as IPosterStart).Start();
                 }
@@ -72,6 +74,22 @@ namespace Propnex.Poster.NetCoreWinForm
                     Application.Exit();
                 }
             }
+        }
+
+        public async Task HandleEventAsync(LogEvent eventData)
+        {
+            if (richTextBox1.InvokeRequired)
+            {
+                richTextBox1.BeginInvoke(() =>
+                {
+                    richTextBox1.AppendText($"{eventData.Message}{Environment.NewLine}");
+                });
+            }
+            else
+            {
+                richTextBox1.AppendText($"{eventData.Message}{Environment.NewLine}");
+            }
+            await Task.CompletedTask;
         }
     }
 }

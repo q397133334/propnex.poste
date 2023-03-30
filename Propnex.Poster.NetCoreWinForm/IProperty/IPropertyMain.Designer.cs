@@ -1,4 +1,6 @@
-﻿namespace Propnex.Poster.NetCoreWinForm
+﻿using Microsoft.Extensions.DependencyInjection;
+
+namespace Propnex.Poster.NetCoreWinForm
 {
     partial class IPropertyMain : Volo.Abp.DependencyInjection.ITransientDependency
     {
@@ -29,7 +31,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(IPropertyMain));
-            this.mainControl1 = new Propnex.Poster.NetCoreWinForm.MainControl();
+            this.mainControl1 = _serviceProvider.GetService<MainControl>();//  new Propnex.Poster.NetCoreWinForm.MainControl();
             this.SuspendLayout();
             // 
             // mainControl1

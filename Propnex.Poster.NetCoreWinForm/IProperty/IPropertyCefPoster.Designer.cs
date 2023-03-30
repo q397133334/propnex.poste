@@ -1,6 +1,9 @@
-﻿namespace Propnex.Poster.NetCoreWinForm
+﻿using Propnex.Poster.Share;
+using Volo.Abp.DependencyInjection;
+
+namespace Propnex.Poster.NetCoreWinForm
 {
-    partial class IPropertyCefPoster
+    partial class IPropertyCefPoster : Form, ITransientDependency, IPosterStart
     {
         /// <summary>
         ///  Required designer variable.
