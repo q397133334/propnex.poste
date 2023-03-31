@@ -37,7 +37,7 @@ namespace Propnex.Poster.NetCoreWinForm
             {
                 propnexTask = item;
                 await Login();
-                await GetListings();
+                var listings = await GetListings();
             }
             Close();
         }
@@ -47,8 +47,8 @@ namespace Propnex.Poster.NetCoreWinForm
             var loginUrl = "https://www.iproperty.com.my/pro/listings?lang=en-GB";
             await chromiumWebBrowser.LoadUrlAsync("https://www.baidu.com");
             await PublishMessageAsync("DeleteCookie");
-            var cookieManager = chromiumWebBrowser.GetCookieManager();
-            await cookieManager.DeleteCookiesAsync();
+            //var cookieManager = chromiumWebBrowser.GetCookieManager();
+            //await cookieManager.DeleteCookiesAsync();
             await PublishMessageAsync($"LoadUrl:{loginUrl}");
             await chromiumWebBrowser.LoadUrlAsync(loginUrl);
             await watiForIsLoading();
@@ -60,18 +60,18 @@ namespace Propnex.Poster.NetCoreWinForm
             //check page
             await CheckPage();
             //input login user name
-            var userNameInput = await DevToolsContext.QuerySelectorAsync<HtmlElement>("#login-userid");
-            await Delay(60);
-            await userNameInput.SetAttributeAsync("value", propnexTask.Account);
-            //input password
-            var userPasswordInput = await DevToolsContext.QuerySelectorAsync<HtmlElement>("#login-password");
-            await Delay();
-            await userPasswordInput.SetAttributeAsync("value", propnexTask.Password);
-            //login button
-            var loginButton = await DevToolsContext.QuerySelectorAsync<HtmlElement>("#btn_login");
-            await Delay(1);
-            await loginButton.ClickAsync();
-            await Delay();
+            //var userNameInput = await DevToolsContext.QuerySelectorAsync<HtmlElement>("#login-userid");
+            //await Delay();
+            //await userNameInput.SetAttributeAsync("value", propnexTask.Account);
+            ////input password
+            //var userPasswordInput = await DevToolsContext.QuerySelectorAsync<HtmlElement>("#login-password");
+            //await Delay();
+            //await userPasswordInput.SetAttributeAsync("value", propnexTask.Password);
+            ////login button
+            //var loginButton = await DevToolsContext.QuerySelectorAsync<HtmlElement>("#btn_login");
+            //await Delay(1);
+            //await loginButton.ClickAsync();
+            //await Delay();
 
             await watiForIsLoading();
         }
@@ -91,7 +91,16 @@ namespace Propnex.Poster.NetCoreWinForm
                                 }}).then(res=>{{
                                       return res.json()
                                 }})}}";
-            var javaReposnse = await DevToolsContext.EvaluateFunctionAsync<RequestData<ListingsData>>(jscode);
+            try
+            {
+                var javaReposnse = await DevToolsContext.EvaluateFunctionAsync<RequestData<ListingsData>>(jscode);
+                return javaReposnse.Data.listings.Data;
+            }
+            catch (Exception ex)
+            {
+                await Delay(60);
+            }
+
             return new List<Listing>();
         }
 
@@ -121,7 +130,7 @@ namespace Propnex.Poster.NetCoreWinForm
 
         public async Task GetTask()
         {
-            propnexTasks = _propnexTaskProvider.GetTasks(System.IO.File.ReadAllText("C:\\Users\\worker_fg\\Downloads\\2504.tsk"));
+            propnexTasks = _propnexTaskProvider.GetTasks(System.IO.File.ReadAllText("E:\\2504.tsk"));
             if (propnexTasks == null)
             {
                 await PublishMessageAsync("Not find tasks ,dealy 1 min");

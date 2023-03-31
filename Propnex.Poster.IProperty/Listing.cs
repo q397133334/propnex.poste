@@ -40,7 +40,7 @@ namespace Propnex.Poster.IProperty
 
         public List<ListingImage> FloorPlans { get; set; } = new List<ListingImage>();
 
-        public string Photo360s { get; set; }
+        public List<ListingImage> Photo360s { get; set; }
 
         public int PropertyCategoryTypeCode { get; set; }
 
@@ -50,7 +50,7 @@ namespace Propnex.Poster.IProperty
 
         public string GrossArea { get; set; }
 
-        public string GrossAreaMeasurement { get; set; }
+        public ListingItemType GrossAreaMeasurement { get; set; }
 
         public string Image360s { get; set; }
 
@@ -78,7 +78,7 @@ namespace Propnex.Poster.IProperty
 
         public ListingItemType PropertyType { get; set; } = new ListingItemType();
 
-        public string RentPrice { get; set; }
+        public ListingSalePrice RentPrice { get; set; }=new ListingSalePrice();
 
         public string RepresentationListerId { get; set; }
 
@@ -96,11 +96,11 @@ namespace Propnex.Poster.IProperty
 
         public List<string> UnitFeatures { get; set; }
 
-        public string Videos { get; set; }
+        public List<ListingRichMedia> Videos { get; set; }
 
         public List<string> Views { get; set; }
 
-        public string Photo360players { get; set; }
+        public List<ListingRichMedia> Photo360players { get; set; }
 
         public string __typename { get; set; } = "Listing";
 
@@ -165,6 +165,39 @@ namespace Propnex.Poster.IProperty
         public int CrossListTypeCode { get; set; }
 
         public string __typename { get; set; } = "ListingAttributes";
+    }
+
+    public class ListingRichMedia
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Id { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Url { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int Sort { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public DateTime? CreatedDate { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public DateTime? UpdatedDate { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string __typename { get; set; } = "RichMedia";
     }
 
     public class ListingImage
