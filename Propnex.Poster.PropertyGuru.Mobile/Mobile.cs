@@ -13,16 +13,24 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 {
     public class Mobile : ClientBase
     {
+
+        private const string baseUrl = "https://bff-mobile.propertyguru.com";
+
         public Token Token { get; set; }
 
-        public Mobile(Token token) : base("https://bff-mobile.propertyguru.com")
+        public Mobile(Token token) : base(baseUrl)
         {
             Token = token;
         }
 
-        public Mobile() : base("https://bff-mobile.propertyguru.com")
+        public Mobile() : base(baseUrl)
         {
 
+        }
+
+        public Mobile(Token token,string proxyIp) : base(baseUrl,proxyIp)
+        {
+            Token = token;
         }
 
         public async Task<HttpResult<ListingsResult>> ListingManagementAsync(QueryListingManagement queryListingManagement)

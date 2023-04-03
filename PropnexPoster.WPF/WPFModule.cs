@@ -12,6 +12,8 @@ namespace PropnexPoster.WPF;
 [DependsOn(typeof(AbpAutofacModule))]
 public class WPFModule : AbpModule
 {
+    public static AppConfiguration AppConfiguration { get; set; }
+
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
         context.Services.AddSingleton<MainWindow>();
@@ -22,11 +24,10 @@ public class WPFModule : AbpModule
     public override async Task OnPostApplicationInitializationAsync(ApplicationInitializationContext context)
     {
         var configuration = context.ServiceProvider.GetService<IConfiguration>();
-        var appConfiguration = context.ServiceProvider.GetService<AppConfiguration>();
+        AppConfiguration = context.ServiceProvider.GetService<AppConfiguration>();
         WebServer.BaseUrl = configuration["BaseUrl"];
         WebServer.MachindNumber = (await WebServer.GetMachineIdAsync(configuration["MachineNumber"])).Trim('\"');
-        appConfiguration = configuration.Get<AppConfiguration>();
-
+        AppConfiguration = configuration.Get<AppConfiguration>();
     }
     public override async Task OnPreApplicationInitializationAsync(ApplicationInitializationContext context)
     {

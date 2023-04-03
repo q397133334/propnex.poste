@@ -16,15 +16,23 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 {
     public class Api : ClientBase
     {
+
+        private const string baseUrl = "https://api.propertyguru.com";
+
         public Token Token { get; set; }
 
         public ILogger<Api> Logger { get; set; }
 
-        public Api() : base("https://api.propertyguru.com")
+        public Api() : base(baseUrl)
         {
         }
 
-        public Api(Token token) : base("https://api.propertyguru.com")
+        public Api(Token token) : base(baseUrl)
+        {
+            Token = token;
+        }
+
+        public Api(Token token, string proxyIp) : base(baseUrl, proxyIp)
         {
             Token = token;
         }

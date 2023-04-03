@@ -91,17 +91,18 @@ namespace PropnexPoster.WPF
 
         public async Task Run()
         {
+
             Log("Get Task .....");
             //1.获取任务信息
-            //var guruTasks = await getGuruTasks();
-            taskDto = new PnTaskDto()
-            {
-                Number = "896622.guru.tsk"
-            };
-            var context = await File.ReadAllTextAsync("E:\\896622.guru.tsk");
-            var lenght = context.IndexOf("Xpressor-Listing-File===");
-            var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
-            var guruTasks = new GuruTasks(context, taskContext);
+            var guruTasks = await getGuruTasks();
+            //taskDto = new PnTaskDto()
+            //{
+            //    Number = "896622.guru.tsk"
+            //};
+            //var context = await File.ReadAllTextAsync("E:\\896622.guru.tsk");
+            //var lenght = context.IndexOf("Xpressor-Listing-File===");
+            //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
+            //var guruTasks = new GuruTasks(context, taskContext);
             if (guruTasks == null)
             {
                 Log("Not find task ,delay 1 min");
@@ -119,6 +120,12 @@ namespace PropnexPoster.WPF
           .MinimumLevel.Debug()
           .WriteTo.Async(c => c.File($"{Directory.GetDirectoryRoot(System.AppDomain.CurrentDomain.BaseDirectory)}\\logs\\task\\{taskDto.Number}.txt"))
           .CreateLogger();
+                var proxyIp = "";
+                if (WPFModule.AppConfiguration.IsProxy)
+                {
+                    proxyIp = WPFModule.AppConfiguration.GetProxy();
+                }
+                Log($"Use proxyIp:{proxyIp}");
                 //4.处理任务
                 for (int i = 0; i < guruTasks.Tasks.Count; i++)
                 {
@@ -128,7 +135,7 @@ namespace PropnexPoster.WPF
                         var task = guruTasks.Tasks[i];
                         //3.登陆
                         Log("Get Token .......");
-                        var token = await Login(task);
+                        var token = await Login(task, proxyIp);
 
                         if (token == null)
                         {
@@ -152,10 +159,24 @@ namespace PropnexPoster.WPF
 
                         Log($"{task.TaskType.ToLower()}");
 
-                        var _api = new Api() { Token = token, Log = Log };
-                        var _projectsApi = new ProjectsApi() { Token = token, Log = Log };
-                        var _adsProject = new AdsProduct(token) { Log = Log };
-                        var _mobile = new Mobile(token) { Log = Log };
+                        Api _api;
+                        ProjectsApi _projectsApi;
+                        AdsProduct _adsProject;
+                        Mobile _mobile;
+                        if (WPFModule.AppConfiguration.IsProxy)
+                        {
+                            _api = new Api(token, proxyIp) { Log = Log };
+                            _projectsApi = new ProjectsApi(token, proxyIp) { Log = Log };
+                            _adsProject = new AdsProduct(token, proxyIp) { Log = Log };
+                            _mobile = new Mobile(token, proxyIp) { Log = Log };
+                        }
+                        else
+                        {
+                            _api = new Api(token) { Log = Log };
+                            _projectsApi = new ProjectsApi(token) { Log = Log };
+                            _adsProject = new AdsProduct(token) { Log = Log };
+                            _mobile = new Mobile(token) { Log = Log };
+                        }
                         //4.执行操作
                         if (task.TaskType.ToLower() == "post only")
                         {
@@ -302,7 +323,7 @@ namespace PropnexPoster.WPF
                                         await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
                                     }
                                 }
-                               
+
                                 await End(task, listing.TaskItemId);
                             }
                             await XwebEnd(task);
@@ -584,7 +605,7 @@ namespace PropnexPoster.WPF
             return path;
         }
 
-        private async Task<Propnex.Poster.PropertyGuru.Mobile.Dto.Token> Login(GuruTask guruTask)
+        private async Task<Propnex.Poster.PropertyGuru.Mobile.Dto.Token> Login(GuruTask guruTask, string proxyIp = "")
         {
             var pnUser = await getUser();
             var _Token = string.IsNullOrEmpty(pnUser.TokenJson) ? await auth() : await checkToken();
@@ -614,7 +635,15 @@ namespace PropnexPoster.WPF
 
             async Task<Propnex.Poster.PropertyGuru.Mobile.Dto.Token> auth()
             {
-                var _auth = new Auth() { Log = Log };
+                Auth _auth;
+                if (string.IsNullOrEmpty(proxyIp) == false)
+                {
+                    _auth = new Auth(proxyIp) { Log = Log };
+                }
+                else
+                {
+                    _auth = new Auth() { Log = Log };
+                }
                 Log("Login ....");
                 var loginResult = await _auth.LoginAsync(new AuthLogin()
                 {
@@ -813,7 +842,7 @@ namespace PropnexPoster.WPF
                     _logger?.Error($"Retry count {retry},{ex.Message}", ex);
                 }).ExecuteAsync(async () =>
                 {
-                    var result =await "https://pa-production.propnex.net/index.php/tasks/updateStatus"
+                    var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus"
                     .PostUrlEncodedAsync(formData.ToString());
                     Log("xwebItem success");
                 });

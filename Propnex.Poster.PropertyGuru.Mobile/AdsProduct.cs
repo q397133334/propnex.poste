@@ -20,6 +20,12 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             Token = token;
         }
 
+
+        public AdsProduct(Token token, string proxyIp) : base("https://ads-products.propertyguru.com", proxyIp)
+        {
+            Token = token;
+        }
+
         public async Task<HttpResult<string>> Activate(int listingId, int credit = 1)
         {
             var request = GetRequest();

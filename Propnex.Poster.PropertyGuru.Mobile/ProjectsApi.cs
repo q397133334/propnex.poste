@@ -12,12 +12,23 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 {
     public class ProjectsApi : ClientBase
     {
-        public Token Token { get; set; }
 
-        public ILogger<ProjectsApi> Logger { get; set; }
+        private const string baseUrl = "https://projects-api-projectnet.propertyguru.com";
+
+        public Token Token { get; set; }
 
         public ProjectsApi() : base("https://projects-api-projectnet.propertyguru.com")
         {
+        }
+
+        public ProjectsApi(Token token ) : base(baseUrl)
+        {
+            Token = token;
+        }
+
+        public ProjectsApi(Token token, string proxyIp) : base(baseUrl, proxyIp)
+        {
+            Token = token;
         }
 
         public async Task<HttpResult<Model.Project>> GetProjectAsync(int property_id)

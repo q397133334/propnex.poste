@@ -43,7 +43,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 });
         }
 
-        public ClientBase(string baseUrl, string proxyIp) : this(baseUrl)
+        public ClientBase(string baseUrl, string proxyIp)
         {
             var ip = proxyIp.Split(':')[0];
             var port = proxyIp.Split(':')[1];

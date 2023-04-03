@@ -11,15 +11,21 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 {
     public class Auth : ClientBase
     {
+        private const string baseUrl = "https://auth.propertyguru.com";
 
         public ILogger<Auth> _logger { get; set; }
 
-        public Auth(ILogger<Auth> logger) : base("https://auth.propertyguru.com")
+        public Auth(ILogger<Auth> logger) : base(baseUrl)
         {
             _logger = logger;
         }
 
-        public Auth() : base("https://auth.propertyguru.com")
+        public Auth() : base(baseUrl)
+        {
+
+        }
+
+        public Auth(string proxyIp):base(baseUrl,proxyIp)
         {
 
         }
