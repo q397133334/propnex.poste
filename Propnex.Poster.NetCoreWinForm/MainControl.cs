@@ -46,7 +46,7 @@ namespace Propnex.Poster.NetCoreWinForm
             IsStop = true;
         }
 
-        private void timerWorker_Tick(object sender, EventArgs e)
+        private async void timerWorker_Tick(object sender, EventArgs e)
         {
             if (CefPoster == null && IsStop == false)
             {
@@ -62,6 +62,7 @@ namespace Propnex.Poster.NetCoreWinForm
                     }
                 };
                 CefPoster.Show();
+                await Task.Delay(1000);
                 if (CefPoster != null)
                 {
                     (CefPoster as IPosterStart).Start();

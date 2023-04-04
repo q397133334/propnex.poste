@@ -297,6 +297,10 @@ namespace Propnex.Poster.IProperty
 
         public ListingMultiLangText FullName { get; set; } = new ListingMultiLangText();
 
+        public ListingMultiLangText firstName { get; set; } = new ListingMultiLangText();
+
+        public ListingMultiLangText lastName { get; set; } = new ListingMultiLangText();
+
         public string __typename { get; set; } = "User";
     }
 
