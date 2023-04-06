@@ -4,6 +4,7 @@ using CefSharp.WinForms;
 using Newtonsoft.Json;
 using Propnex.Poster.IProperty;
 using Propnex.Poster.Share;
+using Serilog.Core;
 using System;
 using System.Security.Policy;
 using Volo.Abp.DependencyInjection;
@@ -61,14 +62,16 @@ namespace Propnex.Poster.NetCoreWinForm
         public async Task CreateListing(PropnexListing propnexListing)
         {
             string addListingMutationUrl = "https://www.iproperty.com.my/pro/rasor/graphql/addListingMutation";
-            await listingDetails();
+            string? listingId = "";
+            //await listingDetails();
+            await location();
             async Task listingDetails()
             {
                 try
                 {
                     propnexListing.Details["data_step1"] = propnexListing.Details["data_step1"].Replace("\"location\":[]", "\"location\":{}");
                     var listingDetails = JsonConvert.DeserializeObject<RequestData<Variables<AddListingMutationDto>>>(propnexListing.Details["data_step1"]);
-                    string data = JsonConvert.SerializeObject(listingDetails, new JsonSerializerSettings
+                    string jsonData = JsonConvert.SerializeObject(listingDetails, new JsonSerializerSettings
                     {
                         ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
                     });
@@ -80,13 +83,14 @@ namespace Propnex.Poster.NetCoreWinForm
                                     }},
                                     ""method"": ""POST"",
                                     ""referrer"":""https://www.iproperty.com.my/pro/add-listing/listing-details"",
-                                    ""body"":'{data.Replace('\"', '"')}'
+                                    ""body"":'{jsonData.Replace('\"', '"')}'
                                 }}).then(res=>{{
                                       return res.json()
                                 }})}}";
 
-                    var result = await AjaxJsonPost<string>(addListingMutationUrl, "https://www.iproperty.com.my/pro/add-listing/listing-details", data: propnexListing.Details["data_step1"]);
-                    
+                    var result = await AjaxJsonPostAsync(addListingMutationUrl, "https://www.iproperty.com.my/pro/add-listing/listing-details", data: propnexListing.Details["data_step1"]);
+                    var data = JsonConvert.DeserializeObject<ResponseData<AddListingPayload>>(result);
+                    listingId = data?.Data.addListing.listing.Id;
                 }
                 catch (Exception ex)
                 {
@@ -95,7 +99,43 @@ namespace Propnex.Poster.NetCoreWinForm
                 await Delay(60);
             }
 
-            async Task location() { }
+            async Task location()
+            {
+                //1.解析location数据
+                try
+                {
+                    var location = JsonConvert.DeserializeObject<RequestData<Variables<LocationDto>>>(propnexListing.Details["data_location"]);
+                    location.variables.input.id = listingId;
+                    string buildingText = "";
+                    if (propnexListing.Basic.ContainsKey("txtBuilding"))
+                    {
+                        buildingText = propnexListing.Basic["txtBuilding"];
+                    }
+                    if (string.IsNullOrEmpty(buildingText))
+                    {
+                        if (propnexListing.Basic.ContainsKey("txtBuildingCom"))
+                        {
+                            buildingText = propnexListing.Basic["txtBuildingCom"];
+                        }
+                    }
+                    if (propnexListing.Details.ContainsKey("standard_name"))
+                    {
+                        if (!string.IsNullOrEmpty(propnexListing.Details["standard_name"]))
+                        {
+                            buildingText = propnexListing.Details["standard_name"];
+                        }
+                    }
+
+                    var buildings = await BuildingQuery(buildingText);
+                    var building = buildings.Where(q => q.postCode == propnexListing.Basic["txtPostCode"]).FirstOrDefault();
+                }
+                catch (Exception ex)
+                {
+
+                }
+
+
+            }
 
             async Task propertyDetails() { }
 
@@ -103,6 +143,8 @@ namespace Propnex.Poster.NetCoreWinForm
 
             async Task UpgradePublish() { }
         }
+
+
 
         public async Task Login()
         {
@@ -166,6 +208,17 @@ namespace Propnex.Poster.NetCoreWinForm
             return new List<Listing>();
         }
 
+        public async Task<List<PlaceDto>> BuildingQuery(string key)
+        {
+            string url = $"https://www.iproperty.com.my/pro/rasor/graphql/buildingQuery?" +
+                $"operationName=buildingQuery&" +
+                $"variables=%7B%22q%22%3A%22level5%22%2C%22shouldExtendsFields%22%3Atrue%2C%22includeBuildingFacilityCodes%22%3Atrue%2C%22keyword%22%3A%22{key}%22%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%229adf6bae0454ed8c07e24e43e1f2b622d0649a9fb96a056659ab644ee2b06e63%22%7D%7D";
+            var result = await AjaxJsonGetAsync(url);
+
+            var resultData = JsonConvert.DeserializeObject<ResponseData<BuildingRequestData>>(result);
+            return resultData.Data.places.Data;
+        }
+
         public async Task CheckPage()
         {
             var gRecaptcha = await DevToolsContext.QuerySelectorAsync(".g-recaptcha");
@@ -184,19 +237,51 @@ namespace Propnex.Poster.NetCoreWinForm
         /// <param name="type"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        private async Task<T> AjaxJsonPost<T>(string url, string referrerUrl, string type = "POST", string data = "")
+        private async Task<string> AjaxJsonPostAsync(string url, string referrerUrl, string type = "POST", string data = "")
         {
             string jscode = $"()=> fetch('{url}',{{ method:\"{type}\",referrer:'{referrerUrl}',headers:{{'content-type': 'application/json'}},body:{(data == "" ? "''" : "JSON.stringify(" + data.Replace('\"', '"') + ")")}}}) .then(response => response.text())";
-            T result;
+            string result = "";
             try
             {
-                result = await DevToolsContext.EvaluateFunctionAsync<T>(jscode);
+                result = await DevToolsContext.EvaluateFunctionAsync<string>(jscode);
             }
             catch (Exception ex)
             {
-                result = default(T);
+                result = "";
             }
-            return (T)result;
+            return result;
+        }
+
+        /// <summary>
+        /// 获取json数据
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="url"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private async Task<string> AjaxJsonGetAsync(string url)
+        {
+            try
+            {
+                string jscode = $@"()=> {{return fetch(""{url}"", {{
+                                  ""headers"": {{
+                                    ""accept"": ""application/json, text/plain, */*"",
+                                  }},
+                                  ""method"": ""GET"",
+                                  ""mode"": ""cors""
+                                }}).then(res=>{{
+                                      return res.text()
+                                }})}}";
+
+                var result = await DevToolsContext.EvaluateFunctionAsync<string>(jscode);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return "";
+            }
+
         }
 
         private async Task watiForIsLoading()

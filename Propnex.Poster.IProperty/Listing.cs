@@ -108,7 +108,7 @@ namespace Propnex.Poster.IProperty
 
         public DateTime? CreatedDate { get; set; }
 
-        public ListingLister Lister { get; set; }
+        public ListingLister Lister { get; set; } = new ListingLister();
 
         public DateTime? PostedDate { get; set; }
 

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Propnex.Poster.IProperty
 {
-    public class DeleteListingRequestData
+    public class DeleteListingDto
     {
         public string id { get; set; }
     }
