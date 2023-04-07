@@ -33,10 +33,5 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             e.Cancel = true;
         }
-
-        public async Task HandleEventAsync(LogEvent eventData)
-        {
-            await Task.CompletedTask;
-        }
     }
 }

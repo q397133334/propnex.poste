@@ -1,12 +1,20 @@
 using CefSharp;
+using CefSharp.DevTools.IO;
 using CefSharp.Dom;
 using CefSharp.WinForms;
 using Newtonsoft.Json;
+using Polly;
+using Polly.Contrib.WaitAndRetry;
+using Polly.Fallback;
+using Polly.Retry;
+using Polly.Wrap;
 using Propnex.Poster.IProperty;
 using Propnex.Poster.Share;
+using Serilog;
 using Serilog.Core;
 using System;
 using System.Security.Policy;
+using System.Windows.Forms;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.EventBus.Local;
 using HtmlElement = CefSharp.Dom.HtmlElement;
@@ -23,10 +31,13 @@ namespace Propnex.Poster.NetCoreWinForm
         private List<Listing> Listings = new List<Listing>();
 
         private DevToolsContext DevToolsContext;
+        private ILogger? _logger;
 
         private static object _lock = new object();
 
-        public IPropertyCefPoster(ILocalEventBus localEventBus, IPropnexTaskProvider propnexTaskProvider)
+        public IPropertyCefPoster(
+            ILocalEventBus localEventBus,
+            IPropnexTaskProvider propnexTaskProvider)
         {
             InitializeComponent();
             _localEventBus = localEventBus;
@@ -37,11 +48,25 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             await PublishMessageAsync("Start a new task");
             await GetTask();
+            _logger = new LoggerConfiguration()
+                        .MinimumLevel.Debug()
+                        .WriteTo.Async(c => c.File($"{Directory.GetDirectoryRoot(System.AppDomain.CurrentDomain.BaseDirectory)}\\logs\\task\\{"test"}.txt"))
+                        .CreateLogger();
             foreach (var item in propnexTasks.Tasks)
             {
                 propnexTask = item;
-                await Login();
-                //Listings = await GetListings();
+                var loginResult = await Login();
+                if (loginResult.Status != PosterActionResultStatus.Success)
+                {
+                    await PublishMessageAsync(loginResult.Message);
+                    break;
+                }
+                var listingResult = await GetListings();
+                if (listingResult.Status != PosterActionResultStatus.Success)
+                {
+                    await PublishMessageAsync(listingResult.Message);
+                    break;
+                }
                 if (item.TaskType == "Post Only")
                 {
                     propnexTask = item;
@@ -64,7 +89,7 @@ namespace Propnex.Poster.NetCoreWinForm
             string addListingMutationUrl = "https://www.iproperty.com.my/pro/rasor/graphql/addListingMutation";
             string? listingId = "";
             //await listingDetails();
-            await location();
+            await location(propnexListing, listingId);
             async Task listingDetails()
             {
                 try
@@ -99,44 +124,6 @@ namespace Propnex.Poster.NetCoreWinForm
                 await Delay(60);
             }
 
-            async Task location()
-            {
-                //1.解析location数据
-                try
-                {
-                    var location = JsonConvert.DeserializeObject<RequestData<Variables<LocationDto>>>(propnexListing.Details["data_location"]);
-                    location.variables.input.id = listingId;
-                    string buildingText = "";
-                    if (propnexListing.Basic.ContainsKey("txtBuilding"))
-                    {
-                        buildingText = propnexListing.Basic["txtBuilding"];
-                    }
-                    if (string.IsNullOrEmpty(buildingText))
-                    {
-                        if (propnexListing.Basic.ContainsKey("txtBuildingCom"))
-                        {
-                            buildingText = propnexListing.Basic["txtBuildingCom"];
-                        }
-                    }
-                    if (propnexListing.Details.ContainsKey("standard_name"))
-                    {
-                        if (!string.IsNullOrEmpty(propnexListing.Details["standard_name"]))
-                        {
-                            buildingText = propnexListing.Details["standard_name"];
-                        }
-                    }
-
-                    var buildings = await BuildingQuery(buildingText);
-                    var building = buildings.Where(q => q.postCode == propnexListing.Basic["txtPostCode"]).FirstOrDefault();
-                }
-                catch (Exception ex)
-                {
-
-                }
-
-
-            }
-
             async Task propertyDetails() { }
 
             async Task descriptionMedia() { }
@@ -144,9 +131,45 @@ namespace Propnex.Poster.NetCoreWinForm
             async Task UpgradePublish() { }
         }
 
+        public async Task location(PropnexListing propnexListing, string listingId)
+        {
+            //1.解析location数据
+            try
+            {
+                var location = JsonConvert.DeserializeObject<RequestData<Variables<LocationDto>>>(propnexListing.Details["data_location"]);
+                location.variables.input.id = listingId;
+                string buildingText = "";
+                if (propnexListing.Basic.ContainsKey("txtBuilding"))
+                {
+                    buildingText = propnexListing.Basic["txtBuilding"];
+                }
+                if (string.IsNullOrEmpty(buildingText))
+                {
+                    if (propnexListing.Basic.ContainsKey("txtBuildingCom"))
+                    {
+                        buildingText = propnexListing.Basic["txtBuildingCom"];
+                    }
+                }
+                if (propnexListing.Details.ContainsKey("standard_name"))
+                {
+                    if (!string.IsNullOrEmpty(propnexListing.Details["standard_name"]))
+                    {
+                        buildingText = propnexListing.Details["standard_name"];
+                    }
+                }
+
+                var buildings = await BuildingQuery(buildingText);
+                var building = buildings.Where(q => q.postCode == propnexListing.Basic["txtPostCode"]).FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
 
 
-        public async Task Login()
+
+        public async Task<PosterActionResult> Login()
         {
             var loginUrl = "https://www.iproperty.com.my/pro/listings?lang=en-GB";
             await chromiumWebBrowser.LoadUrlAsync("https://www.baidu.com");
@@ -162,7 +185,9 @@ namespace Propnex.Poster.NetCoreWinForm
             //await Delay(60);
 
             //check page
-            await CheckPage();
+            var checkPageResult = await CheckPage();
+            if (checkPageResult.Status != PosterActionResultStatus.Success)
+                return checkPageResult;
             //input login user name
             //var userNameInput = await DevToolsContext.QuerySelectorAsync<HtmlElement>("#login-userid");
             //await Delay();
@@ -178,35 +203,67 @@ namespace Propnex.Poster.NetCoreWinForm
             //await Delay();
 
             await watiForIsLoading();
+            await PublishMessageAsync("Login success");
+            return new PosterActionResult()
+            {
+                Status = PosterActionResultStatus.Success
+            };
         }
 
-        public async Task<List<Listing>> GetListings()
+        public async Task<PosterActionResult<List<Listing>>> GetListings()
         {
             string url = $"https://www.iproperty.com.my/pro/rasor/graphql/listingsQuery?" +
                 $"operationName=listingsQuery&variables=%7B%22shouldExtendsFields%22%3Atrue%2C%22statusCode%22%3A{2}%2C%22isExcludeChild%22%3Afalse%2C%22sortBy%22%3A%22new-to-old%22%2C%22limit%22%3A500%2C%22page%22%3A%221%22%2C%22includeReAdvertiseJob%22%3Atrue%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%228893c19fbd672297adbdd3bf3eba0c22544d6ef0517a2c3153f36b2c64f86659%22%7D%7D";
-            string jscode = $@"()=> {{return fetch(""{url}"", {{
+
+            return await GetPolicy<List<Listing>>().ExecuteAsync(async (ctx) =>
+            {
+                string jscode = $@"()=> {{return fetch(""{url}"", {{
                                     ""headers"": {{
                                         ""accept"": ""application/json, text/plain, */*"",
-                                        ""if-none-match"": ""W/\""42c3f-i6z2s6ipfF/j1sd6HDcrj3E+{new Random(_lock.GetHashCode()).Next(1000)}\"""",
+                                        ""if-none-match"": ""W/\""42c3f-i6z2s6ipfF/j1sd6HDcrj3E+{new Random(_lock.GetHashCode()).Next(100, 999)}\"""",
                                     }},
                                     ""method"": ""GET"",
                                     ""mode"": ""cors"",
                                     ""credentials"": ""include""
                                 }}).then(res=>{{
-                                      return res.json()
+                                      return res.text()
                                 }})}}";
-            try
-            {
-                var javaReposnse = await DevToolsContext.EvaluateFunctionAsync<ResponseData<ListingsData>>(jscode);
-                return javaReposnse.Data.listings.Data;
-            }
-            catch (Exception ex)
-            {
-                await Delay(60);
-            }
+                var result = await DevToolsContext.EvaluateFunctionAsync<string>(jscode);
+                var jsonResult = JsonConvert.DeserializeObject<ResponseData<ListingsData>>(result);
+                _logger?.Information(result);
+                return new PosterActionResult<List<Listing>>()
+                {
+                    Data = jsonResult.Data.listings.Data,
+                    Status = PosterActionResultStatus.Success
+                };
+            }, new Context("GetListings"));
 
-            return new List<Listing>();
         }
+
+        private AsyncPolicyWrap<PosterActionResult<T>> GetPolicy<T>()
+        {
+            var retryPolicy = Policy<PosterActionResult<T>>
+           .Handle<Exception>()
+           .WaitAndRetryAsync(5, retryNumber => TimeSpan.FromSeconds(60), async (exception, timeSpan, retryCount, context) =>
+           {
+               await PublishMessageAsync($"retry count {retryCount}, exctption {exception.Exception.Message}");
+           });
+
+            var fallbackPolicy = Policy<PosterActionResult<T>>
+           .Handle<Exception>()
+           .FallbackAsync(fallbackAction: async (c) =>
+           {   
+               return await Task.Run<PosterActionResult<T>>(() =>
+               {
+                   return new PosterActionResult<T>()
+                   {
+                       Status = PosterActionResultStatus.Error
+                   };
+               });
+           });
+            return Policy.WrapAsync(fallbackPolicy, retryPolicy);
+        }
+
 
         public async Task<List<PlaceDto>> BuildingQuery(string key)
         {
@@ -219,13 +276,22 @@ namespace Propnex.Poster.NetCoreWinForm
             return resultData.Data.places.Data;
         }
 
-        public async Task CheckPage()
+        public async Task<PosterActionResult> CheckPage()
         {
             var gRecaptcha = await DevToolsContext.QuerySelectorAsync(".g-recaptcha");
             if (gRecaptcha != null)
             {
-
+                return new PosterActionResult()
+                {
+                    Status = PosterActionResultStatus.Error,
+                    Message = "g-recaptcha"
+                };
             }
+
+            return new PosterActionResult()
+            {
+                Status = PosterActionResultStatus.Success
+            };
         }
 
         /// <summary>
@@ -312,6 +378,7 @@ namespace Propnex.Poster.NetCoreWinForm
 
         public async Task PublishMessageAsync(string message)
         {
+            _logger?.Information(message);
             await _localEventBus.PublishAsync(new LogEvent()
             {
                 Message = $"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}-{message}"

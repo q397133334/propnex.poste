@@ -13,13 +13,8 @@ namespace Propnex.Poster.Share
         public T Data { get; set; }
     }
 
-    public class PosterActionResult
+    public class PosterActionResult : PosterActionResult<object>
     {
-        public string Message { get; set; }
-
-        public PosterActionResultStatus Status { get; set; }
-
-        public Object Data { get; set; }
     }
 
 
