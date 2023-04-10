@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,18 +8,25 @@ namespace Propnex.Poster.IProperty
     public class PlaceDto : ListingLocation
     {
 
-        public List<ListingItemType> buildingFacilities { get; set; }=new List<ListingItemType>();
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public List<ListingItemType>? buildingFacilities { get; set; }=null;
 
         public double latitude { get; set; }
 
-        public double longitude { get; set; }  
+        public double longitude { get; set; }
 
+        [Newtonsoft.Json.JsonIgnore]
         public ListingItemType propertyGroupTpye { get; set; }
 
+
+        [Newtonsoft.Json.JsonIgnore]
         public ListingItemType propertyType { get; set; }
 
-        public string postCode { get; set; }
+        public string postalCode { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string? postCode { get; set; }
+       
         public string block { get; set; }
 
         public string unit { get; set; }

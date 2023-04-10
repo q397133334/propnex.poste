@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,67 +11,67 @@ namespace Propnex.Poster.IProperty
 
         public List<string> Amenities { get; set; } = new List<string>();
 
-        public int Bathroom { get; set; }
+        public int? Bathroom { get; set; }
 
-        public int Bedroom { get; set; }
+        public int? Bedroom { get; set; }
 
         public ListingItemType BedroomRef { get; set; } = new ListingItemType();
 
-        public List<string> BuildingFacilities { get; set; }
+        public List<ListingItemType> BuildingFacilities { get; set; }
 
-        public int CarPark { get; set; }
+        public int? CarPark { get; set; }
 
         public ListingItemType Channel { get; set; } = new ListingItemType();
 
         public List<string> Conditions { get; set; } = new List<string>();
 
-        public DateTime ContentUpdatedDate { get; set; }
+        public DateTime? ContentUpdatedDate { get; set; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
-        public string Direction { get; set; }
+        public string? Direction { get; set; }
 
-        public DateTime ExpiryDate { get; set; }
+        public DateTime? ExpiryDate { get; set; }
 
         public ListingExtension Extension { get; set; } = new ListingExtension();
 
         public ListingAttributes Attributes { get; set; } = new ListingAttributes();
 
-        public DateTime FirstPublishedDate { get; set; }
+        public DateTime? FirstPublishedDate { get; set; }
 
         public List<ListingImage> FloorPlans { get; set; } = new List<ListingImage>();
 
         public List<ListingImage> Photo360s { get; set; }
 
-        public int PropertyCategoryTypeCode { get; set; }
+        public int? PropertyCategoryTypeCode { get; set; }
 
-        public string FloorZone { get; set; }
+        public string? FloorZone { get; set; }
 
         public ListingMultiLangText FullAddress { get; set; } = new ListingMultiLangText();
 
-        public string GrossArea { get; set; }
+        public string? GrossArea { get; set; }
 
         public ListingItemType GrossAreaMeasurement { get; set; }
 
-        public string Image360s { get; set; }
+        public string? Image360s { get; set; }
 
         public List<ListingImage> Images { get; set; } = new List<ListingImage>();
 
-        public string Layout { get; set; }
+        public string? Layout { get; set; }
 
-        public string ListerId { get; set; }
+        public string? ListerId { get; set; }
 
         public ListingItemType ListingProduct { get; set; }
 
-        public string ListingRefNo { get; set; }
+        public string? ListingRefNo { get; set; }
 
         public ListingLocation ListingLocation { get; set; } = new ListingLocation();
 
         public DateTime? NextRotationDate { get; set; }
 
-        public string OrganisationId { get; set; }
+        public string? OrganisationId { get; set; }
 
-        public string OutdoorArea { get; set; }
+        public string? OutdoorArea { get; set; }
 
         public DateTime? ProductExpiryDate { get; set; }
 
@@ -80,9 +81,9 @@ namespace Propnex.Poster.IProperty
 
         public ListingSalePrice RentPrice { get; set; }=new ListingSalePrice();
 
-        public string RepresentationListerId { get; set; }
+        public string? RepresentationListerId { get; set; }
 
-        public int SaleableArea { get; set; }
+        public int? SaleableArea { get; set; }
 
         public ListingItemType SaleableAreaMeasurement { get; set; }
 
@@ -90,9 +91,9 @@ namespace Propnex.Poster.IProperty
 
         public ListingItemType Status { get; set; } = new ListingItemType();
 
-        public string StoreRoom { get; set; }
+        public string? StoreRoom { get; set; }
 
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
         public List<string> UnitFeatures { get; set; }
 
@@ -112,19 +113,19 @@ namespace Propnex.Poster.IProperty
 
         public DateTime? PostedDate { get; set; }
 
-        public bool quality { get; set; }
+        public bool? quality { get; set; }
 
-        public bool isDegraded { get; set; }
+        public bool? isDegraded { get; set; }
 
-        public bool isAutoUpgrade { get; set; }
+        public bool? isAutoUpgrade { get; set; }
 
-        public bool isAuction { get; set; }
+        public bool? isAuction { get; set; }
 
         public DateTime? auctionDate { get; set; }
 
-        public string reAdvertiseJobs { get; set; }
+        public string? reAdvertiseJobs { get; set; }
 
-        public string partnerRefId { get; set; }
+        public string? partnerRefId { get; set; }
 
         public ListingRequestorListingPermission RequestorListingPermission { get; set; }
     }
@@ -162,7 +163,7 @@ namespace Propnex.Poster.IProperty
 
         public List<string> MandatoryFields { get; set; }
 
-        public int CrossListTypeCode { get; set; }
+        public int? CrossListTypeCode { get; set; }
 
         public string __typename { get; set; } = "ListingAttributes";
     }
@@ -229,11 +230,11 @@ namespace Propnex.Poster.IProperty
         /// <summary>
         /// 
         /// </summary>
-        public DateTime CreatedDate { get; set; }
+        public DateTime? CreatedDate { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public DateTime UpdatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -246,45 +247,59 @@ namespace Propnex.Poster.IProperty
 
     public class ListingMultiLangText
     {
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string en_GB { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string zh_HK { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string zh_CN { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string ms_MY { get; set; }
 
-        public string __typename { get; set; } = "MultiLangText";
+        [JsonIgnore]
+        public string? __typename { get; set; }
 
     }
 
     public class ListingLocation
     {
-        public ListingLevel Level1 { get; set; } = new ListingLevel() { __typename = "LocationLevel1" };
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public ListingLevel Level1 { get; set; }
 
-        public ListingLevel Level2 { get; set; } = new ListingLevel() { __typename = "LocationLevel2" };
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public ListingLevel Level2 { get; set; }
 
-        public ListingLevel Level3 { get; set; } = new ListingLevel() { __typename = "LocationLevel3" };
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public ListingLevel Level3 { get; set; }
 
-        public ListingLevel Level4 { get; set; } = new ListingLevel() { __typename = "LocationLevel4" };
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public ListingLevel Level4 { get; set; }
 
-        public ListingLevel Level5 { get; set; } = new ListingLevel() { __typename = "LocationLevel5" };
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public ListingLevel Level5 { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public ListingMultiLangText Address { get; set; } = new ListingMultiLangText();
     }
 
     public class ListingLevel
     {
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string Id { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public ListingMultiLangText Text { get; set; }
 
+        [Newtonsoft.Json.JsonIgnore]
         public string __typename { get; set; }
     }
 
     public class ListingSalePrice
     {
-        public int Fixed { get; set; }
+        public int? Fixed { get; set; }
 
         public string CurrencyCode { get; set; } = "MYR";
 
@@ -309,43 +324,43 @@ namespace Propnex.Poster.IProperty
         /// <summary>
         /// 
         /// </summary>
-        public bool canDuplicateListing { get; set; }
+        public bool? canDuplicateListing { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canEditListing { get; set; }
+        public bool? canEditListing { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canEditLister { get; set; }
+        public bool? canEditLister { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canEditRepresentationLister { get; set; }
+        public bool? canEditRepresentationLister { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canReAdvertiseListing { get; set; }
+        public bool? canReAdvertiseListing { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canPublishListing { get; set; }
+        public bool? canPublishListing { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canUpgradeListing { get; set; }
+        public bool? canUpgradeListing { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canModifyAutoUpgrade { get; set; }
+        public bool? canModifyAutoUpgrade { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canOfflineListing { get; set; }
+        public bool? canOfflineListing { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canDeleteListing { get; set; }
+        public bool? canDeleteListing { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -353,51 +368,51 @@ namespace Propnex.Poster.IProperty
         /// <summary>
         /// 
         /// </summary>
-        public bool canDegradeListing { get; set; }
+        public bool? canDegradeListing { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canExtendListing { get; set; }
+        public bool? canExtendListing { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canEditLocationUnit { get; set; }
+        public bool? canEditLocationUnit { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canEditLocationFloor { get; set; }
+        public bool? canEditLocationFloor { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canEditLocationLevel1Id { get; set; }
+        public bool? canEditLocationLevel1Id { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canEditLocationLevel2Id { get; set; }
+        public bool? canEditLocationLevel2Id { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canEditLocationLevel3Text { get; set; }
+        public bool? canEditLocationLevel3Text { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canEditLocationLevel5Text { get; set; }
+        public bool? canEditLocationLevel5Text { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public string canEditLocationLevel5Id { get; set; }
+        public string? canEditLocationLevel5Id { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canEditLocationAddress { get; set; }
+        public bool? canEditLocationAddress { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canEditLocationPostalCode { get; set; }
+        public bool? canEditLocationPostalCode { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public bool canEditLocationCoordinate { get; set; }
+        public bool? canEditLocationCoordinate { get; set; }
         /// <summary>
         /// 
         /// </summary>

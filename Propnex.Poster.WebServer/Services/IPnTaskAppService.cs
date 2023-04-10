@@ -51,15 +51,23 @@ namespace Propnex.Poster.WebServer.Services
 
         public async Task<Dtos.PnTaskDto> GetPnTaskAsync(Dtos.InputGetTaskInfoDto inputDto)
         {
+            if (string.IsNullOrEmpty(inputDto.TargetPortal))
+            {
+                inputDto.TargetPortal = "GURU";
+            }
             using (await _Mutex.LockAsync())
             {
                 var rootPath = Path.Combine(_webHostEnvironment.WebRootPath, "taskxml");
                 //1. get waiting pntask
-                var pnTask = await AsyncExecuter.FirstOrDefaultAsync((await Repository.GetQueryableAsync()).Where(q => q.Status == Share.TaskStatus.Wait));
+                var pnTask = await AsyncExecuter.FirstOrDefaultAsync((await Repository.GetQueryableAsync()).Where(q => q.Status == Share.TaskStatus.Wait && q.TargetPortal == inputDto.TargetPortal));
                 if (pnTask == null)
                     return null;
                 //2. check task file
                 var downloadUrl = $"{WebServerConsts.PnBaseUrl}{WebServerConsts.PnreadGuruTask}?client_id={pnTask.ClientId}&fileName={pnTask.Number}";
+                if(inputDto.TargetPortal=="MyIP")
+                {
+                    downloadUrl = $"https://franchise-staging.propnex.net/index.php/tasks/readCefTask?client_id={pnTask.ClientId}&fileName={pnTask.Number}";
+                }
                 //3. download task file
                 var taskContext = await downloadUrl.GetStringAsync();
                 //4. return pntasks
@@ -83,7 +91,7 @@ namespace Propnex.Poster.WebServer.Services
                     await _pnTaskLogRepository.InsertAsync(pnTask.Id, inputDto.MachineId, "Dwonload Success", "");
                     File.WriteAllText(Path.Combine(rootPath, pnTask.Number), taskContext, Encoding.UTF8);
                 }
-                await _pnTaskLogRepository.InsertAsync(pnTask.Id,inputDto.MachineId, "Get PnTask", "");
+                await _pnTaskLogRepository.InsertAsync(pnTask.Id, inputDto.MachineId, "Get PnTask", "");
 
                 pnTask.Status = Share.TaskStatus.Runing;
                 await Repository.UpdateAsync(pnTask);
@@ -106,9 +114,9 @@ namespace Propnex.Poster.WebServer.Services
         {
             var pnTasks = await AsyncExecuter.ToListAsync((await Repository.GetQueryableAsync()).Where(q => q.Status == Share.TaskStatus.Wait));
 
-            var lists=new List<PnTaskDto>();
+            var lists = new List<PnTaskDto>();
 
-            foreach(var pnTask in pnTasks)
+            foreach (var pnTask in pnTasks)
             {
                 lists.Add(new PnTaskDto()
                 {
@@ -155,7 +163,7 @@ namespace Propnex.Poster.WebServer.Services
         public async Task PnTaskXmlRetry(Guid pnTaskId, string message = "")
         {
             var pnTask = await AsyncExecuter.FirstOrDefaultAsync((await Repository.GetQueryableAsync()).Where(q => q.Id == pnTaskId));
-            if (pnTask !=null)
+            if (pnTask != null)
             {
                 await _pnTaskLogRepository.InsertAsync(Guid.Empty, pnTask.Id, $"{message}", "");
 

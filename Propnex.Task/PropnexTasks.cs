@@ -44,6 +44,7 @@ namespace Propnex
                         Country = element.ElementString("country"),
                         Status = element.ElementString("status"),
                     };
+                    content = content.Replace("cef_", "");
                     // find listingfile start index
                     var listingFileIndex = content.IndexOf($"Xpressor-Listing-File==={task.ListingFile}");
                     // find listingfile end index

@@ -16,11 +16,7 @@ namespace Propnex.Poster.IProperty
 
         public T variables { get; set; }
 
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public Extensions extensions { get; set; } = null;
-
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public bool? shouldExtendsFields { get; set; } = null;
     }
 
     public class Extensions

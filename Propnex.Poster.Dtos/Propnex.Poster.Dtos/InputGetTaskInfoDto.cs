@@ -8,5 +8,7 @@ namespace Propnex.Poster.Dtos
     {
         public Guid MachineId { get; set; }
 
+        public string TargetPortal { get; set; } = "GURU";
+
     }
 }

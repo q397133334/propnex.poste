@@ -1,23 +1,15 @@
 using CefSharp;
-using CefSharp.DevTools.IO;
 using CefSharp.Dom;
-using CefSharp.WinForms;
 using Newtonsoft.Json;
 using Polly;
-using Polly.Contrib.WaitAndRetry;
-using Polly.Fallback;
-using Polly.Retry;
 using Polly.Wrap;
 using Propnex.Poster.IProperty;
 using Propnex.Poster.Share;
+using PropnexPoster.NetCoreWinForm;
 using Serilog;
-using Serilog.Core;
-using System;
-using System.Security.Policy;
-using System.Windows.Forms;
+using System.CodeDom;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.EventBus.Local;
-using HtmlElement = CefSharp.Dom.HtmlElement;
 
 namespace Propnex.Poster.NetCoreWinForm
 {
@@ -34,10 +26,14 @@ namespace Propnex.Poster.NetCoreWinForm
         private ILogger? _logger;
 
         private static object _lock = new object();
+        private JsonSerializerSettings jsonSerialzerSettings = new JsonSerializerSettings
+        {
+            ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
+        };
 
         public IPropertyCefPoster(
-            ILocalEventBus localEventBus,
-            IPropnexTaskProvider propnexTaskProvider)
+                ILocalEventBus localEventBus,
+                IPropnexTaskProvider propnexTaskProvider)
         {
             InitializeComponent();
             _localEventBus = localEventBus;
@@ -80,94 +76,154 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             foreach (var task in propnexTask.Listings.Listings)
             {
-                await CreateListing(task);
+                var result = await CreateListing(task);
             }
         }
 
-        public async Task CreateListing(PropnexListing propnexListing)
+        public async Task<PosterActionResult> CreateListing(PropnexListing propnexListing)
         {
             string addListingMutationUrl = "https://www.iproperty.com.my/pro/rasor/graphql/addListingMutation";
-            string? listingId = "";
-            //await listingDetails();
-            await location(propnexListing, listingId);
-            async Task listingDetails()
+            string? listingId = "104938596";
+
+            var resultListingDetails = await listingDetails();
+            if (resultListingDetails.Status == PosterActionResultStatus.Success)
+                listingId = resultListingDetails.Data;
+            else
+                return new PosterActionResult()
+                {
+                    Data = listingId,
+                    Message = resultListingDetails.Message
+                };
+
+
+            var locationResult = await location(propnexListing, listingId);
+            if (locationResult.Status == PosterActionResultStatus.Error)
+                return new PosterActionResult()
+                {
+                    Data = listingId,
+                    Message = locationResult.Message
+                };
+
+            var resultProperytDetails = await propertyDetails(propnexListing, listingId);
+
+
+            async Task<PosterActionResult<string>> listingDetails()
             {
-                try
+                return await GetPolicy<string>().ExecuteAsync(async (ctx) =>
                 {
                     propnexListing.Details["data_step1"] = propnexListing.Details["data_step1"].Replace("\"location\":[]", "\"location\":{}");
                     var listingDetails = JsonConvert.DeserializeObject<RequestData<Variables<AddListingMutationDto>>>(propnexListing.Details["data_step1"]);
-                    string jsonData = JsonConvert.SerializeObject(listingDetails, new JsonSerializerSettings
+                    string jsonData = JsonConvert.SerializeObject(listingDetails, jsonSerialzerSettings);
+
+                    var result = await AjaxJsonPostAsync(addListingMutationUrl, "https://www.iproperty.com.my/pro/add-listing/listing-details", data: jsonData);
+                    if (result.Contains("PERSISTED_QUERY_NOT_FOUND"))
                     {
-                        ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
-                    });
-
-                    string jscode = $@"()=> {{return fetch(""{addListingMutationUrl}"", {{
-                                    ""headers"": {{
-                                        ""accept"": ""d*/*"",
-                                        ""if-none-match"": ""W/\""42c3f-i6z2s6ipfF/j1sd6HDcrj3E+{new Random(_lock.GetHashCode()).Next(1000)}\"""",
-                                    }},
-                                    ""method"": ""POST"",
-                                    ""referrer"":""https://www.iproperty.com.my/pro/add-listing/listing-details"",
-                                    ""body"":'{jsonData.Replace('\"', '"')}'
-                                }}).then(res=>{{
-                                      return res.json()
-                                }})}}";
-
-                    var result = await AjaxJsonPostAsync(addListingMutationUrl, "https://www.iproperty.com.my/pro/add-listing/listing-details", data: propnexListing.Details["data_step1"]);
+                        await PublishMessageAsync(result);
+                        throw new Exception("PERSISTED_QUERY_NOT_FOUND");
+                    }
+                    _logger.Information(result);
                     var data = JsonConvert.DeserializeObject<ResponseData<AddListingPayload>>(result);
                     listingId = data?.Data.addListing.listing.Id;
-                }
-                catch (Exception ex)
-                {
+                    await PublishMessageAsync($"create listing details success,listing is is {listingId}");
+                    return new PosterActionResult<string>()
+                    {
+                        Data = listingId,
+                        Status = PosterActionResultStatus.Success
+                    };
 
-                }
-                await Delay(60);
+                }, new Context("listingDetails"));
             }
 
-            async Task propertyDetails() { }
 
             async Task descriptionMedia() { }
 
             async Task UpgradePublish() { }
+
+            return new PosterActionResult();
         }
 
-        public async Task location(PropnexListing propnexListing, string listingId)
+        public async Task<PosterActionResult<Listing>> propertyDetails(PropnexListing propnexListing, string listingId)
+        {
+
+            return new PosterActionResult<Listing>();
+        }
+
+        public async Task<PosterActionResult<Listing>> location(PropnexListing propnexListing, string listingId)
         {
             //1.½âÎölocationÊý¾Ý
-            try
+            var location = JsonConvert.DeserializeObject<RequestData<Variables<LocationDto>>>(propnexListing.Details["data_location"].Replace("\"extension\":[]", "\"extension\":{}"));
+            location.variables.input.id = listingId;
+            string buildingText = "";
+            if (propnexListing.Basic.ContainsKey("txtBuilding"))
             {
-                var location = JsonConvert.DeserializeObject<RequestData<Variables<LocationDto>>>(propnexListing.Details["data_location"]);
-                location.variables.input.id = listingId;
-                string buildingText = "";
-                if (propnexListing.Basic.ContainsKey("txtBuilding"))
-                {
-                    buildingText = propnexListing.Basic["txtBuilding"];
-                }
-                if (string.IsNullOrEmpty(buildingText))
-                {
-                    if (propnexListing.Basic.ContainsKey("txtBuildingCom"))
-                    {
-                        buildingText = propnexListing.Basic["txtBuildingCom"];
-                    }
-                }
-                if (propnexListing.Details.ContainsKey("standard_name"))
-                {
-                    if (!string.IsNullOrEmpty(propnexListing.Details["standard_name"]))
-                    {
-                        buildingText = propnexListing.Details["standard_name"];
-                    }
-                }
-
-                var buildings = await BuildingQuery(buildingText);
-                var building = buildings.Where(q => q.postCode == propnexListing.Basic["txtPostCode"]).FirstOrDefault();
+                buildingText = propnexListing.Basic["txtBuilding"];
             }
-            catch (Exception ex)
+            if (string.IsNullOrEmpty(buildingText))
             {
-
+                if (propnexListing.Basic.ContainsKey("txtBuildingCom"))
+                {
+                    buildingText = propnexListing.Basic["txtBuildingCom"];
+                }
             }
+            if (string.IsNullOrEmpty(buildingText) && propnexListing.Details.ContainsKey("standard_name"))
+            {
+                if (!string.IsNullOrEmpty(propnexListing.Details["standard_name"]))
+                {
+                    buildingText = propnexListing.Details["standard_name"];
+                }
+            }
+            if (string.IsNullOrEmpty(buildingText) && propnexListing.ProjectData.ContainsKey("name"))
+            {
+                buildingText = propnexListing.ProjectData["name"];
+            }
+            if (string.IsNullOrEmpty(buildingText))
+            {
+                return new PosterActionResult<Listing>()
+                {
+                    Status = PosterActionResultStatus.Error,
+                    Message = "Not find building"
+                };
+            }
+
+            var buildings = await BuildingQuery(buildingText);
+            var building = buildings.Where(q => q.postCode == propnexListing.Basic["txtPostCode"]).FirstOrDefault();
+            if (building != null)
+            {
+                location.variables.input.location = building;
+                location.variables.input.saleableAreaMeasurementCode = 1;
+                if (building.buildingFacilities != null && building.buildingFacilities.Count > 1)
+                {
+                    location.variables.input.buildingFacilityCodes = building.buildingFacilities.Select(q => q.Code).ToList();
+                    location.variables.shouldExtendsFields = true;
+                }
+                location.variables.input.location.buildingFacilities = null;
+                location.variables.input.location.postalCode = location.variables.input.location.postCode;
+                location.variables.input.location.postCode = null;
+                //location.variables.input.buildingFacilityCodes = null;
+                location.extensions.persistedQuery.Sha256Hash = "338f5cae02e4a1a1514a145cf448909fbe092045dc524f11db5d41572990dcdf";
+
+                return await GetPolicy<Listing>().ExecuteAsync(async (ctx) =>
+                 {
+                     var result = await AjaxJsonPostAsync("https://www.iproperty.com.my/pro/rasor/graphql/updateListingInfo", $"https://www.iproperty.com.my/pro/add-listing/location/{listingId}", data: JsonConvert.SerializeObject(location, jsonSerialzerSettings));
+
+                     if (result.Contains("PersistedQueryNotFound"))
+                     {
+                         throw new Exception("PersistedQueryNotFound");
+                     }
+                     var listing = JsonConvert.DeserializeObject<ResponseData<UpdateListingPayload>>(result);
+                     return new PosterActionResult<Listing>()
+                     {
+                         Data = listing.Data.updateListing.listing,
+                         Status = PosterActionResultStatus.Success
+                     };
+                 }, new Context("location"));
+            }
+            return new PosterActionResult<Listing>()
+            {
+                Message = "unknown error",
+                Status = PosterActionResultStatus.Error
+            };
         }
-
-
 
         public async Task<PosterActionResult> Login()
         {
@@ -229,8 +285,13 @@ namespace Propnex.Poster.NetCoreWinForm
                                       return res.text()
                                 }})}}";
                 var result = await DevToolsContext.EvaluateFunctionAsync<string>(jscode);
-                var jsonResult = JsonConvert.DeserializeObject<ResponseData<ListingsData>>(result);
+                if (result.Contains("PERSISTED_QUERY_NOT_FOUND"))
+                {
+                    throw new Exception("PERSISTED_QUERY_NOT_FOUND");
+                }
                 _logger?.Information(result);
+                var jsonResult = JsonConvert.DeserializeObject<ResponseData<ListingsData>>(result);
+                //await Delay(60);
                 return new PosterActionResult<List<Listing>>()
                 {
                     Data = jsonResult.Data.listings.Data,
@@ -239,7 +300,6 @@ namespace Propnex.Poster.NetCoreWinForm
             }, new Context("GetListings"));
 
         }
-
         private AsyncPolicyWrap<PosterActionResult<T>> GetPolicy<T>()
         {
             var retryPolicy = Policy<PosterActionResult<T>>
@@ -252,7 +312,7 @@ namespace Propnex.Poster.NetCoreWinForm
             var fallbackPolicy = Policy<PosterActionResult<T>>
            .Handle<Exception>()
            .FallbackAsync(fallbackAction: async (c) =>
-           {   
+           {
                return await Task.Run<PosterActionResult<T>>(() =>
                {
                    return new PosterActionResult<T>()
@@ -367,8 +427,30 @@ namespace Propnex.Poster.NetCoreWinForm
 
         public async Task GetTask()
         {
-            propnexTasks = _propnexTaskProvider.GetTasks(System.IO.File.ReadAllText("E:\\2504.tsk"));
+
+            propnexTasks = _propnexTaskProvider.GetTasks(System.IO.File.ReadAllText("E:\\114.cef.tsk"));
             if (propnexTasks == null)
+            {
+                await PublishMessageAsync("Not find tasks ,dealy 1 min");
+                await Task.Delay(1000 * 60);
+                Close();
+            }
+            return;
+            var context = "";
+            var pnTask = await WebServer.GetTask();
+            if (pnTask != null)
+            {
+                context = await WebServer.GetTaskContent(pnTask);
+                //propnexTasks = _propnexTaskProvider.GetTasks(System.IO.File.ReadAllText("E:\\111.cef.tsk"));
+                propnexTasks = _propnexTaskProvider.GetTasks(context);
+                if (propnexTasks == null)
+                {
+                    await PublishMessageAsync("Not find tasks ,dealy 1 min");
+                    await Task.Delay(1000 * 60);
+                    Close();
+                }
+            }
+            else
             {
                 await PublishMessageAsync("Not find tasks ,dealy 1 min");
                 await Task.Delay(1000 * 60);

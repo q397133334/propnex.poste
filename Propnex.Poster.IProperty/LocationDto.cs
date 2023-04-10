@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,8 +11,11 @@ namespace Propnex.Poster.IProperty
 
         public string id { get; set; }
 
-        public object extension { get; set; } = new object();
+        public NullClass extension { get; set; } = new NullClass();
 
         public int saleableAreaMeasurementCode { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public List<int>? buildingFacilityCodes { get; set; }
     }
 }

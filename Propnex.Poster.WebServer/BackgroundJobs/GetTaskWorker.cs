@@ -32,10 +32,11 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
 
             await getPnTasks(workerContext, WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks);
             await getPnTasks(workerContext, WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks + "?xweb=1");
+            await getPnTasks(workerContext, "https://franchise-staging.propnex.net/index.php/tasks/fetchCefTasks?xweb=1", "MyIP");
         }
 
 
-        private async Task getPnTasks(PeriodicBackgroundWorkerContext workerContext, string url)
+        private async Task getPnTasks(PeriodicBackgroundWorkerContext workerContext, string url,string targetPortal="GURU")
         {
             var _repositoryPntask = workerContext.ServiceProvider.GetService<IRepository<PnTask>>();
             IPnTaskLogRepository _pnTaskLogRepository = workerContext.ServiceProvider.GetService<IPnTaskLogRepository>();
@@ -46,14 +47,15 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
                 var tsk = item.Split('\t');
                 if (tsk.Length == 2)
                 {
-                    var waitTask = (await _repositoryPntask.GetQueryableAsync()).Where(q => q.Number == tsk[0] && q.ClientId == tsk[1]).OrderByDescending(q => q.CreationTime).FirstOrDefault();
+                    var waitTask = (await _repositoryPntask.GetQueryableAsync()).Where(q => q.Number == tsk[0] && q.ClientId == tsk[1] && q.TargetPortal==targetPortal).OrderByDescending(q => q.CreationTime).FirstOrDefault();
                     if (waitTask == null)
                     {
                         waitTask = await _repositoryPntask.InsertAsync(new PnTask()
                         {
                             Number = tsk[0],
                             ClientId = tsk[1],
-                            Status = TaskStatus.Wait
+                            Status = TaskStatus.Wait,
+                            TargetPortal = targetPortal
                         });
                         await _pnTaskLogRepository.InsertAsync(waitTask.Id, Guid.Empty, "Init Task", "");
                     }

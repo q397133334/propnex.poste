@@ -10,6 +10,11 @@ namespace Propnex.Poster.IProperty
         public Payload<AddListingDto> addListing { get; set; }
     }
 
+    public class UpdateListingPayload
+    {
+        public Payload<Listing> updateListing { get; set; }
+    }
+
     public class Payload<T>
     {
         public T listing { get; set; }
@@ -33,7 +38,7 @@ namespace Propnex.Poster.IProperty
 
         public ListingItemType propertyCategoryType { get; set; }
 
-        public bool isAuction { get; set; }
+        public bool? isAuction { get; set; }
 
         public DateTime? auctionDate { get; set; }
 
