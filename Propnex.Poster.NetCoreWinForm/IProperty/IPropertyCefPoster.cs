@@ -200,16 +200,18 @@ namespace Propnex.Poster.NetCoreWinForm
                 location.variables.input.location.postalCode = location.variables.input.location.postCode;
                 location.variables.input.location.postCode = null;
                 //location.variables.input.buildingFacilityCodes = null;
-                location.extensions.persistedQuery.Sha256Hash = "338f5cae02e4a1a1514a145cf448909fbe092045dc524f11db5d41572990dcdf";
+               
 
                 return await GetPolicy<Listing>().ExecuteAsync(async (ctx) =>
                  {
+                     location.extensions.persistedQuery.Sha256Hash = "d6797c24744e9c772977451f0dd7270ab0e622a483ffc8676d6accdd997036ae";
                      var result = await AjaxJsonPostAsync("https://www.iproperty.com.my/pro/rasor/graphql/updateListingInfo", $"https://www.iproperty.com.my/pro/add-listing/location/{listingId}", data: JsonConvert.SerializeObject(location, jsonSerialzerSettings));
 
                      if (result.Contains("PersistedQueryNotFound"))
                      {
                          throw new Exception("PersistedQueryNotFound");
                      }
+                     await Delay(60);
                      var listing = JsonConvert.DeserializeObject<ResponseData<UpdateListingPayload>>(result);
                      return new PosterActionResult<Listing>()
                      {
@@ -414,7 +416,7 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             while (chromiumWebBrowser.IsLoading)
             {
-                await Delay();
+                //await Delay();
                 await PublishMessageAsync($"Waiting loading {chromiumWebBrowser.IsLoading}");
             }
             await Delay();
@@ -428,7 +430,7 @@ namespace Propnex.Poster.NetCoreWinForm
         public async Task GetTask()
         {
 
-            propnexTasks = _propnexTaskProvider.GetTasks(System.IO.File.ReadAllText("E:\\114.cef.tsk"));
+            propnexTasks = _propnexTaskProvider.GetTasks(System.IO.File.ReadAllText("E:\\116.cef.tsk"));
             if (propnexTasks == null)
             {
                 await PublishMessageAsync("Not find tasks ,dealy 1 min");
