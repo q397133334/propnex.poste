@@ -11,5 +11,9 @@
         public static string PnfetchGuruTasks = "/index.php/tasks/fetchGuruTasks";
 
         public static string PnreadGuruTask = "/index.php/tasks/readGuruTask";
+
+        public static string PnfetchMyIpTasks = "https://franchise-prod.propnex.net/index.php/tasks/fetchCefTasks?xweb=1";
+
+        public static string PnreadMyIpTask = "https://franchise-prod.propnex.net/index.php/tasks/readCefTask";
     }
 }

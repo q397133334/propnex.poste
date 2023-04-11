@@ -32,7 +32,7 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
 
             await getPnTasks(workerContext, WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks);
             await getPnTasks(workerContext, WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks + "?xweb=1");
-            await getPnTasks(workerContext, "https://franchise-staging.propnex.net/index.php/tasks/fetchCefTasks?xweb=1", "MyIP");
+            await getPnTasks(workerContext, WebServerConsts.PnfetchMyIpTasks, "MyIP");
         }
 
 

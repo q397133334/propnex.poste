@@ -64,9 +64,9 @@ namespace Propnex.Poster.WebServer.Services
                     return null;
                 //2. check task file
                 var downloadUrl = $"{WebServerConsts.PnBaseUrl}{WebServerConsts.PnreadGuruTask}?client_id={pnTask.ClientId}&fileName={pnTask.Number}";
-                if(inputDto.TargetPortal=="MyIP")
+                if (inputDto.TargetPortal == "MyIP")
                 {
-                    downloadUrl = $"https://franchise-staging.propnex.net/index.php/tasks/readCefTask?client_id={pnTask.ClientId}&fileName={pnTask.Number}";
+                    downloadUrl = $"{WebServerConsts.PnreadMyIpTask}?client_id={pnTask.ClientId}&fileName={pnTask.Number}";
                 }
                 //3. download task file
                 var taskContext = await downloadUrl.GetStringAsync();

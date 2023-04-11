@@ -52,6 +52,7 @@ using Volo.Abp.Validation.Localization;
 using Volo.Abp.VirtualFileSystem;
 using Volo.Abp.BackgroundWorkers;
 using Propnex.Poster.WebServer.Data;
+using Propnex.Poster.WebServer;
 
 namespace Propnex.Poster;
 
@@ -320,6 +321,15 @@ public class PosterModule : AbpModule
                 configurationContext.UseMySQL();
             });
         });
+    }
+
+    public override async Task OnPostApplicationInitializationAsync(ApplicationInitializationContext context)
+    {
+        var config= context.ServiceProvider.GetService<IConfiguration>();
+        WebServerConsts.PnfetchMyIpTasks = config["PnfetchMyIpTasks"];
+        WebServerConsts.PnreadMyIpTask = config["PnreadMyIpTask"];
+
+        await Task.CompletedTask;
     }
 
 
