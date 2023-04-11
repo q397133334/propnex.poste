@@ -13,7 +13,7 @@ namespace Propnex.Poster.IProperty
 
     public class AddListingMutationDto
     {
-        public DateTime? actionData { get; set; }
+        public DateTime? auctionDate { get; set; }
 
         public int? channelCode { get; set; }
 

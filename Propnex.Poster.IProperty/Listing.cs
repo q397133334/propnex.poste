@@ -95,7 +95,7 @@ namespace Propnex.Poster.IProperty
 
         public string? Title { get; set; }
 
-        public List<string> UnitFeatures { get; set; }
+        public List<ListingItemType> UnitFeatures { get; set; }
 
         public List<ListingRichMedia> Videos { get; set; }
 
@@ -303,6 +303,7 @@ namespace Propnex.Poster.IProperty
 
         public string CurrencyCode { get; set; } = "MYR";
 
+        [Newtonsoft.Json.JsonIgnore]
         public string __typename { get; set; } = "Price";
     }
 

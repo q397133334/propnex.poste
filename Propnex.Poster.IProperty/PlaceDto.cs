@@ -15,11 +15,11 @@ namespace Propnex.Poster.IProperty
 
         public double longitude { get; set; }
 
-        [Newtonsoft.Json.JsonIgnore]
-        public ListingItemType propertyGroupTpye { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public ListingItemType propertyGroupType { get; set; }
 
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public ListingItemType propertyType { get; set; }
 
         public string postalCode { get; set; }

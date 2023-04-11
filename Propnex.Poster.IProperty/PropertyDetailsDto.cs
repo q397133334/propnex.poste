@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -17,13 +18,27 @@ namespace Propnex.Poster.IProperty
 
         public int? carPark { get; set; }
 
+        public int? conditionCodes { get; set; }
+
+        public int? directionCode { get; set; }
+
+
+
         public PropertyDetailsExtension extension { get; set; }
 
+        public List<int> floorPlans { get; set; }
+
+
         public int? grossArea { get; set; }
+
+        public string id { get; set; }
+        public List<string> images { get; set; }
 
         public NullClass location { get; set; }
 
         public ListingSalePrice maintenanceFee { get; set; }
+
+        public List<string> photo360s { get; set; }
 
         public ListingSalePrice rentPrice { get; set; }
 
@@ -39,16 +54,29 @@ namespace Propnex.Poster.IProperty
 
         public List<int>? unitFeatureCodes { get; set; }
 
+        public int? unitTypeCode { get; set; }
+
+
     }
 
     public class PropertyDetailsExtension
     {
-        public AreaDimension grossAreaDimension { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public AreaDimension? grossAreaDimension { get; set; } = new AreaDimension();
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public bool? isBumiLot { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public int? landTitleTypeCode { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public int? occupiedCode { get; set; }
 
-        public AreaDimension saleableAreaDimension { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public AreaDimension? saleableAreaDimension { get; set; } = new AreaDimension();
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public int? titleTypeCode { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int? unexpiredLeaseYear { get; set; }
     }
 
