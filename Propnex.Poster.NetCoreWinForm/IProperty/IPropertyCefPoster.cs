@@ -13,8 +13,10 @@ using Serilog;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Text;
+using System.Windows.Forms;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.EventBus.Local;
+using HtmlElement = CefSharp.Dom.HtmlElement;
 
 namespace Propnex.Poster.NetCoreWinForm
 {
@@ -49,6 +51,13 @@ namespace Propnex.Poster.NetCoreWinForm
 
         public async Task Start()
         {
+            var toLoginResult = await ToLogin();
+            if (toLoginResult.Status == PosterActionResultStatus.Error)
+            {
+                await PublishMessageAsync("error");
+                Close();
+                return;
+            }
             await PublishMessageAsync("Start a new task");
             await GetTask();
             _logger = new LoggerConfiguration()
@@ -74,15 +83,15 @@ namespace Propnex.Poster.NetCoreWinForm
                 {
                     await PostOnly();
                 }
-                if(item.TaskType.ToLower()== "repost")
+                if (item.TaskType.ToLower() == "repost")
                 {
 
                 }
-                if(item.TaskType.ToLower()== "update")
+                if (item.TaskType.ToLower() == "update")
                 {
 
                 }
-                if(item.TaskType.ToLower()== "remove from portals")
+                if (item.TaskType.ToLower() == "remove from portals")
                 {
 
                 }
@@ -121,7 +130,8 @@ namespace Propnex.Poster.NetCoreWinForm
                 return new PosterActionResult()
                 {
                     Data = listingId,
-                    Message = resultListingDetails.Message
+                    Message = resultListingDetails.Message,
+                    Status = PosterActionResultStatus.Error
                 };
 
 
@@ -130,7 +140,8 @@ namespace Propnex.Poster.NetCoreWinForm
                 return new PosterActionResult()
                 {
                     Data = listingId,
-                    Message = resultLocation.Message
+                    Message = resultLocation.Message,
+                    Status = PosterActionResultStatus.Error
                 };
 
             var resultProperytDetails = await propertyDetails(propnexListing, listingId);
@@ -138,7 +149,8 @@ namespace Propnex.Poster.NetCoreWinForm
                 return new PosterActionResult()
                 {
                     Data = listingId,
-                    Message = resultProperytDetails.Message
+                    Message = resultProperytDetails.Message,
+                    Status = PosterActionResultStatus.Error
                 };
 
             var resultDescriptionMedial = await descriptionMedial(propnexListing, listingId);
@@ -146,7 +158,8 @@ namespace Propnex.Poster.NetCoreWinForm
                 return new PosterActionResult()
                 {
                     Data = listingId,
-                    Message = resultDescriptionMedial.Message
+                    Message = resultDescriptionMedial.Message,
+                    Status = PosterActionResultStatus.Error
                 };
 
             var resultUpgradePublish = await UpgradePublish(propnexListing, listingId);
@@ -515,18 +528,40 @@ namespace Propnex.Poster.NetCoreWinForm
              }, new Context("location"));
         }
 
-        public async Task<PosterActionResult> Login()
+        public async Task<PosterActionResult> ToLogin()
         {
             var loginUrl = "https://www.iproperty.com.my/pro/listings?lang=en-GB";
             await chromiumWebBrowser.LoadUrlAsync("https://www.baidu.com");
             await PublishMessageAsync("DeleteCookie");
-            //var cookieManager = chromiumWebBrowser.GetCookieManager();
-            //await cookieManager.DeleteCookiesAsync();
+            var cookieManager = chromiumWebBrowser.GetCookieManager();
+            await cookieManager.DeleteCookiesAsync();
             await PublishMessageAsync($"LoadUrl:{loginUrl}");
             await chromiumWebBrowser.LoadUrlAsync(loginUrl);
             await watiForIsLoading();
             DevToolsContext = await chromiumWebBrowser.CreateDevToolsContextAsync();
             chromiumWebBrowser.ShowDevTools();
+            var checkPageResult = await CheckPage();
+            int retry = 0;
+            while (checkPageResult.Status == PosterActionResultStatus.Error && retry < 5)
+            {
+                checkPageResult = await CheckPage();
+                retry++;
+            }
+            return checkPageResult;
+        }
+
+        public async Task<PosterActionResult> Login()
+        {
+            //var loginUrl = "https://www.iproperty.com.my/pro/listings?lang=en-GB";
+            //await chromiumWebBrowser.LoadUrlAsync("https://www.baidu.com");
+            //await PublishMessageAsync("DeleteCookie");
+            //var cookieManager = chromiumWebBrowser.GetCookieManager();
+            //await cookieManager.DeleteCookiesAsync();
+            //await PublishMessageAsync($"LoadUrl:{loginUrl}");
+            //await chromiumWebBrowser.LoadUrlAsync(loginUrl);
+            //await watiForIsLoading();
+            //DevToolsContext = await chromiumWebBrowser.CreateDevToolsContextAsync();
+            //chromiumWebBrowser.ShowDevTools();
 
             //await Delay(60);
 
@@ -535,20 +570,21 @@ namespace Propnex.Poster.NetCoreWinForm
             if (checkPageResult.Status != PosterActionResultStatus.Success)
                 return checkPageResult;
             //input login user name
-            //var userNameInput = await DevToolsContext.QuerySelectorAsync<HtmlElement>("#login-userid");
-            //await Delay();
-            //await userNameInput.SetAttributeAsync("value", propnexTask.Account);
-            ////input password
-            //var userPasswordInput = await DevToolsContext.QuerySelectorAsync<HtmlElement>("#login-password");
-            //await Delay();
-            //await userPasswordInput.SetAttributeAsync("value", propnexTask.Password);
-            ////login button
-            //var loginButton = await DevToolsContext.QuerySelectorAsync<HtmlElement>("#btn_login");
-            //await Delay(1);
-            //await loginButton.ClickAsync();
-            //await Delay();
+            var userNameInput = await DevToolsContext.QuerySelectorAsync<CefSharp.Dom.HtmlElement>("#login-userid");
+            await Delay();
+            await userNameInput.SetAttributeAsync("value", propnexTask.Account);
+            //input password
+            var userPasswordInput = await DevToolsContext.QuerySelectorAsync<CefSharp.Dom.HtmlElement>("#login-password");
+            await Delay();
+            await userPasswordInput.SetAttributeAsync("value", propnexTask.Password);
+            //login button
+            var loginButton = await DevToolsContext.QuerySelectorAsync<HtmlElement>("#btn_login");
+            await Delay(1);
+            await loginButton.ClickAsync();
+            await Delay();
 
             await watiForIsLoading();
+            await CheckPage();
             await PublishMessageAsync("Login success");
             return new PosterActionResult()
             {
@@ -602,23 +638,30 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             var retryPolicy = Policy<PosterActionResult<T>>
            .Handle<Exception>()
-           .WaitAndRetryAsync(5, retryNumber => TimeSpan.FromSeconds(60), async (exception, timeSpan, retryCount, context) =>
+           .WaitAndRetryAsync(5, retryNumber => TimeSpan.FromSeconds(30), async (exception, timeSpan, retryCount, context) =>
            {
                await PublishMessageAsync($"retry count {retryCount}, exctption {exception.Exception.Message}");
+               context["Message"] = exception.Exception.Message;
            });
 
             var fallbackPolicy = Policy<PosterActionResult<T>>
            .Handle<Exception>()
-           .FallbackAsync(fallbackAction: async (c) =>
-           {
-               return await Task.Run<PosterActionResult<T>>(() =>
-               {
-                   return new PosterActionResult<T>()
+           .FallbackAsync(
+                async (res, context, cancellationToken) =>
                    {
-                       Status = PosterActionResultStatus.Error
-                   };
-               });
-           });
+                       return await Task.Factory.StartNew(() =>
+                       {
+                           return new PosterActionResult<T>()
+                           {
+                               Status = PosterActionResultStatus.Error,
+                               Message = $"{context.OperationKey}:{context["Message"].ToString()}"
+                           };
+                       }, cancellationToken);
+                   },
+                async (res, c) =>
+                   {
+                       await PublishMessageAsync($"onFallbackAsync called:{res?.Exception?.Message}");
+                   });
             return Policy.WrapAsync(fallbackPolicy, retryPolicy);
         }
 
@@ -675,6 +718,7 @@ namespace Propnex.Poster.NetCoreWinForm
 
         public async Task<PosterActionResult> CheckPage()
         {
+            await Delay(10);
             var gRecaptcha = await DevToolsContext.QuerySelectorAsync(".g-recaptcha");
             if (gRecaptcha != null)
             {
@@ -684,7 +728,21 @@ namespace Propnex.Poster.NetCoreWinForm
                     Message = "g-recaptcha"
                 };
             }
+            var challengeForm = await DevToolsContext.QuerySelectorAsync("#challenge-form");
+            if (challengeForm != null)
+            {
+                var checkBox = await DevToolsContext.QuerySelectorAsync("#cf-stage > div.ctp-checkbox-container > label > input[type=checkbox]");
+                try
+                {
+                    await DevToolsContext.EvaluateFunctionAsync("()=> {document.querySelector(\"iframe\").contentWindow.document.querySelector(\"#cf-stage > div.ctp-checkbox-container > label > input[type=checkbox]\").click();}");
+                }
+                catch (Exception ex)
+                {
 
+                }
+            }
+
+            await Delay(60);
             return new PosterActionResult()
             {
                 Status = PosterActionResultStatus.Success
@@ -809,101 +867,69 @@ namespace Propnex.Poster.NetCoreWinForm
 
         private async Task xwebItem(PosterActionResult posterActionResult, PropnexListing propnexListing)
         {
-            var net = true;
-            for (int i = 0; i < 3; i++)
+            using (RestClient client = new RestClient("https://franchise-prod.propnex.net/index.php/tasks/updateStatus"))
             {
-                StringBuilder formData = new StringBuilder();
-                Dictionary<string, string> data = new Dictionary<string, string>();
-                formData.Append($"account_name={propnexTask.Account}&");
-                data.Add("account_name", propnexTask.Account);
-
-                formData.Append($"account_password={propnexTask.Password}&");
-                data.Add("account_password", propnexTask.Password);
-
-                formData.Append($"task_id={propnexTask.Id}&");
-                data.Add("task_id", propnexTask.Id);
-
-                formData.Append($"taskitem_id={propnexListing.Details["taskitem_id"]}&");
-                data.Add("taskitem_id", propnexListing.Details["taskitem_id"]);
-
-                formData.Append($"status={(posterActionResult.Status == PosterActionResultStatus.Success ? "Done" : "Faile")}&");
-                data.Add("status", posterActionResult.Status == PosterActionResultStatus.Success ? "Done" : "Faile");
-
-                formData.Append($"time_cost={0}&");
-                data.Add("time_cost", 0.ToString());
-
-                formData.Append($"taskitem_note={posterActionResult.Message}&");
-                data.Add("taskitem_note", posterActionResult.Message);
-
+                var request = new RestRequest();
+                request.AddParameter("account_name", propnexTask.Account);
+                request.AddParameter("account_password", propnexTask.Password);
+                request.AddParameter("task_id", propnexTask.Id);
+                request.AddParameter("taskitem_id", propnexListing.Details["taskitem_id"]);
+                request.AddParameter("status", (posterActionResult.Status == PosterActionResultStatus.Success ? "Done" : "Faile"));
+                request.AddParameter("time_cost", "0");
+                request.AddParameter("taskitem_note", posterActionResult.Message);
                 if (PosterActionResultStatus.Success == posterActionResult.Status)
                 {
-                    formData.Append($"portal_link=https://www.propertyguru.com.sg/listing/{posterActionResult.Data}&");
-                    data.Add("portal_link", $"https://www.propertyguru.com.sg/listing/{posterActionResult.Data}");
+                    request.AddParameter($"portal_link", $"https://www.iproperty.com.my/property/sepang/sale-{posterActionResult.Data}/");
                 }
                 else
                 {
-                    formData.Append($"portal_link=&");
-                    data.Add("portal_link", "");
+                    request.AddParameter("portal_link", "");
                 }
-                formData.Append($"listing_version={propnexListing.Details["UpdateTime"]}&");
-                data.Add("listing_version", propnexListing.Details["UpdateTime"]);
+                request.AddParameter("poster", "cef");
+                request.Method = Method.Post;
+                request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
 
-                formData.Append("poster=cef");
-                data.Add("poster", "cef");
-                System.Net.Http.StringContent stringContent = new System.Net.Http.StringContent(formData.ToString());
-
-                //new
-                //{
-                //    account_name = guruTask.Account,
-                //    account_password = guruTask.Password,
-                //    task_id = guruTask.Id,
-                //    taskitem_id = taskListing.TaskItemId,
-                //    status = status,
-                //    time_cost = time_cost.ToString(),
-                //    taskitem_note = note,
-                //    portal_link = "",
-                //    listing_version = taskListing.UpdateTime,
-                //    poster = "cef"
-                //}
-
-                try
+                var response = await Policy
+                .Handle<Exception>()
+                 .OrResult<RestResponse>(response =>
+                 (response.ResponseStatus == ResponseStatus.TimedOut ||
+                 response.ResponseStatus == ResponseStatus.Aborted) || !response.IsSuccessStatusCode)
+                .WaitAndRetryAsync(5, retryNumber => TimeSpan.FromSeconds(30), async (ex, retry) =>
                 {
-                    var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus".PostUrlEncodedAsync(formData.ToString());
-                    var s = await result.GetStringAsync();
-                    net = false;
-                    break;
-                }
-                catch (Exception ex)
+                    await PublishMessageAsync($"xwebItem error ,{propnexTask.Id},{propnexListing.Details["taskitem_id"]}- {ex.Result.Request.Resource}");
+                }).ExecuteAsync(async () =>
                 {
-                    await PublishMessageAsync($"upload result error {ex.Message}");
-                }
+                    return await client.ExecutePostAsync(request);
+                });
             }
         }
 
         private async Task XwebEnd(string note = "")
         {
-            StringBuilder formData = new StringBuilder();
-            formData.Append($"account_name={propnexTask.Account}&");
-            formData.Append($"account_password={propnexTask.Password}&");
-            formData.Append($"task_id={propnexTask.Id}&");
-            formData.Append($"status=Done&");
-            formData.Append($"time_cost=&");
-            formData.Append($"note={note}&");
-            formData.Append("poster=selenium");
-
-            for (int i = 0; i < 3; i++)
+            using (RestClient client = new RestClient("https://franchise-prod.propnex.net/index.php/tasks/updateStatus"))
             {
-                try
+                var request = new RestRequest();
+                request.AddParameter("account_name", propnexTask.Account);
+                request.AddParameter("account_password", propnexTask.Password);
+                request.AddParameter("task_id", propnexTask.Id);
+                request.AddParameter("time_cost", "0");
+                request.AddParameter($"note=", note);
+                request.AddParameter("poster", "cef");
+                request.Method = Method.Post;
+                request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+
+                var response = await Policy
+                .Handle<Exception>()
+                 .OrResult<RestResponse>(response =>
+                 (response.ResponseStatus == ResponseStatus.TimedOut ||
+                 response.ResponseStatus == ResponseStatus.Aborted) || !response.IsSuccessStatusCode)
+                .WaitAndRetryAsync(5, retryNumber => TimeSpan.FromSeconds(30), async (ex, retry) =>
                 {
-                    var result = await "https://franchise-prod.propnex.net/index.php/tasks/updateStatus".PostUrlEncodedAsync(formData.ToString());
-                    var s = await result.GetStringAsync();
-                    await PublishMessageAsync($"Xweb end success");
-                    break;
-                }
-                catch (Exception ex)
+                    await PublishMessageAsync($"XwebEnd error ,{propnexTask.Id}- {ex.Result.Request.Resource}");
+                }).ExecuteAsync(async () =>
                 {
-                    await PublishMessageAsync($"Xweb end upload result error {ex.Message}");
-                }
+                    return await client.ExecutePostAsync(request);
+                });
             }
         }
     }

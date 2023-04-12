@@ -39,7 +39,8 @@ namespace Propnex.Poster.NetCoreWinForm
             settings.CefCommandLineArgs.Add("use-fake-ui-for-media-stream");
             //For screen sharing add (see https://bitbucket.org/chromiumembedded/cef/issues/2582/allow-run-time-handling-of-media-access#comment-58677180)
             settings.CefCommandLineArgs.Add("enable-usermedia-screen-capturing");
-
+            settings.CefCommandLineArgs.Add("--disable-web-security", "1");//关闭同源策略,允许跨域
+            settings.CefCommandLineArgs.Add("--disable-site-isolation-trials", "1");//关闭站点隔离策略,允许跨域
             //Perform dependency check to make sure all relevant resources are in our output directory.
             Cef.Initialize(settings, performDependencyCheck: true, browserProcessHandler: null);
 
