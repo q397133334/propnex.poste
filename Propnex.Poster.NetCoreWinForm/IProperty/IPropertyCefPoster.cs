@@ -13,6 +13,7 @@ using Serilog;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.EventBus.Local;
@@ -31,6 +32,8 @@ namespace Propnex.Poster.NetCoreWinForm
 
         private DevToolsContext DevToolsContext;
         private ILogger? _logger;
+
+        CancellationToken cancellationToken=new CancellationToken();
 
         private static object _lock = new object();
         private JsonSerializerSettings jsonSerialzerSettings = new JsonSerializerSettings
@@ -64,43 +67,55 @@ namespace Propnex.Poster.NetCoreWinForm
                         .MinimumLevel.Debug()
                         .WriteTo.Async(c => c.File($"{Directory.GetDirectoryRoot(System.AppDomain.CurrentDomain.BaseDirectory)}\\logs\\task\\{PnTaskDto.Number}.MyIP.txt"))
                         .CreateLogger();
-            foreach (var item in propnexTasks.Tasks)
+            try
             {
-                propnexTask = item;
-                var loginResult = await Login();
-                if (loginResult.Status != PosterActionResultStatus.Success)
+                foreach (var item in propnexTasks.Tasks)
                 {
-                    await PublishMessageAsync(loginResult.Message);
-                    break;
-                }
-                var listingResult = await GetListings();
-                if (listingResult.Status != PosterActionResultStatus.Success)
-                {
-                    await PublishMessageAsync(listingResult.Message);
-                    break;
-                }
-                if (item.TaskType == "Post Only")
-                {
-                    await PostOnly();
-                }
-                if (item.TaskType.ToLower() == "repost")
-                {
+                    propnexTask = item;
+                    var loginResult = await Login();
+                    if (loginResult.Status != PosterActionResultStatus.Success)
+                    {
+                        await PublishMessageAsync(loginResult.Message);
+                        break;
+                    }
+                    var listingResult = await GetListings();
+                    if (listingResult.Status != PosterActionResultStatus.Success)
+                    {
+                        await PublishMessageAsync(listingResult.Message);
+                        break;
+                    }
+                    if (item.TaskType == "Post Only")
+                    {
+                        await PostOnly();
+                    }
+                    if (item.TaskType.ToLower() == "repost")
+                    {
 
-                }
-                if (item.TaskType.ToLower() == "update")
-                {
+                    }
+                    if (item.TaskType.ToLower() == "update")
+                    {
 
-                }
-                if (item.TaskType.ToLower() == "remove from portals")
-                {
+                    }
+                    if (item.TaskType.ToLower() == "remove from portals")
+                    {
 
-                }
-                if (item.TaskType.ToLower().IndexOf("retrieve") > -1)
-                {
+                    }
+                    if (item.TaskType.ToLower().IndexOf("retrieve") > -1)
+                    {
 
+                    }
                 }
             }
-            Close();
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+                Close();
+            }
+
+
         }
 
         public async Task PostOnly()
@@ -530,16 +545,20 @@ namespace Propnex.Poster.NetCoreWinForm
 
         public async Task<PosterActionResult> ToLogin()
         {
+            await Delay(5);
             var loginUrl = "https://www.iproperty.com.my/pro/listings?lang=en-GB";
             await chromiumWebBrowser.LoadUrlAsync("https://www.baidu.com");
             await PublishMessageAsync("DeleteCookie");
             var cookieManager = chromiumWebBrowser.GetCookieManager();
             await cookieManager.DeleteCookiesAsync();
+            await Delay();
             await PublishMessageAsync($"LoadUrl:{loginUrl}");
             await chromiumWebBrowser.LoadUrlAsync(loginUrl);
             await watiForIsLoading();
+            await Delay();
             DevToolsContext = await chromiumWebBrowser.CreateDevToolsContextAsync();
             chromiumWebBrowser.ShowDevTools();
+            await Delay();
             var checkPageResult = await CheckPage();
             int retry = 0;
             while (checkPageResult.Status == PosterActionResultStatus.Error && retry < 5)
@@ -742,7 +761,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 }
             }
 
-            await Delay(60);
+            //await Delay(60);
             return new PosterActionResult()
             {
                 Status = PosterActionResultStatus.Success
@@ -817,6 +836,7 @@ namespace Propnex.Poster.NetCoreWinForm
 
         public async Task Delay(int delay = 5)
         {
+            await PublishMessageAsync($"Waiting {delay} sec");
             await Task.Delay(delay * 1000);
         }
 
@@ -824,9 +844,9 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             PnTaskDto = new PnTaskDto()
             {
-                Number = "3614.cef.tsk"
+                Number = "3719.cef.tsk"
             };
-            propnexTasks = _propnexTaskProvider.GetTasks(System.IO.File.ReadAllText("E:\\3614.cef.tsk"));
+            propnexTasks = _propnexTaskProvider.GetTasks(System.IO.File.ReadAllText("E:\\3719.cef.tsk"));
             if (propnexTasks == null)
             {
                 await PublishMessageAsync("Not find tasks ,dealy 1 min");

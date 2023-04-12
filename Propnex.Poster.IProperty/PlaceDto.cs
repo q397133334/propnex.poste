@@ -11,9 +11,9 @@ namespace Propnex.Poster.IProperty
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public List<ListingItemType>? buildingFacilities { get; set; }=null;
 
-        public double latitude { get; set; }
+        public double? latitude { get; set; }
 
-        public double longitude { get; set; }
+        public double? longitude { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public ListingItemType propertyGroupType { get; set; }

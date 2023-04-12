@@ -27,7 +27,7 @@ namespace Propnex.Poster.IProperty
 
         public DateTime? ContentUpdatedDate { get; set; }
 
-        public string? Description { get; set; }
+        public ListingMultiLangText? Description { get; set; }
 
         public string? Direction { get; set; }
 
