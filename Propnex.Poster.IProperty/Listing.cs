@@ -93,7 +93,7 @@ namespace Propnex.Poster.IProperty
 
         public string? StoreRoom { get; set; }
 
-        public string? Title { get; set; }
+        public ListingMultiLangText? Title { get; set; }
 
         public List<ListingItemType> UnitFeatures { get; set; }
 

@@ -15,9 +15,17 @@ namespace Propnex.Poster.IProperty
         public Payload<Listing> updateListing { get; set; }
     }
 
+    public class PublishListingPayload
+    {
+        public Payload<Listing> publishListing { get; set; }
+    }
+
     public class Payload<T>
     {
+
         public T listing { get; set; }
+
+        public List<T>? listings { get; set; }
     }
 
     public class AddListingDto

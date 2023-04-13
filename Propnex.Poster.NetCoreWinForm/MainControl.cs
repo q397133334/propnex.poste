@@ -65,7 +65,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 await Task.Delay(1000);
                 if (CefPoster != null)
                 {
-                    (CefPoster as IPosterStart).Start();
+                    await (CefPoster as IPosterStart).StartAsync();
                 }
             }
             else
