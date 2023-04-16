@@ -11,6 +11,15 @@ namespace Propnex.Poster.Share
         public PosterActionResultStatus Status { get; set; }
 
         public T Data { get; set; }
+
+        public PosterActionResult ToPosterActionResult()
+        {
+            return new PosterActionResult()
+            {
+                Data = Data,
+                Message = Message
+            };
+        }
     }
 
     public class PosterActionResult : PosterActionResult<object>

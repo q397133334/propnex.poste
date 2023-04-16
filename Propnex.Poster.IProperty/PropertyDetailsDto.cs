@@ -26,18 +26,22 @@ namespace Propnex.Poster.IProperty
 
         public PropertyDetailsExtension extension { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public List<int> floorPlans { get; set; }
 
 
         public int? grossArea { get; set; }
 
         public string id { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public List<string> images { get; set; }
 
         public NullClass location { get; set; }
 
         public ListingSalePrice maintenanceFee { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public List<string> photo360s { get; set; }
 
         public ListingSalePrice rentPrice { get; set; }

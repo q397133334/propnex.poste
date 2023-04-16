@@ -17,6 +17,7 @@ namespace Propnex.Poster.IProperty
         public T variables { get; set; }
 
         public Extensions extensions { get; set; } = null;
+
     }
 
     public class Extensions

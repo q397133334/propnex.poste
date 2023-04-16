@@ -6,7 +6,7 @@ namespace Propnex.Poster.IProperty
 {
     public class QuoteDto
     {
-        public int cost { get; set; }
+        public int? cost { get; set; }
 
         public string description { get; set; }
 

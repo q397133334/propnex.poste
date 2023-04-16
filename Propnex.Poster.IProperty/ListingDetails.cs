@@ -36,6 +36,13 @@ namespace Propnex.Poster.IProperty
         public int? storeyCode { get; set; }
     }
 
+    public class UpdateListingMutationDto:AddListingMutationDto
+    { 
+        public string id { get; set; }
+
+    }
+
+
     public class NullClass
     {
 
