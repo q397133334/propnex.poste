@@ -58,7 +58,9 @@ namespace Propnex
                     listing.Videos = element.ElementString("Videos", "").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable().Where(q => q.Trim() != "").ToList();
                     listing.Tours = element.ElementString("Tours", "").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable().Where(q => q.Trim() != "").ToList();
                     listing.FloorPlan = element.ElementString("FloorPlan", "").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable().Where(q => q.Trim() != "").ToList();
-                    
+                    listing.ListingType= element.ElementString("ListingType");
+                    listing.ListingName= element.ElementString("ListingName");
+
                     var projectData = element.Element("ProjectData");
                     if (projectData != null)
                     {
