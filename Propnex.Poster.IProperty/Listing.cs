@@ -65,7 +65,7 @@ namespace Propnex.Poster.IProperty
 
         public string? ListingRefNo { get; set; }
 
-        public ListingLocation ListingLocation { get; set; } = new ListingLocation();
+        public ListingLocation Location { get; set; } = new ListingLocation();
 
         public DateTime? NextRotationDate { get; set; }
 
