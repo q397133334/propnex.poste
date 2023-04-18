@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -19,6 +20,8 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             _serviceProvider = serviceProvider;
             InitializeComponent();
+
+            this.Text = $"IProperty Poster Version{Assembly.GetEntryAssembly().GetFileVersion()}"; 
         }
 
         private void mainControl1_Load(object sender, EventArgs e)

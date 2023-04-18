@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using AutoUpdaterDotNET;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Propnex.Poster.Share;
 using PropnexPoster.NetCoreWinForm;
@@ -32,6 +33,11 @@ namespace Propnex.Poster.NetCoreWinForm
             WebServer.MachindNumber = (await WebServer.GetMachineIdAsync(configuration["MachineNumber"])).Trim('\"');
             AppConfiguration = configuration.Get<AppConfiguration>();
             await Task.CompletedTask;
+        }
+
+        public override void OnPreApplicationInitialization(ApplicationInitializationContext context)
+        {
+            AutoUpdater.Start("http://testposter.propnex.net/PropnexPoster.IProperty.AutoUpdater.xml");
         }
     }
 }

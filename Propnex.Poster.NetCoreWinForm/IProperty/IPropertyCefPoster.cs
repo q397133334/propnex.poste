@@ -72,6 +72,13 @@ namespace Propnex.Poster.NetCoreWinForm
             }
             await PublishMessageAsync("Start a new task");
             await GetTaskAsync();
+            if (PnTaskDto == null)
+            {
+                await PublishMessageAsync("Not find task ,delay 1 min");
+                await Delay(60 * 5);
+                Close();
+                return;
+            }
             _logger = new LoggerConfiguration()
                         .MinimumLevel.Debug()
                         .WriteTo.Async(c => c.File($"{Directory.GetDirectoryRoot(System.AppDomain.CurrentDomain.BaseDirectory)}\\logs\\task\\{PnTaskDto.Number}.MyIP.txt"))
@@ -348,7 +355,7 @@ namespace Propnex.Poster.NetCoreWinForm
             async Task<PosterActionResult<string>> listingDetails()
             {
                 propnexListing.Details["data_step1"] = propnexListing.Details["data_step1"].Replace("\"location\":[]", "\"location\":{}");
-                addListingMutationDto= JsonConvert.DeserializeObject<RequestData<Variables<AddListingMutationDto>>>(propnexListing.Details["data_step1"]);
+                addListingMutationDto = JsonConvert.DeserializeObject<RequestData<Variables<AddListingMutationDto>>>(propnexListing.Details["data_step1"]);
                 var updateListingMutationDto = JsonConvert.DeserializeObject<RequestData<Variables<UpdateListingMutationDto>>>(propnexListing.Details["data_step1"]);
                 updateListingMutationDto.variables.input.id = listingId;
                 updateListingMutationDto.OperationName = "updateListingInfo";
@@ -412,15 +419,15 @@ namespace Propnex.Poster.NetCoreWinForm
                 var input = propertyDetailsDto.variables.input;
                 input.id = listingId;
                 propertyDetailsDto.extensions.persistedQuery.Sha256Hash = "338f5cae02e4a1a1514a145cf448909fbe092045dc524f11db5d41572990dcdf";
-                if(input.photo360s.Count==0)
+                if (input.photo360s.Count == 0)
                 {
                     input.photo360s = null;
                 }
-                if(input.images.Count==0)
+                if (input.images.Count == 0)
                 {
                     input.images = null;
                 }
-                if(input.floorPlans.Count==0)
+                if (input.floorPlans.Count == 0)
                 {
                     input.floorPlans = null;
                 }
@@ -1217,18 +1224,18 @@ namespace Propnex.Poster.NetCoreWinForm
 
         public async Task GetTaskAsync()
         {
-            PnTaskDto = new PnTaskDto()
-            {
-                Number = "3849.cef.tsk"
-            };
-            propnexTasks = _propnexTaskProvider.GetTasks(System.IO.File.ReadAllText("E:\\3849.cef.tsk"));
-            if (propnexTasks == null)
-            {
-                await PublishMessageAsync("Not find tasks ,dealy 1 min");
-                await Task.Delay(1000 * 60);
-                Close();
-            }
-            return;
+            //PnTaskDto = new PnTaskDto()
+            //{
+            //    Number = "3849.cef.tsk"
+            //};
+            //propnexTasks = _propnexTaskProvider.GetTasks(System.IO.File.ReadAllText("E:\\3849.cef.tsk"));
+            //if (propnexTasks == null)
+            //{
+            //    await PublishMessageAsync("Not find tasks ,dealy 1 min");
+            //    await Task.Delay(1000 * 60);
+            //    Close();
+            //}
+            //return;
             var context = "";
             PnTaskDto = await WebServer.GetTask();
             if (PnTaskDto != null)
