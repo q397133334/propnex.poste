@@ -98,7 +98,7 @@ namespace Propnex.Poster.NetCoreWinForm
                         {
                             await xwebItemAsync(loginResult, task);
                         }
-                        await XwebEndAsync();
+                        await XwebEndAsync(loginResult.Message);
                         break;
                     }
                     var listingResult = await GetListings();
@@ -1138,12 +1138,7 @@ namespace Propnex.Poster.NetCoreWinForm
             await Delay();
 
             await watiForIsLoading();
-            await CheckPage();
-            await PublishMessageAsync("Login success");
-            return new PosterActionResult()
-            {
-                Status = PosterActionResultStatus.Success
-            };
+            return await CheckPage();
         }
 
         public async Task<PosterActionResult<List<Listing>>> GetListings()
@@ -1296,7 +1291,26 @@ namespace Propnex.Poster.NetCoreWinForm
 
                 }
                 challengeForm = await DevToolsContext.QuerySelectorAsync("#challenge-form");
+                if (challengeForm != null)
+                {
+                    return new PosterActionResult()
+                    {
+                        Status = PosterActionResultStatus.Error,
+                        Message = "challenge recaptcha"
+                    };
+                }
             }
+            var warning = await DevToolsContext.QuerySelectorAsync<Element>("div.warning-container > div.warning");
+            if (warning != null)
+            {
+                return new PosterActionResult()
+                {
+                    Status = PosterActionResultStatus.Error,
+                    Message = await warning.GetInnerHtmlAsync()
+                };
+            }
+
+
 
             //await Delay(60);
             return new PosterActionResult()
@@ -1470,8 +1484,9 @@ namespace Propnex.Poster.NetCoreWinForm
                 request.AddParameter("account_name", propnexTask.Account);
                 request.AddParameter("account_password", propnexTask.Password);
                 request.AddParameter("task_id", propnexTask.Id);
+                request.AddParameter("status", "Done");
                 request.AddParameter("time_cost", "0");
-                request.AddParameter($"note=", note);
+                request.AddParameter("note", note);
                 request.AddParameter("poster", "cef");
                 request.Method = Method.Post;
                 request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
