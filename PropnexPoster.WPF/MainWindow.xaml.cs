@@ -47,7 +47,7 @@ namespace PropnexPoster.WPF
         public bool IsStart = false;
         public bool IsRun = false;
 
-        private void ThreadPoster()
+        private async void ThreadPoster()
         {
             while (IsStart)
             {
@@ -55,7 +55,8 @@ namespace PropnexPoster.WPF
                 var run = _serviceProvider.GetService<PosterRun>();//  new PosterRun();
                 run.MessageEvent = Log;
                 run.TaskInfoEvent = TaskInfoEvent;
-                run.Run().Wait();
+                await run.Run();
+
                 IsRun = false;
             }
             this.Dispatcher.Invoke(new Action(() =>

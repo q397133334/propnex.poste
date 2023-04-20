@@ -384,6 +384,11 @@ namespace PropnexPoster.WPF
                         {
 
                         }
+
+                        _api.Dispose();
+                        _projectsApi.Dispose();
+                        _adsProject.Dispose();
+                        _mobile.Dispose();
                     }
                     catch (Exception ex)
                     {
@@ -398,7 +403,9 @@ namespace PropnexPoster.WPF
             }
             finally
             {
-
+                this.globleLogger = null;
+                this.MessageEvent = null;
+                this.TaskInfoEvent = null;
             }
 
         }
