@@ -36,11 +36,8 @@ public partial class App : Application
                 options.UseAutofac();
                 options.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
             });
-
             await _abpApplication.InitializeAsync();
-
             _abpApplication.Services.GetRequiredService<MainWindow>()?.Show();
-
         }
         catch (Exception ex)
         {
