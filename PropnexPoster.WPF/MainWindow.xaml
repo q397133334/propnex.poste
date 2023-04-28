@@ -1,11 +1,10 @@
-﻿<Window
+﻿<Window x:Class="PropnexPoster.WPF.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PropnexPoster.WPF"
         xmlns:hc="https://handyorg.github.io/handycontrol" 
-        x:Class="PropnexPoster.WPF.MainWindow"
         mc:Ignorable="d"
         Title="PropnexPoster" Height="500" Width="800" Loaded="Window_Loaded" Closing="Window_Closing" Icon="/Logo.ico">
     <Grid>
@@ -32,12 +31,12 @@
                          Margin="0,5,0,5" Canvas.Left="10" Width="230"></TextBox>
             <GroupBox Grid.Row="2" Style="{StaticResource BaseStyle}" Header="Run Info:">
                 <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
-                    <Label Name="lblTaskNumber"  Style="{StaticResource BaseStyle}" Content="111" HorizontalAlignment="Left"></Label>
+                    <Label Name="lblTaskNumber"  Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
                     <Label Name="lblAccount"  Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"/>
                     <Label Name="lblAgentId" Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
                     <Label Name="lblTaskType" Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
-                    <Label Name="lblListingCount" Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
-                    <Label Name="lblTaskItemId" Style="{StaticResource BaseStyle}" Content="sss" HorizontalAlignment="Left"></Label>
+                    <Label Name="lblListingCount" Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"/>
+                    <Label Name="lblTaskItemId" Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
                 </StackPanel>
             </GroupBox>
         </Grid>
