@@ -1,14 +1,4 @@
-﻿using CefSharp.DevTools.CSS;
-using Propnex.Poster.Share;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using Propnex.Poster.Share;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.EventBus;
 
@@ -90,6 +80,8 @@ namespace Propnex.Poster.NetCoreWinForm
             {
                 richTextBox1.AppendText($"{eventData.Message}{Environment.NewLine}");
             }
+            richTextBox1.SelectionStart = richTextBox1.Text.Length;
+            richTextBox1.ScrollToCaret();
             await Task.CompletedTask;
         }
     }

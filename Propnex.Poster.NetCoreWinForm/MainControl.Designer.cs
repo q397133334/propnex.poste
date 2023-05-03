@@ -3,7 +3,7 @@ using Volo.Abp.EventBus;
 
 namespace Propnex.Poster.NetCoreWinForm
 {
-    partial class MainControl : ILocalEventHandler<LogEvent>, ISingletonDependency
+    partial class MainControl : UserControl, ILocalEventHandler<LogEvent>, ISingletonDependency
     {
         /// <summary> 
         /// 必需的设计器变量。
