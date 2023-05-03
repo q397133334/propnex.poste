@@ -1139,6 +1139,15 @@ namespace Propnex.Poster.NetCoreWinForm
 
             await watiForIsLoading();
             await CheckPage();
+            var warning = await DevToolsContext.QuerySelectorAsync<HtmlElement>("div.login-body > div.warning-container > div");
+            if(warning!=null)
+            {
+                return new PosterActionResult()
+                {
+                    Status = PosterActionResultStatus.Error,
+                    Message = await warning.GetInnerTextAsync()
+                };
+            }
             await PublishMessageAsync("Login success");
             return new PosterActionResult()
             {
