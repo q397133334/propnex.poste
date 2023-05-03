@@ -27,7 +27,7 @@ namespace PropnexPoster.WPF
         {
             btnStart.IsEnabled = true;
             btnStop.IsEnabled = false;
-            Title += $" Version{Assembly.GetEntryAssembly().GetFileVersion()}";
+            Title += $" Version {Assembly.GetEntryAssembly().GetFileVersion()}";
         }
 
         private void btnStop_Click(object sender, RoutedEventArgs e)
@@ -47,7 +47,7 @@ namespace PropnexPoster.WPF
         public bool IsStart = false;
         public bool IsRun = false;
 
-        private void ThreadPoster()
+        private async void ThreadPoster()
         {
             while (IsStart)
             {
@@ -55,7 +55,8 @@ namespace PropnexPoster.WPF
                 var run = _serviceProvider.GetService<PosterRun>();//  new PosterRun();
                 run.MessageEvent = Log;
                 run.TaskInfoEvent = TaskInfoEvent;
-                run.Run().Wait();
+                await run.Run();
+                run = null;
                 IsRun = false;
             }
             this.Dispatcher.Invoke(new Action(() =>
@@ -69,8 +70,7 @@ namespace PropnexPoster.WPF
             logBox.Dispatcher.BeginInvoke((Action)delegate
              {
                  logBox.ScrollToEnd();
-                 logBox.AppendText($"[{DateTime.Now.ToString()}]");
-                 logBox.AppendText("-----");
+                 logBox.AppendText($"[{DateTime.Now}]");
                  logBox.AppendText(message);
                  logBox.AppendText(Environment.NewLine);
              });

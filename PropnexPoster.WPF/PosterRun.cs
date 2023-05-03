@@ -1,23 +1,18 @@
 ﻿using Flurl.Http;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Polly;
 using Propnex.Poster.Dtos;
 using Propnex.Poster.PropertyGuru.Listing;
 using Propnex.Poster.PropertyGuru.Mobile;
 using Propnex.Poster.PropertyGuru.Mobile.Dto;
 using Propnex.Poster.PropertyGuru.Tasks;
-using RestSharp;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Controls.Ribbon;
 using ILogger = Serilog.ILogger;
 
 namespace PropnexPoster.WPF
@@ -111,7 +106,7 @@ namespace PropnexPoster.WPF
             }
             posterRunInfo.TaskNumber = taskDto.Number;
             TaskInfoEvent?.Invoke(posterRunInfo);
-            Log($"Get Tas success,{taskDto.Number}");
+            Log($"Get Task success,{taskDto.Number}");
             //2.生成日志
 
             try
@@ -194,6 +189,7 @@ namespace PropnexPoster.WPF
                                 var createOrUpdateListing = new CreateOrUpdateListing();
                                 listing.Listing.Agent.id = token.User.AgentId;
                                 createOrUpdateListing.Create(listing.Listing);
+                                createOrUpdateListing.isLiveTourAvailable = true;
                                 var result = await _api.CreateAsync(createOrUpdateListing);
                                 //result = new HttpResult<CreateOrUpdateListingResult>() { Data = new CreateOrUpdateListingResult { Id = 24371139 } };
                                 if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
@@ -280,8 +276,8 @@ namespace PropnexPoster.WPF
                                     if (listing.FastRepost == "0")
                                     {
                                         //更新任务
-
                                         taskListing.Data.Update(listing.Listing);
+                                        taskListing.Data.isLiveTourAvailable = true;
                                         await _api.UpdateAsync(taskListing.Data);
                                         await _mobile.DeleteMediaAll(taskListing.Data);
                                         await uploadPhotosAsync(listing, _api);
@@ -303,6 +299,7 @@ namespace PropnexPoster.WPF
                                     var createOrUpdateListing = new CreateOrUpdateListing();
                                     listing.Listing.Agent.id = token.User.AgentId;
                                     createOrUpdateListing.Create(listing.Listing);
+                                    createOrUpdateListing.isLiveTourAvailable = true;
                                     var result = await _api.CreateAsync(createOrUpdateListing);
                                     //result = new HttpResult<CreateOrUpdateListingResult>() { Data = new CreateOrUpdateListingResult { Id = 24371139 } };
                                     if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
@@ -342,6 +339,7 @@ namespace PropnexPoster.WPF
                                     //更新任务
 
                                     taskListing.Data.Update(listing.Listing);
+                                    taskListing.Data.isLiveTourAvailable = true;
                                     await _api.UpdateAsync(taskListing.Data);
                                     await _mobile.DeleteMediaAll(taskListing.Data);
                                     await _mobile.DeleteMediaAll(taskListing.Data);
@@ -384,6 +382,11 @@ namespace PropnexPoster.WPF
                         {
 
                         }
+
+                        _api.Dispose();
+                        _projectsApi.Dispose();
+                        _adsProject.Dispose();
+                        _mobile.Dispose();
                     }
                     catch (Exception ex)
                     {
@@ -398,7 +401,9 @@ namespace PropnexPoster.WPF
             }
             finally
             {
-
+                this.globleLogger = null;
+                this.MessageEvent = null;
+                this.TaskInfoEvent = null;
             }
 
         }
@@ -496,7 +501,6 @@ namespace PropnexPoster.WPF
                 }
                 catch { }
 
-
             }
         }
 
@@ -590,8 +594,6 @@ namespace PropnexPoster.WPF
                     await _api.UploadFlooplan($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
                 }
                 catch { }
-
-
             }
         }
 
@@ -679,8 +681,6 @@ namespace PropnexPoster.WPF
                     return await auth();
                 return Newtonsoft.Json.JsonConvert.DeserializeObject<Token>(pnUser.TokenJson);
             }
-
-
             async Task<List<ListingsListing>> getListing()
             {
                 Log("Get Listings ....");
@@ -802,26 +802,15 @@ namespace PropnexPoster.WPF
 
         private async Task xwebItem(GuruTask guruTask, GuruTaskListing taskListing, int time_cost = 0, string status = "Done", string note = "")
         {
-            var net = true;
-
-
             StringBuilder formData = new StringBuilder();
             Dictionary<string, string> data = new Dictionary<string, string>();
             formData.Append($"account_name={guruTask.Account}&");
-
             formData.Append($"account_password={guruTask.Password}&");
-
             formData.Append($"task_id={guruTask.Id}&");
-
             formData.Append($"taskitem_id={taskListing.TaskItemId}&");
-
             formData.Append($"status={status}&");
-
-
             formData.Append($"time_cost={time_cost}&");
-
             formData.Append($"taskitem_note={note}&");
-
             if (taskListing.Listing.Id.HasValue && status == "Done")
             {
                 formData.Append($"portal_link=https://www.propertyguru.com.sg/listing/{taskListing.Listing.Id}&");
@@ -831,11 +820,8 @@ namespace PropnexPoster.WPF
                 formData.Append($"portal_link=&");
             }
             formData.Append($"listing_version={taskListing.UpdateTime}&");
-
             formData.Append("poster=mobileApi");
             System.Net.Http.StringContent stringContent = new System.Net.Http.StringContent(formData.ToString());
-
-
             await Polly.Policy.Handle<Exception>()
                 .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
                 {
@@ -846,7 +832,6 @@ namespace PropnexPoster.WPF
                     .PostUrlEncodedAsync(formData.ToString());
                     Log("xwebItem success");
                 });
-
         }
 
         private async Task XwebEnd(GuruTask guruTask, string note = "")

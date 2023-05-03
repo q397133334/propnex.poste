@@ -98,7 +98,7 @@ namespace Propnex.Poster.NetCoreWinForm
                         {
                             await xwebItemAsync(loginResult, task);
                         }
-                        await XwebEndAsync();
+                        await XwebEndAsync(loginResult.Message);
                         break;
                     }
                     var listingResult = await GetListings();
@@ -303,7 +303,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 return new PosterActionResult()
                 {
                     Data = "",
-                    Message = "Oops, we can¡¯t find and match the above listing to perform any action. Please check your guru direct as you could have modified previously."
+                    Message = "Oops, we canï¿½ï¿½t find and match the above listing to perform any action. Please check your guru direct as you could have modified previously."
                 };
             }
             else
@@ -417,7 +417,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 return new PosterActionResult()
                 {
                     Data = "",
-                    Message = "Oops, we can¡¯t find and match the above listing to perform any action. Please check your guru direct as you could have modified previously."
+                    Message = "Oops, we canï¿½ï¿½t find and match the above listing to perform any action. Please check your guru direct as you could have modified previously."
                 };
             }
             else
@@ -518,7 +518,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 return new PosterActionResult()
                 {
                     Data = "",
-                    Message = "Oops, we can¡¯t find and match the above listing to perform any action. Please check your guru direct as you could have modified previously."
+                    Message = "Oops, we canï¿½ï¿½t find and match the above listing to perform any action. Please check your guru direct as you could have modified previously."
                 };
             }
             else
@@ -611,7 +611,7 @@ namespace Propnex.Poster.NetCoreWinForm
             {
                 refUrl = action;
             }
-            //1.½âÎölocationÊý¾Ý
+            //1.ï¿½ï¿½ï¿½ï¿½locationï¿½ï¿½ï¿½ï¿½
             locationDto = JsonConvert.DeserializeObject<RequestData<Variables<LocationDto>>>(propnexListing.Details["data_location"].Replace("\"extension\":[]", "\"extension\":{}"));
             locationDto.variables.input.id = listingId;
             string buildingText = "";
@@ -1305,7 +1305,26 @@ namespace Propnex.Poster.NetCoreWinForm
 
                 }
                 challengeForm = await DevToolsContext.QuerySelectorAsync("#challenge-form");
+                if (challengeForm != null)
+                {
+                    return new PosterActionResult()
+                    {
+                        Status = PosterActionResultStatus.Error,
+                        Message = "challenge recaptcha"
+                    };
+                }
             }
+            var warning = await DevToolsContext.QuerySelectorAsync<Element>("div.warning-container > div.warning");
+            if (warning != null)
+            {
+                return new PosterActionResult()
+                {
+                    Status = PosterActionResultStatus.Error,
+                    Message = await warning.GetInnerHtmlAsync()
+                };
+            }
+
+
 
             //await Delay(60);
             return new PosterActionResult()
@@ -1315,7 +1334,7 @@ namespace Propnex.Poster.NetCoreWinForm
         }
 
         /// <summary>
-        /// »ñÈ¡post Êý¾Ý
+        /// ï¿½ï¿½È¡post ï¿½ï¿½ï¿½ï¿½
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="url"></param>
@@ -1339,7 +1358,7 @@ namespace Propnex.Poster.NetCoreWinForm
         }
 
         /// <summary>
-        /// »ñÈ¡jsonÊý¾Ý
+        /// ï¿½ï¿½È¡jsonï¿½ï¿½ï¿½ï¿½
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="url"></param>
@@ -1479,8 +1498,9 @@ namespace Propnex.Poster.NetCoreWinForm
                 request.AddParameter("account_name", propnexTask.Account);
                 request.AddParameter("account_password", propnexTask.Password);
                 request.AddParameter("task_id", propnexTask.Id);
+                request.AddParameter("status", "Done");
                 request.AddParameter("time_cost", "0");
-                request.AddParameter($"note=", note);
+                request.AddParameter("note", note);
                 request.AddParameter("poster", "cef");
                 request.Method = Method.Post;
                 request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
