@@ -67,21 +67,20 @@ namespace Propnex.Poster.NetCoreWinForm
             }
         }
 
+        public object reichTextLock = new object();
+
         public async Task HandleEventAsync(LogEvent eventData)
         {
-            if (richTextBox1.InvokeRequired)
+            richTextBox1.BeginInvoke(() =>
             {
-                richTextBox1.BeginInvoke(() =>
+                lock(reichTextLock)
                 {
                     richTextBox1.AppendText($"{eventData.Message}{Environment.NewLine}");
-                });
-            }
-            else
-            {
-                richTextBox1.AppendText($"{eventData.Message}{Environment.NewLine}");
-            }
-            richTextBox1.SelectionStart = richTextBox1.Text.Length;
-            richTextBox1.ScrollToCaret();
+                    richTextBox1.SelectionStart = richTextBox1.Text.Length;
+                    richTextBox1.ScrollToCaret();
+                }
+              
+            });
             await Task.CompletedTask;
         }
     }

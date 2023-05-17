@@ -6,6 +6,7 @@ using Propnex.Poster.PropertyGuru.Listing;
 using Propnex.Poster.PropertyGuru.Mobile;
 using Propnex.Poster.PropertyGuru.Mobile.Dto;
 using Propnex.Poster.PropertyGuru.Tasks;
+using RestSharp;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Propnex;
 using ILogger = Serilog.ILogger;
 
 namespace PropnexPoster.WPF
@@ -102,6 +104,7 @@ namespace PropnexPoster.WPF
             {
                 Log("Not find task ,delay 1 min");
                 await Task.Delay(6000 * 10);
+                //await Task.Delay(1000);
                 return;
             }
             posterRunInfo.TaskNumber = taskDto.Number;
@@ -254,8 +257,6 @@ namespace PropnexPoster.WPF
                                     {
                                         await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
                                     }
-
-
                                 }
                                 await End(task, listing.TaskItemId);
                             }
@@ -311,13 +312,59 @@ namespace PropnexPoster.WPF
                                             await uploadVideos(listing, _api);
                                             await uploadVirtualTours(listing, _api);
                                             await uploadFloorPlanAsync(listing, _api);
-                                            await _adsProject.Activate(result.Data.Id);
+                                            var activateResult = await _adsProject.Activate(result.Data.Id);
+                                            if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                            {
+                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                            }
+                                            else
+                                            {
+
+                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
+                                            }
                                         }
-                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
                                     }
                                     else
                                     {
-                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
+                                        if (result.Message.Contains("Postal code is already being used"))
+                                        {
+                                            var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
+                                            //1.获取邮政编号
+                                            var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
+                                            var locale = locales.Data.FirstOrDefault();
+                                            //2. 获取loca 信息
+                                            var project = (await _projectsApi.GetProjectAsync(int.Parse(locale.ObjectId))).Data;
+                                            if (project != null && project.addresses != null && project.addresses.Count > 0)
+                                            {
+                                                createOrUpdateListing.location.id = int.Parse(project.addresses[0].external_id);
+                                                result = await _api.CreateAsync(createOrUpdateListing);
+                                                if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                                {
+                                                    listing.Listing.Id = result.Data.Id;
+                                                    if (result.Data.Id != 0)
+                                                    {
+                                                        await uploadPhotosAsync(listing, _api);
+                                                        await uploadVideos(listing, _api);
+                                                        await uploadVirtualTours(listing, _api);
+                                                        await uploadFloorPlanAsync(listing, _api);
+                                                        var activateResult = await _adsProject.Activate(result.Data.Id);
+                                                        if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                                        {
+                                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                                        }
+                                                        else
+                                                        {
+
+                                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Data);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
+                                        }
                                     }
                                 }
 
@@ -341,7 +388,6 @@ namespace PropnexPoster.WPF
                                     taskListing.Data.Update(listing.Listing);
                                     taskListing.Data.isLiveTourAvailable = true;
                                     await _api.UpdateAsync(taskListing.Data);
-                                    await _mobile.DeleteMediaAll(taskListing.Data);
                                     await _mobile.DeleteMediaAll(taskListing.Data);
                                     await uploadPhotosAsync(listing, _api);
                                     await uploadVideos(listing, _api);
@@ -391,6 +437,10 @@ namespace PropnexPoster.WPF
                     catch (Exception ex)
                     {
                         _logger.Error("", ex);
+                    }
+                    finally
+                    {
+
                     }
                 }
                 //5.
@@ -496,7 +546,23 @@ namespace PropnexPoster.WPF
                 try
                 {
                     Log($"download photo {filePath}");
-                    await guruTaskListing.Photos[i].DownloadFileAsync(path, $"{i}_image.jpg");
+                    if (File.Exists(filePath))
+                    {
+                        Log($"exists");
+                        File.Delete(filePath);
+                        Log("delete");
+                        if (File.Exists(filePath) == false)
+                        {
+                            Log("delete success");
+                        }
+                        else
+                        {
+                            Log("delete error");
+                        }
+                    }
+                    DownClient webClient = new DownClient();
+                    webClient.DownloadFile(guruTaskListing.Photos[i], filePath);
+                    Log("download tour complete");
                     await _api.UploadPhotoAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
                 }
                 catch { }
@@ -530,7 +596,13 @@ namespace PropnexPoster.WPF
                     try
                     {
                         Log($"download move {filePath}");
-                        await guruTaskListing.Videos[i].DownloadFileAsync(path, $"{i}_movie.mp4");
+                        if (File.Exists(filePath))
+                        {
+                            File.Delete(filePath);
+                        }
+                        DownClient webClient = new DownClient();
+                        webClient.DownloadFile(guruTaskListing.Videos[i], filePath);
+                        Log("download tour complete");
                     }
                     catch { }
                     if (System.IO.File.Exists(filePath) == false)
@@ -566,7 +638,14 @@ namespace PropnexPoster.WPF
                 {
                     try
                     {
-                        await guruTaskListing.Tours[i].DownloadFileAsync(path, $"{i}_vt.mp4");
+                        Log($"download tour {filePath}");
+                        if (File.Exists(filePath))
+                        {
+                            File.Delete(filePath);
+                        }
+                        DownClient webClient = new DownClient();
+                        webClient.DownloadFile(guruTaskListing.Tours[i], filePath);
+                        Log("download tour complete");
                     }
                     catch
                     {
@@ -590,7 +669,16 @@ namespace PropnexPoster.WPF
                 var filePath = $"{path}{i}_fp.jpg";
                 try
                 {
-                    await guruTaskListing.FloorPlan[i].DownloadFileAsync(path, $"{i}_fp.jpg");
+                    //await guruTaskListing.FloorPlan[i].DownloadFileAsync(path, $"{i}_fp.jpg");
+
+                    Log("download FloorPlan");
+                    if (File.Exists(filePath))
+                    {
+                        File.Delete(filePath);
+                    }
+                    DownClient webClient = new DownClient();
+                    webClient.DownloadFile(guruTaskListing.FloorPlan[i], filePath);
+                    Log("download tour complete");
                     await _api.UploadFlooplan($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
                 }
                 catch { }
@@ -790,9 +878,10 @@ namespace PropnexPoster.WPF
                 $"tm={unix_timestamp(DateTime.Now)}&" +
                 $"memo={memo}");
             await Polly.Policy.Handle<Exception>()
-                  .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
+                  .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(30), (ex, retry) =>
                   {
-                      _logger?.Error($"Retry count {retry},{ex.Message}", ex);
+                      _logger?.Error($"Retry count {retry},{ex.Message},{sbUrl.ToString()}", ex);
+                      Log(sbUrl.ToString());
                   }).ExecuteAsync(async () =>
                   {
                       var res = await sbUrl.ToString().GetStringAsync();
@@ -823,9 +912,10 @@ namespace PropnexPoster.WPF
             formData.Append("poster=mobileApi");
             System.Net.Http.StringContent stringContent = new System.Net.Http.StringContent(formData.ToString());
             await Polly.Policy.Handle<Exception>()
-                .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
+                .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(30), (ex, retry) =>
                 {
-                    _logger?.Error($"Retry count {retry},{ex.Message}", ex);
+                    _logger?.Error($"Retry count {retry},{ex.Message},{formData.ToString()}", ex);
+                    Log(formData.ToString());
                 }).ExecuteAsync(async () =>
                 {
                     var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus"
@@ -850,9 +940,9 @@ namespace PropnexPoster.WPF
 
 
             await Polly.Policy.Handle<Exception>()
-                      .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
+                      .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(30), (ex, retry) =>
                       {
-                          Log($"Retry count {retry},{ex.Message}");
+                          Log($"Retry count {retry},{ex.Message},{formData.ToString()}");
                       }).ExecuteAsync(async () =>
                       {
                           var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus".PostUrlEncodedAsync(formData.ToString());
@@ -869,7 +959,7 @@ namespace PropnexPoster.WPF
     $"super=1&queue_id={queue_id}&portal=GURU&&memo=&tm={unix_timestamp(DateTime.Now)}";
 
                 await Polly.Policy.Handle<Exception>()
-                      .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
+                      .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(30), (ex, retry) =>
                       {
                           Log($"Retry count {retry},{ex.Message}");
                       }).ExecuteAsync(async () =>
@@ -890,7 +980,6 @@ namespace PropnexPoster.WPF
         {
             MessageEvent?.Invoke(message);
             _logger?.Information(message);
-            MessageEvent?.Invoke(".........................");
         }
     }
 }

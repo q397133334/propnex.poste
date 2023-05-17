@@ -58,6 +58,7 @@ namespace PropnexPoster.WPF
                 await run.Run();
                 run = null;
                 IsRun = false;
+                await Task.Delay(1000);
             }
             this.Dispatcher.Invoke(new Action(() =>
             {
@@ -69,10 +70,14 @@ namespace PropnexPoster.WPF
         {
             logBox.Dispatcher.BeginInvoke((Action)delegate
              {
-                 logBox.ScrollToEnd();
                  logBox.AppendText($"[{DateTime.Now}]");
                  logBox.AppendText(message);
                  logBox.AppendText(Environment.NewLine);
+                 logBox.ScrollToEnd();
+                 if (logBox.Text.Length > 100000)
+                 {
+                     logBox.Text = logBox.Text.Substring(0, logBox.Text.Length - 50000);
+                 }
              });
         }
 

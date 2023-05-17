@@ -41,13 +41,14 @@
             </GroupBox>
         </Grid>
         <GroupBox Style="{StaticResource BaseStyle}" Grid.Column="2" Header="Log" Grid.ColumnSpan="2">
-            <RichTextBox x:Name="logBox"  Style="{StaticResource BaseStyle}"
+            <!--<RichTextBox x:Name="logBox"  Style="{StaticResource BaseStyle}"
                   AcceptsReturn="False"
                   VerticalAlignment="Stretch"
                   VerticalScrollBarVisibility="Visible" AutoWordSelection="False" IsReadOnly="True">
                 <FlowDocument Focusable="True" LineHeight="1">
                 </FlowDocument>
-            </RichTextBox>
+            </RichTextBox>-->
+            <TextBox  x:Name="logBox"  Style="{StaticResource BaseStyle}" />
         </GroupBox>
         <StackPanel/>
     </Grid>

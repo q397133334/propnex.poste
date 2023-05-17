@@ -37,7 +37,7 @@ namespace Propnex.Poster.NetCoreWinForm
 
         public override void OnPreApplicationInitialization(ApplicationInitializationContext context)
         {
-            AutoUpdater.Start("http://testposter.propnex.net/PropnexPoster.IProperty.AutoUpdater.xml");
+            AutoUpdater.Start("http://testposter.propnex.net/PropnexPoster.IProperty/PropnexPoster.IProperty.AutoUpdater.xml");
         }
     }
 }

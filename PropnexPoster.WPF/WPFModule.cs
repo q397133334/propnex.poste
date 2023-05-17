@@ -31,7 +31,7 @@ public class WPFModule : AbpModule
     }
     public override async Task OnPreApplicationInitializationAsync(ApplicationInitializationContext context)
     {
-        AutoUpdater.Start("http://testposter.propnex.net/PropnexPoster.WPF.AutoUpdater.xml");
+        AutoUpdater.Start("http://testposter.propnex.net/PropnexPoster.Guru/PropnexPoster.WPF.AutoUpdater.xml");
         await Task.CompletedTask;
     }
 }

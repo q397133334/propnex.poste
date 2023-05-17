@@ -64,7 +64,9 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             await Delay(5);
             var toLoginResult = await ToLoginAsync();
+#if DEBUG
             chromiumWebBrowser.ShowDevTools();
+#endif
             if (toLoginResult.Status == PosterActionResultStatus.Error)
             {
                 await PublishMessageAsync(toLoginResult.Message);
@@ -926,7 +928,7 @@ namespace Propnex.Poster.NetCoreWinForm
                     RestRequest request = new RestRequest();
                     request.Method = Method.Get;
                     request.Resource = url;
-                    file = await client.DownloadDataAsync(request);
+                    file = await client.DownloadDataAsync(request).ConfigureAwait(false);
                 }
                 if (file != null)
                 {
@@ -1140,7 +1142,7 @@ namespace Propnex.Poster.NetCoreWinForm
             await watiForIsLoading();
             await CheckPage();
             var warning = await DevToolsContext.QuerySelectorAsync<HtmlElement>("div.login-body > div.warning-container > div");
-            if(warning!=null)
+            if (warning != null)
             {
                 return new PosterActionResult()
                 {
@@ -1481,7 +1483,7 @@ namespace Propnex.Poster.NetCoreWinForm
                  response.ResponseStatus == ResponseStatus.Aborted) || !response.IsSuccessStatusCode)
                 .WaitAndRetryAsync(5, retryNumber => TimeSpan.FromSeconds(30), async (ex, retry) =>
                 {
-                    await PublishMessageAsync($"xwebItem error ,{propnexTask.Id},{propnexListing.Details["taskitem_id"]}- {ex.Result.Request.Resource}");
+                    await PublishMessageAsync($"xwebItem error ,{propnexTask.Id},{propnexListing.Details["taskitem_id"]} - {ex.Result.Request.Resource}");
                 }).ExecuteAsync(async () =>
                 {
                     return await client.ExecutePostAsync(request);
