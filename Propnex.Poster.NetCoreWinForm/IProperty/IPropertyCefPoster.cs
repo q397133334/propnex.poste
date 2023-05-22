@@ -65,7 +65,7 @@ namespace Propnex.Poster.NetCoreWinForm
             await Delay(5);
             var toLoginResult = await ToLoginAsync();
 #if DEBUG
-            chromiumWebBrowser.ShowDevTools();
+            //chromiumWebBrowser.ShowDevTools();
 #endif
             if (toLoginResult.Status == PosterActionResultStatus.Error)
             {
@@ -926,6 +926,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 using (RestClient client = new RestClient())
                 {
                     RestRequest request = new RestRequest();
+                    request.Timeout = 6000;
                     request.Method = Method.Get;
                     request.Resource = url;
                     file = await client.DownloadDataAsync(request).ConfigureAwait(false);
@@ -1199,6 +1200,7 @@ namespace Propnex.Poster.NetCoreWinForm
             }, new Context("GetListings"));
 
         }
+       
         private AsyncPolicyWrap<PosterActionResult<T>> GetPolicy<T>()
         {
             var retryPolicy = Policy<PosterActionResult<T>>
@@ -1395,10 +1397,9 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             while (chromiumWebBrowser.IsLoading)
             {
-                //await Delay();
+                await Delay();
                 await PublishMessageAsync($"Waiting loading {chromiumWebBrowser.IsLoading}");
             }
-            await Delay();
         }
 
         public async Task Delay(int delay = 5)

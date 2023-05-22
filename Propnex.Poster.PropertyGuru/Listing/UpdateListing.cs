@@ -699,11 +699,11 @@ namespace Propnex.Poster.PropertyGuru.Listing
         /// <summary>
         /// 
         /// </summary>
-        public string sellerEthnic { get; set; }
+        public string sellerEthnic { get; set; } = "";
         /// <summary>
         /// 
         /// </summary>
-        public string sellerResidency { get; set; }
+        public string sellerResidency { get; set; } = "";
         /// <summary>
         /// 
         /// </summary>
