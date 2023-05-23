@@ -76,12 +76,11 @@ namespace Propnex.Poster.NetCoreWinForm
             }
             await PublishMessageAsync("Start a new task");
             await GetTaskAsync();
-            if (PnTaskDto == null)
+            while (PnTaskDto == null)
             {
                 await PublishMessageAsync("Not find task, delay 1 min");
                 await Delay(60);
-                Close();
-                return;
+                await GetTaskAsync();
             }
             _logger = new LoggerConfiguration()
                         .MinimumLevel.Debug()
@@ -1077,7 +1076,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 await cookieManager.DeleteCookiesAsync();
                 await Delay();
                 await PublishMessageAsync($"LoadUrl:{loginUrl}");
-                await chromiumWebBrowser.LoadUrlAsync(loginUrl);
+                await chromiumWebBrowser.LoadUrlAsync(loginUrl); 
                 await watiForIsLoading();
                 DevToolsContext = await chromiumWebBrowser.CreateDevToolsContextAsync();
                 var loginForm = await DevToolsContext.QuerySelectorAsync("#login-form");
@@ -1138,8 +1137,7 @@ namespace Propnex.Poster.NetCoreWinForm
             var loginButton = await DevToolsContext.QuerySelectorAsync<HtmlElement>("#btn_login");
             await Delay(1);
             await loginButton.ClickAsync();
-            await Delay();
-
+            await chromiumWebBrowser.WaitForNavigationAsync();
             await watiForIsLoading();
             await CheckPage();
             var warning = await DevToolsContext.QuerySelectorAsync<HtmlElement>("div.login-body > div.warning-container > div");
@@ -1397,8 +1395,8 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             while (chromiumWebBrowser.IsLoading)
             {
-                await Delay();
                 await PublishMessageAsync($"Waiting loading {chromiumWebBrowser.IsLoading}");
+                await Delay();
             }
         }
 

@@ -291,8 +291,9 @@ namespace PropnexPoster.WPF
                                         Log("FastRepost");
                                     }
                                     //Repost
-                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
                                     await _adsProject.Repost(taskListing.Data.id.Value, listInfo.RepostCharge);
+                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                 
                                 }
                                 else
                                 {
@@ -393,8 +394,13 @@ namespace PropnexPoster.WPF
                                     await uploadVideos(listing, _api);
                                     await uploadVirtualTours(listing, _api);
                                     await uploadFloorPlanAsync(listing, _api);
+                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
                                 }
-                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                else
+                                {
+                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "Not find listing");
+                                }
+
                                 await End(task, listing.TaskItemId);
                             }
                             await XwebEnd(task);
