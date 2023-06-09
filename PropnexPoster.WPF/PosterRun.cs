@@ -204,6 +204,8 @@ namespace PropnexPoster.WPF
                                         await uploadVideos(listing, _api);
                                         await uploadVirtualTours(listing, _api);
                                         await uploadFloorPlanAsync(listing, _api);
+                                        var taskListing = await _api.GetListing(listing.Listing.Id.Value);
+                                        await _api.UpdateAsync(taskListing.Data);
                                         var activateResult = await _adsProject.Activate(result.Data.Id);
                                         if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
                                         {
@@ -239,7 +241,10 @@ namespace PropnexPoster.WPF
                                                     await uploadVideos(listing, _api);
                                                     await uploadVirtualTours(listing, _api);
                                                     await uploadFloorPlanAsync(listing, _api);
+                                                    var taskListing = await _api.GetListing(listing.Listing.Id.Value);
+                                                    await _api.UpdateAsync(taskListing.Data);
                                                     var activateResult = await _adsProject.Activate(result.Data.Id);
+
                                                     if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
                                                     {
                                                         await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
@@ -291,9 +296,11 @@ namespace PropnexPoster.WPF
                                         Log("FastRepost");
                                     }
                                     //Repost
+
                                     await _adsProject.Repost(taskListing.Data.id.Value, listInfo.RepostCharge);
+
                                     await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-                                 
+
                                 }
                                 else
                                 {
@@ -313,7 +320,10 @@ namespace PropnexPoster.WPF
                                             await uploadVideos(listing, _api);
                                             await uploadVirtualTours(listing, _api);
                                             await uploadFloorPlanAsync(listing, _api);
+                                            var taskListing = await _api.GetListing(listing.Listing.Id.Value);
+                                            await _api.UpdateAsync(taskListing.Data);
                                             var activateResult = await _adsProject.Activate(result.Data.Id);
+
                                             if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
                                             {
                                                 await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
@@ -349,6 +359,7 @@ namespace PropnexPoster.WPF
                                                         await uploadVirtualTours(listing, _api);
                                                         await uploadFloorPlanAsync(listing, _api);
                                                         var activateResult = await _adsProject.Activate(result.Data.Id);
+                                                        await _api.GetListing(listing.Listing.Id.Value);
                                                         if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
                                                         {
                                                             await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
@@ -394,6 +405,7 @@ namespace PropnexPoster.WPF
                                     await uploadVideos(listing, _api);
                                     await uploadVirtualTours(listing, _api);
                                     await uploadFloorPlanAsync(listing, _api);
+                                    await _api.GetListing(listing.Listing.Id.Value);
                                     await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
                                 }
                                 else

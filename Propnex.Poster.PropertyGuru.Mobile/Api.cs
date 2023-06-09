@@ -102,7 +102,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             return GetHttpResult<CreateOrUpdateListingResult>(response);
         }
 
-        public async Task<HttpResult<CreateOrUpdateListing>> GetListing(int listingId)
+        public async Task<HttpResult<CreateOrUpdateListing>> GetListing(int listingId, string statusCode = "ACT")
         {
             var request = GetRequest();
             request.Resource = $"/v1/listings/{listingId}";
@@ -111,7 +111,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddParameter("locale", "en");
             request.AddParameter("region", "sg");
             request.AddParameter("include_suspended_photos", "true");
-            request.AddParameter("status_code", "ACT");
+            request.AddParameter("status_code", statusCode);
             var response = await ExecuteAsync(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
