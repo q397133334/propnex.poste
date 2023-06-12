@@ -204,7 +204,7 @@ namespace PropnexPoster.WPF
                                         await uploadVideos(listing, _api);
                                         await uploadVirtualTours(listing, _api);
                                         await uploadFloorPlanAsync(listing, _api);
-                                        var taskListing = await _api.GetListing(listing.Listing.Id.Value);
+                                        var taskListing = await _api.GetListing(listing.Listing.Id.Value,"DRAFT");
                                         await _api.UpdateAsync(taskListing.Data);
                                         var activateResult = await _adsProject.Activate(result.Data.Id);
                                         if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
@@ -241,7 +241,7 @@ namespace PropnexPoster.WPF
                                                     await uploadVideos(listing, _api);
                                                     await uploadVirtualTours(listing, _api);
                                                     await uploadFloorPlanAsync(listing, _api);
-                                                    var taskListing = await _api.GetListing(listing.Listing.Id.Value);
+                                                    var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
                                                     await _api.UpdateAsync(taskListing.Data);
                                                     var activateResult = await _adsProject.Activate(result.Data.Id);
 
@@ -320,7 +320,7 @@ namespace PropnexPoster.WPF
                                             await uploadVideos(listing, _api);
                                             await uploadVirtualTours(listing, _api);
                                             await uploadFloorPlanAsync(listing, _api);
-                                            var taskListing = await _api.GetListing(listing.Listing.Id.Value);
+                                            var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
                                             await _api.UpdateAsync(taskListing.Data);
                                             var activateResult = await _adsProject.Activate(result.Data.Id);
 
@@ -358,15 +358,16 @@ namespace PropnexPoster.WPF
                                                         await uploadVideos(listing, _api);
                                                         await uploadVirtualTours(listing, _api);
                                                         await uploadFloorPlanAsync(listing, _api);
+                                                        var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
+                                                        await _api.UpdateAsync(taskListing.Data);
                                                         var activateResult = await _adsProject.Activate(result.Data.Id);
-                                                        await _api.GetListing(listing.Listing.Id.Value);
+                                                        
                                                         if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
                                                         {
                                                             await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
                                                         }
                                                         else
                                                         {
-
                                                             await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Data);
                                                         }
                                                     }
@@ -843,10 +844,10 @@ namespace PropnexPoster.WPF
         {
             string context = "";
             taskDto = await WebServer.GetTask();
-            //var taskDto = new PnTaskDto()
+            //taskDto = new PnTaskDto()
             //{
-            //    Id = Guid.Parse("3a096f11-6583-7283-5eea-693372dab84c"),
-            //    Number = "881997.guru.tsk"
+            //    Id = Guid.Parse("3a0bc078-287f-8b3b-3882-c628f32f89cd"),
+            //    Number = "930514.guru.tsk"
             //};
 
             if (taskDto != null)
