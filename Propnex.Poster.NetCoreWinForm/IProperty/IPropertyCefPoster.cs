@@ -38,7 +38,13 @@ namespace Propnex.Poster.NetCoreWinForm
         private RequestData<Variables<LocationDto>> locationDto;
         private RequestData<Variables<PropertyDetailsDto>> propertyDetailsDto;
 
-        private DevToolsContext DevToolsContext;
+        public DevToolsContext DevToolsContext
+        {
+            get
+            {
+                return chromiumWebBrowser.CreateDevToolsContextAsync().Result;
+            }
+        }
 
 
         CancellationToken cancellationToken = new CancellationToken();
@@ -67,27 +73,28 @@ namespace Propnex.Poster.NetCoreWinForm
 #if DEBUG
             //chromiumWebBrowser.ShowDevTools();
 #endif
-            if (toLoginResult.Status == PosterActionResultStatus.Error)
-            {
-                await PublishMessageAsync(toLoginResult.Message);
-                await Delay(60 * 5);
-                Close();
-                return;
-            }
-            await PublishMessageAsync("Start a new task");
-            await GetTaskAsync();
-            while (PnTaskDto == null)
-            {
-                await PublishMessageAsync("Not find task, delay 1 min");
-                await Delay(60);
-                await GetTaskAsync();
-            }
-            _logger = new LoggerConfiguration()
-                        .MinimumLevel.Debug()
-                        .WriteTo.Async(c => c.File($"{Directory.GetDirectoryRoot(System.AppDomain.CurrentDomain.BaseDirectory)}\\logs\\task\\{PnTaskDto.Number}.MyIP.txt"))
-                        .CreateLogger();
             try
             {
+                if (toLoginResult.Status == PosterActionResultStatus.Error)
+                {
+                    await PublishMessageAsync(toLoginResult.Message);
+                    await Delay(60 * 5);
+                    Close();
+                    return;
+                }
+                await PublishMessageAsync("Start a new task");
+                await GetTaskAsync();
+                while (PnTaskDto == null)
+                {
+                    await PublishMessageAsync("Not find task, delay 1 min");
+                    await Delay(60);
+                    await GetTaskAsync();
+                }
+                _logger = new LoggerConfiguration()
+                            .MinimumLevel.Debug()
+                            .WriteTo.Async(c => c.File($"{Directory.GetDirectoryRoot(System.AppDomain.CurrentDomain.BaseDirectory)}\\logs\\task\\{PnTaskDto.Number}.MyIP.txt"))
+                            .CreateLogger();
+
                 foreach (var item in propnexTasks.Tasks)
                 {
                     propnexTask = item;
@@ -1076,9 +1083,9 @@ namespace Propnex.Poster.NetCoreWinForm
                 await cookieManager.DeleteCookiesAsync();
                 await Delay();
                 await PublishMessageAsync($"LoadUrl:{loginUrl}");
-                await chromiumWebBrowser.LoadUrlAsync(loginUrl); 
+                await chromiumWebBrowser.LoadUrlAsync(loginUrl);
                 await watiForIsLoading();
-                DevToolsContext = await chromiumWebBrowser.CreateDevToolsContextAsync();
+                //DevToolsContext = await chromiumWebBrowser.CreateDevToolsContextAsync();
                 var loginForm = await DevToolsContext.QuerySelectorAsync("#login-form");
                 if (loginForm != null)
                     break;
@@ -1198,7 +1205,7 @@ namespace Propnex.Poster.NetCoreWinForm
             }, new Context("GetListings"));
 
         }
-       
+
         private AsyncPolicyWrap<PosterActionResult<T>> GetPolicy<T>()
         {
             var retryPolicy = Policy<PosterActionResult<T>>

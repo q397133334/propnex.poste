@@ -44,7 +44,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 CefPoster = GetForm();
                 CefPoster.FormClosed += (s, ev) =>
                 {
-                    CefPoster = null;
+                    CefPoster.Dispose();
                     if (IsStop)
                     {
                         Application.Exit();
