@@ -204,7 +204,7 @@ namespace PropnexPoster.WPF
                                         await uploadVideos(listing, _api);
                                         await uploadVirtualTours(listing, _api);
                                         await uploadFloorPlanAsync(listing, _api);
-                                        var taskListing = await _api.GetListing(listing.Listing.Id.Value,"DRAFT");
+                                        var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
                                         await _api.UpdateAsync(taskListing.Data);
                                         var activateResult = await _adsProject.Activate(result.Data.Id);
                                         if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
@@ -226,36 +226,43 @@ namespace PropnexPoster.WPF
                                         //1.获取邮政编号
                                         var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
                                         var locale = locales.Data.FirstOrDefault();
-                                        //2. 获取loca 信息
-                                        var project = (await _projectsApi.GetProjectAsync(int.Parse(locale.ObjectId))).Data;
-                                        if (project != null && project.addresses != null && project.addresses.Count > 0)
+                                        if (locale != null)
                                         {
-                                            createOrUpdateListing.location.id = int.Parse(project.addresses[0].external_id);
-                                            result = await _api.CreateAsync(createOrUpdateListing);
-                                            if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                            //2. 获取loca 信息
+                                            var project = (await _projectsApi.GetProjectAsync(int.Parse(locale.ObjectId))).Data;
+                                            if (project != null && project.addresses != null && project.addresses.Count > 0)
                                             {
-                                                listing.Listing.Id = result.Data.Id;
-                                                if (result.Data.Id != 0)
+                                                createOrUpdateListing.location.id = int.Parse(project.addresses[0].external_id);
+                                                result = await _api.CreateAsync(createOrUpdateListing);
+                                                if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
                                                 {
-                                                    await uploadPhotosAsync(listing, _api);
-                                                    await uploadVideos(listing, _api);
-                                                    await uploadVirtualTours(listing, _api);
-                                                    await uploadFloorPlanAsync(listing, _api);
-                                                    var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
-                                                    await _api.UpdateAsync(taskListing.Data);
-                                                    var activateResult = await _adsProject.Activate(result.Data.Id);
-
-                                                    if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                                    listing.Listing.Id = result.Data.Id;
+                                                    if (result.Data.Id != 0)
                                                     {
-                                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-                                                    }
-                                                    else
-                                                    {
+                                                        await uploadPhotosAsync(listing, _api);
+                                                        await uploadVideos(listing, _api);
+                                                        await uploadVirtualTours(listing, _api);
+                                                        await uploadFloorPlanAsync(listing, _api);
+                                                        var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
+                                                        await _api.UpdateAsync(taskListing.Data);
+                                                        var activateResult = await _adsProject.Activate(result.Data.Id);
 
-                                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Data);
+                                                        if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                                        {
+                                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                                        }
+                                                        else
+                                                        {
+
+                                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Data);
+                                                        }
                                                     }
                                                 }
                                             }
+                                        }
+                                        else
+                                        {
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
                                         }
                                     }
                                     else
@@ -361,7 +368,7 @@ namespace PropnexPoster.WPF
                                                         var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
                                                         await _api.UpdateAsync(taskListing.Data);
                                                         var activateResult = await _adsProject.Activate(result.Data.Id);
-                                                        
+
                                                         if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
                                                         {
                                                             await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
