@@ -45,6 +45,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 CefPoster.FormClosed += (s, ev) =>
                 {
                     CefPoster.Dispose();
+                    CefPoster = null;
                     if (IsStop)
                     {
                         Application.Exit();
@@ -55,7 +56,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 await Task.Delay(1000);
                 if (CefPoster != null)
                 {
-                    await (CefPoster as IPosterStart).StartAsync();
+                    await (CefPoster as IPosterStart)?.StartAsync();
                 }
             }
             else

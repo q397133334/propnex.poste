@@ -38,16 +38,17 @@ namespace Propnex.Poster.NetCoreWinForm
         private RequestData<Variables<LocationDto>> locationDto;
         private RequestData<Variables<PropertyDetailsDto>> propertyDetailsDto;
 
-        public DevToolsContext DevToolsContext
+        public Task<DevToolsContext> DevToolsContext
         {
             get
             {
-                return chromiumWebBrowser.CreateDevToolsContextAsync().Result;
+                return chromiumWebBrowser.CreateDevToolsContextAsync();
             }
         }
 
 
         CancellationToken cancellationToken = new CancellationToken();
+        
 
         private static object _lock = new object();
         private JsonSerializerSettings jsonSerialzerSettings = new JsonSerializerSettings
@@ -804,7 +805,7 @@ namespace Propnex.Poster.NetCoreWinForm
             {
                 refUrl = action;
             }
-            await DevToolsContext.EvaluateExpressionAsync(@"window.base64ToFile=function (dataurl, filename) { 
+            await (await DevToolsContext).EvaluateExpressionAsync(@"window.base64ToFile=function (dataurl, filename) { 
 	                var arr = dataurl.split(','),
 	                    mime = arr[0].match(/:(.*?);/)[1],
 	                    bstr = atob(arr[1]),
@@ -942,13 +943,13 @@ namespace Propnex.Poster.NetCoreWinForm
                     try
                     {
                         string dataString = "data:image/jpeg;base64," + Convert.ToBase64String(file);
-                        await DevToolsContext.EvaluateFunctionAsync($"(value)=>{{ window.file_{guid}=window.base64ToFile(value,'{fileName}')}}", dataString);
+                        await (await DevToolsContext).EvaluateFunctionAsync($"(value)=>{{ window.file_{guid}=window.base64ToFile(value,'{fileName}')}}", dataString);
                         StringBuilder sb = new StringBuilder();
                         sb.Append("var fd= new FormData();");
                         sb.Append($"fd.append('photo',window.file_{guid});");
 
                         sb.Append($"fetch(\"https://www.iproperty.com.my/pro/api/image\", {{ method: \"POST\", \"mode\": \"cors\",\"credentials\": \"include\",body: fd}}).then(response => response.text())");
-                        var result = await DevToolsContext.EvaluateExpressionAsync<string>(sb.ToString());
+                        var result = await (await DevToolsContext).EvaluateExpressionAsync<string>(sb.ToString());
                         if (result.Contains("errors") == false)
                         {
                             return JsonConvert.DeserializeObject<ResponseImageDto>(result);
@@ -1086,13 +1087,13 @@ namespace Propnex.Poster.NetCoreWinForm
                 await chromiumWebBrowser.LoadUrlAsync(loginUrl);
                 await watiForIsLoading();
                 //DevToolsContext = await chromiumWebBrowser.CreateDevToolsContextAsync();
-                var loginForm = await DevToolsContext.QuerySelectorAsync("#login-form");
+                var loginForm = await (await DevToolsContext).QuerySelectorAsync("#login-form");
                 if (loginForm != null)
                     break;
             }
             if (retry == 5)
             {
-                var loginForm = DevToolsContext.QuerySelectorAsync("#login-form");
+                var loginForm = await (await DevToolsContext).QuerySelectorAsync("#login-form");
                 if (loginForm == null)
                 {
                     return new PosterActionResult()
@@ -1133,21 +1134,21 @@ namespace Propnex.Poster.NetCoreWinForm
             if (checkPageResult.Status != PosterActionResultStatus.Success)
                 return checkPageResult;
             //input login user name
-            var userNameInput = await DevToolsContext.QuerySelectorAsync<CefSharp.Dom.HtmlElement>("#login-userid");
+            var userNameInput = await (await DevToolsContext).QuerySelectorAsync<CefSharp.Dom.HtmlElement>("#login-userid");
             await Delay();
             await userNameInput.SetAttributeAsync("value", propnexTask.Account);
             //input password
-            var userPasswordInput = await DevToolsContext.QuerySelectorAsync<CefSharp.Dom.HtmlElement>("#login-password");
+            var userPasswordInput = await (await DevToolsContext).QuerySelectorAsync<CefSharp.Dom.HtmlElement>("#login-password");
             await Delay();
             await userPasswordInput.SetAttributeAsync("value", propnexTask.Password);
             //login button
-            var loginButton = await DevToolsContext.QuerySelectorAsync<HtmlElement>("#btn_login");
+            var loginButton = await (await DevToolsContext).QuerySelectorAsync<HtmlElement>("#btn_login");
             await Delay(1);
             await loginButton.ClickAsync();
             await chromiumWebBrowser.WaitForNavigationAsync();
             await watiForIsLoading();
             await CheckPage();
-            var warning = await DevToolsContext.QuerySelectorAsync<HtmlElement>("div.login-body > div.warning-container > div");
+            var warning = await (await DevToolsContext).QuerySelectorAsync<HtmlElement>("div.login-body > div.warning-container > div");
             if (warning != null)
             {
                 return new PosterActionResult()
@@ -1181,7 +1182,7 @@ namespace Propnex.Poster.NetCoreWinForm
                                 }}).then(res=>{{
                                       return res.text()
                                 }})}}";
-                var result = await DevToolsContext.EvaluateFunctionAsync<string>(jscode);
+                var result = await (await DevToolsContext).EvaluateFunctionAsync<string>(jscode);
                 if (result.Contains("PERSISTED_QUERY_NOT_FOUND"))
                 {
                     throw new Exception("PERSISTED_QUERY_NOT_FOUND");
@@ -1291,7 +1292,7 @@ namespace Propnex.Poster.NetCoreWinForm
         public async Task<PosterActionResult> CheckPage()
         {
             await Delay(10);
-            var gRecaptcha = await DevToolsContext.QuerySelectorAsync(".g-recaptcha");
+            var gRecaptcha = await (await DevToolsContext).QuerySelectorAsync(".g-recaptcha");
             if (gRecaptcha != null)
             {
                 return new PosterActionResult()
@@ -1300,20 +1301,20 @@ namespace Propnex.Poster.NetCoreWinForm
                     Message = "g-recaptcha"
                 };
             }
-            var challengeForm = await DevToolsContext.QuerySelectorAsync("#challenge-form");
+            var challengeForm = await (await DevToolsContext).QuerySelectorAsync("#challenge-form");
             if (challengeForm != null)
             {
-                var checkBox = await DevToolsContext.QuerySelectorAsync("#cf-stage > div.ctp-checkbox-container > label > input[type=checkbox]");
+                var checkBox = await (await DevToolsContext).QuerySelectorAsync("#cf-stage > div.ctp-checkbox-container > label > input[type=checkbox]");
                 try
                 {
-                    await DevToolsContext.EvaluateFunctionAsync("()=> {document.querySelector(\"iframe\").contentWindow.document.querySelector(\"#cf-stage > div.ctp-checkbox-container > label > input[type=checkbox]\").click();}");
+                    await (await DevToolsContext).EvaluateFunctionAsync("()=> {document.querySelector(\"iframe\").contentWindow.document.querySelector(\"#cf-stage > div.ctp-checkbox-container > label > input[type=checkbox]\").click();}");
                     await Delay(10);
                 }
                 catch (Exception ex)
                 {
 
                 }
-                challengeForm = await DevToolsContext.QuerySelectorAsync("#challenge-form");
+                challengeForm = await (await DevToolsContext).QuerySelectorAsync("#challenge-form");
                 if (challengeForm != null)
                 {
                     return new PosterActionResult()
@@ -1323,7 +1324,7 @@ namespace Propnex.Poster.NetCoreWinForm
                     };
                 }
             }
-            var warning = await DevToolsContext.QuerySelectorAsync<Element>("div.warning-container > div.warning");
+            var warning = await (await DevToolsContext).QuerySelectorAsync<Element>("div.warning-container > div.warning");
             if (warning != null)
             {
                 return new PosterActionResult()
@@ -1357,7 +1358,7 @@ namespace Propnex.Poster.NetCoreWinForm
             string result = "";
             try
             {
-                result = await DevToolsContext.EvaluateFunctionAsync<string>(jscode);
+                result = await (await DevToolsContext).EvaluateFunctionAsync<string>(jscode);
             }
             catch (Exception ex)
             {
@@ -1387,7 +1388,7 @@ namespace Propnex.Poster.NetCoreWinForm
                                       return res.text()
                                 }})}}";
 
-                var result = await DevToolsContext.EvaluateFunctionAsync<string>(jscode);
+                var result = await (await DevToolsContext).EvaluateFunctionAsync<string>(jscode);
 
                 return result;
             }
@@ -1438,6 +1439,7 @@ namespace Propnex.Poster.NetCoreWinForm
                     await PublishMessageAsync("Not find tasks ,dealy 1 min");
                     await Task.Delay(1000 * 60);
                     Close();
+                    return;
                 }
             }
             else
@@ -1445,6 +1447,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 await PublishMessageAsync("Not find tasks ,dealy 1 min");
                 await Task.Delay(1000 * 60);
                 Close();
+                return;
             }
         }
 
