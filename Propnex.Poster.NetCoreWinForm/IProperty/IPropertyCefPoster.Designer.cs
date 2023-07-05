@@ -3,7 +3,7 @@ using Volo.Abp.DependencyInjection;
 
 namespace Propnex.Poster.NetCoreWinForm
 {
-    partial class IPropertyCefPoster : Form, ITransientDependency, IPosterStart
+    partial class IPropertyCefPoster : CefFrom, ITransientDependency, IPosterStart
     {
         /// <summary>
         ///  Required designer variable.

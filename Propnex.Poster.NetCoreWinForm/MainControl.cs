@@ -9,9 +9,9 @@ namespace Propnex.Poster.NetCoreWinForm
         private bool IsRun = false;
         private bool IsStop = false;
 
-        public Func<Form> GetForm { get; set; }
+        public Func<CefFrom> GetForm { get; set; }
 
-        private Form CefPoster { get; set; }
+        private CefFrom CefPoster { get; set; }
 
         public MainControl()
         {
@@ -36,7 +36,7 @@ namespace Propnex.Poster.NetCoreWinForm
             IsStop = true;
         }
 
-        private async void timerWorker_Tick(object sender, EventArgs e)
+        private  void timerWorker_Tick(object sender, EventArgs e)
         {
             if (CefPoster == null && IsStop == false)
             {
@@ -44,7 +44,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 CefPoster = GetForm();
                 CefPoster.FormClosed += (s, ev) =>
                 {
-                    CefPoster.Dispose();
+                    //CefPoster.Dispose();
                     CefPoster = null;
                     if (IsStop)
                     {
@@ -53,10 +53,10 @@ namespace Propnex.Poster.NetCoreWinForm
                     }
                 };
                 CefPoster.Show();
-                await Task.Delay(1000);
+                Console.WriteLine("PosterStart");
                 if (CefPoster != null)
                 {
-                    await (CefPoster as IPosterStart)?.StartAsync();
+                    CefPoster.StartAsync();
                 }
             }
             else
@@ -74,13 +74,13 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             richTextBox1.BeginInvoke(() =>
             {
-                lock(reichTextLock)
+                lock (reichTextLock)
                 {
                     richTextBox1.AppendText($"{eventData.Message}{Environment.NewLine}");
                     richTextBox1.SelectionStart = richTextBox1.Text.Length;
                     richTextBox1.ScrollToCaret();
                 }
-              
+
             });
             await Task.CompletedTask;
         }

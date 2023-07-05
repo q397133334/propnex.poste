@@ -24,7 +24,7 @@ using HtmlElement = CefSharp.Dom.HtmlElement;
 
 namespace Propnex.Poster.NetCoreWinForm
 {
-    public partial class IPropertyCefPoster : Form, ITransientDependency, IPosterStart
+    public partial class IPropertyCefPoster : CefFrom, ITransientDependency, IPosterStart
     {
         private readonly ILocalEventBus _localEventBus;
         private readonly IPropnexTaskProvider _propnexTaskProvider;
@@ -48,7 +48,7 @@ namespace Propnex.Poster.NetCoreWinForm
 
 
         CancellationToken cancellationToken = new CancellationToken();
-        
+
 
         private static object _lock = new object();
         private JsonSerializerSettings jsonSerialzerSettings = new JsonSerializerSettings
@@ -67,7 +67,7 @@ namespace Propnex.Poster.NetCoreWinForm
 
         PnTaskDto PnTaskDto;
 
-        public async Task StartAsync()
+        public override async Task StartAsync()
         {
             await Delay(5);
             var toLoginResult = await ToLoginAsync();
@@ -87,8 +87,8 @@ namespace Propnex.Poster.NetCoreWinForm
                 await GetTaskAsync();
                 while (PnTaskDto == null)
                 {
-                    await PublishMessageAsync("Not find task, delay 1 min");
-                    await Delay(60);
+                    await PublishMessageAsync("Not find task, delay 5 min");
+                    await Delay(60 * 5);
                     await GetTaskAsync();
                 }
                 _logger = new LoggerConfiguration()
@@ -1438,7 +1438,6 @@ namespace Propnex.Poster.NetCoreWinForm
                 {
                     await PublishMessageAsync("Not find tasks ,dealy 1 min");
                     await Task.Delay(1000 * 60);
-                    Close();
                     return;
                 }
             }
@@ -1446,7 +1445,6 @@ namespace Propnex.Poster.NetCoreWinForm
             {
                 await PublishMessageAsync("Not find tasks ,dealy 1 min");
                 await Task.Delay(1000 * 60);
-                Close();
                 return;
             }
         }
