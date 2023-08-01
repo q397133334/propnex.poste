@@ -188,6 +188,10 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                     filePath.Contains("havelock2")
                     )
             {
+                if (filePath.Contains("#"))
+                {
+                    filePath = filePath.Split('#')[0];
+                }
                 request.AddParameter("videoEmbedHtml", filePath);
                 request.AlwaysMultipartFormData = true;
             }
