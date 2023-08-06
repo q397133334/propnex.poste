@@ -59,10 +59,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="480x80.png" />
     <None Remove="Logo.ico" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="480x80.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Logo.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

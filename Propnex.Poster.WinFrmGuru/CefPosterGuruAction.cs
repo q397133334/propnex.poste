@@ -434,7 +434,7 @@ namespace Propnex.Poster.Guru
                         Dictionary<string, string> files = new Dictionary<string, string>();
                         if (string.IsNullOrEmpty(retrieveListing.Photos)) retrieveListing.Photos = "";
                         string[] photos = retrieveListing.Photos.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                        int i = 0;
+                        //int i = 0;
                         var formName = "ListingAttachments";
                         foreach (string photo in photos)
                         {
