@@ -749,6 +749,7 @@ namespace PropnexPoster.WPF
                                     _logger.Error(ex, "Retrieve Error" + listing.id);
                                 }
                             }
+                            await XwebEnd(task);
                         }
 
                         _api.Dispose();
