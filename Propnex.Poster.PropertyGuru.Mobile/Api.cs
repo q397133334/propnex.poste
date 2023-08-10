@@ -181,11 +181,12 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddParameter("source", "AgentNet-android");
             request.AddParameter("sortOrder", sortOrder);
             request.AddParameter("statusCode", "ACT");
-            if (filePath.Contains("youtube") ||
-                filePath.Contains("vimeo") ||
-                    filePath.Contains("dailymotion") ||
-                    filePath.Contains("<iframe") ||
-                    filePath.Contains("havelock2")
+            var filePathLower=filePath.ToLower();
+            if (filePathLower.Contains("youtube") ||
+                filePathLower.Contains("vimeo") ||
+                    filePathLower.Contains("dailymotion") ||
+                    filePathLower.Contains("<iframe") ||
+                    filePathLower.Contains("havelock2")
                     )
             {
                 if (filePath.Contains("#"))
