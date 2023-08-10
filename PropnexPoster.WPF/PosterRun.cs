@@ -1147,12 +1147,12 @@ namespace PropnexPoster.WPF
         private async Task<GuruTasks> getGuruTasks()
         {
             string context = "";
-            taskDto = await WebServer.GetTask();
-            //taskDto = new PnTaskDto()
-            //{
-            //    Id = Guid.Parse("3a0c452d-4993-5729-9a89-c5cb725df655"),
-            //    Number = "941330.guru.tsk"
-            //};
+            //taskDto = await WebServer.GetTask();
+            taskDto = new PnTaskDto()
+            {
+                Id = Guid.Parse("3a0ceff3-f520-f889-5e83-327a219f7445"),
+                Number = "954852.guru.tsk"
+            };
 
             if (taskDto != null)
             {
