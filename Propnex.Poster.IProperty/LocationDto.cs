@@ -18,8 +18,10 @@ namespace Propnex.Poster.IProperty
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public List<int>? buildingFacilityCodes { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int? propertyGroupTypeCode { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int? propertyTypeCode { get; set; }
     }
 }

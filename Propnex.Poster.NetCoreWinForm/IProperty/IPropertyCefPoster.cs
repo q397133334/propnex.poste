@@ -95,7 +95,7 @@ namespace Propnex.Poster.NetCoreWinForm
                             .MinimumLevel.Debug()
                             .WriteTo.Async(c => c.File($"{Directory.GetDirectoryRoot(System.AppDomain.CurrentDomain.BaseDirectory)}\\logs\\task\\{PnTaskDto.Number}.MyIP.txt"))
                             .CreateLogger();
-
+               
                 foreach (var item in propnexTasks.Tasks)
                 {
                     propnexTask = item;
@@ -153,6 +153,7 @@ namespace Propnex.Poster.NetCoreWinForm
             }
             finally
             {
+                (_logger as Serilog.Core.Logger)?.Dispose();
                 Close();
             }
         }
@@ -778,7 +779,8 @@ namespace Propnex.Poster.NetCoreWinForm
             return await GetPolicy<Listing>().ExecuteAsync(async (ctx) =>
             {
                 locationDto.variables.input.location.Level5.Text = null;
-                var result = await AjaxJsonPostAsync("https://www.iproperty.com.my/pro/rasor/graphql/updateListingInfo", refUrl, data: JsonConvert.SerializeObject(locationDto, jsonSerialzerSettings));
+                var jsonstr = JsonConvert.SerializeObject(locationDto, jsonSerialzerSettings);
+                var result = await AjaxJsonPostAsync("https://www.iproperty.com.my/pro/rasor/graphql/updateListingInfo", refUrl, data: jsonstr);
 
                 if (result.Contains("PersistedQueryNotFound"))
                 {
@@ -1418,9 +1420,9 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             //PnTaskDto = new PnTaskDto()
             //{
-            //    Number = "3849.cef.tsk"
+            //    Number = "11417.cef.tsk"
             //};
-            //propnexTasks = _propnexTaskProvider.GetTasks(System.IO.File.ReadAllText("E:\\3849.cef.tsk"));
+            //propnexTasks = _propnexTaskProvider.GetTasks(System.IO.File.ReadAllText("E:\\11417.cef.tsk"));
             //if (propnexTasks == null)
             //{
             //    await PublishMessageAsync("Not find tasks ,dealy 1 min");

@@ -103,9 +103,9 @@ namespace Propnex.Poster.Guru
                     {
                         //await AjaxJsonPost<object>("https://agent-service.propertyguru.com/v1/sg/getPropertyNames", "",
                         //    data: $@"{{""statusCode"":""DRAFT"",""agentId"":{task.Listing.Agent.id}}}");
-                        await ChromiumWebBrowser.LoadUrlAsync($"https://agentnet.propertyguru.com.sg/v2/dash");
+                        await ChromiumWebBrowser.LoadUrlAsync($"https://agentnet.propertyguru.com.my/v2/dash");
                         await watiForIsLoading();
-                        await ChromiumWebBrowser.LoadUrlAsync("https://agentnet.propertyguru.com.sg/v2/listing_management#draft");
+                        await ChromiumWebBrowser.LoadUrlAsync("https://agentnet.propertyguru.com.my/v2/listing_management#draft");
                         await watiForIsLoading();
                         var postBtn = await devToolsContext.QuerySelectorAsync($"#listing-management-component > div > div > div > div > div > div > div.listing-card.listing-card-{result.Id} > div.listing-card-content > div > div > button");
                         if (postBtn != null)
@@ -165,7 +165,7 @@ namespace Propnex.Poster.Guru
                 _logger.Information($"Login-{i}");
                 try
                 {
-                    await ChromiumWebBrowser.LoadUrlAsync("https://agentnet.propertyguru.com.sg/ex_logout");
+                    await ChromiumWebBrowser.LoadUrlAsync("https://agentnet.propertyguru.com.my/ex_logout");
                     await randoTime();
                     await watiForIsLoading();
 
@@ -178,7 +178,7 @@ namespace Propnex.Poster.Guru
                     var add = ChromiumWebBrowser.Address;
                     await devToolsContext.GoToAsync(add);
 
-                    if (ChromiumWebBrowser.Address.StartsWith("https://accounts.propertyguru.com.sg/account/login") == false)
+                    if (ChromiumWebBrowser.Address.StartsWith("https://accounts.propertyguru.com.my/account/login") == false)
                     {
                         await randoTime(1000 * 60 * 5);
                         result.Message = "Verification Code";
@@ -230,8 +230,8 @@ namespace Propnex.Poster.Guru
                         await randoTime();
                         await watiForIsLoading();
 
-                        if (devToolsContext.Url != "https://agentnet.propertyguru.com.sg/dash?" &&
-                                    devToolsContext.Url != "https://agentnet.propertyguru.com.sg/v2/dash")
+                        if (devToolsContext.Url != "https://agentnet.propertyguru.com.my/dash?" &&
+                                    devToolsContext.Url != "https://agentnet.propertyguru.com.my/v2/dash")
                         {
                             if (devToolsContext.Url == "chrome-error://chromewebdata/")
                             {
@@ -351,7 +351,7 @@ namespace Propnex.Poster.Guru
                         var result = await Update(task);
                         if (result.Status == PosterActionResultStatus.Success)
                         {
-                            await AjaxJsonPost<object>($"https://agentnet.propertyguru.com.sg/repost_listing?listing_id[]={task.Listing.Id}&statusCode=ACT&expectedCredits=", "");
+                            await AjaxJsonPost<object>($"https://agentnet.propertyguru.com.my/repost_listing?listing_id[]={task.Listing.Id}&statusCode=ACT&expectedCredits=", "");
                         }
                         else
                         {
@@ -360,7 +360,7 @@ namespace Propnex.Poster.Guru
                     }
                     else
                     {
-                        await AjaxJsonPost<object>($"https://agentnet.propertyguru.com.sg/repost_listing?listing_id[]={task.Listing.Id}&statusCode=ACT&expectedCredits=", "");
+                        await AjaxJsonPost<object>($"https://agentnet.propertyguru.com.my/repost_listing?listing_id[]={task.Listing.Id}&statusCode=ACT&expectedCredits=", "");
                     }
                     return new PosterActionResult()
                     {
@@ -545,7 +545,7 @@ namespace Propnex.Poster.Guru
 
                         string[] tours = retrieveListing.Tours.Split(new string[] { "\n" }, StringSplitOptions.None);
                         string[] toursThumbnail = retrieveListing.TourThumbnails.Split(new string[] { "\n" }, StringSplitOptions.None);
-                        i = 0;
+                        int i = 0;
                         for (i = 0; i < tours.Length; i++)
                         {
                             string tour = tours[i].Trim();
@@ -731,7 +731,7 @@ namespace Propnex.Poster.Guru
                 {
                     _logger.Information($"tryCount {tryCount}");
                     tryCount++;
-                    await ChromiumWebBrowser.LoadUrlAsync($"https://agentnet.propertyguru.com.sg/create-listing/media/{guruTask.Listing.Id}");
+                    await ChromiumWebBrowser.LoadUrlAsync($"https://agentnet.propertyguru.com.my/create-listing/media/{guruTask.Listing.Id}");
                     await watiForIsLoading();
 
                     var nextButtons = await devToolsContext.QuerySelectorAllAsync("#lcv2-bar-footer >div > div > button");
@@ -802,7 +802,7 @@ namespace Propnex.Poster.Guru
                 {
                     _logger.Information($"tryCount {tryCount}");
                     tryCount++;
-                    await ChromiumWebBrowser.LoadUrlAsync($"https://agentnet.propertyguru.com.sg/create-listing/media/{guruTask.Listing.Id}");
+                    await ChromiumWebBrowser.LoadUrlAsync($"https://agentnet.propertyguru.com.my/create-listing/media/{guruTask.Listing.Id}");
                     await watiForIsLoading();
 
                     var buttons = await devToolsContext.QuerySelectorAllAsync("#lcv2-bar-footer >div > div > button");
@@ -957,11 +957,11 @@ namespace Propnex.Poster.Guru
             for (int i = 0; i < 3; i++)
             {
                 ListingInfos = new List<ListingInfo>();
-                await GoToAsync("https://agentnet.propertyguru.com.sg/v2/listing_management");
+                await GoToAsync("https://agentnet.propertyguru.com.my/v2/listing_management");
                 while (isErrorPage())
                 {
                     await Api.WebServer.PingAsync();
-                    await GoToAsync("https://agentnet.propertyguru.com.sg/v2/listing_management");
+                    await GoToAsync("https://agentnet.propertyguru.com.my/v2/listing_management");
                 }
 
                 infos = new List<ListingInfo>();
@@ -1048,7 +1048,7 @@ namespace Propnex.Poster.Guru
         private async Task deleteMedias(int id)
         {
             _logger.Information($"deleteMedias");
-            await ChromiumWebBrowser.LoadUrlAsync($"https://agentnet.propertyguru.com.sg/create-listing/media/{id}");
+            await ChromiumWebBrowser.LoadUrlAsync($"https://agentnet.propertyguru.com.my/create-listing/media/{id}");
             await watiForIsLoading();
             var listing = await getListing(id.ToString());
             var medias = await getListingMediaStatus(id.ToString());
@@ -1090,7 +1090,7 @@ namespace Propnex.Poster.Guru
 
             async Task deleteMedia(string mediaId)
             {
-                var result = await ajaxJsonDelete<object>($"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{id}/media/{mediaId}");
+                var result = await ajaxJsonDelete<object>($"https://agentnet.propertyguru.com.my/sf2-agent/ajax/listings/{id}/media/{mediaId}");
             }
         }
 
@@ -1101,7 +1101,7 @@ namespace Propnex.Poster.Guru
         /// <returns></returns>
         private async Task<string> getJwt()
         {
-            var result = await ajaxJsonGet<JwtResult>("https://agentnet.propertyguru.com.sg/sf2-agent/ajax/agent/jwt");
+            var result = await ajaxJsonGet<JwtResult>("https://agentnet.propertyguru.com.my/sf2-agent/ajax/agent/jwt");
             _token = result.accessToken;
             _logger.Information($"getJwt:{_token}");
 
@@ -1131,7 +1131,7 @@ namespace Propnex.Poster.Guru
             var createOrUpdateListing = new CreateOrUpdateListing();
             createOrUpdateListing.Create(guruTaskUpdateListing.Listing);
             var json = JsonConvert.SerializeObject(createOrUpdateListing, jsonFomrate);
-            var ajaxResult = await AjaxJsonPost<object>("https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings", "", data: json);
+            var ajaxResult = await AjaxJsonPost<object>("https://agentnet.propertyguru.com.my/sf2-agent/ajax/listings", "", data: json);
             if (ajaxResult.GetType().Name == "String")
             {
                 var r = new CreateOrUpdateListingResult()
@@ -1145,7 +1145,7 @@ namespace Propnex.Poster.Guru
                     createOrUpdateListing.headlines.En = "Call now to enquire";
 
                     json = JsonConvert.SerializeObject(createOrUpdateListing, jsonFomrate);
-                    ajaxResult = await AjaxJsonPost<object>("https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings", "", data: json);
+                    ajaxResult = await AjaxJsonPost<object>("https://agentnet.propertyguru.com.my/sf2-agent/ajax/listings", "", data: json);
                 }
             }
             if (ajaxResult.GetType().Name == "String")
@@ -1169,7 +1169,7 @@ namespace Propnex.Poster.Guru
             var listing = await getListing(guruTaskListing.Listing.Id.ToString());
             listing.Update(guruTaskListing.Listing);
             var json = JsonConvert.SerializeObject(listing, jsonFomrate);
-            var result = await AjaxJsonPost<object>($"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/update/{guruTaskListing.Listing.Id}", "https://agentnet.propertyguru.com.sg/create-listing/detail/{guruTaskUpdateListing.Listing.Id}", "PUT", json);
+            var result = await AjaxJsonPost<object>($"https://agentnet.propertyguru.com.my/sf2-agent/ajax/update/{guruTaskListing.Listing.Id}", "https://agentnet.propertyguru.com.my/create-listing/detail/{guruTaskUpdateListing.Listing.Id}", "PUT", json);
             return JsonConvert.DeserializeObject<CreateOrUpdateListingResult>(JsonConvert.SerializeObject(result));
         }
 
@@ -1179,7 +1179,7 @@ namespace Propnex.Poster.Guru
             var json = new object();
             try
             {
-                json = await ajaxJsonGet<object>($"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{id}");
+                json = await ajaxJsonGet<object>($"https://agentnet.propertyguru.com.my/sf2-agent/ajax/listings/{id}");
                 var jsonStr = JsonConvert.SerializeObject(json);
                 return JsonConvert.DeserializeObject<CreateOrUpdateListing>(jsonStr);
             }
@@ -1195,7 +1195,7 @@ namespace Propnex.Poster.Guru
             _logger.Information($"getListingMediaStatus");
             try
             {
-                return await ajaxJsonGet<Media>($"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{id}/media-status");
+                return await ajaxJsonGet<Media>($"https://agentnet.propertyguru.com.my/sf2-agent/ajax/listings/{id}/media-status");
             }
             catch (Exception ex)
             {
@@ -1256,7 +1256,7 @@ namespace Propnex.Poster.Guru
                     }
                     //string jscode = @$"var t=new FormData();t.append('ownerId', '23280908');t.append('mediaType', 'IMAGE');t.append('mediaClass', 'UPHO');t.append('source',' AgentNet');t.append('userId', '375435');t.append('caption', '');t.append('sortOrder', 4);t.append('mediaFile', document.getElementById('text').files[0]);return $.ajax({{url:'{url}',async:false,data:t,method:'POST',processData: false, contentType: false}})".Replace('\n', ' ').Replace('\r', ' ');
                     //sb.Append($"return $.ajax({{url:'{url}',async:false,data:fd,method:'POST',processData: false, contentType: false}})"/*.Replace('\n', ' ').Replace('\r', ' ')*/);
-                    sb.Append($"fetch(\"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{guruTaskListing.Listing.Id}/media\", {{ method: \"POST\", \"mode\": \"cors\",\"credentials\": \"include\",body: fd}}).then(response => response.json())");
+                    sb.Append($"fetch(\"https://agentnet.propertyguru.com.my/sf2-agent/ajax/listings/{guruTaskListing.Listing.Id}/media\", {{ method: \"POST\", \"mode\": \"cors\",\"credentials\": \"include\",body: fd}}).then(response => response.json())");
                     var jscode = sb.ToString();
 
                     var r = await devToolsContext.EvaluateExpressionAsync<object>(jscode);
@@ -1344,7 +1344,7 @@ namespace Propnex.Poster.Guru
                 {
                     sb.Append($"fd.append('{item.Key}',{item.Value});");
                 }
-                sb.Append($"fetch(\"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{guruTaskListing.Listing.Id}/media\", {{ method: \"POST\", \"mode\": \"cors\",\"credentials\": \"include\",body: fd}}).then(response => response.json())");
+                sb.Append($"fetch(\"https://agentnet.propertyguru.com.my/sf2-agent/ajax/listings/{guruTaskListing.Listing.Id}/media\", {{ method: \"POST\", \"mode\": \"cors\",\"credentials\": \"include\",body: fd}}).then(response => response.json())");
                 var jscode = sb.ToString();
 
                 try
@@ -1434,7 +1434,7 @@ namespace Propnex.Poster.Guru
                 {
                     sb.Append($"fd.append('{item.Key}',{item.Value});");
                 }
-                sb.Append($"fetch(\"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{guruTaskListing.Listing.Id}/media\", {{ method: \"POST\", \"mode\": \"cors\",\"credentials\": \"include\",body: fd}}).then(response => response.json())");
+                sb.Append($"fetch(\"https://agentnet.propertyguru.com.my/sf2-agent/ajax/listings/{guruTaskListing.Listing.Id}/media\", {{ method: \"POST\", \"mode\": \"cors\",\"credentials\": \"include\",body: fd}}).then(response => response.json())");
                 var jscode = sb.ToString();
 
                 try
@@ -1497,7 +1497,7 @@ namespace Propnex.Poster.Guru
                     {
                         sb.Append($"fd.append('{item.Key}',{item.Value});");
                     }
-                    sb.Append($"fetch(\"https://agentnet.propertyguru.com.sg/sf2-agent/ajax/listings/{guruTaskListing.Listing.Id}/media\", {{ method: \"POST\", \"mode\": \"cors\",\"credentials\": \"include\",body: fd}}).then(response => response.json())");
+                    sb.Append($"fetch(\"https://agentnet.propertyguru.com.my/sf2-agent/ajax/listings/{guruTaskListing.Listing.Id}/media\", {{ method: \"POST\", \"mode\": \"cors\",\"credentials\": \"include\",body: fd}}).then(response => response.json())");
                     var jscode = sb.ToString();
 
                     var r = await devToolsContext.EvaluateExpressionAsync<object>(jscode);

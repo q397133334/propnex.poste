@@ -186,7 +186,8 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 filePathLower.Contains("vimeo") ||
                     filePathLower.Contains("dailymotion") ||
                     filePathLower.Contains("<iframe") ||
-                    filePathLower.Contains("havelock2")
+                    filePathLower.Contains("havelock2")||
+                    filePathLower.Contains("new-vr")
                     )
             {
                 if (filePath.Contains("#"))

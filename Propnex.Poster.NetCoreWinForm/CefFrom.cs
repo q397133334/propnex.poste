@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Propnex.Poster.NetCoreWinForm
 {
-    public class CefFrom : Form, IPosterStart
+    public class CefFrom : Form, IPosterStart 
     {
         public virtual Task StartAsync()
         {
