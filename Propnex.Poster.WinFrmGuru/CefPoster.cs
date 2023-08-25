@@ -52,7 +52,7 @@ namespace Propnex.Poster.Guru
         private void CefPoster_Load(object sender, EventArgs e)
         {
             //this.FormBorderStyle=FormBorderStyle.None;
-            cwb.LoadUrl("https://propertyguru.com.sg");
+            cwb.LoadUrl("https://propertyguru.com.my");
         }
 
         public async void PosterStart()
@@ -67,7 +67,7 @@ namespace Propnex.Poster.Guru
                     Close();
                     return;
                 }
-
+                await Task.Delay(1000 * 10);
                 Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
@@ -266,11 +266,11 @@ namespace Propnex.Poster.Guru
             //taskDto = await Api.WebServer.GetTask();
             taskDto = new PnTaskDto()
             {
-                Number = "11417.cef.tsk"
+                Number = "12133.tsk"
             };
             if (taskDto != null)
             {
-                context = System.IO.File.ReadAllText("E:\\11417.cef.tsk");
+                context = System.IO.File.ReadAllText("E:\\12133.tsk");
                 //context = await Api.WebServer.GetTaskContent(taskDto);
                 var lenght = context.IndexOf("Xpressor-Listing-File===");
                 var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);

@@ -43,7 +43,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     Document = XDocument.Parse(info.ToString());
                     Init();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
 
                 }
@@ -70,10 +70,30 @@ namespace Propnex.Poster.PropertyGuru.Tasks
 
                 var detials = element.Element("Details");
 
-                IEnumerable<XElement> detialss = new List<XElement>();
+                List<XElement> detialss = new List<XElement>();
                 if (detials != null)
                 {
-                    detialss = detials.Elements();
+                    detialss = detials.Elements().ToList();
+                }
+
+                var basic = element.Element("Basic");
+
+                if (basic != null)
+                {
+                    var basics = basic.Elements();
+                    foreach (var item in basics)
+                    {
+                        detialss.Add(item);
+                    }
+                }
+
+                var location= element.Element("Location");
+                if(location!=null)
+                {
+                    foreach(var item in location.Elements().ToList())
+                    {
+                        detialss.Add(item);
+                    }
                 }
 
                 var listing = new GuruTaskListing();

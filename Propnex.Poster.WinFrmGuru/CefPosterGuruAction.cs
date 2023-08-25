@@ -64,10 +64,10 @@ namespace Propnex.Poster.Guru
                 var result = await createListingAsync(task);
                 if (result.errors != null && result.errors.ToString().ToLower().Contains("postcode") && task.Listing.Location.id == null)
                 {
-                    var locales = await ajaxJsonGet<List<QueryLocale>>($"https://prefix-search.propertyguru.com/v1/sg/autocomplete?locale=en&limit=25&object_type=PROPERTY&query={task.Listing.Location.postalCode}&property_type_group_exclude=COMMERCIAL");
+                    var locales = await ajaxJsonGet<List<QueryLocale>>($"https://prefix-search.propertyguru.com/v1/my/autocomplete?locale=en&limit=25&object_type=PROPERTY&query={task.Listing.Location.postalCode}&property_type_group_exclude=COMMERCIAL");
                     if (locales.Count > 0)
                     {
-                        var t = await ajaxJsonGetWithJwt<QueryProject>($"https://projects-api-projectnet.propertyguru.com/v1/project?property_id={locales[0].ObjectId}&country=singapore&language=en");
+                        var t = await ajaxJsonGetWithJwt<QueryProject>($"https://projects-api-projectnet.propertyguru.com/v1/project?property_id={locales[0].ObjectId}&country=malaysia&language=en");
                         if (t != null && t.Addresses != null && t.Addresses.Count > 0)
                         {
                             task.Listing.Location.id = int.Parse(t.Addresses[0].external_id);
@@ -698,7 +698,7 @@ namespace Propnex.Poster.Guru
                 if (listingInfo.IsBoosted == false && listingInfo.IsTurbo == false)
                 {
                     await getAgentId(task);
-                    var result = await AjaxJsonPost<object>("https://bff-mobile.propertyguru.com/v1/listingManagement/delist?region=sg", "", data: $"{{'listingIds':[{task.Listing.Id}],'statusCode':'DEL','agentId':{task.Listing.Agent.id}}}");
+                    var result = await AjaxJsonPost<object>("https://bff-mobile.propertyguru.com/v1/listingManagement/delist?region=my", "", data: $"{{'listingIds':[{task.Listing.Id}],'statusCode':'DEL','agentId':{task.Listing.Agent.id}}}");
                     return new PosterActionResult()
                     {
                         Status = PosterActionResultStatus.Success,
@@ -983,7 +983,7 @@ namespace Propnex.Poster.Guru
             {
                 infos = new List<ListingInfo>();
                 var func = $@"()=>{{
-                           return fetch('https://bff-mobile.propertyguru.com/v1/listingManagement?region=sg&locale=en&status_code=ACT&sort=start_date&order=desc&page=1&limit=20000&timestamp=1616142255393',
+                           return fetch('https://bff-mobile.propertyguru.com/v1/listingManagement?region=my&locale=en&status_code=ACT&sort=start_date&order=desc&page=1&limit=20000&timestamp=1616142255393',
                         {{ headers:{{'authorization':'Bearer {await getJwt()}'}}}}).then(res=>{{
                                       return res.json()
                                 }})}}";
