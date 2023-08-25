@@ -526,6 +526,10 @@
       <Project>{62a446e9-b73c-4f3c-acf6-f625dba08129}</Project>
       <Name>Propnex.Poster.Share</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Propnex.Task\Propnex.csproj">
+      <Project>{849bd261-357d-4d77-ae57-6a796df8405d}</Project>
+      <Name>Propnex</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">

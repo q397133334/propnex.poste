@@ -263,16 +263,15 @@ namespace Propnex.Poster.Guru
         private async Task getGuruTasks()
         {
             string context = "";
-            //taskDto = await Api.WebServer.GetTask();cc
+            //taskDto = await Api.WebServer.GetTask();
             taskDto = new PnTaskDto()
             {
-                Id = Guid.Parse("3a0d0f57-0a08-3bec-018d-0d0e195d71c8"),
-                Number = "957637.guru.tsk"
+                Number = "11417.cef.tsk"
             };
-
             if (taskDto != null)
             {
-                context = await Api.WebServer.GetTaskContent(taskDto);
+                context = System.IO.File.ReadAllText("E:\\11417.cef.tsk");
+                //context = await Api.WebServer.GetTaskContent(taskDto);
                 var lenght = context.IndexOf("Xpressor-Listing-File===");
                 var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
                 guruTasks = new GuruTasks(context, taskContext);

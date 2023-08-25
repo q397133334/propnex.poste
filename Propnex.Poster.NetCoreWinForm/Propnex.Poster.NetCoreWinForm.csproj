@@ -53,7 +53,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="MyGuru\" />
+    <Folder Include="Guru\" />
   </ItemGroup>
 
 </Project>
