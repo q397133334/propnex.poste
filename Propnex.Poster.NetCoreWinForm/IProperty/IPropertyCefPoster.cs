@@ -1169,7 +1169,7 @@ namespace Propnex.Poster.NetCoreWinForm
         public async Task<PosterActionResult<List<Listing>>> GetListings()
         {
             string url = $"https://www.iproperty.com.my/pro/rasor/graphql/listingsQuery?" +
-                $"operationName=listingsQuery&variables=%7B%22shouldExtendsFields%22%3Atrue%2C%22statusCode%22%3A{2}%2C%22isExcludeChild%22%3Afalse%2C%22sortBy%22%3A%22new-to-old%22%2C%22limit%22%3A500%2C%22page%22%3A%221%22%2C%22includeReAdvertiseJob%22%3Atrue%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%228893c19fbd672297adbdd3bf3eba0c22544d6ef0517a2c3153f36b2c64f86659%22%7D%7D";
+                $"operationName=listingsQuery&variables=%7B%22shouldExtendsFields%22%3Atrue%2C%22statusCode%22%3A{2}%2C%22isExcludeChild%22%3Afalse%2C%22sortBy%22%3A%22new-to-old%22%2C%22limit%22%3A500%2C%22page%22%3A%221%22%2C%22includeReAdvertiseJob%22%3Atrue%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%227b6a11e4f1b523a1308f9f5274b6f7d46683849dbbaec77233f66ba21fbef25c%22%7D%7D";
 
             return await GetPolicy<List<Listing>>().ExecuteAsync(async (ctx) =>
             {
@@ -1420,9 +1420,9 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             //PnTaskDto = new PnTaskDto()
             //{
-            //    Number = "11417.cef.tsk"
+            //    Number = "12200.cef.tsk"
             //};
-            //propnexTasks = _propnexTaskProvider.GetTasks(System.IO.File.ReadAllText("E:\\11417.cef.tsk"));
+            //propnexTasks = _propnexTaskProvider.GetTasks(System.IO.File.ReadAllText("E:\\12200.cef.tsk"));
             //if (propnexTasks == null)
             //{
             //    await PublishMessageAsync("Not find tasks ,dealy 1 min");
