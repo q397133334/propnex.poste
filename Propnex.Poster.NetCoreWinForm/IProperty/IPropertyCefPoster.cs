@@ -95,7 +95,7 @@ namespace Propnex.Poster.NetCoreWinForm
                             .MinimumLevel.Debug()
                             .WriteTo.Async(c => c.File($"{Directory.GetDirectoryRoot(System.AppDomain.CurrentDomain.BaseDirectory)}\\logs\\task\\{PnTaskDto.Number}.MyIP.txt"))
                             .CreateLogger();
-               
+
                 foreach (var item in propnexTasks.Tasks)
                 {
                     propnexTask = item;
@@ -113,7 +113,7 @@ namespace Propnex.Poster.NetCoreWinForm
                     var listingResult = await GetListings();
                     if (listingResult.Status != PosterActionResultStatus.Success)
                     {
-                        await PublishMessageAsync(listingResult.Message);
+                        //await PublishMessageAsync(listingResult.Message);
                         foreach (var task in propnexTask.Listings.Listings)
                         {
                             await xwebItemAsync(listingResult.ToPosterActionResult(), task);
@@ -551,7 +551,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 {
                     throw new Exception(result);
                 }
-                _logger?.Information(result);
+                //_logger?.Information(result);
                 return new PosterActionResult<string>()
                 {
                     Data = result,
@@ -1197,7 +1197,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 {
                     throw new Exception(result);
                 }
-                _logger?.Information(result);
+                //_logger?.Information(result);
                 var jsonResult = JsonConvert.DeserializeObject<ResponseData<ListingsData>>(result);
                 //await Delay(60);
                 return new PosterActionResult<List<Listing>>()
@@ -1215,7 +1215,8 @@ namespace Propnex.Poster.NetCoreWinForm
            .Handle<Exception>()
            .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(30), async (exception, timeSpan, retryCount, context) =>
            {
-               await PublishMessageAsync($"retry count {retryCount}, exctption {exception.Exception.Message}");
+               if (retryCount == 1)
+                   await PublishMessageAsync($"retry count {retryCount}, exctption {exception.Exception.Message}");
                context["Message"] = exception.Exception.Message;
            });
 
