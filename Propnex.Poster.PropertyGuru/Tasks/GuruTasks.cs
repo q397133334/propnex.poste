@@ -80,7 +80,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     {
                         listsContext = listsContext.Replace($"Xpressor-Listing-File==={task.ListingFile}\r\n", "");
                     }
-                    System.IO.File.WriteAllText("E:\\222.txt", listsContext);
+                    //System.IO.File.WriteAllText("E:\\222.txt", listsContext);
                     task.Listings = new GuruTaskListings(listsContext);
                 }
             }

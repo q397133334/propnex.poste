@@ -97,9 +97,9 @@ namespace PropnexPoster.WPF
             var guruTasks = await getGuruTasks();
             //taskDto = new PnTaskDto()
             //{
-            //    Number = "896622.guru.tsk"
+            //    Number = "966346.guru.tsk"
             //};
-            //var context = await File.ReadAllTextAsync("E:\\896622.guru.tsk");
+            //var context = await File.ReadAllTextAsync("E:\\966346.guru.tsk");
             //var lenght = context.IndexOf("Xpressor-Listing-File===");
             //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
             //var guruTasks = new GuruTasks(context, taskContext);
@@ -228,7 +228,9 @@ namespace PropnexPoster.WPF
                                         var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
                                         //1.获取邮政编号
                                         var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
-                                        var locale = locales.Data.FirstOrDefault();
+                                        var locale = locales.Data.Where(q=>q.DisplayText==listing.Listing.Title).FirstOrDefault();
+                                        if (locale == null)
+                                            locale = locales.Data.FirstOrDefault();
                                         if (locale != null)
                                         {
                                             //2. 获取loca 信息
