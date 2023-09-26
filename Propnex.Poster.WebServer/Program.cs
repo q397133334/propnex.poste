@@ -1,8 +1,7 @@
-using System;
-using Propnex.Poster;
 using Propnex.Poster.Data;
 using Serilog;
 using Serilog.Events;
+using Volo.Abp.Data;
 
 namespace Propnex.Poster;
 
@@ -36,6 +35,10 @@ public class Program
             builder.Host.AddAppSettingsSecretsJson()
                 .UseAutofac()
                 .UseSerilog();
+            if (IsMigrateDatabase(args))
+            {
+                builder.Services.AddDataMigrationEnvironment();
+            }
             await builder.AddApplicationAsync<PosterModule>();
             var app = builder.Build();
             await app.InitializeApplicationAsync();
