@@ -225,7 +225,7 @@ namespace PropnexPoster.WPF
                                 {
                                     if (result.Message.Contains("Postal code is already being used"))
                                     {
-                                        var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
+                                        //var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
                                         //1.获取邮政编号
                                         var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
                                         var locale = locales.Data.Where(q=>q.DisplayText==listing.Listing.Title).FirstOrDefault();

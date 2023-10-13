@@ -8,6 +8,7 @@ using System.Text;
 using Propnex.Poster.Dtos;
 using System.Reflection.PortableExecutable;
 using System.Threading.Tasks;
+using Volo.Abp.Uow;
 
 namespace Propnex.Poster.WebServer.Services
 {
@@ -26,7 +27,7 @@ namespace Propnex.Poster.WebServer.Services
 
         Task<List<PnTaskDto>> GetWaitPnTaskAsync();
 
-
+        Task CreatePropertyTasks(CreatePropertyTaskDto input);
     }
 
     public class PnTaskAppService : CrudAppService<
@@ -48,6 +49,25 @@ namespace Propnex.Poster.WebServer.Services
             _webHostEnvironment = webHostEnvironment;
         }
 
+        public async Task CreatePropertyTasks(CreatePropertyTaskDto input)
+        {
+            if (input.MaxId < input.MinId)
+            {
+                throw new Volo.Abp.UserFriendlyException("StartId can not max EndId");
+            }
+            List<PnTask> list = new List<PnTask>();
+            for (int i = input.MinId; i <= input.MaxId; i++)
+            {
+                list.Add(new PnTask()
+                {
+                    Number = i.ToString(),
+                    ClientId = "1",
+                    Status = Share.TaskStatus.Wait,
+                    TargetPortal = "PropertyData"
+                }); ;
+            }
+            await Repository.InsertManyAsync(list);
+        }
 
         public async Task<Dtos.PnTaskDto> GetPnTaskAsync(Dtos.InputGetTaskInfoDto inputDto)
         {

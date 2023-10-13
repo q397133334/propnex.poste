@@ -168,52 +168,8 @@ public class PosterModule : AbpModule
         ConfigureBlazorise(context);
         ConfigureRouter(context);
         ConfigureEfCore(context);
-        ConfigureQuartz(context);
 
     }
-
-    private void ConfigureQuartz(ServiceConfigurationContext context)
-    {
-        var configuration= context.Services.GetConfiguration();
-
-        context.Services.AddQuartz(q =>
-        {
-            //q.UseMicrosoftDependencyInjectionJobFactory();
-            q.SchedulerId = "Scheduler-Core";
-            q.UsePersistentStore(c =>
-            {
-                c.UseNewtonsoftJsonSerializer();
-
-                // Use for MySQL database
-                c.UseMySql(mysqlOptions =>
-                {
-                    var ConnectionString= configuration["ConnectionStrings:quartz"];
-                    mysqlOptions.UseDriverDelegate<MySQLDelegate>();
-                    mysqlOptions.ConnectionString = ConnectionString;
-                    mysqlOptions.TablePrefix = "QRTZ_";
-                });
-            });
-
-            q.AddHttpApi(options =>
-            {
-                // "/quartz-api" is also default value
-                options.ApiPath = "/quartz-api";
-                options.IncludeStackTraceInProblemDetails = true;
-            });
-        });
-      
-        context.Services.AddSingleton(serviceProvider =>
-        {
-            var s= AsyncHelper.RunSync(() => serviceProvider.GetRequiredService<ISchedulerFactory>().GetScheduler());
-            s.Start();
-            return s;
-        });
-        context.Services.AddQuartzHostedService(options =>
-        {
-            options.WaitForJobsToComplete = true;
-        });
-    }
-
     private void ConfigureAuthentication(ServiceConfigurationContext context)
     {
         context.Services.ForwardIdentityAuthenticationForBearer(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
@@ -423,9 +379,6 @@ public class PosterModule : AbpModule
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapRazorPages();
-
-            // Map HTTP API endpoints
-            endpoints.MapQuartzApi();
         });
         app.UseAbpSerilogEnrichers();
         app.UseConfiguredEndpoints();

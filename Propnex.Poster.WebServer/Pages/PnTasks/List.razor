@@ -1,11 +1,15 @@
 ﻿@page "/PnTask/List"
 @using Volo.Abp.Application.Dtos
 @using Dtos
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
 @inherits AbpCrudPageBase<WebServer.Services.IPnTaskAppService, PnTaskDto , Guid, PagedAndSortedResultRequestDto, CreateUpdatePnTaskDto>
 @inject AuthenticationStateProvider AuthenticationStateProvider
 <Card>
     <CardHeader>
-        <h2>@L["Books"]</h2>
+        <PageHeader Title="TaskList"
+                    BreadcrumbItems="@BreadcrumbItems"
+                    Toolbar="@Toolbar">
+        </PageHeader>
     </CardHeader>
     <CardBody>
         <DataGrid TItem="PnTaskDto"
@@ -15,21 +19,26 @@
                   ShowPager="true"
                   PageSize="PageSize">
             <DataGridColumns>
-                <DataGridColumn TItem="PnTaskDto"
-                                Field="@nameof(PnTaskDto.Number)"
-                                Caption="编号"></DataGridColumn>
-                <DataGridColumn TItem="PnTaskDto"
-                                Field="@nameof(PnTaskDto.CreationTime)"
-                                Caption="@L["CreationTime"]">
+                <DataGridColumn TItem="PnTaskDto" Field="@nameof(PnTaskDto.Number)" Caption="Number"/>
+               
+                <DataGridColumn TItem="PnTaskDto" Field="@nameof(PnTaskDto.RetryCount)" Caption="RetryCount" />
+                <DataGridColumn TItem="PnTaskDto" Field="@nameof(PnTaskDto.LastModificationTime)" Caption="LastModificationTime">
                     <DisplayTemplate>
-                        @context.CreationTime.ToLongDateString()
+                        @context.LastModificationTime?.ToString()
+                    </DisplayTemplate>
+                </DataGridColumn>
+                <DataGridColumn TItem="PnTaskDto" Field="@nameof(PnTaskDto.CreationTime)" Caption="@L["CreationTime"]">
+                    <DisplayTemplate>
+                        @context.CreationTime.ToString()
                     </DisplayTemplate>
                 </DataGridColumn>
                 <DataGridEntityActionsColumn TItem="PnTaskDto" @ref="@EntityActionsColumn">
                     <DisplayTemplate>
                         <EntityActions TItem="PnTaskDto" EntityActionsColumn="@EntityActionsColumn">
                             <EntityAction TItem="PnTaskDto"
-                                          Text="重试"/>
+                                          Text="重试"
+                                          ConfirmationMessage='()=> GetConfirmationMessage("Are you sure you want to run it again?")'
+                                          Clicked="async ()=>await RetryTask(context)" />
                         </EntityActions>
                     </DisplayTemplate>
                 </DataGridEntityActionsColumn>
@@ -37,3 +46,29 @@
         </DataGrid>
     </CardBody>
 </Card>
+<Modal @ref="CreatePropertyTaskModal">
+    <ModalContent Centered="true">
+        <Form>
+            <ModalHeader>
+                <ModalTitle>CreatePropertyTask</ModalTitle>
+                <CloseButton Clicked="()=>CreatePropertyTaskModal.Close(CloseReason.UserClosing)" />
+            </ModalHeader>
+            <ModalBody>
+                <Validations Model="@CreatePropertyTaskDto" ValidateOnLoad="false">
+                    <Field>
+                        <FieldLabel>StartId:</FieldLabel>
+                        <NumericEdit TValue="int" @bind-Value="@CreatePropertyTaskDto.MinId"></NumericEdit>
+                    </Field>
+                    <Field>
+                        <FieldLabel>EndId:</FieldLabel>
+                        <NumericEdit TValue="int" @bind-Value="@CreatePropertyTaskDto.MaxId"></NumericEdit>
+                    </Field>
+                </Validations>
+            </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary" Clicked="()=>CreatePropertyTaskModal.Close(CloseReason.UserClosing)">@L["Cancel"]</Button>
+                <SubmitButton Clicked="@CreatePropertyTaskAsync" />
+            </ModalFooter>
+        </Form>
+    </ModalContent>
+</Modal>
