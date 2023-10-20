@@ -1,24 +1,23 @@
 ﻿using Flurl.Http;
 using Microsoft.Extensions.Logging;
 using Polly;
+using Propnex;
 using Propnex.Poster.Dtos;
 using Propnex.Poster.PropertyGuru.Listing;
 using Propnex.Poster.PropertyGuru.Mobile;
 using Propnex.Poster.PropertyGuru.Mobile.Dto;
 using Propnex.Poster.PropertyGuru.Tasks;
-using RestSharp;
+using Propnex.Poster.Share;
 using Serilog;
+using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Propnex;
 using ILogger = Serilog.ILogger;
-using System.Security.Principal;
-using Propnex.Poster.Share;
-using System.Net.Http;
 
 namespace PropnexPoster.WPF
 {
@@ -97,9 +96,9 @@ namespace PropnexPoster.WPF
             var guruTasks = await getGuruTasks();
             //taskDto = new PnTaskDto()
             //{
-            //    Number = "966346.guru.tsk"
+            //    Number = "983620.guru.tsk"
             //};
-            //var context = await File.ReadAllTextAsync("E:\\966346.guru.tsk");
+            //var context = await File.ReadAllTextAsync("E:\\983620.guru.tsk");
             //var lenght = context.IndexOf("Xpressor-Listing-File===");
             //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
             //var guruTasks = new GuruTasks(context, taskContext);
@@ -148,7 +147,7 @@ namespace PropnexPoster.WPF
                                     await End(task, listing.TaskItemId);
                                 }
                             }
-                            await XwebEnd(task);
+                            await XwebEnd(task,status: "Failed",note: "Login Faile ,Please check password or account info");
                             return;
                         }
                         posterRunInfo.Account = task.Account;
@@ -228,7 +227,7 @@ namespace PropnexPoster.WPF
                                         //var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
                                         //1.获取邮政编号
                                         var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
-                                        var locale = locales.Data.Where(q=>q.DisplayText==listing.Listing.Title).FirstOrDefault();
+                                        var locale = locales.Data.Where(q => q.DisplayText == listing.Listing.Title).FirstOrDefault();
                                         if (locale == null)
                                             locale = locales.Data.FirstOrDefault();
                                         if (locale != null)
@@ -748,7 +747,7 @@ namespace PropnexPoster.WPF
                                 }
                                 catch (Exception ex)
                                 {
-                                    _logger.Error(ex, "Retrieve Error" + listing.id);
+                                    _logger.Error("Retrieve Error {0},{1}", listing.id, ex);
                                 }
                             }
                             await XwebEnd(task);
@@ -761,13 +760,15 @@ namespace PropnexPoster.WPF
                     }
                     catch (Exception ex)
                     {
-                        _logger.Error("", ex);
+                        _logger.Error("{0},{1}", ex.Message, ex.StackTrace);
                     }
                     finally
                     {
 
                     }
                 }
+
+                await (_logger as Logger).DisposeAsync();
                 //5.
             }
             catch (Exception ex)
@@ -1249,7 +1250,7 @@ namespace PropnexPoster.WPF
                 });
         }
 
-        private async Task XwebEnd(GuruTask guruTask, string note = "")
+        private async Task XwebEnd(GuruTask guruTask, string status="Done", string note = "")
         {
             if (guruTask.Source.ToLower() == "chope")
                 return;
@@ -1258,7 +1259,7 @@ namespace PropnexPoster.WPF
             formData.Append($"account_name={guruTask.Account}&");
             formData.Append($"account_password={guruTask.Password}&");
             formData.Append($"task_id={guruTask.Id}&");
-            formData.Append($"status=Done&");
+            formData.Append($"status={status}&");
             formData.Append($"time_cost=&");
             formData.Append($"note={note}&");
             formData.Append("poster=mobileApi");

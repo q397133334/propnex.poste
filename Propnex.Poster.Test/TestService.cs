@@ -30,7 +30,7 @@ namespace Propnex.Poster.Test
 
         public async Task SayHelloAsync()
         {
-            _propnexTaskProvider.GetTasks(File.ReadAllText("C:\\Users\\worker_fg\\Downloads\\2504.tsk"));
+            _propnexTaskProvider.Get(File.ReadAllText("C:\\Users\\worker_fg\\Downloads\\2504.tsk"));
         }
     }
 }

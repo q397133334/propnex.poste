@@ -628,10 +628,10 @@ namespace Propnex.Poster.PropertyGuru.Listing
                 Image img = Bitmap.FromFile(filename);
                 int X, Y, H, W;
                 X = Y = H = W = 0;
-                Y = (int)System.Math.Round((img.Height * 0.6), 0);
-                X = (int)img.Width - (int)System.Math.Round(img.Height / 550.0 * 100, 0);
-                W = img.Width - X;
-                H = (int)System.Math.Round(img.Height * 0.1 + 1, 0);
+                Y = (int)System.Math.Round((img.Height * 0.5), 0);
+                X = (int)(img.Width - 360);
+                W = 360;
+                H = 55;
                 int Width = (int)System.Math.Round(H * 6.18, 0);
                 if (img.Width - Width < 56)
                 {
@@ -642,8 +642,8 @@ namespace Propnex.Poster.PropertyGuru.Listing
                     Width = newWidth;
                 };
                 //remove following 2 lines to overlay only right part
-                X = img.Width - Width - 5;
-                W = img.Width - X;
+                //X = img.Width - Width - 5;
+                //W = img.Width - X;
                 string photo = "";
                 using (Image src = Image.FromFile("480x80.png"))
                 using (Bitmap dst = new Bitmap(img.Width, img.Height))

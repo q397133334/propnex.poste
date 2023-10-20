@@ -1436,7 +1436,7 @@ namespace Propnex.Poster.NetCoreWinForm
             if (PnTaskDto != null)
             {
                 context = await WebServer.GetTaskContent(PnTaskDto);
-                propnexTasks = _propnexTaskProvider.GetTasks(context);
+                propnexTasks = _propnexTaskProvider.Get(context);
                 if (propnexTasks == null)
                 {
                     await PublishMessageAsync("Not find tasks ,dealy 1 min");

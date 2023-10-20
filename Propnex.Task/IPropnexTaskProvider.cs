@@ -6,6 +6,6 @@ namespace Propnex
 {
     public interface IPropnexTaskProvider
     {
-        PropnexTasks GetTasks(string content);
+        PropnexTasks Get(string content);
     }
 }
