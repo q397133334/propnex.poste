@@ -289,7 +289,7 @@ namespace Propnex.Poster.NetCoreWinForm
                     {
                         throw new Exception(result);
                     }
-                    _logger.Information(result);
+                    //_logger.Information(result);
                     var data = JsonConvert.DeserializeObject<ResponseData<AddListingPayload>>(result);
                     listingId = data?.Data.addListing.listing.Id;
                     await PublishMessageAsync($"create listing details success,listing is is {listingId}");
@@ -668,6 +668,14 @@ namespace Propnex.Poster.NetCoreWinForm
 
             if (buildingText != "")
             {
+                if(string.IsNullOrEmpty(propnexListing.Basic["txtPostCode"]))
+                {
+                    return new PosterActionResult<Listing>()
+                    {
+                        Status = PosterActionResultStatus.Error,
+                        Message = $"PostCode is null"
+                    };
+                }
                 var buildingsResult = await BuildingQuery(buildingText);
                 if (buildingsResult.Status == PosterActionResultStatus.Success)
                 {
@@ -1419,18 +1427,18 @@ namespace Propnex.Poster.NetCoreWinForm
 
         public async Task GetTaskAsync()
         {
-            //PnTaskDto = new PnTaskDto()
-            //{
-            //    Number = "12200.cef.tsk"
-            //};
-            //propnexTasks = _propnexTaskProvider.GetTasks(System.IO.File.ReadAllText("E:\\12200.cef.tsk"));
-            //if (propnexTasks == null)
-            //{
-            //    await PublishMessageAsync("Not find tasks ,dealy 1 min");
-            //    await Task.Delay(1000 * 60);
-            //    Close();
-            //}
-            //return;
+            PnTaskDto = new PnTaskDto()
+            {
+                Number = "17202.cef.tsk"
+            };
+            propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText("E:\\17202.cef.tsk"));
+            if (propnexTasks == null)
+            {
+                await PublishMessageAsync("Not find tasks ,dealy 1 min");
+                await Task.Delay(1000 * 60);
+                Close();
+            }
+            return;
             var context = "";
             PnTaskDto = await WebServer.GetTask();
             if (PnTaskDto != null)

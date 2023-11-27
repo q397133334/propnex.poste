@@ -30,7 +30,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 BaseUrl = new Uri(baseUrl),
                 MaxTimeout = 1000 * 60 * 10
             });
-            client.AddDefaultHeader("User-Agent", "sg;agentnet;android;23.2.10;HD1910;null");
+            client.AddDefaultHeader("User-Agent", "sg;agentnet;android;23.11.10;HD1910;null");
             Log?.Invoke($"client {baseUrl}");
             clientRetryPolicy = Policy
                 .Handle<Exception>()
@@ -53,7 +53,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 MaxTimeout = 1000 * 60 * 10,
                 Proxy = new System.Net.WebProxy(ip, int.Parse(port))
             });
-            client.AddDefaultHeader("User-Agent", "sg;agentnet;android;23.2.10;HD1910;null");
+            client.AddDefaultHeader("User-Agent", "sg;agentnet;android;23.11.10;HD1910;null");
             Log?.Invoke($"client {baseUrl}");
             clientRetryPolicy = Policy
                 .Handle<Exception>()
