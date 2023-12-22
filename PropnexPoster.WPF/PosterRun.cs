@@ -93,15 +93,15 @@ namespace PropnexPoster.WPF
 
             Log("Get Task .....");
             //1.获取任务信息
-            //var guruTasks = await getGuruTasks();
-            taskDto = new PnTaskDto()
-            {
-                Number = "999923.guru.tsk"
-            };
-            var context = await File.ReadAllTextAsync("E:\\999923.guru.tsk");
-            var lenght = context.IndexOf("Xpressor-Listing-File===");
-            var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
-            var guruTasks = new GuruTasks(context, taskContext);
+            var guruTasks = await getGuruTasks();
+            //taskDto = new PnTaskDto()
+            //{
+            //    Number = "cp17031210432729.guru.tsk"
+            //};
+            //var context = await File.ReadAllTextAsync("E:\\cp17031210432729.guru.tsk");
+            //var lenght = context.IndexOf("Xpressor-Listing-File===");
+            //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
+            //var guruTasks = new GuruTasks(context, taskContext);
             if (guruTasks == null)
             {
                 Log("Not find task ,delay 1 min");
@@ -135,7 +135,7 @@ namespace PropnexPoster.WPF
                         var task = guruTasks.Tasks[i];
                         //3.登陆
                         Log("Get Token .......");
-                        var token = await Login(task, proxyIp);
+                         var token = await Login(task, proxyIp);
 
                         if (token == null)
                         {
@@ -1024,7 +1024,7 @@ namespace PropnexPoster.WPF
         private async Task<Propnex.Poster.PropertyGuru.Mobile.Dto.Token> Login(GuruTask guruTask, string proxyIp = "")
         {
             var pnUser = await getUser();
-            var _Token = string.IsNullOrEmpty(pnUser.TokenJson) ? await auth() : await checkToken();
+            var _Token = await auth();// string.IsNullOrEmpty(pnUser.TokenJson) ? await auth() : await checkToken();
             if (_Token == null)
                 return null;
             await getListing();
@@ -1032,7 +1032,7 @@ namespace PropnexPoster.WPF
             async Task<PnUserDto> getUser()
             {
                 Log("get user ....");
-                var pnUser = await WebServer.GetUser(guruTask.Account);
+                var pnUser = new PnUserDto() { Id = Guid.Empty }; //await WebServer.GetUser(guruTask.Account);
 
                 //2.验证用户信息
                 if (pnUser.Id == Guid.Empty)

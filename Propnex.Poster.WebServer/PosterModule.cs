@@ -3,24 +3,27 @@ using Blazorise.Icons.FontAwesome;
 using Microsoft.AspNetCore.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
+using OpenIddict.Validation.AspNetCore;
 using Propnex.Poster.Localization;
 using Propnex.Poster.Menus;
-using OpenIddict.Validation.AspNetCore;
+using Propnex.Poster.WebServer;
+using Propnex.Poster.WebServer.Data;
 using Volo.Abp;
 using Volo.Abp.Account;
 using Volo.Abp.Account.Web;
-using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite;
 using Volo.Abp.AspNetCore.Components.Server.LeptonXLiteTheme;
 using Volo.Abp.AspNetCore.Components.Server.LeptonXLiteTheme.Bundling;
-using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Bundling;
 using Volo.Abp.AspNetCore.Components.Web.Theming.Routing;
 using Volo.Abp.AspNetCore.Mvc;
 using Volo.Abp.AspNetCore.Mvc.Localization;
 using Volo.Abp.AspNetCore.Mvc.UI.Bundling;
+using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite;
+using Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite.Bundling;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.Autofac;
 using Volo.Abp.AutoMapper;
+using Volo.Abp.BackgroundWorkers;
 using Volo.Abp.Emailing;
 using Volo.Abp.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore.MySQL;
@@ -50,21 +53,6 @@ using Volo.Abp.UI.Navigation;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.Validation.Localization;
 using Volo.Abp.VirtualFileSystem;
-using Volo.Abp.BackgroundWorkers;
-using Propnex.Poster.WebServer.Data;
-using Propnex.Poster.WebServer;
-using Quartz;
-using Quartz.AspNetCore;
-using Autofac.Core;
-using System.Configuration;
-using Microsoft.EntityFrameworkCore.Internal;
-using Quartz.Impl.AdoJobStore;
-using Volo.Abp.Threading;
-using System.Reflection.Metadata.Ecma335;
-using Microsoft.AspNetCore.Authentication;
-using static OpenIddict.Abstractions.OpenIddictConstants.Permissions;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 namespace Propnex.Poster;
 
@@ -151,10 +139,10 @@ public class PosterModule : AbpModule
         var hostingEnvironment = context.Services.GetHostingEnvironment();
         var configuration = context.Services.GetConfiguration();
 
-        if (hostingEnvironment.IsDevelopment())
-        {
-            context.Services.Replace(ServiceDescriptor.Singleton<IEmailSender, NullEmailSender>());
-        }
+        //if (hostingEnvironment.IsDevelopment())
+        //{
+        //    context.Services.Replace(ServiceDescriptor.Singleton<IEmailSender, NullEmailSender>());
+        //}
 
         ConfigureAuthentication(context);
         ConfigureUrls(configuration);
@@ -333,12 +321,9 @@ public class PosterModule : AbpModule
         var env = context.GetEnvironment();
         var app = context.GetApplicationBuilder();
 
-        context.ServiceProvider.GetRequiredService<IBackgroundWorkerManager>()
-        .AddAsync(
-        context
-            .ServiceProvider
-            .GetRequiredService<WebServer.BackgroundJobs.GetTaskWorker>()
-    );
+        var backgroundWorkerManager = context.ServiceProvider.GetRequiredService<IBackgroundWorkerManager>();
+        backgroundWorkerManager.AddAsync(context.ServiceProvider.GetRequiredService<WebServer.BackgroundJobs.GetTaskWorker>());
+        backgroundWorkerManager.AddAsync(context.ServiceProvider.GetRequiredService<WebServer.BackgroundJobs.CheckTaskWorker>());
 
 
 
