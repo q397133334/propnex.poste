@@ -93,15 +93,15 @@ namespace PropnexPoster.WPF
 
             Log("Get Task .....");
             //1.获取任务信息
-            //var guruTasks = await getGuruTasks();
-            taskDto = new PnTaskDto()
-            {
-                Number = "999923.guru.tsk"
-            };
-            var context = await File.ReadAllTextAsync("E:\\999923.guru.tsk");
-            var lenght = context.IndexOf("Xpressor-Listing-File===");
-            var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
-            var guruTasks = new GuruTasks(context, taskContext);
+            var guruTasks = await getGuruTasks();
+            //taskDto = new PnTaskDto()
+            //{
+            //    Number = "999923.guru.tsk"
+            //};
+            //var context = await File.ReadAllTextAsync("E:\\999923.guru.tsk");
+            //var lenght = context.IndexOf("Xpressor-Listing-File===");
+            //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
+            //var guruTasks = new GuruTasks(context, taskContext);
             if (guruTasks == null)
             {
                 Log("Not find task ,delay 1 min");
@@ -147,7 +147,7 @@ namespace PropnexPoster.WPF
                                     await End(task, listing.TaskItemId);
                                 }
                             }
-                            await XwebEnd(task,status: "Failed",note: "Login Faile ,Please check password or account info");
+                            await XwebEnd(task, status: "Failed", note: "Login Faile ,Please check password or account info");
                             return;
                         }
                         posterRunInfo.Account = task.Account;
@@ -1159,10 +1159,17 @@ namespace PropnexPoster.WPF
 
             if (taskDto != null)
             {
-                context = await WebServer.GetTaskContent(taskDto);
-                var lenght = context.IndexOf("Xpressor-Listing-File===");
-                var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
-                return new GuruTasks(context, taskContext);
+                try
+                {
+                    context = await WebServer.GetTaskContent(taskDto);
+                    var lenght = context.IndexOf("Xpressor-Listing-File===");
+                    var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
+                    return new GuruTasks(context, taskContext);
+                }
+                catch
+                {
+                    return null;
+                }
             }
             else
             {
@@ -1250,7 +1257,7 @@ namespace PropnexPoster.WPF
                 });
         }
 
-        private async Task XwebEnd(GuruTask guruTask, string status="Done", string note = "")
+        private async Task XwebEnd(GuruTask guruTask, string status = "Done", string note = "")
         {
             if (guruTask.Source.ToLower() == "chope")
                 return;
