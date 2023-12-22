@@ -11,13 +11,17 @@ using System.Runtime.InteropServices;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using Flurl;
+using Flurl.Http;
+using Flurl.Util;
+using System.Net;
 
 namespace Propnex.Poster.PropertyGuru.Mobile
 {
     public class Api : ClientBase
     {
 
-        private const string baseUrl = "https://api.propertyguru.com";
+        private const string baseUrl = "https://listing.propertyguru.com";
 
         public Token Token { get; set; }
 
@@ -42,6 +46,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             var request = GetRequest();
             request.Method = Method.Get;
             request.Resource = $"/v1/listings/{id}";
+            request.AddParameter("agentId", $"{Token.User.AgentId}");
             request.AddHeader("Authorization", $"Bearer {Token.accessToken}");
             request.AddParameter("locale", queryListing.Locale);
             request.AddParameter("region", queryListing.Region);
@@ -82,16 +87,27 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 
         public async Task<HttpResult<CreateOrUpdateListingResult>> CreateAsync(CreateOrUpdateListing createListing)
         {
+            //using (var client=new RestClient(new RestClientOptions()
+            //{
+            //    BaseUrl = new Uri("https://agentnet.propertyguru.com.sg"),
+            //    MaxTimeout = 1000 * 60 * 10,
+            //    UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+            //}))
+            //{
             var request = GetRequest();
-            request.Resource = "/v1/listings";
-            request.Method = Method.Post;
-            request.AddHeader(KnownHeaders.Authorization, $"Bearer {Token.accessToken}");
-            //request.Authenticator = new JwtAuthenticator(Token.accessToken);
+            request.Resource = $"/v1/listings?region=sg&agentId={Token.User.AgentId}";
+            //request.Resource = "/v2/create-listing/detail";
             //request.AddParameter("region", "sg");
-            //request.AddJsonBody(createListing);
-            request.AddStringBody(Newtonsoft.Json.JsonConvert.SerializeObject(createListing), DataFormat.Json);
+            //request.AddParameter("agentId", $"{Token.User.AgentId}");
+            request.Method = Method.Post;
+            request.AddHeader("x-logger-edited-by", $"{Token.User.AgentId}");
+            request.AddHeader(KnownHeaders.Authorization, $"Bearer {Token.accessToken}");
+            //createListing.agent = new Agent();
+            //createListing.media = null;
+            var stringBody = Newtonsoft.Json.JsonConvert.SerializeObject(createListing);
+            request.AddStringBody(stringBody, DataFormat.Json);
             var response = await ExecuteAsync(request);
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            if (response.StatusCode == System.Net.HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created)
             {
                 return new HttpResult<CreateOrUpdateListingResult>()
                 {
@@ -100,6 +116,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 };
             }
             return GetHttpResult<CreateOrUpdateListingResult>(response);
+            //}
         }
 
         public async Task<HttpResult<CreateOrUpdateListing>> GetListing(int listingId, string statusCode = "ACT")
@@ -110,8 +127,20 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.Authenticator = new JwtAuthenticator(Token.accessToken);
             request.AddParameter("locale", "en");
             request.AddParameter("region", "sg");
-            request.AddParameter("include_suspended_photos", "true");
-            request.AddParameter("status_code", statusCode);
+            request.AddParameter("agentId", $"{Token.User.AgentId}");
+            request.AddParameter("status_code[]", "ACT");
+            request.AddParameter("status_code[]", "COMP");
+            request.AddParameter("status_code[]", "DEL");
+            request.AddParameter("status_code[]", "DRAFT");
+            request.AddParameter("status_code[]", "EXP");
+            request.AddParameter("status_code[]", "SUSP");
+            request.AddParameter("status_code[]", "PAUSE");
+            request.AddParameter("include_suspended_photos", "1");
+            request.AddParameter("forceMasterConnection", "1");
+
+            //request.AddParameter("include_suspended_photos", "true");
+            //request.AddParameter("status_code", statusCode);
+
             var response = await ExecuteAsync(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
@@ -127,7 +156,9 @@ namespace Propnex.Poster.PropertyGuru.Mobile
         public async Task<HttpResult<CreateOrUpdateListingResult>> UpdateAsync(CreateOrUpdateListing createListing)
         {
             var request = GetRequest();
-            request.Resource = $"/v1/listings/{createListing.id}?region=sg";
+            request.Resource = $"/v1/listings/{createListing.id}?region=sg&agentId={Token.User.AgentId}";
+            //request.AddParameter("region", "sg");
+            //request.AddParameter("agentId", $"{Token.User.AgentId}");
             request.Method = Method.Put;
             request.Authenticator = new JwtAuthenticator(Token.accessToken);
             request.AddStringBody(Newtonsoft.Json.JsonConvert.SerializeObject(createListing), DataFormat.Json);
@@ -170,23 +201,23 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             string filePath
             )
         {
-            var request = GetRequest(Method.Post, "/v0/media");
-            request.Authenticator = new JwtAuthenticator(Token.accessToken);
-            request.AddParameter("locale", "en");
+            var request = GetRequest(Method.Post, $"/sf2-agent/ajax/listings/{ownerid}/media");
+            //request.Authenticator = new JwtAuthenticator(Token.accessToken);
             request.AddParameter("ownerId", ownerid);
-            request.AddParameter("region", "sg");
             request.AddParameter("mediaClass", mediaClass);
             request.AddParameter("mediaType", mediaType);
-            request.AddParameter("userId", $"{Token.User.AgentId}");
-            request.AddParameter("source", "AgentNet-android");
-            request.AddParameter("sortOrder", sortOrder);
+            request.AddParameter("userId", $"{Token.User.UserId}");
+            request.AddParameter("source", "AgentNet");
+            request.AddParameter("sortOrder", 1);
+            request.AddParameter("caption", "");
             request.AddParameter("statusCode", "ACT");
-            var filePathLower=filePath.ToLower();
+            //var filePath = "C:\\Users\\worker_fg\\Documents\\雷电模拟器\\Pictures\\3_image.jpg";
+            var filePathLower = filePath.ToLower();
             if (filePathLower.Contains("youtube") ||
                 filePathLower.Contains("vimeo") ||
                     filePathLower.Contains("dailymotion") ||
                     filePathLower.Contains("<iframe") ||
-                    filePathLower.Contains("havelock2")||
+                    filePathLower.Contains("havelock2") ||
                     filePathLower.Contains("new-vr")
                     )
             {
@@ -211,46 +242,83 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 var fileName = Path.GetExtension(filePath);
                 request.AddFile("mediaFile", files, $"{Guid.NewGuid()}{filePath}");
             }
-            var response = await ExecuteAsync(request);
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+
+            using (var c = new RestSharp.RestClient(new RestClientOptions()
             {
-                return new HttpResult<string>()
+                BaseUrl = new Uri("https://agentnet.propertyguru.com.sg"),
+                MaxTimeout = 1000 * 60 * 10,
+                UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+            }))
+            {
+                request.AlwaysMultipartFormData = true;
+                cookie = cookie == null ? await GetCookie() : cookie;
+                request.AddHeader("origin", "https://agentnet.propertyguru.com.sg");
+                request.AddHeader("referer", $"https://agentnet.propertyguru.com.sg/v2/create-listing/media/{ownerid}");
+                request.AddHeader("cookie", cookie);
+                var response = await c.ExecuteAsync(request);
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    Data = response.Content,
-                    HttpStatusCode = System.Net.HttpStatusCode.OK
-                };
+                    return new HttpResult<string>()
+                    {
+                        Data = response.Content,
+                        HttpStatusCode = System.Net.HttpStatusCode.OK
+                    };
+                }
+                return GetHttpResult<string>(response);
             }
-            return GetHttpResult<string>(response);
         }
-    }
-
-    public class QueryAutocomplete
-    {
-        public QueryAutocomplete(string query)
+        string cookie = null;
+        public async Task<string> GetCookie()
         {
-            Query = query;
+            using (var c = new RestClient(new RestClientOptions()
+            {
+                BaseUrl = new Uri("https://api.zenrows.com")
+                //Proxy = new System.Net.WebProxy("127.0.0.1", int.Parse("8888"))
+            }))
+            {
+                var request = new RestRequest();
+                request.Resource = $"/v1/?apikey=355de58ca556aff2ca943242562717c5178c71cb";
+                request.Method = Method.Get;
+                //request.AddParameter("apiKey", "8338c842866acc825ac9a7a4ca5cf057c77960f1");
+                request.AddParameter("url", $"https://agentnet.propertyguru.com.sg/oauth/callback/pgaccount?state=%2Fex_home&locale=en&access_token={Token.accessToken}&remember=1", true);
+                //request.AddParameter("js_render", "true");
+                request.AddParameter("premium_proxy", "true");
+                request.AddParameter("original_status", "true");
+                // request.AddUrlSegment("url", $"https://agentnet.propertyguru.com.sg/oauth/callback/pgaccount?state=%2Fex_home&locale=en&access_token={Token.accessToken}&remember=1&premium_proxy=true&original_status=true",true);
+                var result =  await clientRetryPolicy.ExecuteAsync(async () => { return await c.ExecuteAsync(request); });
+                return result.Headers.Where(q => q.Name == "Zr-Cookies").FirstOrDefault().Value.ToString();
+            }
         }
 
-        public string Query { get; set; }
-
-        public string Locale { get; set; } = "en";
-
-        public string Region { get; set; } = "sg";
-
-        public int Limit { get; set; } = 100;
-
-        public string ObjectType { get; set; } = "PROPERTY";
-
     }
+}
 
-    public class QueryListing
+public class QueryAutocomplete
+{
+    public QueryAutocomplete(string query)
     {
-        public string Locale { get; set; } = "en";
-
-        public string Region { get; set; } = "sg";
-
-        public string include_suspended_photos { get; set; } = "true";
-
-        public string status_code { get; set; } = "ACT";
+        Query = query;
     }
+
+    public string Query { get; set; }
+
+    public string Locale { get; set; } = "en";
+
+    public string Region { get; set; } = "sg";
+
+    public int Limit { get; set; } = 100;
+
+    public string ObjectType { get; set; } = "PROPERTY";
+
+}
+
+public class QueryListing
+{
+    public string Locale { get; set; } = "en";
+
+    public string Region { get; set; } = "sg";
+
+    public string include_suspended_photos { get; set; } = "true";
+
+    public string status_code { get; set; } = "ACT";
 }

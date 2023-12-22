@@ -11,8 +11,6 @@ using Propnex.Poster.WebServer.Entities;
 using Propnex.Poster.WebServer;
 using Volo.Abp.EntityFrameworkCore.Modeling;
 using System.Reflection.Emit;
-using AppAny.Quartz.EntityFrameworkCore.Migrations;
-using AppAny.Quartz.EntityFrameworkCore.Migrations.MySql;
 
 namespace Propnex.Poster.WebServer.Data;
 
@@ -35,7 +33,6 @@ public class PosterDbContext : AbpDbContext<PosterDbContext>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.AddQuartz(builder => builder.UseMySql());
         /* Include modules to your migration db context */
 
         builder.ConfigurePermissionManagement();
