@@ -96,9 +96,9 @@ namespace PropnexPoster.WPF
             var guruTasks = await getGuruTasks();
             //taskDto = new PnTaskDto()
             //{
-            //    Number = "999923.guru.tsk"
+            //    Number = "1014356.guru.tsk"
             //};
-            //var context = await File.ReadAllTextAsync("E:\\cp17031210432729.guru.tsk");
+            //var context = await File.ReadAllTextAsync("E:\\1014356.guru.tsk");
             //var lenght = context.IndexOf("Xpressor-Listing-File===");
             //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
             //var guruTasks = new GuruTasks(context, taskContext);
@@ -135,7 +135,7 @@ namespace PropnexPoster.WPF
                         var task = guruTasks.Tasks[i];
                         //3.登陆
                         Log("Get Token .......");
-                         var token = await Login(task, proxyIp);
+                        var token = await Login(task, proxyIp);
 
                         if (token == null)
                         {
@@ -1027,7 +1027,7 @@ namespace PropnexPoster.WPF
             var _Token = await auth();// string.IsNullOrEmpty(pnUser.TokenJson) ? await auth() : await checkToken();
             if (_Token == null)
                 return null;
-            await getListing();
+            listings = await getListing();
 
             async Task<PnUserDto> getUser()
             {
