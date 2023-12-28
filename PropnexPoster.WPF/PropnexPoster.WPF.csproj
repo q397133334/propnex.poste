@@ -9,13 +9,8 @@
     <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
     <ApplicationIcon>Logo.ico</ApplicationIcon>
     <NeutralLanguage>en</NeutralLanguage>
-<<<<<<< HEAD
-    <AssemblyVersion>1.0.0.34</AssemblyVersion>
-    <FileVersion>1.0.0.34</FileVersion>
-=======
     <AssemblyVersion>1.0.0.39</AssemblyVersion>
     <FileVersion>1.0.0.39</FileVersion>
->>>>>>> 58f0d6667fe534e23bc4f166fd6d7210863e1127
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 

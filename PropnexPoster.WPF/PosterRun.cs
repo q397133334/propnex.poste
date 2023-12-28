@@ -96,15 +96,9 @@ namespace PropnexPoster.WPF
             var guruTasks = await getGuruTasks();
             //taskDto = new PnTaskDto()
             //{
-<<<<<<< HEAD
             //    Number = "999923.guru.tsk"
             //};
-            //var context = await File.ReadAllTextAsync("E:\\999923.guru.tsk");
-=======
-            //    Number = "cp17031210432729.guru.tsk"
-            //};
             //var context = await File.ReadAllTextAsync("E:\\cp17031210432729.guru.tsk");
->>>>>>> 58f0d6667fe534e23bc4f166fd6d7210863e1127
             //var lenght = context.IndexOf("Xpressor-Listing-File===");
             //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
             //var guruTasks = new GuruTasks(context, taskContext);
@@ -894,7 +888,7 @@ namespace PropnexPoster.WPF
                     }
                     DownClient webClient = new DownClient();
                     webClient.DownloadFile(guruTaskListing.Photos[i], filePath);
-                    Log("download tour complete");
+                    Log("download photo complete");
                     await _api.UploadPhotoAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
                 }
                 catch { }
@@ -934,7 +928,7 @@ namespace PropnexPoster.WPF
                         }
                         DownClient webClient = new DownClient();
                         webClient.DownloadFile(guruTaskListing.Videos[i], filePath);
-                        Log("download tour complete");
+                        Log("download move complete");
                     }
                     catch { }
                     if (System.IO.File.Exists(filePath) == false)
@@ -1010,7 +1004,7 @@ namespace PropnexPoster.WPF
                     }
                     DownClient webClient = new DownClient();
                     webClient.DownloadFile(guruTaskListing.FloorPlan[i], filePath);
-                    Log("download tour complete");
+                    Log("download FloorPlan complete");
                     await _api.UploadFlooplan($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
                 }
                 catch { }

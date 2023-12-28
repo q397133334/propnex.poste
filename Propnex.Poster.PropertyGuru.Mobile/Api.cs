@@ -247,6 +247,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             {
                 BaseUrl = new Uri("https://agentnet.propertyguru.com.sg"),
                 MaxTimeout = 1000 * 60 * 10,
+                Proxy = client.Options.Proxy ?? null,
                 UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
             }))
             {
@@ -258,12 +259,14 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 var response = await c.ExecuteAsync(request);
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
+                    Log("media upload success");
                     return new HttpResult<string>()
                     {
                         Data = response.Content,
                         HttpStatusCode = System.Net.HttpStatusCode.OK
                     };
                 }
+                Log($"media upload errir {response.StatusCode}");
                 return GetHttpResult<string>(response);
             }
         }
@@ -285,7 +288,8 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 request.AddParameter("premium_proxy", "true");
                 request.AddParameter("original_status", "true");
                 // request.AddUrlSegment("url", $"https://agentnet.propertyguru.com.sg/oauth/callback/pgaccount?state=%2Fex_home&locale=en&access_token={Token.accessToken}&remember=1&premium_proxy=true&original_status=true",true);
-                var result =  await clientRetryPolicy.ExecuteAsync(async () => { return await c.ExecuteAsync(request); });
+                var result = await clientRetryPolicy.ExecuteAsync(async () => { return await c.ExecuteAsync(request); });
+                Log?.Invoke($"get cookie {result.Headers.Count},{result.StatusCode}");
                 return result.Headers.Where(q => q.Name == "Zr-Cookies").FirstOrDefault().Value.ToString();
             }
         }
