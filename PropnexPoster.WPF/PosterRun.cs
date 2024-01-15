@@ -96,9 +96,9 @@ namespace PropnexPoster.WPF
             var guruTasks = await getGuruTasks();
             //taskDto = new PnTaskDto()
             //{
-            //    Number = "1014356.guru.tsk"
+            //    Number = "1022681.guru.tsk"
             //};
-            //var context = await File.ReadAllTextAsync("E:\\1014356.guru.tsk");
+            //var context = await File.ReadAllTextAsync("E:\\1022681.guru.tsk");
             //var lenght = context.IndexOf("Xpressor-Listing-File===");
             //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
             //var guruTasks = new GuruTasks(context, taskContext);
@@ -227,46 +227,53 @@ namespace PropnexPoster.WPF
                                         //var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
                                         //1.获取邮政编号
                                         var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
-                                        var locale = locales.Data.Where(q => q.DisplayText == listing.Listing.Title).FirstOrDefault();
-                                        if (locale == null)
-                                            locale = locales.Data.FirstOrDefault();
-                                        if (locale != null)
+                                        if (locales.Data != null)
                                         {
-                                            //2. 获取loca 信息
-                                            var project = (await _projectsApi.GetProjectAsync(int.Parse(locale.ObjectId))).Data;
-                                            if (project != null && project.addresses != null && project.addresses.Count > 0)
+                                            var locale = locales.Data.Where(q => q.DisplayText == listing.Listing.Title).FirstOrDefault();
+                                            if (locale == null)
+                                                locale = locales.Data.FirstOrDefault();
+                                            if (locale != null)
                                             {
-                                                createOrUpdateListing.location.id = int.Parse(project.addresses[0].external_id);
-                                                result = await _api.CreateAsync(createOrUpdateListing);
-                                                if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                                //2. 获取loca 信息
+                                                var project = (await _projectsApi.GetProjectAsync(int.Parse(locale.ObjectId))).Data;
+                                                if (project != null && project.addresses != null && project.addresses.Count > 0)
                                                 {
-                                                    listing.Listing.Id = result.Data.Id;
-                                                    if (result.Data.Id != 0)
+                                                    createOrUpdateListing.location.id = int.Parse(project.addresses[0].external_id);
+                                                    result = await _api.CreateAsync(createOrUpdateListing);
+                                                    if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
                                                     {
-                                                        await uploadPhotosAsync(listing, _api);
-                                                        await uploadVideos(listing, _api);
-                                                        await uploadVirtualTours(listing, _api);
-                                                        await uploadFloorPlanAsync(listing, _api);
-                                                        var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
-                                                        await _api.UpdateAsync(taskListing.Data);
-                                                        var activateResult = await _adsProject.Activate(result.Data.Id);
-
-                                                        if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                                        listing.Listing.Id = result.Data.Id;
+                                                        if (result.Data.Id != 0)
                                                         {
-                                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-                                                        }
-                                                        else
-                                                        {
+                                                            await uploadPhotosAsync(listing, _api);
+                                                            await uploadVideos(listing, _api);
+                                                            await uploadVirtualTours(listing, _api);
+                                                            await uploadFloorPlanAsync(listing, _api);
+                                                            var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
+                                                            await _api.UpdateAsync(taskListing.Data);
+                                                            var activateResult = await _adsProject.Activate(result.Data.Id);
 
-                                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Data);
+                                                            if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                                            {
+                                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                                            }
+                                                            else
+                                                            {
+
+                                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Data);
+                                                            }
                                                         }
                                                     }
                                                 }
                                             }
+                                            else
+                                            {
+                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
+                                            }
                                         }
                                         else
                                         {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed","not find :"+ result.Message);
                                         }
                                     }
                                     else
