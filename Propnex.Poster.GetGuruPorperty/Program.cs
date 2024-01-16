@@ -6,6 +6,8 @@ using Propnex.Poster.PropertyGuru.Mobile.Dto;
 using Propnex.Poster.PropertyGuru.Mobile.Model;
 using Flurl;
 using Flurl.Http;
+using System.Collections;
+using System.Linq;
 
 namespace Propnex.Poster.GetGuruPorperty
 {
@@ -13,6 +15,17 @@ namespace Propnex.Poster.GetGuruPorperty
     {
         static async Task Main(string[] args)
         {
+
+
+            var list = new List<string>();
+
+            var GuruMissingId = await "https://pa-production.propnex.net/index.php/scrape/getGuruMissingId".GetJsonAsync<GuruMissingIdResult>();
+
+            if (GuruMissingId.status != "ok")
+            {
+                return;
+            }
+            list = GuruMissingId.data;
             var loginResult = await new Auth().LoginAsync(new AuthLogin()
             {
                 UserName = "davidytp@gmail.com",
@@ -27,55 +40,6 @@ namespace Propnex.Poster.GetGuruPorperty
             {
                 return;
             }
-
-            var list = new List<string>()
-            {
-                "25272",
-                "25297",
-                "25343",
-                "24662",
-                "25306",
-                "25429",
-                "25305",
-                "25339",
-                "25395",
-                "24699",
-                "25466",
-                "25403",
-                "25495",
-                "25565",
-                "25431",
-                "25432",
-                "25393",
-                "25462",
-                "25464",
-                "25463",
-                "25289",
-                "25299",
-                "25436",
-                "25433",
-                "25373",
-                "25374",
-                "25478",
-                "25406",
-                "25309",
-                "25310",
-                "25286",
-                "25634",
-                "25516",
-                "25497",
-                "25517",
-                "25503",
-                "25639",
-                "25600",
-                "25636",
-                "25413",
-                "25643",
-                "25447",
-                "25555"
-            };
-
-
             var jsonList = new List<string>();
 
             foreach (var item in list)
@@ -87,17 +51,27 @@ namespace Propnex.Poster.GetGuruPorperty
                     var project = projectResult.Data;
                     jsonList.Add(project.ToJson());
 
-                    var ok = await $"https://pa-staging.propnex.net/index.php/scrape/guruProjects".PostUrlEncodedAsync(new { 
-                        id=item,
-                        json=System.Web.HttpUtility.UrlEncode(project.ToJson())
-                });
+                    //https://pa-production.propnex.net/index.php/scrape/guruProjects
+                    //https://pa-staging.propnex.net/index.php/scrape/guruProjects
+                    var ok = await $"https://pa-production.propnex.net/index.php/scrape/guruProjects".PostUrlEncodedAsync(new
+                    {
+                        id = item,
+                        json = System.Web.HttpUtility.UrlEncode(project.ToJson())
+                    });
 
-                   var msg=await ok.GetStringAsync();
-                   Console.WriteLine(msg);
+                    var msg = await ok.GetStringAsync();
+                    Console.WriteLine(msg);
                 }
             }
 
             //await System.IO.File.WriteAllLinesAsync($"{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt", jsonList);
         }
+    }
+
+    public class GuruMissingIdResult
+    {
+        public string status { get; set; }
+
+        public List<string> data { get; set; }
     }
 }
