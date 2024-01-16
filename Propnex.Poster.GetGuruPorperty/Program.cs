@@ -15,8 +15,6 @@ namespace Propnex.Poster.GetGuruPorperty
     {
         static async Task Main(string[] args)
         {
-
-
             var list = new List<string>();
 
             var GuruMissingId = await "https://pa-production.propnex.net/index.php/scrape/getGuruMissingId".GetJsonAsync<GuruMissingIdResult>();
@@ -56,7 +54,7 @@ namespace Propnex.Poster.GetGuruPorperty
                     var ok = await $"https://pa-production.propnex.net/index.php/scrape/guruProjects".PostUrlEncodedAsync(new
                     {
                         id = item,
-                        json = System.Web.HttpUtility.UrlEncode(project.ToJson())
+                        json = project.ToJson()
                     });
 
                     var msg = await ok.GetStringAsync();

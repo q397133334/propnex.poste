@@ -64,25 +64,31 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 
         public async Task<HttpResult<List<QueryLocale>>> AutocompleteAsync(QueryAutocomplete queryAutocomplete)
         {
-            var request = GetRequest();
-            request.Method = Method.Get;
-            request.Resource = $"/v1/autocomplete";
-            request.AddHeader("Authorization", $"Bearer {Token.accessToken}");
-            request.AddParameter("locale", queryAutocomplete.Locale);
-            request.AddParameter("region", queryAutocomplete.Region);
-            request.AddParameter("query", queryAutocomplete.Query);
-            request.AddParameter("limit", queryAutocomplete.Limit);
-            request.AddParameter("objectType", queryAutocomplete.ObjectType);
-            var response = await ExecuteAsync(request);
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            using (var client = new RestSharp.RestClient("https://prefix-search.propertyguru.com/v1/sg/autocomplete"))
             {
-                return new HttpResult<List<QueryLocale>>()
+                var request = GetRequest();
+                request.Method = Method.Get;
+                request.Resource = $"/v1/autocomplete";
+                if(Token!=null)
                 {
-                    HttpStatusCode = response.StatusCode,
-                    Data = Newtonsoft.Json.JsonConvert.DeserializeObject<List<QueryLocale>>(response.Content)
-                };
+                    request.AddHeader("Authorization", $"Bearer {Token.accessToken}");
+                }
+                request.AddParameter("locale", queryAutocomplete.Locale);
+                //request.AddParameter("region", queryAutocomplete.Region);
+                request.AddParameter("query", queryAutocomplete.Query);
+                request.AddParameter("limit", queryAutocomplete.Limit);
+                request.AddParameter("objectType", queryAutocomplete.ObjectType);
+                var response = await client.ExecuteAsync(request);
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    return new HttpResult<List<QueryLocale>>()
+                    {
+                        HttpStatusCode = response.StatusCode,
+                        Data = Newtonsoft.Json.JsonConvert.DeserializeObject<List<QueryLocale>>(response.Content)
+                    };
+                }
+                return GetHttpResult<List<QueryLocale>>(response);
             }
-            return GetHttpResult<List<QueryLocale>>(response);
         }
 
         public async Task<HttpResult<CreateOrUpdateListingResult>> CreateAsync(CreateOrUpdateListing createListing)

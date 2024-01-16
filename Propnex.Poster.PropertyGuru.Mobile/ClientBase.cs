@@ -80,6 +80,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             //request.AddHeader("x-clientsecret", "jjiF916yVwfCRQEJtS6loHVDZ16mWPWf");
             request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2023.12.6;LIO-AN00;null");
             request.Timeout = 1000 * 60 * 10;
+           
             return request;
         }
 
