@@ -10,6 +10,7 @@ using Propnex.Poster.PropertyGuru.Tasks;
 using Propnex.Poster.Share;
 using Serilog;
 using Serilog.Core;
+using SlackBotMessages;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -202,10 +203,30 @@ namespace PropnexPoster.WPF
                                     listing.Listing.Id = result.Data.Id;
                                     if (result.Data.Id != 0)
                                     {
-                                        await uploadPhotosAsync(listing, _api);
-                                        await uploadVideos(listing, _api);
-                                        await uploadVirtualTours(listing, _api);
-                                        await uploadFloorPlanAsync(listing, _api);
+                                        if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                        {
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
+                                            await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload photo error");
+                                            continue;
+                                        }
+                                        if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                        {
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
+                                            await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload video error");
+                                            continue;
+                                        }
+                                        if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                        {
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
+                                            await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload vt error");
+                                            continue;
+                                        }
+                                        if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                        {
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
+                                            await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload floor plan error");
+                                            continue;
+                                        }
                                         var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
                                         await _api.UpdateAsync(taskListing.Data);
                                         var activateResult = await _adsProject.Activate(result.Data.Id);
@@ -243,10 +264,30 @@ namespace PropnexPoster.WPF
                                                     listing.Listing.Id = result.Data.Id;
                                                     if (result.Data.Id != 0)
                                                     {
-                                                        await uploadPhotosAsync(listing, _api);
-                                                        await uploadVideos(listing, _api);
-                                                        await uploadVirtualTours(listing, _api);
-                                                        await uploadFloorPlanAsync(listing, _api);
+                                                        if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                                        {
+                                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
+                                                            await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload photo error");
+                                                            continue;
+                                                        }
+                                                        if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                                        {
+                                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
+                                                            await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload video error");
+                                                            continue;
+                                                        }
+                                                        if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                                        {
+                                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
+                                                            await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload vt error");
+                                                            continue;
+                                                        }
+                                                        if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                                        {
+                                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
+                                                            await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload floor plan error");
+                                                            continue;
+                                                        }
                                                         var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
                                                         await _api.UpdateAsync(taskListing.Data);
                                                         var activateResult = await _adsProject.Activate(result.Data.Id);
@@ -259,6 +300,7 @@ namespace PropnexPoster.WPF
                                                         {
 
                                                             await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Data);
+                                                            await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} {activateResult.Data}");
                                                         }
                                                     }
                                                 }
@@ -267,11 +309,13 @@ namespace PropnexPoster.WPF
                                         else
                                         {
                                             await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
+                                            await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} {result.Message}");
                                         }
                                     }
                                     else
                                     {
                                         await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
+                                        await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} {result.Message}");
                                     }
                                 }
                                 await End(task, listing.TaskItemId);
@@ -297,10 +341,27 @@ namespace PropnexPoster.WPF
                                         taskListing.Data.isLiveTourAvailable = true;
                                         await _api.UpdateAsync(taskListing.Data);
                                         await _mobile.DeleteMediaAll(taskListing.Data);
-                                        await uploadPhotosAsync(listing, _api);
-                                        await uploadVideos(listing, _api);
-                                        await uploadVirtualTours(listing, _api);
-                                        await uploadFloorPlanAsync(listing, _api);
+                                        if((await uploadPhotosAsync(listing, _api)).HttpStatusCode!=System.Net.HttpStatusCode.OK)
+                                        {
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
+                                            continue;
+                                        }
+                                        if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                        {
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
+                                            continue;
+                                        }
+                                        if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                        {
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
+                                            continue;
+                                        }
+                                        if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                        {
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
+                                            continue;
+                                        }
+                                
                                     }
                                     else
                                     {
@@ -327,10 +388,26 @@ namespace PropnexPoster.WPF
                                         listing.Listing.Id = result.Data.Id;
                                         if (result.Data.Id != 0)
                                         {
-                                            await uploadPhotosAsync(listing, _api);
-                                            await uploadVideos(listing, _api);
-                                            await uploadVirtualTours(listing, _api);
-                                            await uploadFloorPlanAsync(listing, _api);
+                                            if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                            {
+                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
+                                                continue;
+                                            }
+                                            if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                            {
+                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
+                                                continue;
+                                            }
+                                            if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                            {
+                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
+                                                continue;
+                                            }
+                                            if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                            {
+                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
+                                                continue;
+                                            }
                                             var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
                                             await _api.UpdateAsync(taskListing.Data);
                                             var activateResult = await _adsProject.Activate(result.Data.Id);
@@ -413,10 +490,30 @@ namespace PropnexPoster.WPF
                                     taskListing.Data.isLiveTourAvailable = true;
                                     await _api.UpdateAsync(taskListing.Data);
                                     await _mobile.DeleteMediaAll(taskListing.Data);
-                                    await uploadPhotosAsync(listing, _api);
-                                    await uploadVideos(listing, _api);
-                                    await uploadVirtualTours(listing, _api);
-                                    await uploadFloorPlanAsync(listing, _api);
+                                    if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                    {
+                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
+                                        await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload photo error");
+                                        continue;
+                                    }
+                                    if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                    {
+                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
+                                        await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload video error");
+                                        continue;
+                                    }
+                                    if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                    {
+                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
+                                        await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload vt error");
+                                        continue;
+                                    }
+                                    if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                    {
+                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
+                                        await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload floor plan error");
+                                        continue;
+                                    }
                                     await _api.GetListing(listing.Listing.Id.Value);
                                     await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
                                 }
@@ -858,8 +955,9 @@ namespace PropnexPoster.WPF
             return listingInfo;
         }
 
-        private async Task uploadPhotosAsync(GuruTaskListing guruTaskListing, Api _api)
+        private async Task<HttpResult<string>> uploadPhotosAsync(GuruTaskListing guruTaskListing, Api _api)
         {
+            HttpResult<string> result = null;
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
             for (int i = 0; i < guruTaskListing.Photos.Count; i++)
@@ -889,15 +987,20 @@ namespace PropnexPoster.WPF
                     DownClient webClient = new DownClient();
                     webClient.DownloadFile(guruTaskListing.Photos[i], filePath);
                     Log("download photo complete");
-                    await _api.UploadPhotoAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
+                    result = await _api.UploadPhotoAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
+                    if (result.HttpStatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        break;
+                    }
                 }
                 catch { }
-
             }
+            return result;
         }
 
-        private async Task uploadVideos(GuruTaskListing guruTaskListing, Api _api)
+        private async Task<HttpResult<string>> uploadVideos(GuruTaskListing guruTaskListing, Api _api)
         {
+            HttpResult<string> result = null;
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
             for (int i = 0; i < guruTaskListing.Videos.Count; i++)
@@ -936,12 +1039,18 @@ namespace PropnexPoster.WPF
                         continue;
                     }
                 }
-                await _api.UploadVideosAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
+                result=await _api.UploadVideosAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
+                if (result.HttpStatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    break;
+                }
             }
+            return result;
         }
 
-        private async Task uploadVirtualTours(GuruTaskListing guruTaskListing, Api _api)
+        private async Task<HttpResult<string>> uploadVirtualTours(GuruTaskListing guruTaskListing, Api _api)
         {
+            HttpResult<string> result = null;
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
             for (int i = 0; i < guruTaskListing.Tours.Count; i++)
@@ -978,12 +1087,19 @@ namespace PropnexPoster.WPF
                         filePath = "";
                     }
                 }
-                await _api.UplaodVirtualTours($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
+                result =await _api.UplaodVirtualTours($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
+                if (result.HttpStatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    break;
+                }
             }
+
+            return result;
         }
 
-        private async Task uploadFloorPlanAsync(GuruTaskListing guruTaskListing, Api _api)
+        private async Task<HttpResult<string>> uploadFloorPlanAsync(GuruTaskListing guruTaskListing, Api _api)
         {
+            HttpResult<string> result = null;
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
             for (int i = 0; i < guruTaskListing.FloorPlan.Count; i++)
@@ -1005,10 +1121,15 @@ namespace PropnexPoster.WPF
                     DownClient webClient = new DownClient();
                     webClient.DownloadFile(guruTaskListing.FloorPlan[i], filePath);
                     Log("download FloorPlan complete");
-                    await _api.UploadFlooplan($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
+                    result= await _api.UploadFlooplan($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
+                    if (result.HttpStatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        break;
+                    }
                 }
                 catch { }
             }
+            return result;
         }
 
         private string checkFileDirectory(string taskId)

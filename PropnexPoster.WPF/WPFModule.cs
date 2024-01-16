@@ -13,6 +13,7 @@ using Volo.Abp;
 using Volo.Abp.Autofac;
 using Volo.Abp.Modularity;
 using System.IO;
+using SlackBotMessages;
 
 namespace PropnexPoster.WPF;
 
@@ -40,6 +41,16 @@ public class WPFModule : AbpModule
     {
         AutoUpdater.Start("http://testposter.propnex.net/PropnexPoster.Guru/PropnexPoster.WPF.AutoUpdater.xml");
         //await Test();
+        //var client = new SbmClient("https://hooks.slack.com/services/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");
+
+        //var message = new SlackBotMessages.Models.Message
+        //{
+        //    Channel= "#production-messenger-alerts",
+        //    Text = "test <@U01DQLBLWNL>",
+        //};
+
+        //var result=await client.SendAsync(message);
+
 
         await Task.CompletedTask;
     }

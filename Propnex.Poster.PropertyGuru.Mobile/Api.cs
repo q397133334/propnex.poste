@@ -174,23 +174,23 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             return GetHttpResult<CreateOrUpdateListingResult>(response);
         }
 
-        public async Task UploadPhotoAsync(string ownerId, string sortOrder, string filePath)
+        public async Task<HttpResult<string>> UploadPhotoAsync(string ownerId, string sortOrder, string filePath)
         {
-            await UploadMediaAsync(ownerId, "UPHO", "IMAGE", sortOrder, filePath);
+            return await UploadMediaAsync(ownerId, "UPHO", "IMAGE", sortOrder, filePath);
         }
-        public async Task UploadVideosAsync(string ownerId, string sortOrder, string filePath)
+        public async Task<HttpResult<string>> UploadVideosAsync(string ownerId, string sortOrder, string filePath)
         {
-            await UploadMediaAsync(ownerId, "UMOV", "MOVIE", sortOrder, filePath);
-        }
-
-        public async Task UplaodVirtualTours(string ownerId, string sortOrder, string filePath)
-        {
-            await UploadMediaAsync(ownerId, "UTOUR", "VTOUR", sortOrder, filePath);
+            return await UploadMediaAsync(ownerId, "UMOV", "MOVIE", sortOrder, filePath);
         }
 
-        public async Task UploadFlooplan(string ownerId, string sortOrder, string filePath)
+        public async Task<HttpResult<string>> UplaodVirtualTours(string ownerId, string sortOrder, string filePath)
         {
-            await UploadMediaAsync(ownerId, "UFLOO", "IMAGE", sortOrder, filePath);
+            return await UploadMediaAsync(ownerId, "UTOUR", "VTOUR", sortOrder, filePath);
+        }
+
+        public async Task<HttpResult<string>> UploadFlooplan(string ownerId, string sortOrder, string filePath)
+        {
+            return await UploadMediaAsync(ownerId, "UFLOO", "IMAGE", sortOrder, filePath);
         }
 
         private async Task<HttpResult<string>> UploadMediaAsync(
@@ -253,6 +253,14 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             {
                 request.AlwaysMultipartFormData = true;
                 cookie = cookie == null ? await GetCookie() : cookie;
+                if(cookie==null)
+                {
+                    return new HttpResult<string>()
+                    {
+                        Data = "get cookie faile",
+                        HttpStatusCode = System.Net.HttpStatusCode.Forbidden
+                    };
+                }
                 request.AddHeader("origin", "https://agentnet.propertyguru.com.sg");
                 request.AddHeader("referer", $"https://agentnet.propertyguru.com.sg/v2/create-listing/media/{ownerid}");
                 request.AddHeader("cookie", cookie);
