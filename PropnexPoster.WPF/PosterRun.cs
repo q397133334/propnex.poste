@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -97,9 +98,9 @@ namespace PropnexPoster.WPF
             var guruTasks = await getGuruTasks();
             //taskDto = new PnTaskDto()
             //{
-            //    Number = "1022681.guru.tsk"
+            //    Number = "cp17054566093576.guru.tsk"
             //};
-            //var context = await File.ReadAllTextAsync("E:\\1022681.guru.tsk");
+            //var context = await File.ReadAllTextAsync("E:\\cp17054566093576.guru.tsk");
             //var lenght = context.IndexOf("Xpressor-Listing-File===");
             //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
             //var guruTasks = new GuruTasks(context, taskContext);
@@ -313,7 +314,7 @@ namespace PropnexPoster.WPF
                                         else
                                         {
                                             await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} {result.Message}");
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed","not find :"+ result.Message);
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find :" + result.Message);
                                         }
                                     }
                                     else
@@ -961,9 +962,11 @@ namespace PropnexPoster.WPF
 
         private async Task<HttpResult<string>> uploadPhotosAsync(GuruTaskListing guruTaskListing, Api _api)
         {
-            HttpResult<string> result = null;
+            HttpResult<string> result = new HttpResult<string>() { HttpStatusCode = HttpStatusCode.OK };
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
+            if (guruTaskListing.Photos.Count == 0)
+                return new HttpResult<string>() { HttpStatusCode = System.Net.HttpStatusCode.OK };
             for (int i = 0; i < guruTaskListing.Photos.Count; i++)
             {
                 // max upload photos
@@ -1004,9 +1007,11 @@ namespace PropnexPoster.WPF
 
         private async Task<HttpResult<string>> uploadVideos(GuruTaskListing guruTaskListing, Api _api)
         {
-            HttpResult<string> result = null;
+            HttpResult<string> result = new HttpResult<string>() { HttpStatusCode = HttpStatusCode.OK };
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
+            if (guruTaskListing.Videos.Count == 0)
+                return new HttpResult<string>() { HttpStatusCode = System.Net.HttpStatusCode.OK };
             for (int i = 0; i < guruTaskListing.Videos.Count; i++)
             {
                 // max upload photos
@@ -1054,9 +1059,11 @@ namespace PropnexPoster.WPF
 
         private async Task<HttpResult<string>> uploadVirtualTours(GuruTaskListing guruTaskListing, Api _api)
         {
-            HttpResult<string> result = null;
+            HttpResult<string> result = new HttpResult<string>() { HttpStatusCode = HttpStatusCode.OK };
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
+            if (guruTaskListing.Tours.Count == 0)
+                return new HttpResult<string>() { HttpStatusCode = System.Net.HttpStatusCode.OK };
             for (int i = 0; i < guruTaskListing.Tours.Count; i++)
             {
                 // max upload photos
@@ -1103,9 +1110,11 @@ namespace PropnexPoster.WPF
 
         private async Task<HttpResult<string>> uploadFloorPlanAsync(GuruTaskListing guruTaskListing, Api _api)
         {
-            HttpResult<string> result = null;
+            HttpResult<string> result = new HttpResult<string>() { HttpStatusCode = HttpStatusCode.OK };
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
+            if (guruTaskListing.FloorPlan.Count == 0)
+                return new HttpResult<string>() { HttpStatusCode = System.Net.HttpStatusCode.OK };
             for (int i = 0; i < guruTaskListing.FloorPlan.Count; i++)
             {
                 // max upload photos
@@ -1131,7 +1140,10 @@ namespace PropnexPoster.WPF
                         break;
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Log(ex.Message);
+                }
             }
             return result;
         }
