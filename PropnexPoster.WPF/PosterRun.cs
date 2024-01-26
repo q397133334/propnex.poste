@@ -95,15 +95,15 @@ namespace PropnexPoster.WPF
 
             Log("Get Task .....");
             //1.获取任务信息
-            var guruTasks = await getGuruTasks();
-            //taskDto = new PnTaskDto()
-            //{
-            //    Number = "cp17054566093576.guru.tsk"
-            //};
-            //var context = await File.ReadAllTextAsync("E:\\cp17054566093576.guru.tsk");
-            //var lenght = context.IndexOf("Xpressor-Listing-File===");
-            //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
-            //var guruTasks = new GuruTasks(context, taskContext);
+            //var guruTasks = await getGuruTasks();
+            taskDto = new PnTaskDto()
+            {
+                Number = "1028518.guru.tsk"
+            };
+            var context = await File.ReadAllTextAsync("E:\\1028518.guru.tsk");
+            var lenght = context.IndexOf("Xpressor-Listing-File===");
+            var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
+            var guruTasks = new GuruTasks(context, taskContext);
             if (guruTasks == null)
             {
                 Log("Not find task ,delay 1 min");
@@ -1024,7 +1024,8 @@ namespace PropnexPoster.WPF
                     url.Contains("vimeo") ||
                     url.Contains("dailymotion") ||
                     url.Contains("<iframe") ||
-                    url.Contains("havelock2")
+                    url.Contains("havelock2")||
+                    url.Contains("8prop.com")
                     )
                 {
                     filePath = guruTaskListing.Videos[i];
@@ -1075,7 +1076,8 @@ namespace PropnexPoster.WPF
                 if (url.Contains("youtube") ||
                     url.Contains("vimeo") ||
                     url.Contains("dailymotion") ||
-                    url.Contains("<iframe")
+                    url.Contains("<iframe") ||
+                    url.Contains("8prop.com")
                     )
                 {
                     filePath = guruTaskListing.Tours[i];

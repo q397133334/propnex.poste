@@ -224,7 +224,8 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                     filePathLower.Contains("dailymotion") ||
                     filePathLower.Contains("<iframe") ||
                     filePathLower.Contains("havelock2") ||
-                    filePathLower.Contains("new-vr")
+                    filePathLower.Contains("new-vr") ||
+                    filePathLower.Contains("8prop.com")
                     )
             {
                 if (filePath.Contains("#"))
