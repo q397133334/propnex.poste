@@ -69,7 +69,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 var request = GetRequest();
                 request.Method = Method.Get;
                 request.Resource = $"/v1/autocomplete";
-                if(Token!=null)
+                if (Token != null)
                 {
                     request.AddHeader("Authorization", $"Bearer {Token.accessToken}");
                 }
@@ -260,7 +260,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             {
                 request.AlwaysMultipartFormData = true;
                 cookie = cookie == null ? await GetCookie() : cookie;
-                if(cookie==null)
+                if (cookie == null)
                 {
                     return new HttpResult<string>()
                     {
@@ -271,7 +271,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 request.AddHeader("origin", "https://agentnet.propertyguru.com.sg");
                 request.AddHeader("referer", $"https://agentnet.propertyguru.com.sg/v2/create-listing/media/{ownerid}");
                 request.AddHeader("cookie", cookie);
-                var response = await c.ExecuteAsync(request);
+                var response = await ExecuteAsync(request, c);// c.ExecuteAsync(request);
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
                     Log("media upload success");

@@ -24,13 +24,13 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 
 
         public ClientBase(string baseUrl)
-        { 
+        {
             client = new RestSharp.RestClient(new RestClientOptions()
             {
                 BaseUrl = new Uri(baseUrl),
                 MaxTimeout = 1000 * 60 * 10,
                 UseDefaultCredentials = true,
-                UserAgent= "okhttp/4.10.0"
+                UserAgent = "okhttp/4.10.0"
             });
             client.AddDefaultHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2023.12.6;LIO-AN00;null");
             Log?.Invoke($"client {baseUrl}");
@@ -68,9 +68,10 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 });
         }
 
-        public async Task<RestResponse> ExecuteAsync(RestRequest restRequest)
+        public async Task<RestResponse> ExecuteAsync(RestRequest restRequest, RestClient _client = null)
         {
-            return await clientRetryPolicy.ExecuteAsync(async () => { return await client.ExecuteAsync(restRequest); });
+            _client = _client == null ? client : _client;
+            return await clientRetryPolicy.ExecuteAsync(async () => { return await _client.ExecuteAsync(restRequest); });
         }
 
         public RestRequest GetRequest()
@@ -80,7 +81,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             //request.AddHeader("x-clientsecret", "jjiF916yVwfCRQEJtS6loHVDZ16mWPWf");
             request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2023.12.6;LIO-AN00;null");
             request.Timeout = 1000 * 60 * 10;
-           
+
             return request;
         }
 
