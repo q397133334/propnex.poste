@@ -19,6 +19,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using ILogger = Serilog.ILogger;
 
 namespace PropnexPoster.WPF
@@ -98,9 +99,9 @@ namespace PropnexPoster.WPF
             var guruTasks = await getGuruTasks();
             //taskDto = new PnTaskDto()
             //{
-            //    Number = "1028518.guru.tsk"
+            //    Number = "1031106.guru.tsk"
             //};
-            //var context = await File.ReadAllTextAsync("E:\\1028518.guru.tsk");
+            //var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
             //var lenght = context.IndexOf("Xpressor-Listing-File===");
             //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
             //var guruTasks = new GuruTasks(context, taskContext);
@@ -119,9 +120,9 @@ namespace PropnexPoster.WPF
             try
             {
                 _logger = new LoggerConfiguration()
-          .MinimumLevel.Debug()
-          .WriteTo.Async(c => c.File($"{Directory.GetDirectoryRoot(System.AppDomain.CurrentDomain.BaseDirectory)}\\logs\\task\\{taskDto.Number}.txt"))
-          .CreateLogger();
+                  .MinimumLevel.Debug()
+                  .WriteTo.Async(c => c.File($"{Directory.GetDirectoryRoot(System.AppDomain.CurrentDomain.BaseDirectory)}\\logs\\task\\{taskDto.Number}.txt"))
+                  .CreateLogger();
                 var proxyIp = "";
                 if (WPFModule.AppConfiguration.IsProxy)
                 {
@@ -150,7 +151,7 @@ namespace PropnexPoster.WPF
                                 }
                             }
                             await XwebEnd(task, status: "Failed", note: "Login Faile ,Please check password or account info");
-                            return;
+                            continue;
                         }
                         posterRunInfo.Account = task.Account;
                         posterRunInfo.AgentId = token.User.AgentId.ToString();
@@ -207,25 +208,25 @@ namespace PropnexPoster.WPF
                                         if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                         {
                                             await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
-                                            await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload photo error");
+                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload photo error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                             continue;
                                         }
                                         if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                         {
                                             await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
-                                            await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload video error");
+                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload video error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                             continue;
                                         }
                                         if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                         {
                                             await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
-                                            await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload vt error");
+                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload vt error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                             continue;
                                         }
                                         if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                         {
                                             await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
-                                            await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload floor plan error");
+                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload floor plan error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                             continue;
                                         }
                                         var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
@@ -270,25 +271,25 @@ namespace PropnexPoster.WPF
                                                             if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                                             {
                                                                 await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
-                                                                await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload photo error");
+                                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload photo error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                                                 continue;
                                                             }
                                                             if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                                             {
                                                                 await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
-                                                                await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload video error");
+                                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload video error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                                                 continue;
                                                             }
                                                             if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                                             {
                                                                 await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
-                                                                await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload vt error");
+                                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload vt error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                                                 continue;
                                                             }
                                                             if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                                             {
                                                                 await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
-                                                                await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} upload floor plan error");
+                                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload floor plan error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                                                 continue;
                                                             }
                                                             var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
@@ -313,7 +314,7 @@ namespace PropnexPoster.WPF
                                         }
                                         else
                                         {
-                                            await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} {result.Message}");
+                                            await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} {result.Message}  {WPFModule.AppConfiguration.MachineNumber}  <@U01DQLBLWNL>");
                                             await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find :" + result.Message);
                                         }
                                     }
@@ -349,21 +350,25 @@ namespace PropnexPoster.WPF
                                         if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                         {
                                             await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
+                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload photo error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                             continue;
                                         }
                                         if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                         {
                                             await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
+                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload video error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                             continue;
                                         }
                                         if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                         {
                                             await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
+                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload vt error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                             continue;
                                         }
                                         if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                         {
                                             await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
+                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload floor plan error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                             continue;
                                         }
 
@@ -396,21 +401,25 @@ namespace PropnexPoster.WPF
                                             if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                             {
                                                 await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
+                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload photo error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                                 continue;
                                             }
                                             if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                             {
                                                 await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
+                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload video error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                                 continue;
                                             }
                                             if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                             {
                                                 await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
+                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload vt error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                                 continue;
                                             }
                                             if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                             {
                                                 await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
+                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload floor plan error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                                 continue;
                                             }
                                             var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
@@ -498,25 +507,25 @@ namespace PropnexPoster.WPF
                                     if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                     {
                                         await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
-                                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload photo error <@U01DQLBLWNL>");
+                                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload photo error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                         continue;
                                     }
                                     if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                     {
-                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error <@U01DQLBLWNL>");
-                                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload video error");
+                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
+                                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload video error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                         continue;
                                     }
                                     if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                     {
-                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error <@U01DQLBLWNL>");
-                                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload vt error");
+                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
+                                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload vt error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                         continue;
                                     }
                                     if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                     {
-                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error <@U01DQLBLWNL>");
-                                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload floor plan error");
+                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
+                                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload floor plan error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                         continue;
                                     }
                                     await _api.GetListing(listing.Listing.Id.Value);
@@ -995,7 +1004,7 @@ namespace PropnexPoster.WPF
                     webClient.DownloadFile(guruTaskListing.Photos[i], filePath);
                     Log("download photo complete");
                     result = await _api.UploadPhotoAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
-                    if (result.HttpStatusCode != System.Net.HttpStatusCode.OK)
+                    if (result.HttpStatusCode != System.Net.HttpStatusCode.OK && result.HttpStatusCode != HttpStatusCode.BadRequest)
                     {
                         break;
                     }
@@ -1024,7 +1033,7 @@ namespace PropnexPoster.WPF
                     url.Contains("vimeo") ||
                     url.Contains("dailymotion") ||
                     url.Contains("<iframe") ||
-                    url.Contains("havelock2")||
+                    url.Contains("havelock2") ||
                     url.Contains("8prop.com")
                     )
                 {
