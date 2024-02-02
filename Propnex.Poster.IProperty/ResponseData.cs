@@ -16,6 +16,9 @@ namespace Propnex.Poster.IProperty
 
         public T variables { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string query { get; set; } = null;
+
         public Extensions extensions { get; set; } = null;
 
     }
