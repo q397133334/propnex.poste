@@ -668,7 +668,7 @@ namespace Propnex.Poster.NetCoreWinForm
 
             if (buildingText != "")
             {
-                if(string.IsNullOrEmpty(propnexListing.Basic["txtPostCode"]))
+                if (string.IsNullOrEmpty(propnexListing.Basic["txtPostCode"]))
                 {
                     return new PosterActionResult<Listing>()
                     {
@@ -1155,7 +1155,7 @@ namespace Propnex.Poster.NetCoreWinForm
             var loginButton = await (await DevToolsContext).QuerySelectorAsync<HtmlElement>("#btn_login");
             await Delay(1);
             await loginButton.ClickAsync();
-            await chromiumWebBrowser.WaitForNavigationAsync();
+            await chromiumWebBrowser.WaitForNavigationAsync(new TimeSpan(0,5,0));
             await watiForIsLoading();
             await CheckPage();
             var warning = await (await DevToolsContext).QuerySelectorAsync<HtmlElement>("div.login-body > div.warning-container > div");
@@ -1429,9 +1429,9 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             PnTaskDto = new PnTaskDto()
             {
-                Number = "17202.cef.tsk"
+                Number = "23885.cef.tsk"
             };
-            propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText("E:\\17202.cef.tsk"));
+            propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"E:\\{PnTaskDto.Number}"));
             if (propnexTasks == null)
             {
                 await PublishMessageAsync("Not find tasks ,dealy 1 min");
