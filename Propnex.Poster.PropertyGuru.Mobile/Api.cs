@@ -15,6 +15,7 @@ using Flurl;
 using Flurl.Http;
 using Flurl.Util;
 using System.Net;
+using System.Threading;
 
 namespace Propnex.Poster.PropertyGuru.Mobile
 {
@@ -217,7 +218,6 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddParameter("sortOrder", 1);
             request.AddParameter("caption", "");
             request.AddParameter("statusCode", "ACT");
-            //var filePath = "C:\\Users\\worker_fg\\Documents\\雷电模拟器\\Pictures\\3_image.jpg";
             var filePathLower = filePath.ToLower();
             if (filePathLower.Contains("youtube") ||
                 filePathLower.Contains("vimeo") ||
@@ -249,7 +249,9 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 var fileName = Path.GetExtension(filePath);
                 request.AddFile("mediaFile", files, $"{Guid.NewGuid()}{filePath}");
             }
-
+            int count = 0;
+        Start:
+            count++;
             using (var c = new RestSharp.RestClient(new RestClientOptions()
             {
                 BaseUrl = new Uri("https://agentnet.propertyguru.com.sg"),
@@ -280,6 +282,18 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                         Data = response.Content,
                         HttpStatusCode = System.Net.HttpStatusCode.OK
                     };
+                }
+                else
+                {
+                    if (count < 2)
+                    {
+                        Log($"media upload errir {response.StatusCode},{response.ErrorMessage}-{response.StatusDescription}");
+                        cookie = null;
+                        Log("Waiting 10min");
+                        await Task.Delay(1000 * 60 * 10);
+                        Log("retry get cookie");
+                        goto Start;
+                    }
                 }
                 Log($"media upload errir {response.StatusCode}");
                 return GetHttpResult<string>(response);

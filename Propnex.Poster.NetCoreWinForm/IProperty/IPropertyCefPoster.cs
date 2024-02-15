@@ -14,6 +14,7 @@ using Serilog;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -72,7 +73,7 @@ namespace Propnex.Poster.NetCoreWinForm
             await Delay(5);
             var toLoginResult = await ToLoginAsync();
 #if DEBUG
-            //chromiumWebBrowser.ShowDevTools();
+            chromiumWebBrowser.ShowDevTools();
 #endif
             try
             {
@@ -676,11 +677,11 @@ namespace Propnex.Poster.NetCoreWinForm
                         Message = $"PostCode is null"
                     };
                 }
-                var buildingsResult = await BuildingQuery(buildingText);
+                var buildingsResult = await BuildingQuery(buildingText, listingId);
                 if (buildingsResult.Status == PosterActionResultStatus.Success)
                 {
                     var buildings = buildingsResult.Data;
-                    place = buildings.FirstOrDefault(q => q.postCode == propnexListing.Basic["txtPostCode"]);
+                    place = buildings.FirstOrDefault(q => q.postCode == propnexListing.Basic["txtPostCode"] || q.Level5.Text.en_GB == buildingText);
                     if (place == null)
                     {
                         //    buildingsResult = await level2Query(locationDto.variables.input.location.Level2.Text.en_GB, locationDto.variables.input.location.Level1.Id);
@@ -1155,7 +1156,11 @@ namespace Propnex.Poster.NetCoreWinForm
             var loginButton = await (await DevToolsContext).QuerySelectorAsync<HtmlElement>("#btn_login");
             await Delay(1);
             await loginButton.ClickAsync();
+<<<<<<< HEAD
             await chromiumWebBrowser.WaitForNavigationAsync(new TimeSpan(0,5,0));
+=======
+            await chromiumWebBrowser.WaitForNavigationAsync(new TimeSpan(0, 5, 0));
+>>>>>>> b2026e98f4ef8648a1f320f10b3234df25c847ac
             await watiForIsLoading();
             await CheckPage();
             var warning = await (await DevToolsContext).QuerySelectorAsync<HtmlElement>("div.login-body > div.warning-container > div");
@@ -1183,7 +1188,7 @@ namespace Propnex.Poster.NetCoreWinForm
             {
                 string jscode = $@"()=> {{return fetch(""{url}"", {{
                                     ""headers"": {{
-                                        ""accept"": ""application/json, text/plain, */*"",
+                                        ""accept"": ""application/json, text/plain, *"",
                                         ""if-none-match"": ""W/\""42c3f-i6z2s6ipfF/j1sd6HDcrj3E+{new Random(_lock.GetHashCode()).Next(100, 999)}\"""",
                                     }},
                                     ""method"": ""GET"",
@@ -1249,13 +1254,36 @@ namespace Propnex.Poster.NetCoreWinForm
             return Policy.WrapAsync(fallbackPolicy, retryPolicy);
         }
 
-        public async Task<PosterActionResult<List<PlaceDto>>> BuildingQuery(string key)
+        public async Task<PosterActionResult<List<PlaceDto>>> BuildingQuery(string key, string listingId)
         {
-            string url = $"https://www.iproperty.com.my/pro/rasor/graphql/buildingQuery?" +
-                $"operationName=buildingQuery&" +
-                $"variables=%7B%22q%22%3A%22level5%22%2C%22shouldExtendsFields%22%3Atrue%2C%22includeBuildingFacilityCodes%22%3Atrue%2C%22keyword%22%3A%22{key}%22%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%229adf6bae0454ed8c07e24e43e1f2b622d0649a9fb96a056659ab644ee2b06e63%22%7D%7D";
+            string url = $"https://www.iproperty.com.my/pro/rasor/graphql/buildingQuery";
+            url = $"https://www.iproperty.com.my/pro/rasor/graphql/buildingQuery?" +
+               $"operationName=buildingQuery&" +
+               $"variables=%7B%22q%22%3A%22level5%22%2C%22shouldExtendsFields%22%3Atrue%2C%22includeBuildingFacilityCodes%22%3Atrue%2C%22keyword%22%3A%22{key.ToLower()}%22%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%229adf6bae0454ed8c07e24e43e1f2b622d0649a9fb96a056659ab644ee2b06e63%22%7D%7D";
             return await GetPolicy<List<PlaceDto>>().ExecuteAsync(async (ctx) =>
             {
+                //while (true)
+                //{
+                //    await Task.Delay(1000 * 10);
+                //}
+                //var query = new RequestData<BuildingQueryVariablesDto>()
+                //{
+                //    extensions = new Extensions()
+                //    {
+                //        persistedQuery = new PersistedQuery()
+                //        {
+                //            Sha256Hash = "9adf6bae0454ed8c07e24e43e1f2b622d0649a9fb96a056659ab644ee2b06e63",
+                //            Version = 1
+                //        }
+                //    },
+                //    variables = new BuildingQueryVariablesDto()
+                //    {
+                //        keyword = key
+                //    },
+                //    query = "query buildingQuery($keyword: String, $q: String = \"level3\", $shouldExtendsFields: Boolean = false, $includeBuildingFacilityCodes: Boolean = false) {\r\n  places(searchAddress: true, keyword: $keyword, q: $q, limit: 50, includeBuildingFacilityCodes: $includeBuildingFacilityCodes) {\r\n    data {\r\n      latitude\r\n      longitude\r\n      address {\r\n        en_GB\r\n        zh_HK\r\n        zh_CN\r\n        __typename\r\n      }\r\n      postCode\r\n      level1 {\r\n        id\r\n        text {\r\n          en_GB\r\n          zh_HK\r\n          zh_CN\r\n          __typename\r\n        }\r\n        __typename\r\n      }\r\n      level2 {\r\n        id\r\n        text {\r\n          en_GB\r\n          zh_HK\r\n          zh_CN\r\n          __typename\r\n        }\r\n        __typename\r\n      }\r\n      level3 {\r\n        id @skip(if: $shouldExtendsFields)\r\n        text {\r\n          en_GB\r\n          zh_HK\r\n          zh_CN\r\n          __typename\r\n        }\r\n        __typename\r\n      }\r\n      level5 @include(if: $shouldExtendsFields) {\r\n        id\r\n        text {\r\n          en_GB\r\n          __typename\r\n        }\r\n        __typename\r\n      }\r\n      propertyType {\r\n        id\r\n        code\r\n        description\r\n        label\r\n        __typename\r\n      }\r\n      propertyGroupType {\r\n        id\r\n        code\r\n        description\r\n        label\r\n        __typename\r\n      }\r\n      buildingFacilities @include(if: $includeBuildingFacilityCodes) {\r\n        id\r\n        code\r\n        description\r\n        __typename\r\n      }\r\n      __typename\r\n    }\r\n    __typename\r\n  }\r\n}\r\n",
+                //    OperationName = "buildingQuery"
+                //};
+                //var result = await AjaxJsonPostAsync(url, $"https://www.iproperty.com.my/pro/add-listing/location/{listingId}", data: JsonConvert.SerializeObject(query, jsonSerialzerSettings));
                 var result = await AjaxJsonGetAsync(url);
                 if (result.Contains("PersistedQueryNotFound"))
                 {
@@ -1391,7 +1419,7 @@ namespace Propnex.Poster.NetCoreWinForm
             {
                 string jscode = $@"()=> {{return fetch(""{url}"", {{
                                   ""headers"": {{
-                                    ""accept"": ""application/json, text/plain, */*"",
+                                    ""accept"": ""application/json, text/plain, *"",
                                   }},
                                   ""method"": ""GET"",
                                   ""mode"": ""cors""
@@ -1427,6 +1455,7 @@ namespace Propnex.Poster.NetCoreWinForm
 
         public async Task GetTaskAsync()
         {
+<<<<<<< HEAD
             PnTaskDto = new PnTaskDto()
             {
                 Number = "23885.cef.tsk"
@@ -1439,6 +1468,20 @@ namespace Propnex.Poster.NetCoreWinForm
                 Close();
             }
             return;
+=======
+            //PnTaskDto = new PnTaskDto()
+            //{
+            //    Number = "23885.cef.tsk"
+            //};
+            //propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText("E:\\23885.cef.tsk"));
+            //if (propnexTasks == null)
+            //{
+            //    await PublishMessageAsync("Not find tasks ,dealy 1 min");
+            //    await Task.Delay(1000 * 60);
+            //    Close();
+            //}
+            //return;
+>>>>>>> b2026e98f4ef8648a1f320f10b3234df25c847ac
             var context = "";
             PnTaskDto = await WebServer.GetTask();
             if (PnTaskDto != null)
