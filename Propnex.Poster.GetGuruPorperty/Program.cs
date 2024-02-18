@@ -54,8 +54,8 @@ namespace Propnex.Poster.GetGuruPorperty
                     var ok = await $"https://pa-production.propnex.net/index.php/scrape/guruProjects".PostUrlEncodedAsync(new
                     {
                         id = item,
-                        json = project.ToJson()
-                    });
+                        json = projectResult.Message
+                    }) ;
 
                     var msg = await ok.GetStringAsync();
                     Console.WriteLine(msg);

@@ -96,15 +96,15 @@ namespace PropnexPoster.WPF
 
             Log("Get Task .....");
             //1.获取任务信息
-            var guruTasks = await getGuruTasks();
-            //taskDto = new PnTaskDto()
-            //{
-            //    Number = "1031106.guru.tsk"
-            //};
-            //var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
-            //var lenght = context.IndexOf("Xpressor-Listing-File===");
-            //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
-            //var guruTasks = new GuruTasks(context, taskContext);
+            //var guruTasks = await getGuruTasks();
+            taskDto = new PnTaskDto()
+            {
+                Number = "1037582.guru.tsk"
+            };
+            var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
+            var lenght = context.IndexOf("Xpressor-Listing-File===");
+            var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
+            var guruTasks = new GuruTasks(context, taskContext);
             if (guruTasks == null)
             {
                 Log("Not find task ,delay 1 min");

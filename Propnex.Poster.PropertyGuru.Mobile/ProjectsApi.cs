@@ -21,7 +21,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
         {
         }
 
-        public ProjectsApi(Token token ) : base(baseUrl)
+        public ProjectsApi(Token token) : base(baseUrl)
         {
             Token = token;
         }
@@ -47,7 +47,8 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 return new HttpResult<Model.Project>()
                 {
                     Data = Model.Project.FromJson(respones.Content),
-                    HttpStatusCode = respones.StatusCode
+                    HttpStatusCode = respones.StatusCode,
+                    Message = respones.Content
                 };
             }
             return GetHttpResult<Model.Project>(respones);

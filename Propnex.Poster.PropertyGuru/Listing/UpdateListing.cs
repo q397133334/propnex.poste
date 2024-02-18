@@ -979,7 +979,7 @@ namespace Propnex.Poster.PropertyGuru.Listing
         /// <summary>
         /// 
         /// </summary>
-        public List<string> propertyFloorplans { get; set; }
+        public List<ListingItem> propertyFloorplans { get; set; }
         /// <summary>
         /// 
         /// </summary>

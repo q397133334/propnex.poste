@@ -1156,11 +1156,7 @@ namespace Propnex.Poster.NetCoreWinForm
             var loginButton = await (await DevToolsContext).QuerySelectorAsync<HtmlElement>("#btn_login");
             await Delay(1);
             await loginButton.ClickAsync();
-<<<<<<< HEAD
             await chromiumWebBrowser.WaitForNavigationAsync(new TimeSpan(0,5,0));
-=======
-            await chromiumWebBrowser.WaitForNavigationAsync(new TimeSpan(0, 5, 0));
->>>>>>> b2026e98f4ef8648a1f320f10b3234df25c847ac
             await watiForIsLoading();
             await CheckPage();
             var warning = await (await DevToolsContext).QuerySelectorAsync<HtmlElement>("div.login-body > div.warning-container > div");
@@ -1455,7 +1451,6 @@ namespace Propnex.Poster.NetCoreWinForm
 
         public async Task GetTaskAsync()
         {
-<<<<<<< HEAD
             PnTaskDto = new PnTaskDto()
             {
                 Number = "23885.cef.tsk"
@@ -1468,20 +1463,6 @@ namespace Propnex.Poster.NetCoreWinForm
                 Close();
             }
             return;
-=======
-            //PnTaskDto = new PnTaskDto()
-            //{
-            //    Number = "23885.cef.tsk"
-            //};
-            //propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText("E:\\23885.cef.tsk"));
-            //if (propnexTasks == null)
-            //{
-            //    await PublishMessageAsync("Not find tasks ,dealy 1 min");
-            //    await Task.Delay(1000 * 60);
-            //    Close();
-            //}
-            //return;
->>>>>>> b2026e98f4ef8648a1f320f10b3234df25c847ac
             var context = "";
             PnTaskDto = await WebServer.GetTask();
             if (PnTaskDto != null)

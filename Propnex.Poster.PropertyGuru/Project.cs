@@ -63,6 +63,8 @@ namespace Propnex.Poster.PropertyGuru.Mobile.Model
         /// 103.84365640636763000
         /// </summary>
         public string longitude { get; set; }
+
+        public string postal_code { get; set; }
     }
 
 
