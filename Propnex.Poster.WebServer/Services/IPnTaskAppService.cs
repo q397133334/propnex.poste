@@ -79,7 +79,7 @@ namespace Propnex.Poster.WebServer.Services
             {
                 var rootPath = Path.Combine(_webHostEnvironment.WebRootPath, "taskxml");
                 //1. get waiting pntask
-                var pnTask = await AsyncExecuter.FirstOrDefaultAsync((await Repository.GetQueryableAsync()).Where(q => q.Status == Share.TaskStatus.Wait && q.TargetPortal == inputDto.TargetPortal));
+                var pnTask = await AsyncExecuter.FirstOrDefaultAsync((await Repository.GetQueryableAsync()).Where(q => q.Status == Share.TaskStatus.Wait && q.TargetPortal == inputDto.TargetPortal).Order(q=>q.CreationTime));
                 if (pnTask == null)
                     return null;
                 //2. check task file
