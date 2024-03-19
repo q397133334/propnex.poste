@@ -96,15 +96,15 @@ namespace PropnexPoster.WPF
 
             Log("Get Task .....");
             //1.获取任务信息
-            //var guruTasks = await getGuruTasks();
-            taskDto = new PnTaskDto()
-            {
-                Number = "1037582.guru.tsk"
-            };
-            var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
-            var lenght = context.IndexOf("Xpressor-Listing-File===");
-            var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
-            var guruTasks = new GuruTasks(context, taskContext);
+            var guruTasks = await getGuruTasks();
+            //taskDto = new PnTaskDto()
+            //{
+            //    Number = "1052826.guru.tsk"
+            //};
+            //var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
+            //var lenght = context.IndexOf("Xpressor-Listing-File===");
+            //var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
+            //var guruTasks = new GuruTasks(context, taskContext);
             if (guruTasks == null)
             {
                 Log("Not find task ,delay 1 min");
@@ -1030,6 +1030,7 @@ namespace PropnexPoster.WPF
                 var url = guruTaskListing.Videos[i].ToLower();
                 var filePath = $"{path}{i}_movie.mp4";
                 if (url.Contains("youtube") ||
+                    url.Contains("youtu.be") ||
                     url.Contains("vimeo") ||
                     url.Contains("dailymotion") ||
                     url.Contains("<iframe") ||
@@ -1083,6 +1084,7 @@ namespace PropnexPoster.WPF
                 var url = guruTaskListing.Tours[i].ToLower();
                 var filePath = $"{path}{i}_vt.mp4";
                 if (url.Contains("youtube") ||
+                    url.Contains("youtu.be")||
                     url.Contains("vimeo") ||
                     url.Contains("dailymotion") ||
                     url.Contains("<iframe") ||

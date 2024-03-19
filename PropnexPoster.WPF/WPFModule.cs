@@ -80,8 +80,9 @@ public class WPFModule : AbpModule
         request.AddParameter("caption", "");
         request.AddParameter("statusCode", "ACT");
         var filePath = "C:\\Users\\worker_fg\\Documents\\雷电模拟器\\Pictures\\3_image.jpg";
-        var filePathLower =filePath .ToLower();
+        var filePathLower = filePath.ToLower();
         if (filePathLower.Contains("youtube") ||
+            filePathLower.Contains("youtu.be")||
             filePathLower.Contains("vimeo") ||
                 filePathLower.Contains("dailymotion") ||
                 filePathLower.Contains("<iframe") ||
