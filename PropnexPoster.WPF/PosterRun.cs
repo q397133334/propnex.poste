@@ -99,7 +99,7 @@ namespace PropnexPoster.WPF
             var guruTasks = await getGuruTasks();
             //taskDto = new PnTaskDto()
             //{
-            //    Number = "1052826.guru.tsk"
+            //    Number = "1057597.guru.tsk"
             //};
             //var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
             //var lenght = context.IndexOf("Xpressor-Listing-File===");
@@ -230,16 +230,29 @@ namespace PropnexPoster.WPF
                                             continue;
                                         }
                                         var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
-                                        await _api.UpdateAsync(taskListing.Data);
-                                        var activateResult = await _adsProject.Activate(result.Data.Id);
-                                        if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                        await _api.UpdateAsync(taskListing.Data); var mobile = new Mobile() { Token = token };
+                                        var draflistings =
+                                        (await _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
                                         {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                            StatusCode = "DRAFT"
+                                        })).Data.listings;
+                                        var draflisting = draflistings.Where(q => q.id == listing.Listing.Id).FirstOrDefault();
+                                        if (draflisting != null)
+                                        {
+                                            var activateResult = await _adsProject.Activate(result.Data.Id, draflisting.charges.activate);
+                                            if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                            {
+                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                            }
+                                            else
+                                            {
+
+                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
+                                            }
                                         }
                                         else
                                         {
-
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
                                         }
                                     }
                                 }
@@ -294,14 +307,28 @@ namespace PropnexPoster.WPF
                                                             }
                                                             var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
                                                             await _api.UpdateAsync(taskListing.Data);
-                                                            var activateResult = await _adsProject.Activate(result.Data.Id);
-                                                            if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                                            var draflistings =
+                                                                (await _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
+                                                                {
+                                                                    StatusCode = "DRAFT"
+                                                                })).Data.listings;
+                                                            var draflisting = draflistings.Where(q => q.id == listing.Listing.Id).FirstOrDefault();
+                                                            if (draflisting != null)
                                                             {
-                                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                                                var activateResult = await _adsProject.Activate(result.Data.Id, draflisting.charges.activate);
+                                                                if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                                                {
+                                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                                                }
+                                                                else
+                                                                {
+
+                                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
+                                                                }
                                                             }
                                                             else
                                                             {
-                                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
+                                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
                                                             }
                                                         }
                                                     }
@@ -424,16 +451,29 @@ namespace PropnexPoster.WPF
                                             }
                                             var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
                                             await _api.UpdateAsync(taskListing.Data);
-                                            var activateResult = await _adsProject.Activate(result.Data.Id);
-
-                                            if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                            await _api.UpdateAsync(taskListing.Data); var mobile = new Mobile() { Token = token };
+                                            var draflistings =
+                                            (await _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
                                             {
-                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                                StatusCode = "DRAFT"
+                                            })).Data.listings;
+                                            var draflisting = draflistings.Where(q => q.id == listing.Listing.Id).FirstOrDefault();
+                                            if (draflisting != null)
+                                            {
+                                                var activateResult = await _adsProject.Activate(result.Data.Id, draflisting.charges.activate);
+                                                if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                                {
+                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                                }
+                                                else
+                                                {
+
+                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
+                                                }
                                             }
                                             else
                                             {
-
-                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
+                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
                                             }
                                         }
                                     }
@@ -462,15 +502,29 @@ namespace PropnexPoster.WPF
                                                         await uploadFloorPlanAsync(listing, _api);
                                                         var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
                                                         await _api.UpdateAsync(taskListing.Data);
-                                                        var activateResult = await _adsProject.Activate(result.Data.Id);
-
-                                                        if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                                        await _api.UpdateAsync(taskListing.Data); var mobile = new Mobile() { Token = token };
+                                                        var draflistings =
+                                                        (await _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
                                                         {
-                                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                                            StatusCode = "DRAFT"
+                                                        })).Data.listings;
+                                                        var draflisting = draflistings.Where(q => q.id == listing.Listing.Id).FirstOrDefault();
+                                                        if (draflisting != null)
+                                                        {
+                                                            var activateResult = await _adsProject.Activate(result.Data.Id, draflisting.charges.activate);
+                                                            if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                                            {
+                                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                                            }
+                                                            else
+                                                            {
+
+                                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
+                                                            }
                                                         }
                                                         else
                                                         {
-                                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Data);
+                                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
                                                         }
                                                     }
                                                 }
@@ -1084,7 +1138,7 @@ namespace PropnexPoster.WPF
                 var url = guruTaskListing.Tours[i].ToLower();
                 var filePath = $"{path}{i}_vt.mp4";
                 if (url.Contains("youtube") ||
-                    url.Contains("youtu.be")||
+                    url.Contains("youtu.be") ||
                     url.Contains("vimeo") ||
                     url.Contains("dailymotion") ||
                     url.Contains("<iframe") ||
