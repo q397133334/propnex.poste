@@ -16,7 +16,7 @@ namespace Propnex.Poster.IProperty
         public int saleableAreaMeasurementCode { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public List<int>? buildingFacilityCodes { get; set; }
+        public List<int?>? buildingFacilityCodes { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int? propertyGroupTypeCode { get; set; }

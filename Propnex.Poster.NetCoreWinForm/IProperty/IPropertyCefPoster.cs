@@ -384,6 +384,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 propnexListing.Details["data_step1"] = propnexListing.Details["data_step1"].Replace("\"location\":[]", "\"location\":{}");
                 addListingMutationDto = JsonConvert.DeserializeObject<RequestData<Variables<AddListingMutationDto>>>(propnexListing.Details["data_step1"]);
                 var updateListingMutationDto = JsonConvert.DeserializeObject<RequestData<Variables<UpdateListingMutationDto>>>(propnexListing.Details["data_step1"]);
+                updateListingMutationDto.query = null;
                 updateListingMutationDto.variables.input.id = listingId;
                 updateListingMutationDto.OperationName = "updateListingInfo";
                 updateListingMutationDto.variables.shouldExtendsFields = true;
@@ -393,7 +394,7 @@ namespace Propnex.Poster.NetCoreWinForm
 
                 return await GetPolicy<string>().ExecuteAsync(async (ctx) =>
                 {
-                    var result = await AjaxJsonPostAsync("https://www.iproperty.com.my/pro/rasor/graphql/updateListingInfo", "refUrl", data: jsonData);
+                     var result = await AjaxJsonPostAsync("https://www.iproperty.com.my/pro/rasor/graphql/updateListingInfo", "refUrl", data: jsonData);
                     if (result.Contains("PERSISTED_QUERY_NOT_FOUND"))
                     {
                         await PublishMessageAsync(result);
@@ -1453,7 +1454,7 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             PnTaskDto = new PnTaskDto()
             {
-                Number = "23885.cef.tsk"
+                Number = "27561.cef.tsk"
             };
             propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"E:\\{PnTaskDto.Number}"));
             if (propnexTasks == null)

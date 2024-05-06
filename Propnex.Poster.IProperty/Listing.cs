@@ -9,21 +9,21 @@ namespace Propnex.Poster.IProperty
     {
         public string Id { get; set; }
 
-        public List<string> Amenities { get; set; } = new List<string>();
+        public List<string>? Amenities { get; set; } = new List<string>();
 
         public int? Bathroom { get; set; }
 
         public int? Bedroom { get; set; }
 
-        public ListingItemType BedroomRef { get; set; } = new ListingItemType();
+        public ListingItemType? BedroomRef { get; set; } = new ListingItemType();
 
-        public List<ListingItemType> BuildingFacilities { get; set; }
+        public List<ListingItemType>? BuildingFacilities { get; set; }
 
         public int? CarPark { get; set; }
 
-        public ListingItemType Channel { get; set; } = new ListingItemType();
+        public ListingItemType? Channel { get; set; } = new ListingItemType();
 
-        public List<string> Conditions { get; set; } = new List<string>();
+        public List<string>? Conditions { get; set; } = new List<string>();
 
         public DateTime? ContentUpdatedDate { get; set; }
 
@@ -33,39 +33,39 @@ namespace Propnex.Poster.IProperty
 
         public DateTime? ExpiryDate { get; set; }
 
-        public ListingExtension Extension { get; set; } = new ListingExtension();
+        public ListingExtension? Extension { get; set; } = new ListingExtension();
 
-        public ListingAttributes Attributes { get; set; } = new ListingAttributes();
+        public ListingAttributes? Attributes { get; set; } = new ListingAttributes();
 
         public DateTime? FirstPublishedDate { get; set; }
 
-        public List<ListingImage> FloorPlans { get; set; } = new List<ListingImage>();
+        public List<ListingImage>? FloorPlans { get; set; } = new List<ListingImage>();
 
-        public List<ListingImage> Photo360s { get; set; }
+        public List<ListingImage>? Photo360s { get; set; }
 
         public int? PropertyCategoryTypeCode { get; set; }
 
         public string? FloorZone { get; set; }
 
-        public ListingMultiLangText FullAddress { get; set; } = new ListingMultiLangText();
+        public ListingMultiLangText? FullAddress { get; set; } = new ListingMultiLangText();
 
         public string? GrossArea { get; set; }
 
-        public ListingItemType GrossAreaMeasurement { get; set; }
+        public ListingItemType? GrossAreaMeasurement { get; set; }
 
         public string? Image360s { get; set; }
 
-        public List<ListingImage> Images { get; set; } = new List<ListingImage>();
+        public List<ListingImage>? Images { get; set; } = new List<ListingImage>();
 
         public string? Layout { get; set; }
 
         public string? ListerId { get; set; }
 
-        public ListingItemType ListingProduct { get; set; }
+        public ListingItemType? ListingProduct { get; set; }
 
         public string? ListingRefNo { get; set; }
 
-        public ListingLocation Location { get; set; } = new ListingLocation();
+        public ListingLocation? Location { get; set; } = new ListingLocation();
 
         public DateTime? NextRotationDate { get; set; }
 
@@ -77,31 +77,31 @@ namespace Propnex.Poster.IProperty
 
         public DateTime? ProductUpgradeDate { get; set; }
 
-        public ListingItemType PropertyType { get; set; } = new ListingItemType();
+        public ListingItemType? PropertyType { get; set; } = new ListingItemType();
 
-        public ListingSalePrice RentPrice { get; set; }=new ListingSalePrice();
+        public ListingSalePrice? RentPrice { get; set; }=new ListingSalePrice();
 
         public string? RepresentationListerId { get; set; }
 
         public int? SaleableArea { get; set; }
 
-        public ListingItemType SaleableAreaMeasurement { get; set; }
+        public ListingItemType? SaleableAreaMeasurement { get; set; }
 
-        public ListingSalePrice SalePrice { get; set; } = new ListingSalePrice();
+        public ListingSalePrice? SalePrice { get; set; } = new ListingSalePrice();
 
-        public ListingItemType Status { get; set; } = new ListingItemType();
+        public ListingItemType? Status { get; set; } = new ListingItemType();
 
         public string? StoreRoom { get; set; }
 
         public ListingMultiLangText? Title { get; set; }
 
-        public List<ListingItemType> UnitFeatures { get; set; }
+        public List<ListingItemType>? UnitFeatures { get; set; }
 
-        public List<ListingRichMedia> Videos { get; set; }
+        public List<ListingRichMedia>? Videos { get; set; }
 
-        public List<string> Views { get; set; }
+        public List<string>? Views { get; set; }
 
-        public List<ListingRichMedia> Photo360players { get; set; }
+        public List<ListingRichMedia>? Photo360players { get; set; }
 
         public string __typename { get; set; } = "Listing";
 
@@ -109,7 +109,7 @@ namespace Propnex.Poster.IProperty
 
         public DateTime? CreatedDate { get; set; }
 
-        public ListingLister Lister { get; set; } = new ListingLister();
+        public ListingLister? Lister { get; set; } = new ListingLister();
 
         public DateTime? PostedDate { get; set; }
 
@@ -127,14 +127,14 @@ namespace Propnex.Poster.IProperty
 
         public string? partnerRefId { get; set; }
 
-        public ListingRequestorListingPermission RequestorListingPermission { get; set; }
+        public ListingRequestorListingPermission? RequestorListingPermission { get; set; }
     }
 
     public class ListingItemType
     {
         public string Id { get; set; }
 
-        public int Code { get; set; }
+        public int? Code { get; set; }
 
         public string Label { get; set; }
 
@@ -161,7 +161,7 @@ namespace Propnex.Poster.IProperty
     {
         public bool? IsWithinMigrationGracePeriod { get; set; }
 
-        public List<string> MandatoryFields { get; set; }
+        public List<string>? MandatoryFields { get; set; }
 
         public int? CrossListTypeCode { get; set; }
 
@@ -183,7 +183,7 @@ namespace Propnex.Poster.IProperty
         /// <summary>
         /// 
         /// </summary>
-        public int Sort { get; set; }
+        public int? Sort { get; set; }
 
         /// <summary>
         /// 
@@ -210,7 +210,7 @@ namespace Propnex.Poster.IProperty
         /// <summary>
         /// 
         /// </summary>
-        public int Sort { get; set; }
+        public int? Sort { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -222,11 +222,11 @@ namespace Propnex.Poster.IProperty
         /// <summary>
         /// 
         /// </summary>
-        public int Width { get; set; }
+        public int? Width { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public int Height { get; set; }
+        public int? Height { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -267,22 +267,22 @@ namespace Propnex.Poster.IProperty
     public class ListingLocation
     {
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public ListingLevel Level1 { get; set; }
+        public ListingLevel? Level1 { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public ListingLevel Level2 { get; set; }
+        public ListingLevel? Level2 { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public ListingLevel Level3 { get; set; }
+        public ListingLevel? Level3 { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public ListingLevel Level4 { get; set; }
+        public ListingLevel? Level4 { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public ListingLevel Level5 { get; set; }
+        public ListingLevel? Level5 { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public ListingMultiLangText Address { get; set; } = new ListingMultiLangText();
+        public ListingMultiLangText? Address { get; set; } = new ListingMultiLangText();
     }
 
     public class ListingLevel
@@ -291,7 +291,7 @@ namespace Propnex.Poster.IProperty
         public string Id { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public ListingMultiLangText Text { get; set; }
+        public ListingMultiLangText? Text { get; set; }
 
         [Newtonsoft.Json.JsonIgnore]
         public string __typename { get; set; }
@@ -311,11 +311,11 @@ namespace Propnex.Poster.IProperty
     {
         public string Id { get; set; }
 
-        public ListingMultiLangText FullName { get; set; } = new ListingMultiLangText();
+        public ListingMultiLangText? FullName { get; set; } = new ListingMultiLangText();
 
-        public ListingMultiLangText firstName { get; set; } = new ListingMultiLangText();
+        public ListingMultiLangText? firstName { get; set; } = new ListingMultiLangText();
 
-        public ListingMultiLangText lastName { get; set; } = new ListingMultiLangText();
+        public ListingMultiLangText? lastName { get; set; } = new ListingMultiLangText();
 
         public string __typename { get; set; } = "User";
     }
