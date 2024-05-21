@@ -226,7 +226,8 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                     filePathLower.Contains("<iframe") ||
                     filePathLower.Contains("havelock2") ||
                     filePathLower.Contains("new-vr") ||
-                    filePathLower.Contains("8prop.com")
+                    filePathLower.Contains("8prop.com") ||
+                    filePathLower.Contains("matterport.com")
                     )
             {
                 if (filePath.Contains("#"))
