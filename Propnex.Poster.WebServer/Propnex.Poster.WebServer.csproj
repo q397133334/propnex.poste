@@ -103,6 +103,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Propnex.Poster.Dtos\Propnex.Poster.Dtos\Propnex.Poster.Dtos.csproj" />
+    <ProjectReference Include="..\Propnex.Poster.PropertyGuru.Mobile\Propnex.Poster.PropertyGuru.Mobile.csproj" />
+    <ProjectReference Include="..\Propnex.Poster.PropertyGuru\Propnex.Poster.PropertyGuru.csproj" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" package_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>

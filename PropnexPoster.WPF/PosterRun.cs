@@ -1090,7 +1090,8 @@ namespace PropnexPoster.WPF
                     url.Contains("<iframe") ||
                     url.Contains("havelock2") ||
                     url.Contains("8prop.com")||
-                    url.Contains("matterport.com")
+                    url.Contains("matterport.com") ||
+                    url.Contains("tubear")
                     )
                 {
                     filePath = guruTaskListing.Videos[i];
@@ -1145,7 +1146,8 @@ namespace PropnexPoster.WPF
                     url.Contains("dailymotion") ||
                     url.Contains("<iframe") ||
                     url.Contains("8prop.com") ||
-                    url.Contains("matterport.com")
+                    url.Contains("matterport.com")||
+                    url.Contains("tubear")
                     )
                 {
                     filePath = guruTaskListing.Tours[i];
