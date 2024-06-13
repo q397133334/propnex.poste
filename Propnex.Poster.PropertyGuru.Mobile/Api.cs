@@ -234,6 +234,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 {
                     filePath = filePath.Split('#')[0];
                 }
+                filePath=System.Web.HttpUtility.UrlDecode(filePath);
                 request.AddParameter("videoEmbedHtml", filePath);
                 request.AlwaysMultipartFormData = true;
             }

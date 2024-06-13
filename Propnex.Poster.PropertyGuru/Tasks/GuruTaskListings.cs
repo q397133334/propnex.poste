@@ -87,10 +87,10 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     }
                 }
 
-                var location= element.Element("Location");
-                if(location!=null)
+                var location = element.Element("Location");
+                if (location != null)
                 {
-                    foreach(var item in location.Elements().ToList())
+                    foreach (var item in location.Elements().ToList())
                     {
                         detialss.Add(item);
                     }
@@ -106,11 +106,11 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                 listing.UpdateTime = detialss.FindAttribute("Name", "UpdateTime").GetAttributeValue("Value", "");
 
 
-                listing.Photos = element.ElementString("Photos", "").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable().Where(q => q.Trim() != "").ToList();
-                listing.PhotosTime = element.ElementString("PhotosTime", "").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable().Where(q => q.Trim() != "").ToList();
-                listing.Videos = element.ElementString("Videos", "").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable().Where(q => q.Trim() != "").ToList();
-                listing.Tours = element.ElementString("Tours", "").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable().Where(q => q.Trim() != "").ToList();
-                listing.FloorPlan = element.ElementString("FloorPlan", "").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable().Where(q => q.Trim() != "").ToList();
+                listing.Photos = element.ElementString("Photos", "").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable().Where(q => q.Trim() != "").Where(q => q.Length > 10).ToList();
+                listing.PhotosTime = element.ElementString("PhotosTime", "").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable().Where(q => q.Trim() != "").Where(q => q.Length > 10).ToList();
+                listing.Videos = element.ElementString("Videos", "").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable().Where(q => q.Trim() != "").Where(q => q.Length > 10).ToList();
+                listing.Tours = element.ElementString("Tours", "").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable().Where(q => q.Trim() != "").Where(q => q.Length > 10).ToList();
+                listing.FloorPlan = element.ElementString("FloorPlan", "").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable().Where(q => q.Trim() != "").Where(q => q.Length > 10).ToList();
                 listing.FastRepost = detialss.FindAttribute("Name", "FastRepost").GetAttributeValue("Value", "0");
                 listing.TaskItemId = detialss.FindAttribute("Name", "taskitem_id").GetAttributeValue("Value", "0");
 
