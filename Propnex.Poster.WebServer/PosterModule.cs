@@ -324,7 +324,7 @@ public class PosterModule : AbpModule
         var backgroundWorkerManager = context.ServiceProvider.GetRequiredService<IBackgroundWorkerManager>();
         backgroundWorkerManager.AddAsync(context.ServiceProvider.GetRequiredService<WebServer.BackgroundJobs.GetTaskWorker>());
         backgroundWorkerManager.AddAsync(context.ServiceProvider.GetRequiredService<WebServer.BackgroundJobs.CheckTaskWorker>());
-
+        backgroundWorkerManager.AddAsync(context.ServiceProvider.GetRequiredService<WebServer.BackgroundJobs.GetPropertyWorker>());
 
 
         app.UseAbpRequestLocalization();

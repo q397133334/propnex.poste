@@ -6,6 +6,8 @@ using Flurl.Http;
 using Propnex.Poster.PropertyGuru.Mobile;
 using Propnex.Poster.PropertyGuru.Mobile.Dto;
 using Propnex.Poster.PropertyGuru.Mobile.Model;
+using System.Threading.Tasks;
+using Propnex;
 
 namespace Propnex.Poster.WebServer.BackgroundJobs
 {
@@ -32,9 +34,11 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
 
             if (GuruMissingId.status != "ok")
             {
+                await SlackBotMessage.SendAsync($"GetProperty 0 <@U01DQLBLWNL>");
                 return;
             }
             list = GuruMissingId.data;
+
             var loginResult = await new Auth().LoginAsync(new AuthLogin()
             {
                 UserName = "davidytp@gmail.com",
@@ -50,7 +54,7 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
                 return;
             }
             var jsonList = new List<string>();
-
+            var listname = new List<string>();
             foreach (var item in list)
             {
                 ProjectsApi api = new ProjectsApi(token);
@@ -59,7 +63,7 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
                 {
                     var project = projectResult.Data;
                     jsonList.Add(project.ToJson());
-
+                    listname.Add(project.name);
                     //https://pa-production.propnex.net/index.php/scrape/guruProjects
                     //https://pa-staging.propnex.net/index.php/scrape/guruProjects
                     var ok = await $"https://pa-production.propnex.net/index.php/scrape/guruProjects".PostUrlEncodedAsync(new
@@ -72,6 +76,8 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
                     Console.WriteLine(msg);
                 }
             }
+            await SlackBotMessage.SendAsync($"GetProperty {listname.JoinAsString(",")} <@U01DQLBLWNL><@U9WPWQYGH>");
+
         }
     }
 }
