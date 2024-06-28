@@ -317,7 +317,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 request.Method = Method.Get;
                 //request.AddParameter("apiKey", "8338c842866acc825ac9a7a4ca5cf057c77960f1");
                 request.AddParameter("url", $"https://agentnet.propertyguru.com.sg/oauth/callback/pgaccount?state=%2Fex_home&locale=en&access_token={Token.accessToken}&remember=1", true);
-                //request.AddParameter("js_render", "true");
+                request.AddParameter("js_render", "true");
                 request.AddParameter("premium_proxy", "true");
                 request.AddParameter("original_status", "true");
                 // request.AddUrlSegment("url", $"https://agentnet.propertyguru.com.sg/oauth/callback/pgaccount?state=%2Fex_home&locale=en&access_token={Token.accessToken}&remember=1&premium_proxy=true&original_status=true",true);
