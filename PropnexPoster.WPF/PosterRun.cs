@@ -1089,13 +1089,14 @@ namespace PropnexPoster.WPF
                     url.Contains("dailymotion") ||
                     url.Contains("<iframe") ||
                     url.Contains("havelock2") ||
-                    url.Contains("8prop.com")||
+                    url.Contains("8prop.com") ||
                     url.Contains("matterport.com") ||
-                    url.Contains("tubear")
+                    url.Contains("tubear") ||
+                    url.Contains("beyond.3dnest.cn")
                     )
                 {
                     filePath = guruTaskListing.Videos[i];
-                    filePath=System.Web.HttpUtility.UrlDecode(filePath);
+                    filePath = System.Web.HttpUtility.UrlDecode(filePath);
                 }
                 else
                 {
@@ -1145,9 +1146,11 @@ namespace PropnexPoster.WPF
                     url.Contains("vimeo") ||
                     url.Contains("dailymotion") ||
                     url.Contains("<iframe") ||
+                    url.Contains("havelock2") ||
                     url.Contains("8prop.com") ||
-                    url.Contains("matterport.com")||
-                    url.Contains("tubear")
+                    url.Contains("matterport.com") ||
+                    url.Contains("tubear") ||
+                    url.Contains("beyond.3dnest.cn")
                     )
                 {
                     filePath = guruTaskListing.Tours[i];

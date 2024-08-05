@@ -228,7 +228,9 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                     filePathLower.Contains("new-vr") ||
                     filePathLower.Contains("8prop.com") ||
                     filePathLower.Contains("matterport.com")||
-                    filePathLower.Contains("tubear")
+                    filePathLower.Contains("tubear")||
+                    filePathLower.Contains("beyond.3dnest.cn")
+                    
                     )
             {
                 if (filePath.Contains("#"))
