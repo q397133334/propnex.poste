@@ -1092,7 +1092,8 @@ namespace PropnexPoster.WPF
                     url.Contains("8prop.com") ||
                     url.Contains("matterport.com") ||
                     url.Contains("tubear") ||
-                    url.Contains("beyond.3dnest.cn")
+                    url.Contains("beyond.3dnest.cn")||
+                    url.Contains("mixgo.com")
                     )
                 {
                     filePath = guruTaskListing.Videos[i];
@@ -1150,7 +1151,8 @@ namespace PropnexPoster.WPF
                     url.Contains("8prop.com") ||
                     url.Contains("matterport.com") ||
                     url.Contains("tubear") ||
-                    url.Contains("beyond.3dnest.cn")
+                    url.Contains("beyond.3dnest.cn")||
+                    url.Contains("mixgo.com")
                     )
                 {
                     filePath = guruTaskListing.Tours[i];

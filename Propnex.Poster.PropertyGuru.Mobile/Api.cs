@@ -220,16 +220,17 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddParameter("statusCode", "ACT");
             var filePathLower = filePath.ToLower();
             if (filePathLower.Contains("youtube") ||
-                filePathLower.Contains("youtu.be")||
+                filePathLower.Contains("youtu.be") ||
                 filePathLower.Contains("vimeo") ||
                     filePathLower.Contains("dailymotion") ||
                     filePathLower.Contains("<iframe") ||
                     filePathLower.Contains("havelock2") ||
                     filePathLower.Contains("new-vr") ||
                     filePathLower.Contains("8prop.com") ||
-                    filePathLower.Contains("matterport.com")||
-                    filePathLower.Contains("tubear")||
-                    filePathLower.Contains("beyond.3dnest.cn")
+                    filePathLower.Contains("matterport.com") ||
+                    filePathLower.Contains("tubear") ||
+                    filePathLower.Contains("beyond.3dnest.cn")||
+                    filePathLower.Contains("mixgo.com")
                     
                     )
             {
