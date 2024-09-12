@@ -236,7 +236,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             {
                 if (filePath.Contains("#"))
                 {
-                    filePath = filePath.Split('#')[0];
+                    filePath = filePath.Trim('#');
                 }
                 filePath=System.Web.HttpUtility.UrlDecode(filePath);
                 request.AddParameter("videoEmbedHtml", filePath);
@@ -312,8 +312,8 @@ namespace Propnex.Poster.PropertyGuru.Mobile
         {
             using (var c = new RestClient(new RestClientOptions()
             {
-                BaseUrl = new Uri("https://api.zenrows.com")
-                //Proxy = new System.Net.WebProxy("127.0.0.1", int.Parse("8888"))
+                BaseUrl = new Uri("https://api.zenrows.com"),
+                //Proxy = new System.Net.WebProxy("127.0.0.1", int.Parse("8080"))
             }))
             {
                 var request = new RestRequest();
