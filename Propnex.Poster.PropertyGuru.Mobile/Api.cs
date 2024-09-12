@@ -280,6 +280,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 request.AddHeader("origin", "https://agentnet.propertyguru.com.sg");
                 request.AddHeader("referer", $"https://agentnet.propertyguru.com.sg/v2/create-listing/media/{ownerid}");
                 request.AddHeader("cookie", cookie);
+                request.AddOrUpdateHeader(KnownHeaders.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36");
                 var response = await ExecuteAsync(request, c);// c.ExecuteAsync(request);
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {

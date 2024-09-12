@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Runtime.Remoting.Messaging;
@@ -30,9 +31,9 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 BaseUrl = new Uri(baseUrl),
                 MaxTimeout = 1000 * 60 * 10,
                 UseDefaultCredentials = true,
-                UserAgent = "okhttp/4.10.0"
+                UserAgent = "okhttp/4.12.0"
             });
-            client.AddDefaultHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2024.3.12;V1916A;null");
+            client.AddDefaultHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2024.8.26;M973Q;null");
             Log?.Invoke($"client {baseUrl}");
             clientRetryPolicy = Policy
                 .Handle<Exception>()
@@ -54,9 +55,13 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             {
                 BaseUrl = new Uri(baseUrl),
                 MaxTimeout = 1000 * 60 * 10,
-                Proxy = new System.Net.WebProxy(ip, int.Parse(port))
-            });
-            client.AddDefaultHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2024.3.12;V1916A;null");
+                Proxy = new System.Net.WebProxy(ip, int.Parse(port)),
+
+            })
+            { 
+                
+            };
+            client.AddDefaultHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2024.8.26;M973Q;null");
             Log?.Invoke($"client {baseUrl}");
             clientRetryPolicy = Policy
                 .Handle<Exception>()
@@ -74,6 +79,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
         public async Task<RestResponse> ExecuteAsync(RestRequest restRequest, RestClient _client = null)
         {
             _client = _client == null ? client : _client;
+            
             return await clientRetryPolicy.ExecuteAsync(async () => { return await _client.ExecuteAsync(restRequest); });
         }
 
@@ -82,7 +88,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             RestRequest request = new RestRequest();
             //request.AddHeader("x-clientid", "L7C9YKV9-ESF3606Q-GHF9H1F5-8LJMKRO5");
             //request.AddHeader("x-clientsecret", "jjiF916yVwfCRQEJtS6loHVDZ16mWPWf");
-            request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2023.12.6;LIO-AN00;null");
+            request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2024.8.26;M973Q;null");
             request.Timeout = 1000 * 60 * 10;
 
             return request;
@@ -93,7 +99,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             RestRequest request = new RestRequest();
             //request.AddHeader("x-clientid", "L7C9YKV9-ESF3606Q-GHF9H1F5-8LJMKRO5");
             //request.AddHeader("x-clientsecret", "jjiF916yVwfCRQEJtS6loHVDZ16mWPWf");
-            request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2023.12.6;LIO-AN00;null");
+            request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2024.8.26;M973Q;null");
             request.Method = method;
             request.Timeout = 1000 * 60 * 10;
             request.Resource = resource;
