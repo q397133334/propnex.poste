@@ -229,9 +229,9 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                     filePathLower.Contains("8prop.com") ||
                     filePathLower.Contains("matterport.com") ||
                     filePathLower.Contains("tubear") ||
-                    filePathLower.Contains("beyond.3dnest.cn")||
-                    filePathLower.Contains("mixgo.com")
-                    
+                    filePathLower.Contains("beyond.3dnest.cn") ||
+                    filePathLower.Contains("mixgo.com")||
+                    filePathLower.Contains("tiktok.com")
                     )
             {
                 if (filePath.Contains("#"))

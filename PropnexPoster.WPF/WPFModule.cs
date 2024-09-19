@@ -62,7 +62,7 @@ public class WPFModule : AbpModule
         //request.AddHeader("x-clientsecret", "jjiF916yVwfCRQEJtS6loHVDZ16mWPWf");
         request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2023.12.6;LIO-AN00;null");
         request.Method = method;
-        request.Timeout = 1000 * 60 * 10;
+        request.Timeout = 1000 * 60;//new TimeSpan(0, 5, 0);
         request.Resource = resource;
         return request;
     }
