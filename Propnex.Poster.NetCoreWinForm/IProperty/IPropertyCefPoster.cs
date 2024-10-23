@@ -388,7 +388,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 updateListingMutationDto.variables.input.id = listingId;
                 updateListingMutationDto.OperationName = "updateListingInfo";
                 updateListingMutationDto.variables.shouldExtendsFields = true;
-                updateListingMutationDto.extensions.persistedQuery.Sha256Hash = "338f5cae02e4a1a1514a145cf448909fbe092045dc524f11db5d41572990dcdf";
+                updateListingMutationDto.extensions.persistedQuery.Sha256Hash = "5c989cb9020484c26568312317c311a0f5035c0cddf6502ed4209511c0db4ec8";
                 string jsonData = JsonConvert.SerializeObject(updateListingMutationDto, jsonSerialzerSettings);
 
 
@@ -580,7 +580,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 propertyDetailsDto = JsonConvert.DeserializeObject<RequestData<Variables<PropertyDetailsDto>>>(propnexListing.Details["data_details"]);
                 var input = propertyDetailsDto.variables.input;
                 input.id = listingId;
-                propertyDetailsDto.extensions.persistedQuery.Sha256Hash = "338f5cae02e4a1a1514a145cf448909fbe092045dc524f11db5d41572990dcdf";
+                propertyDetailsDto.extensions.persistedQuery.Sha256Hash = "5c989cb9020484c26568312317c311a0f5035c0cddf6502ed4209511c0db4ec8";
                 if (input.photo360s.Count == 0)
                 {
                     input.photo360s = null;
@@ -783,7 +783,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 locationDto.variables.shouldExtendsFields = true;
             }
             locationDto.variables.input.buildingFacilityCodes = null;
-            locationDto.extensions.persistedQuery.Sha256Hash = "338f5cae02e4a1a1514a145cf448909fbe092045dc524f11db5d41572990dcdf";
+            locationDto.extensions.persistedQuery.Sha256Hash = "5c989cb9020484c26568312317c311a0f5035c0cddf6502ed4209511c0db4ec8";
             if (locationDto.variables.input.location.block != null && locationDto.variables.input.location.block.Length > 29)
                 locationDto.variables.input.location.block = locationDto.variables.input.location.block.Substring(0, 29);
             return await GetPolicy<Listing>().ExecuteAsync(async (ctx) =>
@@ -912,7 +912,7 @@ namespace Propnex.Poster.NetCoreWinForm
              {
                  var input = descriptionMedialDto.variables.input;
                  input.id = listingId;
-                 descriptionMedialDto.extensions.persistedQuery.Sha256Hash = "338f5cae02e4a1a1514a145cf448909fbe092045dc524f11db5d41572990dcdf";
+                 descriptionMedialDto.extensions.persistedQuery.Sha256Hash = "5c989cb9020484c26568312317c311a0f5035c0cddf6502ed4209511c0db4ec8";
                  var result = await AjaxJsonPostAsync("https://www.iproperty.com.my/pro/rasor/graphql/updateListingInfo", refUrl, data: JsonConvert.SerializeObject(descriptionMedialDto, jsonSerialzerSettings));
 
                  if (result.Contains("PersistedQueryNotFound"))
@@ -1179,8 +1179,8 @@ namespace Propnex.Poster.NetCoreWinForm
         public async Task<PosterActionResult<List<Listing>>> GetListings()
         {
             string url = $"https://www.iproperty.com.my/pro/rasor/graphql/listingsQuery?" +
-                $"operationName=listingsQuery&variables=%7B%22shouldExtendsFields%22%3Atrue%2C%22statusCode%22%3A{2}%2C%22isExcludeChild%22%3Afalse%2C%22sortBy%22%3A%22new-to-old%22%2C%22limit%22%3A500%2C%22page%22%3A%221%22%2C%22includeReAdvertiseJob%22%3Atrue%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%227b6a11e4f1b523a1308f9f5274b6f7d46683849dbbaec77233f66ba21fbef25c%22%7D%7D";
-
+                //$"operationName=listingsQuery&variables=%7B%22shouldExtendsFields%22%3Atrue%2C%22statusCode%22%3A{2}%2C%22isExcludeChild%22%3Afalse%2C%22sortBy%22%3A%22new-to-old%22%2C%22limit%22%3A500%2C%22page%22%3A%221%22%2C%22includeReAdvertiseJob%22%3Atrue%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%227b6a11e4f1b523a1308f9f5274b6f7d46683849dbbaec77233f66ba21fbef25c%22%7D%7D";
+                  $"operationName=listingsQuery&variables=%7B%22shouldExtendsFields%22%3Atrue%2C%22includeSummary%22%3Afalse%2C%22statusCode%22%3A2%2C%22isExcludeChild%22%3Afalse%2C%22sortBy%22%3A%22new-to-old%22%2C%22limit%22%3A50%2C%22page%22%3A%221%22%2C%22includeReAdvertiseJob%22%3Atrue%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%226c479472da2ba1285d89b8f6bd5ea09a3f89b8981f98655bc817435a3942b865%22%7D%7D";
             return await GetPolicy<List<Listing>>().ExecuteAsync(async (ctx) =>
             {
                 string jscode = $@"()=> {{return fetch(""{url}"", {{
@@ -1195,6 +1195,7 @@ namespace Propnex.Poster.NetCoreWinForm
                                       return res.text()
                                 }})}}";
                 var result = await (await DevToolsContext).EvaluateFunctionAsync<string>(jscode);
+                //await Delay(60);
                 if (result.Contains("PERSISTED_QUERY_NOT_FOUND"))
                 {
                     throw new Exception("PERSISTED_QUERY_NOT_FOUND");
@@ -1452,18 +1453,18 @@ namespace Propnex.Poster.NetCoreWinForm
 
         public async Task GetTaskAsync()
         {
-            PnTaskDto = new PnTaskDto()
-            {
-                Number = "27561.cef.tsk"
-            };
-            propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"E:\\{PnTaskDto.Number}"));
-            if (propnexTasks == null)
-            {
-                await PublishMessageAsync("Not find tasks ,dealy 1 min");
-                await Task.Delay(1000 * 60);
-                Close();
-            }
-            return;
+            //PnTaskDto = new PnTaskDto()
+            //{
+            //    Number = "28571.cef.tsk"
+            //};
+            //propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"E:\\{PnTaskDto.Number}"));
+            //if (propnexTasks == null)
+            //{
+            //    await PublishMessageAsync("Not find tasks ,dealy 1 min");
+            //    await Task.Delay(1000 * 60);
+            //    Close();
+            //}
+            //return;
             var context = "";
             PnTaskDto = await WebServer.GetTask();
             if (PnTaskDto != null)
