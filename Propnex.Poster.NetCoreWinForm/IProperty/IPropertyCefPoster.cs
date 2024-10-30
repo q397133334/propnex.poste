@@ -986,7 +986,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 var publishListingInfoDto = new RequestData<Variables<PublishListingInfoDto>>();
                 publishListingInfoDto.extensions = new Extensions()
                 {
-                    persistedQuery = new PersistedQuery() { Sha256Hash = "3ecb2bca14887a97ee2cbd986baf6ba5455605248583f0a66afc7daee4120dc9", Version = 1 }
+                    persistedQuery = new PersistedQuery() { Sha256Hash = "cbcb3847fe02c210f06078504b20cc5ae5ebdd1b8da8ac40c94ecce5a117b42d", Version = 1 }
                 };
                 publishListingInfoDto.OperationName = "publishListingInfo";
                 publishListingInfoDto.variables = new Variables<PublishListingInfoDto>()
@@ -1035,12 +1035,13 @@ namespace Propnex.Poster.NetCoreWinForm
             async Task<PosterActionResult<ListingQuoteDto>> listingQuoteQueryAsync(string listingId)
             {
                 var url = $"https://www.iproperty.com.my/pro/rasor/graphql/ListingQuoteQuery/{listingId}?" +
-                    $"operationName=ListingQuoteQuery&variables=%7B%22id%22%3A%22{listingId}%22%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%2228b8639e7d95e8ba5dce1e3176397c3a56a34f3fd29204fc6c8c5b08729e5720%22%7D%7D";
+                    $"operationName=ListingQuoteQuery&variables=%7B%22id%22%3A%22{listingId}%22%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%222ac313f70c209c63edf06866222674a14f18c8e0e77017d05708230726ba3bf3%22%7D%7D";
 
                 return await GetPolicy<ListingQuoteDto>()
                      .ExecuteAsync(async (ctx) =>
                      {
                          var result = await AjaxJsonGetAsync(url);
+                         await Delay(1);
                          var responseData = JsonConvert.DeserializeObject<ResponseData<Payload<ListingQuoteDto>>>(result);
                          if (result.Contains("PERSISTED_QUERY_NOT_FOUND"))
                          {
@@ -1455,7 +1456,7 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             //PnTaskDto = new PnTaskDto()
             //{
-            //    Number = "28571.cef.tsk"
+            //    Number = "28592.cef.tsk"
             //};
             //propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"E:\\{PnTaskDto.Number}"));
             //if (propnexTasks == null)
