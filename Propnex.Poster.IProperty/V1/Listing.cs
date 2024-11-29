@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Propnex.Poster.IProperty
+namespace Propnex.Poster.IProperty.V1
 {
     public class Listing
     {
@@ -79,7 +79,7 @@ namespace Propnex.Poster.IProperty
 
         public ListingItemType? PropertyType { get; set; } = new ListingItemType();
 
-        public ListingSalePrice? RentPrice { get; set; }=new ListingSalePrice();
+        public ListingSalePrice? RentPrice { get; set; } = new ListingSalePrice();
 
         public string? RepresentationListerId { get; set; }
 
@@ -260,7 +260,7 @@ namespace Propnex.Poster.IProperty
         public string ms_MY { get; set; }
 
         [JsonIgnore]
-        public string? __typename { get; set; }
+        public string? __typename { get; set; }= "MultiLangText"
 
     }
 
@@ -293,7 +293,7 @@ namespace Propnex.Poster.IProperty
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public ListingMultiLangText? Text { get; set; }
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public string __typename { get; set; }
     }
 
@@ -303,7 +303,7 @@ namespace Propnex.Poster.IProperty
 
         public string CurrencyCode { get; set; } = "MYR";
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public string __typename { get; set; } = "Price";
     }
 

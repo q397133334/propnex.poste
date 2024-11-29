@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Propnex.Poster.IProperty
+namespace Propnex.Poster.IProperty.V1
 {
     public class PublishListingInfoDto
     {
@@ -19,6 +19,6 @@ namespace Propnex.Poster.IProperty
     {
         public int channelCode { get; set; }
 
-        public List<string> quoteIds { get; set; }=new List<string>();
+        public List<string> quoteIds { get; set; } = new List<string>();
     }
 }

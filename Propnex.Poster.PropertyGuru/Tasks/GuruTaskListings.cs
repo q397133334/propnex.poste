@@ -281,13 +281,20 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                 listingModel.Sizes = new Sizes();
                 listingModel.Sizes.bedrooms = new Bedrooms()
                 {
-                    value = detialss.FindAttribute("Name", "bedrooms").GetAttributeValue<int?>("Value", null)
+                    value = detialss.FindAttribute("Name", "bedrooms").GetAttributeValue<int?>("Value", 0)
                 };
                 listingModel.Sizes.bathrooms = new Bathrooms()
                 {
-                    value = detialss.FindAttribute("Name", "bathrooms").GetAttributeValue<int?>("Value", null)
+                    value = detialss.FindAttribute("Name", "bathrooms").GetAttributeValue<int?>("Value", 0)
                 };
-                if (listingModel.Sizes.bedrooms.value != null)
+                if (listingModel.Sizes.bedrooms != null)
+                {
+                    if (listingModel.Sizes.bedrooms.value == null)
+                    {
+                        listingModel.Sizes.bedrooms.value = 0;
+                    }
+                }
+                if (listingModel.Sizes.bathrooms != null)
                 {
                     if (listingModel.Sizes.bathrooms.value == null)
                     {

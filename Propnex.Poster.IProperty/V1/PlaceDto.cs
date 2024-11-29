@@ -3,13 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Propnex.Poster.IProperty
+namespace Propnex.Poster.IProperty.V1
 {
     public class PlaceDto : ListingLocation
     {
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public List<ListingItemType>? buildingFacilities { get; set; }=null;
+        public List<ListingItemType>? buildingFacilities { get; set; } = null;
 
         public double? latitude { get; set; }
 
@@ -26,7 +26,7 @@ namespace Propnex.Poster.IProperty
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string? postCode { get; set; }
-       
+
         public string block { get; set; }
 
         public string unit { get; set; }

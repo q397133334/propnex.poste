@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Propnex.Poster.IProperty
+namespace Propnex.Poster.IProperty.V1
 {
 
     public class ResponseImageDto
@@ -33,8 +33,8 @@ namespace Propnex.Poster.IProperty
 
         public int width { get; set; }
 
-        public int height { get; set; }  
-    
+        public int height { get; set; }
+
         public bool premultiplied { get; set; }
 
         public int size { get; set; }

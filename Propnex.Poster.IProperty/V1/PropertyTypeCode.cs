@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Propnex.Poster.IProperty
+namespace Propnex.Poster.IProperty.V1
 {
     public static class IPropertyHelper
     {
@@ -39,25 +39,25 @@ namespace Propnex.Poster.IProperty
         public static int ListingType(string name)
         {
             name = name.ToLower();
-            if("buy"==name)
+            if ("buy" == name)
             {
                 return 1;
             }
-            if("rent"==name)
+            if ("rent" == name)
             {
                 return 2;
             }
             return -1;
         }
 
-        public static int CategoryType(string name) 
-        { 
-            name=name.ToLower();
-            if("residential" == name)
+        public static int CategoryType(string name)
+        {
+            name = name.ToLower();
+            if ("residential" == name)
             {
                 return 1;
             }
-            if("commercial"==name)
+            if ("commercial" == name)
             {
                 return 2;
             }

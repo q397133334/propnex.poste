@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 using Polly;
 using Polly.Wrap;
 using Propnex.Poster.Dtos;
-using Propnex.Poster.IProperty;
+using Propnex.Poster.IProperty.V1;
 using Propnex.Poster.Share;
 using PropnexPoster.NetCoreWinForm;
 using RestSharp;
@@ -20,7 +20,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.EventBus.Local;
-using Extensions = Propnex.Poster.IProperty.Extensions;
+using Extensions = Propnex.Poster.IProperty.V1.Extensions;
 using HtmlElement = CefSharp.Dom.HtmlElement;
 
 namespace Propnex.Poster.NetCoreWinForm
@@ -1253,6 +1253,34 @@ namespace Propnex.Poster.NetCoreWinForm
             return Policy.WrapAsync(fallbackPolicy, retryPolicy);
         }
 
+        public async Task<PosterActionResult<List<PlaceDto>>> Autocomplete(string key)
+        {
+
+            string url = "\r\nhttps://www.iproperty.com.my/pro/rasor/graphql/autocomplete";
+            url += $"operationName=autocomplete&" +
+                $"variables=%7B%22resolveLocation%22%3Atrue%2C%22includeBuildingFacility%22%3Atrue%2C%22keyword%22%3A%22{key}%22%7D" +
+                $"&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22618f598ed602639597a1388dc1e28d9ff48b22838877fb8653621c60f925d10d%22%7D%7D";
+
+            return await GetPolicy<List<PlaceDto>>().ExecuteAsync(async (ctx) =>
+            {
+                var result = await AjaxJsonGetAsync(url);
+                if (result.Contains("PersistedQueryNotFound"))
+                {
+                    throw new Exception("PersistedQueryNotFound");
+                }
+                if (result.Contains("errors"))
+                {
+                    throw new Exception(result);
+                }
+                var resultData = JsonConvert.DeserializeObject<ResponseData<BuildingRequestData>>(result);
+                return new PosterActionResult<List<PlaceDto>>()
+                {
+                    Data = resultData.Data.places.Data,
+                    Status = PosterActionResultStatus.Success
+                };
+            }, new Context("BuildingQuery"));
+        }
+
         public async Task<PosterActionResult<List<PlaceDto>>> BuildingQuery(string key, string listingId)
         {
             string url = $"https://www.iproperty.com.my/pro/rasor/graphql/buildingQuery";
@@ -1261,28 +1289,6 @@ namespace Propnex.Poster.NetCoreWinForm
                $"variables=%7B%22q%22%3A%22level5%22%2C%22shouldExtendsFields%22%3Atrue%2C%22includeBuildingFacilityCodes%22%3Atrue%2C%22keyword%22%3A%22{key.ToLower()}%22%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%229adf6bae0454ed8c07e24e43e1f2b622d0649a9fb96a056659ab644ee2b06e63%22%7D%7D";
             return await GetPolicy<List<PlaceDto>>().ExecuteAsync(async (ctx) =>
             {
-                //while (true)
-                //{
-                //    await Task.Delay(1000 * 10);
-                //}
-                //var query = new RequestData<BuildingQueryVariablesDto>()
-                //{
-                //    extensions = new Extensions()
-                //    {
-                //        persistedQuery = new PersistedQuery()
-                //        {
-                //            Sha256Hash = "9adf6bae0454ed8c07e24e43e1f2b622d0649a9fb96a056659ab644ee2b06e63",
-                //            Version = 1
-                //        }
-                //    },
-                //    variables = new BuildingQueryVariablesDto()
-                //    {
-                //        keyword = key
-                //    },
-                //    query = "query buildingQuery($keyword: String, $q: String = \"level3\", $shouldExtendsFields: Boolean = false, $includeBuildingFacilityCodes: Boolean = false) {\r\n  places(searchAddress: true, keyword: $keyword, q: $q, limit: 50, includeBuildingFacilityCodes: $includeBuildingFacilityCodes) {\r\n    data {\r\n      latitude\r\n      longitude\r\n      address {\r\n        en_GB\r\n        zh_HK\r\n        zh_CN\r\n        __typename\r\n      }\r\n      postCode\r\n      level1 {\r\n        id\r\n        text {\r\n          en_GB\r\n          zh_HK\r\n          zh_CN\r\n          __typename\r\n        }\r\n        __typename\r\n      }\r\n      level2 {\r\n        id\r\n        text {\r\n          en_GB\r\n          zh_HK\r\n          zh_CN\r\n          __typename\r\n        }\r\n        __typename\r\n      }\r\n      level3 {\r\n        id @skip(if: $shouldExtendsFields)\r\n        text {\r\n          en_GB\r\n          zh_HK\r\n          zh_CN\r\n          __typename\r\n        }\r\n        __typename\r\n      }\r\n      level5 @include(if: $shouldExtendsFields) {\r\n        id\r\n        text {\r\n          en_GB\r\n          __typename\r\n        }\r\n        __typename\r\n      }\r\n      propertyType {\r\n        id\r\n        code\r\n        description\r\n        label\r\n        __typename\r\n      }\r\n      propertyGroupType {\r\n        id\r\n        code\r\n        description\r\n        label\r\n        __typename\r\n      }\r\n      buildingFacilities @include(if: $includeBuildingFacilityCodes) {\r\n        id\r\n        code\r\n        description\r\n        __typename\r\n      }\r\n      __typename\r\n    }\r\n    __typename\r\n  }\r\n}\r\n",
-                //    OperationName = "buildingQuery"
-                //};
-                //var result = await AjaxJsonPostAsync(url, $"https://www.iproperty.com.my/pro/add-listing/location/{listingId}", data: JsonConvert.SerializeObject(query, jsonSerialzerSettings));
                 var result = await AjaxJsonGetAsync(url);
                 if (result.Contains("PersistedQueryNotFound"))
                 {
@@ -1329,7 +1335,7 @@ namespace Propnex.Poster.NetCoreWinForm
 
         public async Task<PosterActionResult> CheckPage()
         {
-            await Delay(10);
+            await Delay(20);
             var gRecaptcha = await (await DevToolsContext).QuerySelectorAsync(".g-recaptcha");
             if (gRecaptcha != null)
             {
@@ -1454,18 +1460,18 @@ namespace Propnex.Poster.NetCoreWinForm
 
         public async Task GetTaskAsync()
         {
-            //PnTaskDto = new PnTaskDto()
-            //{
-            //    Number = "28592.cef.tsk"
-            //};
-            //propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"E:\\{PnTaskDto.Number}"));
-            //if (propnexTasks == null)
-            //{
-            //    await PublishMessageAsync("Not find tasks ,dealy 1 min");
-            //    await Task.Delay(1000 * 60);
-            //    Close();
-            //}
-            //return;
+            PnTaskDto = new PnTaskDto()
+            {
+                Number = "28620.cef.tsk"
+            };
+            propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"E:\\{PnTaskDto.Number}"));
+            if (propnexTasks == null)
+            {
+                await PublishMessageAsync("Not find tasks ,dealy 1 min");
+                await Task.Delay(1000 * 60);
+                Close();
+            }
+            return;
             var context = "";
             PnTaskDto = await WebServer.GetTask();
             if (PnTaskDto != null)

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Propnex.Poster.IProperty
+namespace Propnex.Poster.IProperty.V1
 {
     public class DeleteListingDto
     {
@@ -23,7 +23,7 @@ namespace Propnex.Poster.IProperty
 
         public string? listingRefNo { get; set; }
 
-        public NullClass location { get; set; }=new NullClass();
+        public NullClass location { get; set; } = new NullClass();
 
         public int? propertyCategoryTypeCode { get; set; }
 
@@ -36,8 +36,8 @@ namespace Propnex.Poster.IProperty
         public int? storeyCode { get; set; }
     }
 
-    public class UpdateListingMutationDto:AddListingMutationDto
-    { 
+    public class UpdateListingMutationDto : AddListingMutationDto
+    {
         public string id { get; set; }
 
     }
