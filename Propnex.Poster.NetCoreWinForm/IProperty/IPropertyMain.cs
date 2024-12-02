@@ -13,7 +13,7 @@ using Volo.Abp.EventBus;
 
 namespace Propnex.Poster.NetCoreWinForm
 {
-    public partial class IPropertyMain : Form,Volo.Abp.DependencyInjection.ITransientDependency
+    public partial class IPropertyMain : Form, Volo.Abp.DependencyInjection.ITransientDependency
     {
         IServiceProvider _serviceProvider;
         public IPropertyMain(IServiceProvider serviceProvider)
@@ -21,7 +21,7 @@ namespace Propnex.Poster.NetCoreWinForm
             _serviceProvider = serviceProvider;
             InitializeComponent();
 
-            this.Text = $"IProperty Poster Version{Assembly.GetEntryAssembly().GetFileVersion()}"; 
+            this.Text = $"IProperty Poster Version{Assembly.GetEntryAssembly().GetFileVersion()}";
         }
 
         private void mainControl1_Load(object sender, EventArgs e)

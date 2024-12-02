@@ -56,4 +56,10 @@
     <Folder Include="Guru\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="IProperty\IPropertyCefPoster.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+
 </Project>

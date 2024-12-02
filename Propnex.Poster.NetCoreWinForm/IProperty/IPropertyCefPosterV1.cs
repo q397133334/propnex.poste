@@ -25,7 +25,7 @@ using HtmlElement = CefSharp.Dom.HtmlElement;
 
 namespace Propnex.Poster.NetCoreWinForm
 {
-    public partial class IPropertyCefPoster : CefFrom, ITransientDependency, IPosterStart
+    public partial class IPropertyCefPosterV1 : CefFrom, ITransientDependency, IPosterStart
     {
         private readonly ILocalEventBus _localEventBus;
         private readonly IPropnexTaskProvider _propnexTaskProvider;
