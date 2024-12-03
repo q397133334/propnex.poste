@@ -46,7 +46,7 @@ namespace Propnex.Poster.IProperty
 
     public class AutocompleteResult
     {
-        public AutoCompleteDto Data { get; set; }
+        public AutoCompleteDto autocomplete { get; set; }
     }
 
 }
