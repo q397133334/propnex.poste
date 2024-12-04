@@ -260,7 +260,7 @@ namespace Propnex.Poster.IProperty.V1
         public string ms_MY { get; set; }
 
         [JsonIgnore]
-        public string? __typename { get; set; }= "MultiLangText"
+        public string? __typename { get; set; } = "MultiLangText";
 
     }
 

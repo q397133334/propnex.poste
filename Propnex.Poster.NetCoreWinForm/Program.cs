@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
 using Volo.Abp;
+using Flurl;
 
 namespace Propnex.Poster.NetCoreWinForm
 {
@@ -21,6 +22,9 @@ namespace Propnex.Poster.NetCoreWinForm
 #if ANYCPU
             CefRuntime.SubscribeAnyCpuAssemblyResolver();
 #endif
+
+            //var a= System.Web.HttpUtility.UrlEncode("The Elements @ Ampang");
+           var b= Url.Encode("The Elements @ Ampang");
 
             var settings = new CefSettings()
             {

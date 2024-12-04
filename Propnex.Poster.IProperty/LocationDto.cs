@@ -23,7 +23,7 @@ namespace Propnex.Poster.IProperty
         public Level? level4 { get; set; }
         public Level? level5 { get; set; }
 
-        public string postalCode { get; set; } = ""
+        public string postalCode { get; set; } = "";
 
     }
 }

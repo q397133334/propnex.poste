@@ -1,5 +1,6 @@
 using CefSharp;
 using CefSharp.Dom;
+using Flurl;
 using Flurl.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -17,6 +18,7 @@ using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Threading;
 using System.Windows.Forms;
 using Volo.Abp.DependencyInjection;
@@ -219,7 +221,7 @@ namespace Propnex.Poster.NetCoreWinForm
             propnexListing.Details["data_details"] = propnexListing.Details["data_details"].Replace("\"location\":[]", "\"location\":{}");
             propertyDetailsDto = JsonConvert.DeserializeObject<IProperty.V1.RequestData<IProperty.V1.Variables<IProperty.V1.PropertyDetailsDto>>>(propnexListing.Details["data_details"]);
 
-            var resultLocation = await location();
+            var resultLocation = await location(propnexListing);
             if (resultLocation.Status == PosterActionResultStatus.Error)
             {
                 await PublishMessageAsync(resultLocation.Message);
@@ -288,29 +290,29 @@ namespace Propnex.Poster.NetCoreWinForm
 
             }
 
-            var resultLocation = await location(propnexListing, listingId, $"https://www.iproperty.com.my/pro/edit-listing/location/{listingId}");
-            if (resultLocation.Status == PosterActionResultStatus.Error)
-            {
-                await PublishMessageAsync(resultLocation.Message);
-                return new PosterActionResult()
-                {
-                    Data = listingId,
-                    Message = resultLocation.Message,
-                    Status = PosterActionResultStatus.Error
-                };
-            }
+            //var resultLocation = await location(propnexListing, listingId, $"https://www.iproperty.com.my/pro/edit-listing/location/{listingId}");
+            //if (resultLocation.Status == PosterActionResultStatus.Error)
+            //{
+            //    await PublishMessageAsync(resultLocation.Message);
+            //    return new PosterActionResult()
+            //    {
+            //        Data = listingId,
+            //        Message = resultLocation.Message,
+            //        Status = PosterActionResultStatus.Error
+            //    };
+            //}
 
-            var resultProperytDetails = await propertyDetails(propnexListing, listingId, $"https://www.iproperty.com.my/pro/edit-listing/property-details/{listingId}");
-            if (resultProperytDetails.Status == PosterActionResultStatus.Error)
-            {
-                await PublishMessageAsync(resultProperytDetails.Message);
-                return new PosterActionResult()
-                {
-                    Data = listingId,
-                    Message = resultProperytDetails.Message,
-                    Status = PosterActionResultStatus.Error
-                };
-            }
+            //var resultProperytDetails = await propertyDetails(propnexListing, listingId, $"https://www.iproperty.com.my/pro/edit-listing/property-details/{listingId}");
+            //if (resultProperytDetails.Status == PosterActionResultStatus.Error)
+            //{
+            //    await PublishMessageAsync(resultProperytDetails.Message);
+            //    return new PosterActionResult()
+            //    {
+            //        Data = listingId,
+            //        Message = resultProperytDetails.Message,
+            //        Status = PosterActionResultStatus.Error
+            //    };
+            //}
 
 
             var resultDescriptionMedial = await descriptionMedial(propnexListing, listingId, $"https://www.iproperty.com.my/pro/edit-listing/description-and-media/{listingId}");
@@ -516,19 +518,42 @@ namespace Propnex.Poster.NetCoreWinForm
         }
 
 
-        public async Task<PosterActionResult<PropertyDto>> location()
+        public async Task<PosterActionResult<PropertyDto>> location(PropnexListing propnexListing)
         {
 
-            var listProperty = complete("");
+            string buildingText = "";
+            if (propnexListing.Basic.ContainsKey("txtBuilding"))
+            {
+                buildingText = propnexListing.Basic["txtBuilding"];
+            }
+            if (string.IsNullOrEmpty(buildingText))
+            {
+                if (propnexListing.Basic.ContainsKey("txtBuildingCom"))
+                {
+                    buildingText = propnexListing.Basic["txtBuildingCom"];
+                }
+            }
+            if (string.IsNullOrEmpty(buildingText) && propnexListing.Details.ContainsKey("standard_name"))
+            {
+                if (!string.IsNullOrEmpty(propnexListing.Details["standard_name"]))
+                {
+                    buildingText = propnexListing.Details["standard_name"];
+                }
+            }
+            if (string.IsNullOrEmpty(buildingText) && propnexListing.ProjectData.ContainsKey("name"))
+            {
+                buildingText = propnexListing.ProjectData["name"];
+            }
+
+            var listProperty = await complete(buildingText);
 
             async Task<PosterActionResult<List<PropertyDto>>> complete(string key)
             {
                 string completeUrl = "https://www.iproperty.com.my/pro/rasor/graphql/autocomplete?" +
                     "operationName=autocomplete&variables=%7B%22resolveLocation%22%3Atrue%2C%22" +
                     "includeBuildingFacility%22%3Atrue%2C%22" +
-                    $"keyword%22%3{key}%22a%22%7D&" +
+                    $"keyword%22%3{Url.Encode(key.ToLower())}%22a%22%7D&" +
                     "extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22618f598ed602639597a1388dc1e28d9ff48b22838877fb8653621c60f925d10d%22%7D%7D";
-
 
                 return await GetPolicy<List<PropertyDto>>()
                      .ExecuteAsync(async (ctx) =>
@@ -537,6 +562,7 @@ namespace Propnex.Poster.NetCoreWinForm
                          var responseData = JsonConvert.DeserializeObject<ResponseData<AutocompleteResult>>(result);
                          if (result.Contains("PERSISTED_QUERY_NOT_FOUND"))
                          {
+
                              await PublishMessageAsync(result);
                              throw new Exception("PERSISTED_QUERY_NOT_FOUND");
                          }
@@ -1179,7 +1205,7 @@ namespace Propnex.Poster.NetCoreWinForm
                                 }})}}";
 
                 var result = await (await DevToolsContext).EvaluateFunctionAsync<string>(jscode);
-
+                await Delay(60);
                 return result;
             }
             catch (Exception ex)
@@ -1208,7 +1234,7 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             PnTaskDto = new PnTaskDto()
             {
-                Number = "28620.cef.tsk"
+                Number = "28640.cef.tsk"
             };
             propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"E:\\{PnTaskDto.Number}"));
             if (propnexTasks == null)
