@@ -23,6 +23,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.EventBus.Local;
+using static System.Net.WebRequestMethods;
 using Extensions = Propnex.Poster.IProperty.V1.Extensions;
 using HtmlElement = CefSharp.Dom.HtmlElement;
 
@@ -547,13 +548,31 @@ namespace Propnex.Poster.NetCoreWinForm
 
             var listProperty = await complete(buildingText);
 
+            if (listProperty.Data.Count == 0)
+            {
+                return new PosterActionResult<PropertyDto>()
+                {
+                    Data = null,
+                    Status = PosterActionResultStatus.Error,
+                    Message = $"not find {buildingText}"
+                };
+            }
+
+            var property= listProperty.Data.FirstOrDefault();
+
+            var stupeLocationDto = new StupeLocation();
+            stupeLocationDto.buildingFacilityCodes = property.buildingFacilities.Select(q => q.Code).ToList();
+
+            stupeLocationDto.propertyTypeCode = property.propertyType.Code;
+            stupeLocationDto.propertyGroupTypeCode = property.propertyGroupType.Code;
+            stupeLocationDto.propertyCategoryTypeCode = addListingMutationDto.variables.input.propertyCategoryTypeCode;
+            stupeLocationDto.saleableAreaMeasurementCode = addListingMutationDto.variables.input.saleableAreaMeasurementCode;
+            stupeLocationDto.storeyCode = addListingMutationDto.variables.input.storeyCode;
+
+            return null;
             async Task<PosterActionResult<List<PropertyDto>>> complete(string key)
             {
-                string completeUrl = "https://www.iproperty.com.my/pro/rasor/graphql/autocomplete?" +
-                    "operationName=autocomplete&variables=%7B%22resolveLocation%22%3Atrue%2C%22" +
-                    "includeBuildingFacility%22%3Atrue%2C%22" +
-                    $"keyword%22%3{Url.Encode(key.ToLower())}%22a%22%7D&" +
-                    "extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22618f598ed602639597a1388dc1e28d9ff48b22838877fb8653621c60f925d10d%22%7D%7D";
+                string completeUrl = $"https://www.iproperty.com.my/pro/rasor/graphql/autocomplete?operationName=autocomplete&variables=%7B%22resolveLocation%22%3Atrue%2C%22includeBuildingFacility%22%3Atrue%2C%22keyword%22%3A%22{Url.Encode(key)}%22%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22618f598ed602639597a1388dc1e28d9ff48b22838877fb8653621c60f925d10d%22%7D%7D";
 
                 return await GetPolicy<List<PropertyDto>>()
                      .ExecuteAsync(async (ctx) =>
@@ -578,8 +597,6 @@ namespace Propnex.Poster.NetCoreWinForm
                      }, new Context("complete"));
 
             }
-
-            return null;
         }
 
         public async Task<PosterActionResult<IProperty.V1.Listing>> descriptionMedial(PropnexListing propnexListing, string listingId, string action = "")
@@ -1205,7 +1222,7 @@ namespace Propnex.Poster.NetCoreWinForm
                                 }})}}";
 
                 var result = await (await DevToolsContext).EvaluateFunctionAsync<string>(jscode);
-                await Delay(60);
+                //await Delay(60);
                 return result;
             }
             catch (Exception ex)
@@ -1234,7 +1251,7 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             PnTaskDto = new PnTaskDto()
             {
-                Number = "28640.cef.tsk"
+                Number = "28625.cef.tsk"
             };
             propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"E:\\{PnTaskDto.Number}"));
             if (propnexTasks == null)

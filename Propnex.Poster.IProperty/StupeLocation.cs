@@ -16,6 +16,8 @@ namespace Propnex.Poster.IProperty
 
         public int? propertyGroupTypeCode {  get; set; } 
 
+        public int? propertyTypeCode { get; set; }
+
         public int? saleableAreaMeasurementCode {  get; set; }
 
         public int? storeyCode { get; set; }
