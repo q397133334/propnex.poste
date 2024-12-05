@@ -8,7 +8,8 @@ namespace Propnex.Poster.IProperty
 {
     public class Level
     {
-        public string NanoId { get; set; } = "";
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string? NanoId { get; set; } = "";
 
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]

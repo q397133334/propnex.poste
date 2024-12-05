@@ -17,6 +17,7 @@ using Serilog;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -577,6 +578,16 @@ namespace Propnex.Poster.NetCoreWinForm
                 hasNoTownship = property.hasTownship
             };
 
+            stupeLocationDto.Location.level1.Text = null;
+            stupeLocationDto.Location.level2.Text = null;
+            //stupeLocationDto.Location.level3 = new Level();
+            //stupeLocationDto.Location.level3.NanoId = null;
+            //stupeLocationDto.Location.level3.Text = new ListingMultiLangText();
+            stupeLocationDto.Location.level4.NanoId = null;
+            stupeLocationDto.Location.level5.Text = null;
+
+
+            var query = "mutation addListingMutation($input: AddListingInput!) {\n  addListing(input: $input) {\n    listing {\n      id\n      channel {\n        id\n        code\n        description\n        label\n        __typename\n      }\n      propertyType {\n        id\n        code\n        description\n        label\n        __typename\n      }\n      lister {\n        id\n        firstName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        lastName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        fullName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        email\n        __typename\n      }\n      representationLister {\n        id\n        firstName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        lastName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        fullName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        email\n        __typename\n      }\n      listingRefNo\n      extension {\n        isCoAgency\n        listingExclusivity {\n          id\n          code\n          description\n          label\n          __typename\n        }\n        __typename\n      }\n      propertyCategoryType {\n        id\n        code\n        description\n        label\n        __typename\n      }\n      isAuction\n      auctionDate\n      postedDate\n      __typename\n    }\n    __typename\n  }\n}\n";
             stupeLocationDto.propertyTypeCode = property.propertyType.Code;
             stupeLocationDto.propertyGroupTypeCode = property.propertyGroupType.Code;
             stupeLocationDto.propertyCategoryTypeCode = addListingMutationDto.variables.input.propertyCategoryTypeCode;
@@ -594,8 +605,12 @@ namespace Propnex.Poster.NetCoreWinForm
                     }
                 },
                 OperationName = "addListingMutation",
+                query= query,
                 variables = new InputDto<StupeLocationDto>() { Input = stupeLocationDto }
             };
+
+
+
 
             var listing = await GetPolicy<string>().ExecuteAsync(async (ctx) =>
             {
@@ -1226,11 +1241,14 @@ namespace Propnex.Poster.NetCoreWinForm
         /// <returns></returns>
         private async Task<string> AjaxJsonPostAsync(string url, string referrerUrl, string type = "POST", string data = "")
         {
-            string jscode = $"()=> fetch('{url}',{{ method:\"{type}\",referrer:'{referrerUrl}',headers:{{'content-type': 'application/json'}},body:{(data == "" ? "''" : "JSON.stringify(" + data.Replace('\"', '"') + ")")}}}) .then(response => response.text())";
+            data = data.Replace('\n', '"');
+            string jscode = $"()=> fetch('{url}',{{ method:\"{type}\",referrer:'{referrerUrl}',headers:{{'content-type': 'application/json'}},body:{(data == "" ? "''" : "JSON.stringify(" + data + ")")}}}) .then(response => response.text())";
             string result = "";
             try
             {
+                data = data.Replace("\"", "");
                 result = await (await DevToolsContext).EvaluateFunctionAsync<string>(jscode);
+                await Delay(60);
             }
             catch (Exception ex)
             {
