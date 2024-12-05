@@ -20,7 +20,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.EventBus.Local;
-using Extensions = Propnex.Poster.IProperty.V1.Extensions;
+using Extensions = Propnex.Poster.IProperty.V1.ExtensionsV1;
 using HtmlElement = CefSharp.Dom.HtmlElement;
 
 namespace Propnex.Poster.NetCoreWinForm
@@ -35,9 +35,9 @@ namespace Propnex.Poster.NetCoreWinForm
         private PropnexTask propnexTask;
         private List<Listing> Listings = new List<Listing>();
 
-        private RequestData<Variables<AddListingMutationDto>>? addListingMutationDto;
-        private RequestData<Variables<LocationDto>> locationDto;
-        private RequestData<Variables<PropertyDetailsDto>> propertyDetailsDto;
+        private RequestDataV1<Variables<AddListingMutationDto>>? addListingMutationDto;
+        private RequestDataV1<Variables<LocationDto>> locationDto;
+        private RequestDataV1<Variables<PropertyDetailsDto>> propertyDetailsDto;
 
         public Task<DevToolsContext> DevToolsContext
         {
@@ -277,7 +277,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 return await GetPolicy<string>().ExecuteAsync(async (ctx) =>
                 {
                     propnexListing.Details["data_step1"] = propnexListing.Details["data_step1"].Replace("\"location\":[]", "\"location\":{}");
-                    addListingMutationDto = JsonConvert.DeserializeObject<RequestData<Variables<AddListingMutationDto>>>(propnexListing.Details["data_step1"]);
+                    addListingMutationDto = JsonConvert.DeserializeObject<RequestDataV1<Variables<AddListingMutationDto>>>(propnexListing.Details["data_step1"]);
                     string jsonData = JsonConvert.SerializeObject(addListingMutationDto, jsonSerialzerSettings);
 
                     var result = await AjaxJsonPostAsync(addListingMutationUrl, "https://www.iproperty.com.my/pro/add-listing/listing-details", data: jsonData);
@@ -291,7 +291,7 @@ namespace Propnex.Poster.NetCoreWinForm
                         throw new Exception(result);
                     }
                     //_logger.Information(result);
-                    var data = JsonConvert.DeserializeObject<ResponseData<AddListingPayload>>(result);
+                    var data = JsonConvert.DeserializeObject<ResponseDataV1<AddListingPayload>>(result);
                     listingId = data?.Data.addListing.listing.Id;
                     await PublishMessageAsync($"create listing details success,listing is is {listingId}");
                     return new PosterActionResult<string>()
@@ -382,8 +382,8 @@ namespace Propnex.Poster.NetCoreWinForm
             async Task<PosterActionResult<string>> listingDetails()
             {
                 propnexListing.Details["data_step1"] = propnexListing.Details["data_step1"].Replace("\"location\":[]", "\"location\":{}");
-                addListingMutationDto = JsonConvert.DeserializeObject<RequestData<Variables<AddListingMutationDto>>>(propnexListing.Details["data_step1"]);
-                var updateListingMutationDto = JsonConvert.DeserializeObject<RequestData<Variables<UpdateListingMutationDto>>>(propnexListing.Details["data_step1"]);
+                addListingMutationDto = JsonConvert.DeserializeObject<RequestDataV1<Variables<AddListingMutationDto>>>(propnexListing.Details["data_step1"]);
+                var updateListingMutationDto = JsonConvert.DeserializeObject<RequestDataV1<Variables<UpdateListingMutationDto>>>(propnexListing.Details["data_step1"]);
                 updateListingMutationDto.query = null;
                 updateListingMutationDto.variables.input.id = listingId;
                 updateListingMutationDto.OperationName = "updateListingInfo";
@@ -405,7 +405,7 @@ namespace Propnex.Poster.NetCoreWinForm
                         throw new Exception(result);
                     }
                     _logger.Information(result);
-                    var data = JsonConvert.DeserializeObject<ResponseData<UpdateListingPayload>>(result);
+                    var data = JsonConvert.DeserializeObject<ResponseDataV1<UpdateListingPayload>>(result);
                     listingId = data?.Data.updateListing.listing.Id;
                     await PublishMessageAsync($"update listing details success,listing is is {listingId}");
                     return new PosterActionResult<string>()
@@ -469,7 +469,7 @@ namespace Propnex.Poster.NetCoreWinForm
                     throw new Exception(result);
                 }
                 _logger.Information(result);
-                var data = JsonConvert.DeserializeObject<ResponseData<UpdateListingPayload>>(result);
+                var data = JsonConvert.DeserializeObject<ResponseDataV1<UpdateListingPayload>>(result);
                 await PublishMessageAsync($"update listing details success,listing is is {listingId}");
                 return new PosterActionResult<string>()
                 {
@@ -577,7 +577,7 @@ namespace Propnex.Poster.NetCoreWinForm
             var result = await GetPolicy<Listing>().ExecuteAsync(async (ctx) =>
             {
                 propnexListing.Details["data_details"] = propnexListing.Details["data_details"].Replace("\"location\":[]", "\"location\":{}");
-                propertyDetailsDto = JsonConvert.DeserializeObject<RequestData<Variables<PropertyDetailsDto>>>(propnexListing.Details["data_details"]);
+                propertyDetailsDto = JsonConvert.DeserializeObject<RequestDataV1<Variables<PropertyDetailsDto>>>(propnexListing.Details["data_details"]);
                 var input = propertyDetailsDto.variables.input;
                 input.id = listingId;
                 propertyDetailsDto.extensions.persistedQuery.Sha256Hash = "5c989cb9020484c26568312317c311a0f5035c0cddf6502ed4209511c0db4ec8";
@@ -603,7 +603,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 {
                     throw new Exception(result);
                 }
-                var listing = JsonConvert.DeserializeObject<ResponseData<UpdateListingPayload>>(result);
+                var listing = JsonConvert.DeserializeObject<ResponseDataV1<UpdateListingPayload>>(result);
                 await PublishMessageAsync($"propertyDetails success,{listingId}");
                 return new PosterActionResult<Listing>()
                 {
@@ -624,7 +624,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 refUrl = action;
             }
             //1.����location����
-            locationDto = JsonConvert.DeserializeObject<RequestData<Variables<LocationDto>>>(propnexListing.Details["data_location"].Replace("\"extension\":[]", "\"extension\":{}"));
+            locationDto = JsonConvert.DeserializeObject<RequestDataV1<Variables<LocationDto>>>(propnexListing.Details["data_location"].Replace("\"extension\":[]", "\"extension\":{}"));
             locationDto.variables.input.id = listingId;
             string buildingText = "";
             if (propnexListing.Basic.ContainsKey("txtBuilding"))
@@ -800,7 +800,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 {
                     throw new Exception(result);
                 }
-                var listing = JsonConvert.DeserializeObject<ResponseData<UpdateListingPayload>>(result);
+                var listing = JsonConvert.DeserializeObject<ResponseDataV1<UpdateListingPayload>>(result);
                 await PublishMessageAsync($"location success,{listingId}");
                 return new PosterActionResult<Listing>()
                 {
@@ -830,7 +830,7 @@ namespace Propnex.Poster.NetCoreWinForm
 	            }");
 
             propnexListing.Details["data_media"] = propnexListing.Details["data_media"].Replace("\"location\":[]", "\"location\":{}").Replace("\"extension\":[]", "\"extension\":{}");
-            var descriptionMedialDto = JsonConvert.DeserializeObject<RequestData<Variables<DescriptionMedialDto>>>(propnexListing.Details["data_media"]);
+            var descriptionMedialDto = JsonConvert.DeserializeObject<RequestDataV1<Variables<DescriptionMedialDto>>>(propnexListing.Details["data_media"]);
 
             if (propnexListing.Details.ContainsKey("listing_title"))
             {
@@ -923,7 +923,7 @@ namespace Propnex.Poster.NetCoreWinForm
                  {
                      throw new Exception(result);
                  }
-                 var listing = JsonConvert.DeserializeObject<ResponseData<UpdateListingPayload>>(result);
+                 var listing = JsonConvert.DeserializeObject<ResponseDataV1<UpdateListingPayload>>(result);
                  await PublishMessageAsync($"descriptionMedial success,{listingId}");
                  return new PosterActionResult<Listing>()
                  {
@@ -983,10 +983,10 @@ namespace Propnex.Poster.NetCoreWinForm
             var quote = listingQuote.Data.quotes.FirstOrDefault(q => q.listingProduct.Id != null && q.listingProduct.Label == "Standard");
             if (quote != null)
             {
-                var publishListingInfoDto = new RequestData<Variables<PublishListingInfoDto>>();
+                var publishListingInfoDto = new RequestDataV1<Variables<PublishListingInfoDto>>();
                 publishListingInfoDto.extensions = new Extensions()
                 {
-                    persistedQuery = new PersistedQuery() { Sha256Hash = "cbcb3847fe02c210f06078504b20cc5ae5ebdd1b8da8ac40c94ecce5a117b42d", Version = 1 }
+                    persistedQuery = new PersistedQueryV1() { Sha256Hash = "cbcb3847fe02c210f06078504b20cc5ae5ebdd1b8da8ac40c94ecce5a117b42d", Version = 1 }
                 };
                 publishListingInfoDto.OperationName = "publishListingInfo";
                 publishListingInfoDto.variables = new Variables<PublishListingInfoDto>()
@@ -1020,7 +1020,7 @@ namespace Propnex.Poster.NetCoreWinForm
                         throw new Exception(result);
                     }
                     await PublishMessageAsync($"create listing details success,listing is is {listingId}");
-                    var listing = JsonConvert.DeserializeObject<ResponseData<PublishListingPayload>>(result);
+                    var listing = JsonConvert.DeserializeObject<ResponseDataV1<PublishListingPayload>>(result);
                     return new PosterActionResult<Listing>()
                     {
                         Data = listing.Data.publishListing.listings[0],
@@ -1042,7 +1042,7 @@ namespace Propnex.Poster.NetCoreWinForm
                      {
                          var result = await AjaxJsonGetAsync(url);
                          await Delay(1);
-                         var responseData = JsonConvert.DeserializeObject<ResponseData<Payload<ListingQuoteDto>>>(result);
+                         var responseData = JsonConvert.DeserializeObject<ResponseDataV1<Payload<ListingQuoteDto>>>(result);
                          if (result.Contains("PERSISTED_QUERY_NOT_FOUND"))
                          {
                              await PublishMessageAsync(result);
@@ -1210,7 +1210,7 @@ namespace Propnex.Poster.NetCoreWinForm
                     throw new Exception(result);
                 }
                 //_logger?.Information(result);
-                var jsonResult = JsonConvert.DeserializeObject<ResponseData<ListingsData>>(result);
+                var jsonResult = JsonConvert.DeserializeObject<ResponseDataV1<ListingsData>>(result);
                 //await Delay(60);
                 return new PosterActionResult<List<Listing>>()
                 {
@@ -1272,7 +1272,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 {
                     throw new Exception(result);
                 }
-                var resultData = JsonConvert.DeserializeObject<ResponseData<BuildingRequestData>>(result);
+                var resultData = JsonConvert.DeserializeObject<ResponseDataV1<BuildingRequestData>>(result);
                 return new PosterActionResult<List<PlaceDto>>()
                 {
                     Data = resultData.Data.places.Data,
@@ -1298,7 +1298,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 {
                     throw new Exception(result);
                 }
-                var resultData = JsonConvert.DeserializeObject<ResponseData<BuildingRequestData>>(result);
+                var resultData = JsonConvert.DeserializeObject<ResponseDataV1<BuildingRequestData>>(result);
                 return new PosterActionResult<List<PlaceDto>>()
                 {
                     Data = resultData.Data.places.Data,
@@ -1322,7 +1322,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 {
                     throw new Exception(result);
                 }
-                var resultData = JsonConvert.DeserializeObject<ResponseData<BuildingRequestData>>(result);
+                var resultData = JsonConvert.DeserializeObject<ResponseDataV1<BuildingRequestData>>(result);
                 return new PosterActionResult<List<PlaceDto>>()
                 {
                     Data = resultData.Data.places.Data,

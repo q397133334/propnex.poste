@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Propnex.Poster.IProperty.V1
+namespace Propnex.Poster.IProperty
 {
     public class ResponseData<T>
     {

@@ -2,6 +2,7 @@ using CefSharp;
 using CefSharp.Dom;
 using Flurl;
 using Flurl.Http;
+using Flurl.Util;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Polly;
@@ -24,7 +25,7 @@ using System.Windows.Forms;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.EventBus.Local;
 using static System.Net.WebRequestMethods;
-using Extensions = Propnex.Poster.IProperty.V1.Extensions;
+using Extensions = Propnex.Poster.IProperty.V1.ExtensionsV1;
 using HtmlElement = CefSharp.Dom.HtmlElement;
 
 namespace Propnex.Poster.NetCoreWinForm
@@ -39,9 +40,9 @@ namespace Propnex.Poster.NetCoreWinForm
         private PropnexTask propnexTask;
         private List<Propnex.Poster.IProperty.V1.Listing> Listings = new List<IProperty.V1.Listing>();
 
-        private IProperty.V1.RequestData<IProperty.V1.Variables<IProperty.V1.AddListingMutationDto>>? addListingMutationDto;
-        private IProperty.V1.RequestData<IProperty.V1.Variables<IProperty.V1.LocationDto>> locationDto;
-        private IProperty.V1.RequestData<IProperty.V1.Variables<IProperty.V1.PropertyDetailsDto>> propertyDetailsDto;
+        private IProperty.V1.RequestDataV1<IProperty.V1.Variables<IProperty.V1.AddListingMutationDto>>? addListingMutationDto;
+        private IProperty.V1.RequestDataV1<IProperty.V1.Variables<IProperty.V1.LocationDto>> locationDto;
+        private IProperty.V1.RequestDataV1<IProperty.V1.Variables<IProperty.V1.PropertyDetailsDto>> propertyDetailsDto;
 
         public Task<DevToolsContext> DevToolsContext
         {
@@ -215,12 +216,12 @@ namespace Propnex.Poster.NetCoreWinForm
             string? listingId = "";
 
             propnexListing.Details["data_step1"] = propnexListing.Details["data_step1"].Replace("\"location\":[]", "\"location\":{}");
-            addListingMutationDto = JsonConvert.DeserializeObject<IProperty.V1.RequestData<IProperty.V1.Variables<IProperty.V1.AddListingMutationDto>>>(propnexListing.Details["data_step1"]);
+            addListingMutationDto = JsonConvert.DeserializeObject<IProperty.V1.RequestDataV1<IProperty.V1.Variables<IProperty.V1.AddListingMutationDto>>>(propnexListing.Details["data_step1"]);
 
-            locationDto = JsonConvert.DeserializeObject<IProperty.V1.RequestData<IProperty.V1.Variables<IProperty.V1.LocationDto>>>(propnexListing.Details["data_location"].Replace("\"extension\":[]", "\"extension\":{}"));
+            locationDto = JsonConvert.DeserializeObject<IProperty.V1.RequestDataV1<IProperty.V1.Variables<IProperty.V1.LocationDto>>>(propnexListing.Details["data_location"].Replace("\"extension\":[]", "\"extension\":{}"));
 
             propnexListing.Details["data_details"] = propnexListing.Details["data_details"].Replace("\"location\":[]", "\"location\":{}");
-            propertyDetailsDto = JsonConvert.DeserializeObject<IProperty.V1.RequestData<IProperty.V1.Variables<IProperty.V1.PropertyDetailsDto>>>(propnexListing.Details["data_details"]);
+            propertyDetailsDto = JsonConvert.DeserializeObject<IProperty.V1.RequestDataV1<IProperty.V1.Variables<IProperty.V1.PropertyDetailsDto>>>(propnexListing.Details["data_details"]);
 
             var resultLocation = await location(propnexListing);
             if (resultLocation.Status == PosterActionResultStatus.Error)
@@ -335,8 +336,8 @@ namespace Propnex.Poster.NetCoreWinForm
             async Task<PosterActionResult<string>> listingDetails()
             {
                 propnexListing.Details["data_step1"] = propnexListing.Details["data_step1"].Replace("\"location\":[]", "\"location\":{}");
-                addListingMutationDto = JsonConvert.DeserializeObject<IProperty.V1.RequestData<IProperty.V1.Variables<IProperty.V1.AddListingMutationDto>>>(propnexListing.Details["data_step1"]);
-                var updateListingMutationDto = JsonConvert.DeserializeObject<IProperty.V1.RequestData<IProperty.V1.Variables<IProperty.V1.UpdateListingMutationDto>>>(propnexListing.Details["data_step1"]);
+                addListingMutationDto = JsonConvert.DeserializeObject<IProperty.V1.RequestDataV1<IProperty.V1.Variables<IProperty.V1.AddListingMutationDto>>>(propnexListing.Details["data_step1"]);
+                var updateListingMutationDto = JsonConvert.DeserializeObject<IProperty.V1.RequestDataV1<IProperty.V1.Variables<IProperty.V1.UpdateListingMutationDto>>>(propnexListing.Details["data_step1"]);
                 updateListingMutationDto.query = null;
                 updateListingMutationDto.variables.input.id = listingId;
                 updateListingMutationDto.OperationName = "updateListingInfo";
@@ -358,7 +359,7 @@ namespace Propnex.Poster.NetCoreWinForm
                         throw new Exception(result);
                     }
                     _logger.Information(result);
-                    var data = JsonConvert.DeserializeObject<IProperty.V1.ResponseData<UpdateListingPayload>>(result);
+                    var data = JsonConvert.DeserializeObject<IProperty.V1.ResponseDataV1<UpdateListingPayload>>(result);
                     listingId = data?.Data.updateListing.listing.Id;
                     await PublishMessageAsync($"update listing details success,listing is is {listingId}");
                     return new PosterActionResult<string>()
@@ -422,7 +423,7 @@ namespace Propnex.Poster.NetCoreWinForm
                     throw new Exception(result);
                 }
                 _logger.Information(result);
-                var data = JsonConvert.DeserializeObject<IProperty.V1.ResponseData<UpdateListingPayload>>(result);
+                var data = JsonConvert.DeserializeObject<IProperty.V1.ResponseDataV1<UpdateListingPayload>>(result);
                 await PublishMessageAsync($"update listing details success,listing is is {listingId}");
                 return new PosterActionResult<string>()
                 {
@@ -558,16 +559,54 @@ namespace Propnex.Poster.NetCoreWinForm
                 };
             }
 
-            var property= listProperty.Data.FirstOrDefault();
+            var property = listProperty.Data.FirstOrDefault();
 
-            var stupeLocationDto = new StupeLocation();
+            var stupeLocationDto = new StupeLocationDto();
             stupeLocationDto.buildingFacilityCodes = property.buildingFacilities.Select(q => q.Code).ToList();
+            stupeLocationDto.Location = new IProperty.LocationDto()
+            {
+                Address = null,
+                latitude = property.latitude.Value,
+                longitude = property.longitude.Value,
+                level1 = property.level1,
+                level2 = property.level2,
+                level3 = property.level3,
+                level4 = property.level4,
+                level5 = property.level5,
+                postalCode = property.PostCode,
+                hasNoTownship = property.hasTownship
+            };
 
             stupeLocationDto.propertyTypeCode = property.propertyType.Code;
             stupeLocationDto.propertyGroupTypeCode = property.propertyGroupType.Code;
             stupeLocationDto.propertyCategoryTypeCode = addListingMutationDto.variables.input.propertyCategoryTypeCode;
             stupeLocationDto.saleableAreaMeasurementCode = addListingMutationDto.variables.input.saleableAreaMeasurementCode;
             stupeLocationDto.storeyCode = addListingMutationDto.variables.input.storeyCode;
+
+            var addListingMutationInput = new RequestData<InputDto<StupeLocationDto>>()
+            {
+                extensions = new IProperty.Extensions()
+                {
+                    persistedQuery = new IProperty.PersistedQuery
+                    {
+                        Sha256Hash = "d6797c24744e9c772977451f0dd7270ab0e622a483ffc8676d6accdd997036ae",
+                        Version = 1
+                    }
+                },
+                OperationName = "addListingMutation",
+                variables = new InputDto<StupeLocationDto>() { Input = stupeLocationDto }
+            };
+
+            var listing = await GetPolicy<string>().ExecuteAsync(async (ctx) =>
+            {
+                string addListingMutationUrl = "https://www.iproperty.com.my/pro/rasor/graphql/addListingMutation";
+
+                var result = await AjaxJsonPostAsync(addListingMutationUrl, "https://www.iproperty.com.my/pro/add-listing/location", data: JsonConvert.SerializeObject(addListingMutationInput, jsonSerialzerSettings));
+
+
+                return new PosterActionResult<string>();
+            },new Context("addListingMutation"));
+
 
             return null;
             async Task<PosterActionResult<List<PropertyDto>>> complete(string key)
@@ -772,10 +811,10 @@ namespace Propnex.Poster.NetCoreWinForm
             var quote = listingQuote.Data.quotes.FirstOrDefault(q => q.listingProduct.Id != null && q.listingProduct.Label == "Standard");
             if (quote != null)
             {
-                var publishListingInfoDto = new IProperty.V1.RequestData<IProperty.V1.Variables<IProperty.V1.PublishListingInfoDto>>();
+                var publishListingInfoDto = new IProperty.V1.RequestDataV1<IProperty.V1.Variables<IProperty.V1.PublishListingInfoDto>>();
                 publishListingInfoDto.extensions = new Extensions()
                 {
-                    persistedQuery = new IProperty.V1.PersistedQuery() { Sha256Hash = "cbcb3847fe02c210f06078504b20cc5ae5ebdd1b8da8ac40c94ecce5a117b42d", Version = 1 }
+                    persistedQuery = new IProperty.V1.PersistedQueryV1() { Sha256Hash = "cbcb3847fe02c210f06078504b20cc5ae5ebdd1b8da8ac40c94ecce5a117b42d", Version = 1 }
                 };
                 publishListingInfoDto.OperationName = "publishListingInfo";
                 publishListingInfoDto.variables = new IProperty.V1.Variables<IProperty.V1.PublishListingInfoDto>()
@@ -809,7 +848,7 @@ namespace Propnex.Poster.NetCoreWinForm
                         throw new Exception(result);
                     }
                     await PublishMessageAsync($"create listing details success,listing is is {listingId}");
-                    var listing = JsonConvert.DeserializeObject<IProperty.V1.ResponseData<IProperty.V1.PublishListingPayload>>(result);
+                    var listing = JsonConvert.DeserializeObject<IProperty.V1.ResponseDataV1<IProperty.V1.PublishListingPayload>>(result);
                     return new PosterActionResult<IProperty.V1.Listing>()
                     {
                         Data = listing.Data.publishListing.listings[0],
@@ -831,7 +870,7 @@ namespace Propnex.Poster.NetCoreWinForm
                      {
                          var result = await AjaxJsonGetAsync(url);
                          await Delay(1);
-                         var responseData = JsonConvert.DeserializeObject<IProperty.V1.ResponseData<Payload<IProperty.V1.ListingQuoteDto>>>(result);
+                         var responseData = JsonConvert.DeserializeObject<IProperty.V1.ResponseDataV1<Payload<IProperty.V1.ListingQuoteDto>>>(result);
                          if (result.Contains("PERSISTED_QUERY_NOT_FOUND"))
                          {
                              await PublishMessageAsync(result);
@@ -999,7 +1038,7 @@ namespace Propnex.Poster.NetCoreWinForm
                     throw new Exception(result);
                 }
                 //_logger?.Information(result);
-                var jsonResult = JsonConvert.DeserializeObject<IProperty.V1.ResponseData<IProperty.V1.ListingsData>>(result);
+                var jsonResult = JsonConvert.DeserializeObject<IProperty.V1.ResponseDataV1<IProperty.V1.ListingsData>>(result);
                 //await Delay(60);
                 return new PosterActionResult<List<IProperty.V1.Listing>>()
                 {
@@ -1061,7 +1100,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 {
                     throw new Exception(result);
                 }
-                var resultData = JsonConvert.DeserializeObject<IProperty.V1.ResponseData<IProperty.V1.BuildingRequestData>>(result);
+                var resultData = JsonConvert.DeserializeObject<IProperty.V1.ResponseDataV1<IProperty.V1.BuildingRequestData>>(result);
                 return new PosterActionResult<List<IProperty.V1.PlaceDto>>()
                 {
                     Data = resultData.Data.places.Data,
@@ -1087,7 +1126,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 {
                     throw new Exception(result);
                 }
-                var resultData = JsonConvert.DeserializeObject<IProperty.V1.ResponseData<IProperty.V1.BuildingRequestData>>(result);
+                var resultData = JsonConvert.DeserializeObject<IProperty.V1.ResponseDataV1<IProperty.V1.BuildingRequestData>>(result);
                 return new PosterActionResult<List<IProperty.V1.PlaceDto>>()
                 {
                     Data = resultData.Data.places.Data,
@@ -1111,7 +1150,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 {
                     throw new Exception(result);
                 }
-                var resultData = JsonConvert.DeserializeObject<IProperty.V1.ResponseData<IProperty.V1.BuildingRequestData>>(result);
+                var resultData = JsonConvert.DeserializeObject<IProperty.V1.ResponseDataV1<IProperty.V1.BuildingRequestData>>(result);
                 return new PosterActionResult<List<IProperty.V1.PlaceDto>>()
                 {
                     Data = resultData.Data.places.Data,

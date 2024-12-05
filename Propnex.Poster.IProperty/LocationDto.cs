@@ -11,7 +11,9 @@ namespace Propnex.Poster.IProperty
 
         public string? Address { get; set; }
 
-        public bool HidelUnitFloor { get; set; } = false;
+        public bool? hasNoTownship { get; set; } = false;
+
+        public bool? HidelUnitFloor { get; set; } = false;
 
         public double latitude { get; set; }
 

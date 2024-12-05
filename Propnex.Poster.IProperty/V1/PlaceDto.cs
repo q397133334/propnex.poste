@@ -38,6 +38,6 @@ namespace Propnex.Poster.IProperty.V1
 
     public class BuildingRequestData
     {
-        public ResponseData<List<PlaceDto>> places { get; set; }
+        public ResponseDataV1<List<PlaceDto>> places { get; set; }
     }
 }

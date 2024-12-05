@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Propnex.Poster.IProperty
 {
-    public class StupeLocation
+    public class StupeLocationDto
     {
         public LocationDto Location { get; set; }
 
@@ -12,14 +12,19 @@ namespace Propnex.Poster.IProperty
 
         public object extension { get; set; } = new object();
 
-        public int? propertyCategoryTypeCode {  get; set; }  
+        public int? propertyCategoryTypeCode { get; set; }
 
-        public int? propertyGroupTypeCode {  get; set; } 
+        public int? propertyGroupTypeCode { get; set; }
 
         public int? propertyTypeCode { get; set; }
 
-        public int? saleableAreaMeasurementCode {  get; set; }
+        public int? saleableAreaMeasurementCode { get; set; }
 
         public int? storeyCode { get; set; }
+    }
+
+    public class InputDto<T>
+    {
+        public T Input { get; set; }
     }
 }
