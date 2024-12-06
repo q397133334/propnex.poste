@@ -9,18 +9,18 @@ namespace Propnex.Poster.IProperty.V1
     {
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public List<ListingItemType>? buildingFacilities { get; set; } = null;
+        public List<ListingItemTypeV1>? buildingFacilities { get; set; } = null;
 
         public double? latitude { get; set; }
 
         public double? longitude { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public ListingItemType propertyGroupType { get; set; }
+        public ListingItemTypeV1 propertyGroupType { get; set; }
 
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public ListingItemType propertyType { get; set; }
+        public ListingItemTypeV1 propertyType { get; set; }
 
         public string postalCode { get; set; }
 

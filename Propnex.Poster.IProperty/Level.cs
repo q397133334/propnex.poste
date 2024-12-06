@@ -13,7 +13,7 @@ namespace Propnex.Poster.IProperty
 
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public V1.ListingMultiLangText? Text { get; set; }
+        public V1.ListingMultiLangTextV1? Text { get; set; }
 
         [JsonIgnore]
         public string __typename { get; set; } = "";

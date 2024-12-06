@@ -15,19 +15,19 @@ namespace Propnex.Poster.IProperty.V1
 
         public int? Bedroom { get; set; }
 
-        public ListingItemType? BedroomRef { get; set; } = new ListingItemType();
+        public ListingItemTypeV1? BedroomRef { get; set; } = new ListingItemTypeV1();
 
-        public List<ListingItemType>? BuildingFacilities { get; set; }
+        public List<ListingItemTypeV1>? BuildingFacilities { get; set; }
 
         public int? CarPark { get; set; }
 
-        public ListingItemType? Channel { get; set; } = new ListingItemType();
+        public ListingItemTypeV1? Channel { get; set; } = new ListingItemTypeV1();
 
         public List<string>? Conditions { get; set; } = new List<string>();
 
         public DateTime? ContentUpdatedDate { get; set; }
 
-        public ListingMultiLangText? Description { get; set; }
+        public ListingMultiLangTextV1? Description { get; set; }
 
         public string? Direction { get; set; }
 
@@ -47,11 +47,11 @@ namespace Propnex.Poster.IProperty.V1
 
         public string? FloorZone { get; set; }
 
-        public ListingMultiLangText? FullAddress { get; set; } = new ListingMultiLangText();
+        public ListingMultiLangTextV1? FullAddress { get; set; } = new ListingMultiLangTextV1();
 
         public string? GrossArea { get; set; }
 
-        public ListingItemType? GrossAreaMeasurement { get; set; }
+        public ListingItemTypeV1? GrossAreaMeasurement { get; set; }
 
         public string? Image360s { get; set; }
 
@@ -61,7 +61,7 @@ namespace Propnex.Poster.IProperty.V1
 
         public string? ListerId { get; set; }
 
-        public ListingItemType? ListingProduct { get; set; }
+        public ListingItemTypeV1? ListingProduct { get; set; }
 
         public string? ListingRefNo { get; set; }
 
@@ -77,7 +77,7 @@ namespace Propnex.Poster.IProperty.V1
 
         public DateTime? ProductUpgradeDate { get; set; }
 
-        public ListingItemType? PropertyType { get; set; } = new ListingItemType();
+        public ListingItemTypeV1? PropertyType { get; set; } = new ListingItemTypeV1();
 
         public ListingSalePrice? RentPrice { get; set; } = new ListingSalePrice();
 
@@ -85,17 +85,17 @@ namespace Propnex.Poster.IProperty.V1
 
         public int? SaleableArea { get; set; }
 
-        public ListingItemType? SaleableAreaMeasurement { get; set; }
+        public ListingItemTypeV1? SaleableAreaMeasurement { get; set; }
 
         public ListingSalePrice? SalePrice { get; set; } = new ListingSalePrice();
 
-        public ListingItemType? Status { get; set; } = new ListingItemType();
+        public ListingItemTypeV1? Status { get; set; } = new ListingItemTypeV1();
 
         public string? StoreRoom { get; set; }
 
-        public ListingMultiLangText? Title { get; set; }
+        public ListingMultiLangTextV1? Title { get; set; }
 
-        public List<ListingItemType>? UnitFeatures { get; set; }
+        public List<ListingItemTypeV1>? UnitFeatures { get; set; }
 
         public List<ListingRichMedia>? Videos { get; set; }
 
@@ -109,7 +109,7 @@ namespace Propnex.Poster.IProperty.V1
 
         public DateTime? CreatedDate { get; set; }
 
-        public ListingLister? Lister { get; set; } = new ListingLister();
+        public ListingListerV1? Lister { get; set; } = new ListingListerV1();
 
         public DateTime? PostedDate { get; set; }
 
@@ -130,7 +130,7 @@ namespace Propnex.Poster.IProperty.V1
         public ListingRequestorListingPermission? RequestorListingPermission { get; set; }
     }
 
-    public class ListingItemType
+    public class ListingItemTypeV1
     {
         public string Id { get; set; }
 
@@ -245,7 +245,7 @@ namespace Propnex.Poster.IProperty.V1
         public string __typename { get; set; } = "Image";
     }
 
-    public class ListingMultiLangText
+    public class ListingMultiLangTextV1
     {
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string en_GB { get; set; }
@@ -282,7 +282,7 @@ namespace Propnex.Poster.IProperty.V1
         public ListingLevel? Level5 { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public ListingMultiLangText? Address { get; set; } = new ListingMultiLangText();
+        public ListingMultiLangTextV1? Address { get; set; } = new ListingMultiLangTextV1();
     }
 
     public class ListingLevel
@@ -291,7 +291,7 @@ namespace Propnex.Poster.IProperty.V1
         public string Id { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public ListingMultiLangText? Text { get; set; }
+        public ListingMultiLangTextV1? Text { get; set; }
 
         [JsonIgnore]
         public string __typename { get; set; }
@@ -307,15 +307,15 @@ namespace Propnex.Poster.IProperty.V1
         public string __typename { get; set; } = "Price";
     }
 
-    public class ListingLister
+    public class ListingListerV1
     {
         public string Id { get; set; }
 
-        public ListingMultiLangText? FullName { get; set; } = new ListingMultiLangText();
+        public ListingMultiLangTextV1? FullName { get; set; } = new ListingMultiLangTextV1();
 
-        public ListingMultiLangText? firstName { get; set; } = new ListingMultiLangText();
+        public ListingMultiLangTextV1? firstName { get; set; } = new ListingMultiLangTextV1();
 
-        public ListingMultiLangText? lastName { get; set; } = new ListingMultiLangText();
+        public ListingMultiLangTextV1? lastName { get; set; } = new ListingMultiLangTextV1();
 
         public string __typename { get; set; } = "User";
     }

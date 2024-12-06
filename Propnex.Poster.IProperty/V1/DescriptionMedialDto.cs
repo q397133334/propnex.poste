@@ -6,7 +6,7 @@ namespace Propnex.Poster.IProperty.V1
 {
     public class DescriptionMedialDto
     {
-        public ListingMultiLangText description { get; set; }
+        public ListingMultiLangTextV1 description { get; set; }
 
         public dynamic extension { get; set; } = new { isLiveTourAvailable = false };
 
@@ -22,7 +22,7 @@ namespace Propnex.Poster.IProperty.V1
 
         public int? saleableAreaMeasurementCode { get; set; }
 
-        public ListingMultiLangText title { get; set; }
+        public ListingMultiLangTextV1 title { get; set; }
 
         public List<dynamic> videos { get; set; }
     }

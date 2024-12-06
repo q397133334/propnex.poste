@@ -15,7 +15,7 @@ namespace Propnex.Poster.IProperty
 
         public string PostCode { get; set; } = "";
 
-        public V1.ListingMultiLangText Address { get; set; }
+        public V1.ListingMultiLangTextV1 Address { get; set; }
 
         public ItemType propertyType { get; set; }
 

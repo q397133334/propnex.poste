@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Propnex.Poster.IProperty.V1
+namespace Propnex.Poster.IProperty
 {
 
     public class AddListingPayload
@@ -12,12 +12,12 @@ namespace Propnex.Poster.IProperty.V1
 
     public class UpdateListingPayload
     {
-        public Payload<Listing> updateListing { get; set; }
+        public Payload<V1.Listing> updateListing { get; set; }
     }
 
     public class PublishListingPayload
     {
-        public Payload<Listing> publishListing { get; set; }
+        public Payload<V1.Listing> publishListing { get; set; }
     }
 
     public class Payload<T>
@@ -36,13 +36,13 @@ namespace Propnex.Poster.IProperty.V1
 
         public ListingItemType PropertyType { get; set; } = new ListingItemType();
 
-        public ListingLister Lister { get; set; } = new ListingLister();
+        public ListingListerV1 Lister { get; set; } = new ListingListerV1();
 
         public object? representationLister { get; set; }
 
         public string ListingRefNo { get; set; }
 
-        public AddListingDxtension extension { get; set; }
+        public AddListingExtension extension { get; set; }
 
         public ListingItemType propertyCategoryType { get; set; }
 
@@ -55,10 +55,10 @@ namespace Propnex.Poster.IProperty.V1
         public string __typename { get; set; } = "Listing";
     }
 
-    public class AddListingDxtension
+    public class AddListingExtension
     {
         public bool isCoAgency { get; set; } = false;
 
-        public ListingItemType listingExclusivity { get; set; } = new ListingItemType();
+        public ListingItemTypeV1 listingExclusivity { get; set; } = new ListingItemTypeV1();
     }
 }

@@ -14,7 +14,7 @@ namespace Propnex.Poster.IProperty.V1
 
         public bool? isPromo { get; set; }
 
-        public ListingItemType listingProduct { get; set; }
+        public ListingItemTypeV1 listingProduct { get; set; }
 
         public int? productCode { get; set; }
 
