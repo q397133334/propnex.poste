@@ -36,7 +36,7 @@ namespace Propnex.Poster.IProperty
 
         public ListingItemType PropertyType { get; set; } = new ListingItemType();
 
-        public ListingListerV1 Lister { get; set; } = new ListingListerV1();
+        public ListingLister Lister { get; set; } = new ListingLister();
 
         public object? representationLister { get; set; }
 
@@ -57,8 +57,8 @@ namespace Propnex.Poster.IProperty
 
     public class AddListingExtension
     {
-        public bool isCoAgency { get; set; } = false;
+        public bool? isCoAgency { get; set; } = false;
 
-        public ListingItemTypeV1 listingExclusivity { get; set; } = new ListingItemTypeV1();
+        public ListingItemType listingExclusivity { get; set; } = new ListingItemType();
     }
 }

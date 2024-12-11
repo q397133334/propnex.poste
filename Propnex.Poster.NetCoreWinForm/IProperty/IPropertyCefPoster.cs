@@ -521,7 +521,7 @@ namespace Propnex.Poster.NetCoreWinForm
         }
 
 
-        public async Task<PosterActionResult<PropertyDto>> location(PropnexListing propnexListing)
+        public async Task<PosterActionResult<AddListingDto>> location(PropnexListing propnexListing)
         {
 
             string buildingText = "";
@@ -552,7 +552,7 @@ namespace Propnex.Poster.NetCoreWinForm
 
             if (listProperty.Data.Count == 0)
             {
-                return new PosterActionResult<PropertyDto>()
+                return new PosterActionResult<AddListingDto>()
                 {
                     Data = null,
                     Status = PosterActionResultStatus.Error,
@@ -605,25 +605,50 @@ namespace Propnex.Poster.NetCoreWinForm
                     }
                 },
                 OperationName = "addListingMutation",
-                query= query,
+                query = query,
                 variables = new InputDto<StupeLocationDto>() { Input = stupeLocationDto }
             };
 
 
 
 
-            var listing = await GetPolicy<string>().ExecuteAsync(async (ctx) =>
+            var listing = await GetPolicy<AddListingDto>().ExecuteAsync(async (ctx) =>
             {
                 string addListingMutationUrl = "https://www.iproperty.com.my/pro/rasor/graphql/addListingMutation";
 
                 var result = await AjaxJsonPostAsync(addListingMutationUrl, "https://www.iproperty.com.my/pro/add-listing/location", data: JsonConvert.SerializeObject(addListingMutationInput, jsonSerialzerSettings));
+                if (result.Contains("PERSISTED_QUERY_NOT_FOUND"))
+                {
+                    await PublishMessageAsync(result);
+                    throw new Exception("PERSISTED_QUERY_NOT_FOUND");
+                }
+                if (result.Contains("errors"))
+                {
+                    throw new Exception(result);
+                }
+
+                try
+                {
+                    var listing = JsonConvert.DeserializeObject<ResponseData<AddListingPayload>>(result);
+                    await PublishMessageAsync($"create listing details success,listing is is {listing.Data.addListing.listing.Id}");
+                    return new PosterActionResult<AddListingDto>()
+                    {
+                        Data = listing.Data.addListing.listing,
+                        Status = PosterActionResultStatus.Success
+                    };
+                }
+                catch(Exception ex)
+                {
+
+                }
+         
 
 
-                return new PosterActionResult<string>();
-            },new Context("addListingMutation"));
+                return new PosterActionResult<AddListingDto>();
+            }, new Context("addListingMutation"));
 
 
-            return null;
+            return listing;
             async Task<PosterActionResult<List<PropertyDto>>> complete(string key)
             {
                 string completeUrl = $"https://www.iproperty.com.my/pro/rasor/graphql/autocomplete?operationName=autocomplete&variables=%7B%22resolveLocation%22%3Atrue%2C%22includeBuildingFacility%22%3Atrue%2C%22keyword%22%3A%22{Url.Encode(key)}%22%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22618f598ed602639597a1388dc1e28d9ff48b22838877fb8653621c60f925d10d%22%7D%7D";
