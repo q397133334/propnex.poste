@@ -117,7 +117,7 @@ namespace Propnex.Poster.IProperty
         /// <summary>
         /// 
         /// </summary>
-        public string auctionDate { get; set; }
+        public DateTime? auctionDate { get; set; }
 
         /// <summary>
         /// 
@@ -135,7 +135,7 @@ namespace Propnex.Poster.IProperty
         /// 
         /// </summary>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public List<int>? buildingFacilityCodes { get; set; }
+        public List<int?>? buildingFacilityCodes { get; set; }
 
         /// <summary>
         /// 
@@ -149,6 +149,7 @@ namespace Propnex.Poster.IProperty
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int? channelCode { get; set; }
 
+     
         /// <summary>
         /// 
         /// </summary>
@@ -179,7 +180,7 @@ namespace Propnex.Poster.IProperty
         /// <summary>
         /// 
         /// </summary>
-        public bool isAuction { get; set; }
+        public bool? isAuction { get; set; }
 
         /// <summary>
         /// 

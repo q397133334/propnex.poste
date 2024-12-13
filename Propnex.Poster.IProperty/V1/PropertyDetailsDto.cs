@@ -14,7 +14,7 @@ namespace Propnex.Poster.IProperty.V1
 
         public int? bedroomCode { get; set; }
 
-        public List<int>? buildingFacilityCodes { get; set; }
+        public List<int?>? buildingFacilityCodes { get; set; }
 
         public int? carPark { get; set; }
 

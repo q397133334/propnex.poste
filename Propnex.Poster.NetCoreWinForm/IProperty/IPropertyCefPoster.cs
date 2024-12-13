@@ -225,6 +225,7 @@ namespace Propnex.Poster.NetCoreWinForm
             propertyDetailsDto = JsonConvert.DeserializeObject<IProperty.V1.RequestDataV1<IProperty.V1.Variables<IProperty.V1.PropertyDetailsDto>>>(propnexListing.Details["data_details"]);
 
             var resultLocation = await location(propnexListing);
+            listingId=resultLocation.Data.Id;
             if (resultLocation.Status == PosterActionResultStatus.Error)
             {
                 await PublishMessageAsync(resultLocation.Message);
@@ -702,9 +703,9 @@ namespace Propnex.Poster.NetCoreWinForm
             {
                 //propnexListing.Details["data_details"] = propnexListing.Details["data_details"].Replace("\"location\":[]", "\"location\":{}");
                 var propertyDetailsDtov2 = JsonConvert.DeserializeObject<RequestData<Variables<IProperty.PropertyDetailsDto>>>(propnexListing.Details["data_details"]);
-                var input = propertyDetailsDto.variables.input;
+                var input = propertyDetailsDtov2.variables.input;
                 input.id = listingId;
-                propertyDetailsDto.extensions.persistedQuery.Sha256Hash = "696299734d38d07dac5e4571217cf4ecd35b8147c72822e8cf7b0b92f8e06e96";
+                propertyDetailsDtov2.extensions.persistedQuery.Sha256Hash = "696299734d38d07dac5e4571217cf4ecd35b8147c72822e8cf7b0b92f8e06e96";
                 if (input.photo360s.Count == 0)
                 {
                     input.photo360s = null;
@@ -717,8 +718,21 @@ namespace Propnex.Poster.NetCoreWinForm
                 {
                     input.floorPlans = null;
                 }
-                var result = await AjaxJsonPostAsync("https://www.iproperty.com.my/pro/rasor/graphql/updateListingInfo", refUrl, data: JsonConvert.SerializeObject(propertyDetailsDto, jsonSerialzerSettings));
+                if(locationDto.variables.input.buildingFacilityCodes!=null)
+                {
+                    input.buildingFacilityCodes = locationDto.variables.input.buildingFacilityCodes;
+                }
+                input.saleableAreaMeasurementCode = locationDto.variables.input.saleableAreaMeasurementCode;
 
+                input.channelCode = addListingMutationDto.variables.input.channelCode;
+
+                input.isAuction = addListingMutationDto.variables.input.isAuction;
+                input.auctionDate = addListingMutationDto.variables.input.auctionDate;
+                input.listingRefNo = addListingMutationDto.variables.input.listingRefNo;
+
+                var result = await AjaxJsonPostAsync("https://www.iproperty.com.my/pro/rasor/graphql/updateListingInfo", refUrl, data: JsonConvert.SerializeObject(propertyDetailsDtov2, jsonSerialzerSettings));
+
+                //await Delay(60);
                 if (result.Contains("PersistedQueryNotFound"))
                 {
                     throw new Exception("PersistedQueryNotFound");
@@ -842,7 +856,7 @@ namespace Propnex.Poster.NetCoreWinForm
              {
                  var input = descriptionMedialDto.variables.input;
                  input.id = listingId;
-                 descriptionMedialDto.extensions.persistedQuery.Sha256Hash = "5c989cb9020484c26568312317c311a0f5035c0cddf6502ed4209511c0db4ec8";
+                 descriptionMedialDto.extensions.persistedQuery.Sha256Hash = "696299734d38d07dac5e4571217cf4ecd35b8147c72822e8cf7b0b92f8e06e96";
                  var result = await AjaxJsonPostAsync("https://www.iproperty.com.my/pro/rasor/graphql/updateListingInfo", refUrl, data: JsonConvert.SerializeObject(descriptionMedialDto, jsonSerialzerSettings));
 
                  if (result.Contains("PersistedQueryNotFound"))
@@ -916,7 +930,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 var publishListingInfoDto = new IProperty.V1.RequestDataV1<IProperty.V1.Variables<IProperty.V1.PublishListingInfoDto>>();
                 publishListingInfoDto.extensions = new Extensions()
                 {
-                    persistedQuery = new IProperty.V1.PersistedQueryV1() { Sha256Hash = "cbcb3847fe02c210f06078504b20cc5ae5ebdd1b8da8ac40c94ecce5a117b42d", Version = 1 }
+                    persistedQuery = new IProperty.V1.PersistedQueryV1() { Sha256Hash = "29cfe80f371c1feff5c97456cd1d4b19e3622ccfd657aad0918d5f98b968ec26", Version = 1 }
                 };
                 publishListingInfoDto.OperationName = "publishListingInfo";
                 publishListingInfoDto.variables = new IProperty.V1.Variables<IProperty.V1.PublishListingInfoDto>()
@@ -1111,7 +1125,7 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             string url = $"https://www.iproperty.com.my/pro/rasor/graphql/listingsQuery?" +
                   //$"operationName=listingsQuery&variables=%7B%22shouldExtendsFields%22%3Atrue%2C%22statusCode%22%3A{2}%2C%22isExcludeChild%22%3Afalse%2C%22sortBy%22%3A%22new-to-old%22%2C%22limit%22%3A500%2C%22page%22%3A%221%22%2C%22includeReAdvertiseJob%22%3Atrue%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%227b6a11e4f1b523a1308f9f5274b6f7d46683849dbbaec77233f66ba21fbef25c%22%7D%7D";
-                  $"operationName=listingsQuery&variables=%7B%22shouldExtendsFields%22%3Atrue%2C%22includeSummary%22%3Afalse%2C%22statusCode%22%3A2%2C%22isExcludeChild%22%3Afalse%2C%22sortBy%22%3A%22new-to-old%22%2C%22limit%22%3A50%2C%22page%22%3A%221%22%2C%22includeReAdvertiseJob%22%3Atrue%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%226c479472da2ba1285d89b8f6bd5ea09a3f89b8981f98655bc817435a3942b865%22%7D%7D";
+                  $"operationName=listingsQuery&variables=%7B%22shouldExtendsFields%22%3Atrue%2C%22includeSummary%22%3Afalse%2C%22statusCode%22%3A2%2C%22isExcludeChild%22%3Afalse%2C%22sortBy%22%3A%22new-to-old%22%2C%22limit%22%3A50%2C%22page%22%3A%221%22%2C%22includeReAdvertiseJob%22%3Atrue%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22cb8b645832495633bfe9658ad205e60e23e2f93e8fbe09cfd12936fa5f4a4484%22%7D%7D";
             return await GetPolicy<List<IProperty.V1.Listing>>().ExecuteAsync(async (ctx) =>
             {
                 string jscode = $@"()=> {{return fetch(""{url}"", {{
@@ -1335,7 +1349,7 @@ namespace Propnex.Poster.NetCoreWinForm
             {
                 data = data.Replace("\"", "");
                 result = await (await DevToolsContext).EvaluateFunctionAsync<string>(jscode);
-                await Delay(60);
+                //await Delay(60);
             }
             catch (Exception ex)
             {
