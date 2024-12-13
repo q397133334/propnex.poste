@@ -10,12 +10,14 @@ namespace Propnex.Poster.IProperty
         /// <summary>
         /// 
         /// </summary>
-        public string? availableDate { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public DateTime? availableDate { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public string isCoAgency { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public bool? isCoAgency { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -29,8 +31,7 @@ namespace Propnex.Poster.IProperty
         /// <summary>
         /// 
         /// </summary>
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public string unexpiredLeaseYear { get; set; }
+        public string? unexpiredLeaseYear { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -50,6 +51,6 @@ namespace Propnex.Poster.IProperty
         /// <summary>
         /// 
         /// </summary>
-        public string? isBumiLot { get; set; }
+        public bool? isBumiLot { get; set; } = null;
     }
 }

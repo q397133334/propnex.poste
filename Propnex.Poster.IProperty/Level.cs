@@ -18,4 +18,17 @@ namespace Propnex.Poster.IProperty
         [JsonIgnore]
         public string __typename { get; set; } = "";
     }
+
+    public class Level3
+    {
+        public string? NanoId { get; set; } = null;
+
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public V1.ListingMultiLangTextV1? Text { get; set; } = new ListingMultiLangTextV1();
+
+        [JsonIgnore]
+        public string __typename { get; set; } = "";
+
+    }
 }

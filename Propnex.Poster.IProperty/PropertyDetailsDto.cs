@@ -239,6 +239,7 @@ namespace Propnex.Poster.IProperty
         /// <summary>
         /// 
         /// </summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int? unitTypeCode { get; set; }
 
 

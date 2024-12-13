@@ -318,17 +318,17 @@ namespace Propnex.Poster.NetCoreWinForm
             //    };
             //}
 
-            //var resultProperytDetails = await propertyDetails(propnexListing, listingId, $"https://www.iproperty.com.my/pro/edit-listing/property-details/{listingId}");
-            //if (resultProperytDetails.Status == PosterActionResultStatus.Error)
-            //{
-            //    await PublishMessageAsync(resultProperytDetails.Message);
-            //    return new PosterActionResult()
-            //    {
-            //        Data = listingId,
-            //        Message = resultProperytDetails.Message,
-            //        Status = PosterActionResultStatus.Error
-            //    };
-            //}
+            var resultProperytDetails = await propertyDetails(propnexListing, listingId, $"https://www.iproperty.com.my/pro/edit-listing/property-details/{listingId}");
+            if (resultProperytDetails.Status == PosterActionResultStatus.Error)
+            {
+                await PublishMessageAsync(resultProperytDetails.Message);
+                return new PosterActionResult()
+                {
+                    Data = listingId,
+                    Message = resultProperytDetails.Message,
+                    Status = PosterActionResultStatus.Error
+                };
+            }
 
 
             var resultDescriptionMedial = await descriptionMedial(propnexListing, listingId, $"https://www.iproperty.com.my/pro/edit-listing/description-and-media/{listingId}");
@@ -584,7 +584,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 longitude = property.longitude.Value,
                 level1 = property.level1,
                 level2 = property.level2,
-                level3 = property.level3,
+                //level3 = property.level3,
                 level4 = property.level4,
                 level5 = property.level5,
                 postalCode = property.PostCode,
@@ -593,9 +593,7 @@ namespace Propnex.Poster.NetCoreWinForm
 
             stupeLocationDto.Location.level1.Text = null;
             stupeLocationDto.Location.level2.Text = null;
-            //stupeLocationDto.Location.level3 = new Level();
-            //stupeLocationDto.Location.level3.NanoId = null;
-            //stupeLocationDto.Location.level3.Text = new ListingMultiLangText();
+            stupeLocationDto.Location.level3 = new Level3();
             stupeLocationDto.Location.level4.NanoId = null;
             stupeLocationDto.Location.level5.Text = null;
 
@@ -724,8 +722,9 @@ namespace Propnex.Poster.NetCoreWinForm
                 }
                 input.saleableAreaMeasurementCode = locationDto.variables.input.saleableAreaMeasurementCode;
 
-                input.channelCode = addListingMutationDto.variables.input.channelCode;
+                input.extension.isCoAgency = addListingMutationDto.variables.input.extension.isCoAgency;
 
+                input.channelCode = addListingMutationDto.variables.input.channelCode;
                 input.isAuction = addListingMutationDto.variables.input.isAuction;
                 input.auctionDate = addListingMutationDto.variables.input.auctionDate;
                 input.listingRefNo = addListingMutationDto.variables.input.listingRefNo;
@@ -954,6 +953,8 @@ namespace Propnex.Poster.NetCoreWinForm
                          $"https://www.iproperty.com.my/pro/add-listing/upgrade-and-review/{listingId}",
                          data: JsonConvert.SerializeObject(publishListingInfoDto, jsonSerialzerSettings)
                          );
+
+                    await Delay(60);
                     if (result.Contains("PERSISTED_QUERY_NOT_FOUND"))
                     {
                         await PublishMessageAsync(result);
