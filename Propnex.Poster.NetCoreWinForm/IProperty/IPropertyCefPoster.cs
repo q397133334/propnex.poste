@@ -1408,18 +1408,18 @@ namespace Propnex.Poster.NetCoreWinForm
 
         public async Task GetTaskAsync()
         {
-            PnTaskDto = new PnTaskDto()
-            {
-                Number = "28625.cef.tsk"
-            };
-            propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"E:\\{PnTaskDto.Number}"));
-            if (propnexTasks == null)
-            {
-                await PublishMessageAsync("Not find tasks ,dealy 1 min");
-                await Task.Delay(1000 * 60);
-                Close();
-            }
-            return;
+            //PnTaskDto = new PnTaskDto()
+            //{
+            //    Number = "28625.cef.tsk"
+            //};
+            //propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"E:\\{PnTaskDto.Number}"));
+            //if (propnexTasks == null)
+            //{
+            //    await PublishMessageAsync("Not find tasks ,dealy 1 min");
+            //    await Task.Delay(1000 * 60);
+            //    Close();
+            //}
+            //return;
             var context = "";
             PnTaskDto = await WebServer.GetTask();
             if (PnTaskDto != null)
