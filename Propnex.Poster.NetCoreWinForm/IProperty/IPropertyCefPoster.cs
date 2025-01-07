@@ -225,7 +225,7 @@ namespace Propnex.Poster.NetCoreWinForm
             propertyDetailsDto = JsonConvert.DeserializeObject<IProperty.V1.RequestDataV1<IProperty.V1.Variables<IProperty.V1.PropertyDetailsDto>>>(propnexListing.Details["data_details"]);
 
             var resultLocation = await location(propnexListing);
-            listingId=resultLocation.Data.Id;
+        
             if (resultLocation.Status == PosterActionResultStatus.Error)
             {
                 await PublishMessageAsync(resultLocation.Message);
@@ -236,7 +236,7 @@ namespace Propnex.Poster.NetCoreWinForm
                     Status = PosterActionResultStatus.Error
                 };
             }
-
+            listingId = resultLocation.Data.Id;
             var resultProperytDetails = await propertyDetails(propnexListing,listingId);
             if (resultProperytDetails.Status == PosterActionResultStatus.Error)
             {
@@ -1410,7 +1410,7 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             //PnTaskDto = new PnTaskDto()
             //{
-            //    Number = "28625.cef.tsk"
+            //    Number = "28732.cef.tsk"
             //};
             //propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"E:\\{PnTaskDto.Number}"));
             //if (propnexTasks == null)
