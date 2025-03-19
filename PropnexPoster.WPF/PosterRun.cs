@@ -19,6 +19,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using ILogger = Serilog.ILogger;
 
@@ -1474,8 +1475,8 @@ namespace PropnexPoster.WPF
         {
             StringBuilder formData = new StringBuilder();
             Dictionary<string, string> data = new Dictionary<string, string>();
-            formData.Append($"account_name={guruTask.Account}&");
-            formData.Append($"account_password={guruTask.Password}&");
+            formData.Append($"account_name={HttpUtility.UrlEncode(guruTask.Account)}&");
+            formData.Append($"account_password={HttpUtility.UrlEncode(guruTask.Password)}&");
             formData.Append($"task_id={guruTask.Id}&");
             formData.Append($"taskitem_id={taskListing.TaskItemId}&");
             formData.Append($"status={status}&");
@@ -1511,8 +1512,8 @@ namespace PropnexPoster.WPF
                 return;
 
             StringBuilder formData = new StringBuilder();
-            formData.Append($"account_name={guruTask.Account}&");
-            formData.Append($"account_password={guruTask.Password}&");
+            formData.Append($"account_name={HttpUtility.UrlEncode(guruTask.Account)}&");
+            formData.Append($"account_password={HttpUtility.UrlEncode(guruTask.Password)}&");
             formData.Append($"task_id={guruTask.Id}&");
             formData.Append($"status={status}&");
             formData.Append($"time_cost=&");
