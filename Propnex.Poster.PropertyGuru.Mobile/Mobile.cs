@@ -139,7 +139,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 
         public string Order { get; set; } = "desc";
 
-        public string Limit { get; set; } = "100";
+        public string Limit { get; set; } = "50";
 
         public string Page { get; set; } = "1";
 

@@ -96,16 +96,18 @@ namespace PropnexPoster.WPF
 
             Log("Get Task .....");
             //1.获取任务信息
-    
+#if DEBUG
             taskDto = new PnTaskDto()
             {
-                Number = "1164013.guru.tsk"
+                Number = "1198381.guru.tsk"
             };
             var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
             var lenght = context.IndexOf("Xpressor-Listing-File===");
             var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
             var guruTasks = new GuruTasks(context, taskContext);
-            //var guruTasks = await getGuruTasks();
+#else
+            var guruTasks = await getGuruTasks();
+#endif
             if (guruTasks == null)
             {
                 Log("Not find task ,delay 1 min");
@@ -1093,9 +1095,11 @@ namespace PropnexPoster.WPF
                     url.Contains("8prop.com") ||
                     url.Contains("matterport.com") ||
                     url.Contains("tubear") ||
-                    url.Contains("beyond.3dnest.cn")||
+                    url.Contains("beyond.3dnest.cn") ||
                     url.Contains("mixgo.com") ||
-                    url.Contains("tiktok.com")
+                    url.Contains("tiktok.com") ||
+                    url.Contains("kuula.co")||
+                    url.Contains("virtualtours")
                     )
                 {
                     filePath = guruTaskListing.Videos[i];
@@ -1153,9 +1157,11 @@ namespace PropnexPoster.WPF
                     url.Contains("8prop.com") ||
                     url.Contains("matterport.com") ||
                     url.Contains("tubear") ||
-                    url.Contains("beyond.3dnest.cn")||
+                    url.Contains("beyond.3dnest.cn") ||
                     url.Contains("mixgo.com") ||
-                    url.Contains("tiktok.com")
+                    url.Contains("tiktok.com") ||
+                    url.Contains("kuula.co") ||
+                    url.Contains("virtualtours")
                     )
                 {
                     filePath = guruTaskListing.Tours[i];
@@ -1245,7 +1251,7 @@ namespace PropnexPoster.WPF
             var _Token = await auth();// string.IsNullOrEmpty(pnUser.TokenJson) ? await auth() : await checkToken();
             if (_Token == null)
                 return null;
-            listings = await getListing();
+            await getListing();
 
             async Task<PnUserDto> getUser()
             {
@@ -1308,62 +1314,86 @@ namespace PropnexPoster.WPF
                 {
                     return await auth();
                 }
-                listings = await getListing();
+                await getListing();
                 if (listings == null)
                     return await auth();
                 return Newtonsoft.Json.JsonConvert.DeserializeObject<Token>(pnUser.TokenJson);
             }
-            async Task<List<ListingsListing>> getListing()
+            async Task getListing()
             {
+                listings = new List<ListingsListing>();
+                ListingInfos = new List<ListingInfo>();
                 Log("Get Listings ....");
                 var token = Newtonsoft.Json.JsonConvert.DeserializeObject<Token>(pnUser.TokenJson);
                 var mobile = new Mobile() { Token = token };
                 var result = await mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
-                if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                try
                 {
-                    foreach (var item in result.Data.listings)
+                    if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
                     {
-                        var info = new ListingInfo();
-                        info.Id = item.id.Value;
-                        info.Title = item.localizedTitle;
-                        info.Score = item.qualityScore.ToString();
-                        info.TypeCode = item.typeCode;
-                        info.StatusCode = item.statusCode;
-                        info.PropertyTypeCode = item.property.typeCode;
-                        info.Prece = item.price.value.ToString();
-                        info.StreetNumber = item.location.streetNumber;
-                        info.StreetName = item.location.streetName1;
-                        info.PostCode = item.location.postalCode;
-                        if (item.products != null && item.products.Count > 0)
-                        {
-                            info.IsBoosted = item.products[0].productType == "boost-v2";
-                        }
-                        //turbo
-                        if (item.products != null && item.products.Count > 0)
-                        {
-                            info.IsTurbo = item.products[0].productType == "turbo";
-                        }
-                        if (item.charges != null)
-                        {
-                            info.RepostCharge = item.charges.repost;
-                        }
-                        try
-                        {
-                            info.Sqft = Convert.ToInt32(item.sizes.floorArea[0].value).ToString();
-                        }
-                        catch
-                        {
-                            info.Sqft = Convert.ToInt32(item.sizes.landArea[0].value).ToString();
-                        }
-                        ListingInfos.Add(info);
+                        addListing(result.Data.listings);
                     }
-                    return result.Data.listings;
+                    while (result.Data.page < result.Data.totalPages)
+                    {
+                        result = await mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
+                        {
+                            Page = (result.Data.page + 1).ToString()
+                        });
+                        if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                        {
+                            addListing(result.Data.listings);
+                        }
+                    }
                 }
-                return null;
+                catch
+                {
+
+                }
+            }
+
+            void addListing(List<ListingsListing> lists)
+            {
+                foreach (var item in lists)
+                {
+                    var info = new ListingInfo();
+                    info.Id = item.id.Value;
+                    info.Title = item.localizedTitle;
+                    info.Score = item.qualityScore.ToString();
+                    info.TypeCode = item.typeCode;
+                    info.StatusCode = item.statusCode;
+                    info.PropertyTypeCode = item.property.typeCode;
+                    info.Prece = item.price.value.ToString();
+                    info.StreetNumber = item.location.streetNumber;
+                    info.StreetName = item.location.streetName1;
+                    info.PostCode = item.location.postalCode;
+                    if (item.products != null && item.products.Count > 0)
+                    {
+                        info.IsBoosted = item.products[0].productType == "boost-v2";
+                    }
+                    //turbo
+                    if (item.products != null && item.products.Count > 0)
+                    {
+                        info.IsTurbo = item.products[0].productType == "turbo";
+                    }
+                    if (item.charges != null)
+                    {
+                        info.RepostCharge = item.charges.repost;
+                    }
+                    try
+                    {
+                        info.Sqft = Convert.ToInt32(item.sizes.floorArea[0].value).ToString();
+                    }
+                    catch
+                    {
+                        info.Sqft = Convert.ToInt32(item.sizes.landArea[0].value).ToString();
+                    }
+                    ListingInfos.Add(info);
+                    listings.Add(item);
+                }
             }
             return _Token;
         }
-        private List<ListingsListing> listings = null;
+        private List<ListingsListing> listings = new List<ListingsListing>();
 
         private async Task<GuruTasks> getGuruTasks()
         {
