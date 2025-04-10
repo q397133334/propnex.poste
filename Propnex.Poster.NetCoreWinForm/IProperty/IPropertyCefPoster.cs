@@ -563,7 +563,7 @@ namespace Propnex.Poster.NetCoreWinForm
 
             var listProperty = await complete(buildingText);
 
-            if (listProperty.Data.Count == 0)
+            if (listProperty.Data.Count == 0 || listProperty.Data==null)
             {
                 return new PosterActionResult<AddListingDto>()
                 {
@@ -662,7 +662,7 @@ namespace Propnex.Poster.NetCoreWinForm
             return listing;
             async Task<PosterActionResult<List<PropertyDto>>> complete(string key)
             {
-                string completeUrl = $"https://www.iproperty.com.my/pro/rasor/graphql/autocomplete?operationName=autocomplete&variables=%7B%22resolveLocation%22%3Atrue%2C%22includeBuildingFacility%22%3Atrue%2C%22keyword%22%3A%22{Url.Encode(key)}%22%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22618f598ed602639597a1388dc1e28d9ff48b22838877fb8653621c60f925d10d%22%7D%7D";
+                string completeUrl = $"https://www.iproperty.com.my/pro/rasor/graphql/autocomplete?operationName=autocomplete&variables=%7B%22resolveLocation%22%3Atrue%2C%22includeBuildingFacility%22%3Atrue%2C%22keyword%22%3A%22{Url.Encode(key)}%22%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22154be742795bc943bd5c3b9c85b43b5d072ffb26fc11229e58b9599935aabcc3%22%7D%7D";
 
                 return await GetPolicy<List<PropertyDto>>()
                      .ExecuteAsync(async (ctx) =>
@@ -1204,7 +1204,7 @@ namespace Propnex.Poster.NetCoreWinForm
             string url = "\r\nhttps://www.iproperty.com.my/pro/rasor/graphql/autocomplete";
             url += $"operationName=autocomplete&" +
                 $"variables=%7B%22resolveLocation%22%3Atrue%2C%22includeBuildingFacility%22%3Atrue%2C%22keyword%22%3A%22{key}%22%7D" +
-                $"&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22618f598ed602639597a1388dc1e28d9ff48b22838877fb8653621c60f925d10d%22%7D%7D";
+                $"&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22154be742795bc943bd5c3b9c85b43b5d072ffb26fc11229e58b9599935aabcc3%22%7D%7D";
 
             return await GetPolicy<List<IProperty.V1.PlaceDto>>().ExecuteAsync(async (ctx) =>
             {
@@ -1408,18 +1408,18 @@ namespace Propnex.Poster.NetCoreWinForm
 
         public async Task GetTaskAsync()
         {
-            //PnTaskDto = new PnTaskDto()
-            //{
-            //    Number = "28732.cef.tsk"
-            //};
-            //propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"E:\\{PnTaskDto.Number}"));
-            //if (propnexTasks == null)
-            //{
-            //    await PublishMessageAsync("Not find tasks ,dealy 1 min");
-            //    await Task.Delay(1000 * 60);
-            //    Close();
-            //}
-            //return;
+            PnTaskDto = new PnTaskDto()
+            {
+                Number = "28835.cef.tsk"
+            };
+            propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"E:\\{PnTaskDto.Number}"));
+            if (propnexTasks == null)
+            {
+                await PublishMessageAsync("Not find tasks ,dealy 1 min");
+                await Task.Delay(1000 * 60);
+                Close();
+            }
+            return;
             var context = "";
             PnTaskDto = await WebServer.GetTask();
             if (PnTaskDto != null)

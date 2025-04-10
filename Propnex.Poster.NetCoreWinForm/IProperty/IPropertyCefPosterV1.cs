@@ -1462,7 +1462,7 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             PnTaskDto = new PnTaskDto()
             {
-                Number = "28620.cef.tsk"
+                Number = "28835.cef.tsk"
             };
             propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"E:\\{PnTaskDto.Number}"));
             if (propnexTasks == null)
