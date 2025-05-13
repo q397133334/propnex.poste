@@ -1039,7 +1039,9 @@ namespace PropnexPoster.WPF
                 // max upload photos
                 if (i == 20)
                     break;
-
+                var title = "";
+                if (guruTaskListing.Videos[i].Split("#").Length > 1)
+                    title = guruTaskListing.Videos[i].Split("#")[1];
                 var filePath = $"{path}{i}_image.jpg";
                 try
                 {
@@ -1086,6 +1088,9 @@ namespace PropnexPoster.WPF
                     break;
 
                 var url = guruTaskListing.Videos[i].ToLower();
+                var title = "";
+                if (guruTaskListing.Videos[i].Split("#").Length > 1)
+                    title = guruTaskListing.Videos[i].Split("#")[1];
                 var filePath = $"{path}{i}_movie.mp4";
                 if (url.Contains("youtube") ||
                     url.Contains("youtu.be") ||
@@ -1099,8 +1104,9 @@ namespace PropnexPoster.WPF
                     url.Contains("beyond.3dnest.cn") ||
                     url.Contains("mixgo.com") ||
                     url.Contains("tiktok.com") ||
-                    url.Contains("kuula.co")||
-                    url.Contains("virtualtours")
+                    url.Contains("kuula.co") ||
+                    url.Contains("virtualtours")||
+                    url.Contains("singaporeluxuryhouse")
                     )
                 {
                     filePath = guruTaskListing.Videos[i];
@@ -1125,7 +1131,7 @@ namespace PropnexPoster.WPF
                         continue;
                     }
                 }
-                result = await _api.UploadVideosAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
+                result = await _api.UploadVideosAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath,title);
                 if (result.HttpStatusCode != System.Net.HttpStatusCode.OK)
                 {
                     break;
@@ -1148,6 +1154,9 @@ namespace PropnexPoster.WPF
                     break;
 
                 var url = guruTaskListing.Tours[i].ToLower();
+                var title = "";
+                if (guruTaskListing.Videos[i].Split("#").Length > 1)
+                    title = guruTaskListing.Videos[i].Split("#")[1];
                 var filePath = $"{path}{i}_vt.mp4";
                 if (url.Contains("youtube") ||
                     url.Contains("youtu.be") ||
@@ -1162,7 +1171,8 @@ namespace PropnexPoster.WPF
                     url.Contains("mixgo.com") ||
                     url.Contains("tiktok.com") ||
                     url.Contains("kuula.co") ||
-                    url.Contains("virtualtours")
+                    url.Contains("virtualtours") ||
+                    url.Contains("singaporeluxuryhouse")
                     )
                 {
                     filePath = guruTaskListing.Tours[i];
@@ -1208,7 +1218,9 @@ namespace PropnexPoster.WPF
                 // max upload photos
                 if (i == 20)
                     break;
-
+                var title = "";
+                if (guruTaskListing.Videos[i].Split("#").Length > 1)
+                    title = guruTaskListing.Videos[i].Split("#")[1];
                 var filePath = $"{path}{i}_fp.jpg";
                 try
                 {

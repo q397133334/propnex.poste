@@ -181,23 +181,23 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             return GetHttpResult<CreateOrUpdateListingResult>(response);
         }
 
-        public async Task<HttpResult<string>> UploadPhotoAsync(string ownerId, string sortOrder, string filePath)
+        public async Task<HttpResult<string>> UploadPhotoAsync(string ownerId, string sortOrder, string filePath, string title = "")
         {
-            return await UploadMediaAsync(ownerId, "UPHO", "IMAGE", sortOrder, filePath);
+            return await UploadMediaAsync(ownerId, "UPHO", "IMAGE", sortOrder, filePath, title);
         }
-        public async Task<HttpResult<string>> UploadVideosAsync(string ownerId, string sortOrder, string filePath)
+        public async Task<HttpResult<string>> UploadVideosAsync(string ownerId, string sortOrder, string filePath, string title = "")
         {
-            return await UploadMediaAsync(ownerId, "UMOV", "MOVIE", sortOrder, filePath);
-        }
-
-        public async Task<HttpResult<string>> UplaodVirtualTours(string ownerId, string sortOrder, string filePath)
-        {
-            return await UploadMediaAsync(ownerId, "UTOUR", "VTOUR", sortOrder, filePath);
+            return await UploadMediaAsync(ownerId, "UMOV", "MOVIE", sortOrder, filePath, title);
         }
 
-        public async Task<HttpResult<string>> UploadFlooplan(string ownerId, string sortOrder, string filePath)
+        public async Task<HttpResult<string>> UplaodVirtualTours(string ownerId, string sortOrder, string filePath, string title = "")
         {
-            return await UploadMediaAsync(ownerId, "UFLOO", "IMAGE", sortOrder, filePath);
+            return await UploadMediaAsync(ownerId, "UTOUR", "VTOUR", sortOrder, filePath, title);
+        }
+
+        public async Task<HttpResult<string>> UploadFlooplan(string ownerId, string sortOrder, string filePath, string title = "")
+        {
+            return await UploadMediaAsync(ownerId, "UFLOO", "IMAGE", sortOrder, filePath, title);
         }
 
         private async Task<HttpResult<string>> UploadMediaAsync(
@@ -205,7 +205,8 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             string mediaClass,
             string mediaType,
             string sortOrder,
-            string filePath
+            string filePath,
+            string title = ""
             )
         {
             var request = GetRequest(Method.Post, $"/sf2-agent/ajax/listings/{ownerid}/media");
@@ -216,7 +217,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddParameter("userId", $"{Token.User.UserId}");
             request.AddParameter("source", "AgentNet");
             request.AddParameter("sortOrder", 1);
-            request.AddParameter("caption", "");
+            request.AddParameter("caption", title);
             request.AddParameter("statusCode", "ACT");
             var filePathLower = filePath.ToLower();
             if (filePathLower.Contains("youtube") ||
@@ -232,15 +233,16 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                     filePathLower.Contains("beyond.3dnest.cn") ||
                     filePathLower.Contains("mixgo.com") ||
                     filePathLower.Contains("tiktok.com") ||
-                    filePathLower.Contains("kuula.co")||
-                    filePathLower.Contains("virtualtours")
+                    filePathLower.Contains("kuula.co") ||
+                    filePathLower.Contains("virtualtours") ||
+                    filePathLower.Contains("singaporeluxuryhouse")
                     )
             {
                 if (filePath.Contains("#"))
                 {
                     filePath = filePath.Trim('#');
                 }
-                filePath=System.Web.HttpUtility.UrlDecode(filePath);
+                filePath = System.Web.HttpUtility.UrlDecode(filePath);
                 request.AddParameter("videoEmbedHtml", filePath);
                 request.AlwaysMultipartFormData = true;
             }
