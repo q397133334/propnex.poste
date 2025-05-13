@@ -28,7 +28,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 
         }
 
-        public Mobile(Token token,string proxyIp) : base(baseUrl,proxyIp)
+        public Mobile(Token token, string proxyIp) : base(baseUrl, proxyIp)
         {
             Token = token;
         }
@@ -65,7 +65,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 
             return GetHttpResult<ListingsResult>(response);
         }
-    
+
         public async Task<HttpResult<string>> DeleteListing(List<int> ids)
         {
             var request = GetRequest();
@@ -75,12 +75,12 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddJsonBody(new
             {
                 listingIds = ids,
-                agentId=Token.User.AgentId,
-                statusCode="DEL",
-                origin= "mobile-android-bulk"
-            }) ;
-            var reponse=await ExecuteAsync(request);
-            if(reponse.StatusCode==System.Net.HttpStatusCode.OK)
+                agentId = Token.User.AgentId,
+                statusCode = "DEL",
+                origin = "mobile-android-bulk"
+            });
+            var reponse = await ExecuteAsync(request);
+            if (reponse.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 return new HttpResult<string>() { };
             }
@@ -89,10 +89,17 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 
         public async Task DeleteMediaAll(CreateOrUpdateListing listing)
         {
-            foreach(var item in listing.media.listing)
+            foreach (var item in listing.media.listing)
             {
                 await DeleteMedia(item.id.Value);
             }
+            if (listing.media != null && listing.media.listingFloorplans != null)
+                foreach (var item in listing.media.listingFloorplans)
+                {
+                    await DeleteMedia(item.id.Value);
+                }
+
+
             if (listing.media != null && listing.media.listingVideos != null)
             {
                 for (var i = 0; i < listing.media.listingVideos.Count; i++)
@@ -114,7 +121,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
         public async Task DeleteMedia(int mediaId)
         {
             var request = GetRequest();
-            request.Method=Method.Delete;
+            request.Method = Method.Delete;
             request.Resource = $"/v1/media?region=sg&mediaId={mediaId}";
             request.Authenticator = new JwtAuthenticator(Token.accessToken);
             var response = await ExecuteAsync(request);
@@ -126,7 +133,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 
         public QueryListingManagement(string agent)
         {
-            Agent=agent;
+            Agent = agent;
         }
 
         public string Locale { get; set; } = "en";
