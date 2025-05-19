@@ -1116,6 +1116,15 @@ namespace Propnex.Poster.NetCoreWinForm
                     Message = await warning.GetInnerTextAsync()
                 };
             }
+            var expired= await (await DevToolsContext).QuerySelectorAsync<HtmlElement>(".expiry-title");
+            if (expired != null)
+            {
+                return new PosterActionResult()
+                {
+                    Status = PosterActionResultStatus.Error,
+                    Message = await expired.GetInnerTextAsync()
+                };
+            }
             await PublishMessageAsync("Login success");
             return new PosterActionResult()
             {
@@ -1411,9 +1420,9 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             //PnTaskDto = new PnTaskDto()
             //{
-            //    Number = "28955.cef.tsk"
+            //    Number = "28979.cef.tsk"
             //};
-            //propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"E:\\{PnTaskDto.Number}"));
+            //propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"D:\\{PnTaskDto.Number}"));
             //if (propnexTasks == null)
             //{
             //    await PublishMessageAsync("Not find tasks ,dealy 1 min");

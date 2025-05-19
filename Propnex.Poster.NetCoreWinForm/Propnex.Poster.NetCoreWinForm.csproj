@@ -10,8 +10,8 @@
     <PackageIcon>favicon.ico</PackageIcon>
     <PlatformTarget>x64</PlatformTarget>
     <Platforms>AnyCPU;x64;x86</Platforms>
-    <AssemblyVersion>1.0.0.15</AssemblyVersion>
-    <FileVersion>1.0.0.15</FileVersion>
+    <AssemblyVersion>1.0.0.16</AssemblyVersion>
+    <FileVersion>1.0.0.16</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,9 +20,9 @@
 
   <ItemGroup>
     <PackageReference Include="Autoupdater.NET.Official" Version="1.7.7" />
-    <PackageReference Include="CefSharp.Common.NETCore" Version="111.2.20" />
+    <PackageReference Include="CefSharp.Common.NETCore" Version="136.1.40" />
     <PackageReference Include="CefSharp.Dom" Version="2.0.86" />
-    <PackageReference Include="CefSharp.WinForms.NETCore" Version="111.2.20" />
+    <PackageReference Include="CefSharp.WinForms.NETCore" Version="136.1.40" />
     <PackageReference Include="Flurl.Http" Version="4.0.0" />
     <PackageReference Include="Polly" Version="7.2.3" />
     <PackageReference Include="Polly.Contrib.WaitAndRetry" Version="1.1.1" />
