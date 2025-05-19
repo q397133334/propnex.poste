@@ -225,7 +225,7 @@ namespace Propnex.Poster.NetCoreWinForm
             propertyDetailsDto = JsonConvert.DeserializeObject<IProperty.V1.RequestDataV1<IProperty.V1.Variables<IProperty.V1.PropertyDetailsDto>>>(propnexListing.Details["data_details"]);
 
             var resultLocation = await location(propnexListing);
-        
+
             if (resultLocation.Status == PosterActionResultStatus.Error)
             {
                 await PublishMessageAsync(resultLocation.Message);
@@ -237,7 +237,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 };
             }
             listingId = resultLocation.Data.Id;
-            var resultProperytDetails = await propertyDetails(propnexListing,listingId);
+            var resultProperytDetails = await propertyDetails(propnexListing, listingId);
             if (resultProperytDetails.Status == PosterActionResultStatus.Error)
             {
                 await PublishMessageAsync(resultProperytDetails.Message);
@@ -563,7 +563,7 @@ namespace Propnex.Poster.NetCoreWinForm
 
             var listProperty = await complete(buildingText);
 
-            if (listProperty.Data.Count == 0 || listProperty.Data==null)
+            if (listProperty.Data.Count == 0 || listProperty.Data == null)
             {
                 return new PosterActionResult<AddListingDto>()
                 {
@@ -584,7 +584,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 longitude = property.longitude.Value,
                 level1 = property.level1,
                 level2 = property.level2,
-                //level3 = property.level3,
+                level3 = new Level3() { NanoId = property.level3?.NanoId }, // property.level3,
                 level4 = property.level4,
                 level5 = property.level5,
                 postalCode = property.PostCode,
@@ -593,7 +593,7 @@ namespace Propnex.Poster.NetCoreWinForm
 
             stupeLocationDto.Location.level1.Text = null;
             stupeLocationDto.Location.level2.Text = null;
-            stupeLocationDto.Location.level3 = new Level3();
+            stupeLocationDto.Location.level3.Text = null;// = new Level3();
             stupeLocationDto.Location.level4.NanoId = null;
             stupeLocationDto.Location.level5.Text = null;
 
@@ -633,6 +633,7 @@ namespace Propnex.Poster.NetCoreWinForm
                     await PublishMessageAsync(result);
                     throw new Exception("PERSISTED_QUERY_NOT_FOUND");
                 }
+                // await Task.Delay(60 * 1000 * 2);
                 if (result.Contains("errors"))
                 {
                     throw new Exception(result);
@@ -648,11 +649,11 @@ namespace Propnex.Poster.NetCoreWinForm
                         Status = PosterActionResultStatus.Success
                     };
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
 
                 }
-         
+
 
 
                 return new PosterActionResult<AddListingDto>();
@@ -716,7 +717,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 {
                     input.floorPlans = null;
                 }
-                if(locationDto.variables.input.buildingFacilityCodes!=null)
+                if (locationDto.variables.input.buildingFacilityCodes != null)
                 {
                     input.buildingFacilityCodes = locationDto.variables.input.buildingFacilityCodes;
                 }
@@ -888,7 +889,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 using (RestClient client = new RestClient())
                 {
                     RestRequest request = new RestRequest();
-                    request.Timeout = 6000;
+                    request.Timeout = 60*1000;
                     request.Method = Method.Get;
                     request.Resource = url;
                     file = await client.DownloadDataAsync(request).ConfigureAwait(false);
@@ -1410,7 +1411,7 @@ namespace Propnex.Poster.NetCoreWinForm
         {
             //PnTaskDto = new PnTaskDto()
             //{
-            //    Number = "28835.cef.tsk"
+            //    Number = "28955.cef.tsk"
             //};
             //propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"E:\\{PnTaskDto.Number}"));
             //if (propnexTasks == null)
