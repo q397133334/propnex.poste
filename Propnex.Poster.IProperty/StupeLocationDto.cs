@@ -23,6 +23,11 @@ namespace Propnex.Poster.IProperty
         public int? storeyCode { get; set; }
     }
 
+    public class UpdateStupeLocationDto : StupeLocationDto
+    {
+        public int Id { get; set; }
+    }
+
     public class InputDto<T>
     {
         public T Input { get; set; }

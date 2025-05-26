@@ -356,7 +356,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 updateListingMutationDto.variables.input.id = listingId;
                 updateListingMutationDto.OperationName = "updateListingInfo";
                 updateListingMutationDto.variables.shouldExtendsFields = true;
-                updateListingMutationDto.extensions.persistedQuery.Sha256Hash = "5c989cb9020484c26568312317c311a0f5035c0cddf6502ed4209511c0db4ec8";
+                updateListingMutationDto.extensions.persistedQuery.Sha256Hash = "696299734d38d07dac5e4571217cf4ecd35b8147c72822e8cf7b0b92f8e06e96";
                 string jsonData = JsonConvert.SerializeObject(updateListingMutationDto, jsonSerialzerSettings);
 
 
@@ -690,6 +690,166 @@ namespace Propnex.Poster.NetCoreWinForm
             }
         }
 
+        public async Task<PosterActionResult<AddListingDto>> updatelocation(PropnexListing propnexListing,int id)
+        {
+
+            string buildingText = "";
+            if (propnexListing.Basic.ContainsKey("txtBuilding"))
+            {
+                buildingText = propnexListing.Basic["txtBuilding"];
+            }
+            if (string.IsNullOrEmpty(buildingText))
+            {
+                if (propnexListing.Basic.ContainsKey("txtBuildingCom"))
+                {
+                    buildingText = propnexListing.Basic["txtBuildingCom"];
+                }
+            }
+            if (string.IsNullOrEmpty(buildingText) && propnexListing.Details.ContainsKey("standard_name"))
+            {
+                if (!string.IsNullOrEmpty(propnexListing.Details["standard_name"]))
+                {
+                    buildingText = propnexListing.Details["standard_name"];
+                }
+            }
+            if (string.IsNullOrEmpty(buildingText) && propnexListing.ProjectData.ContainsKey("name"))
+            {
+                buildingText = propnexListing.ProjectData["name"];
+            }
+
+            var listProperty = await complete(buildingText);
+
+            if (listProperty.Data.Count == 0 || listProperty.Data == null)
+            {
+                return new PosterActionResult<AddListingDto>()
+                {
+                    Data = null,
+                    Status = PosterActionResultStatus.Error,
+                    Message = $"not find {buildingText}"
+                };
+            }
+
+            var property = listProperty.Data.FirstOrDefault();
+
+            var stupeLocationDto = new UpdateStupeLocationDto();
+            stupeLocationDto.Id = id;
+            stupeLocationDto.buildingFacilityCodes = property.buildingFacilities.Select(q => q.Code).ToList();
+            stupeLocationDto.Location = new IProperty.LocationDto()
+            {
+                Address = null,
+                latitude = property.latitude.Value,
+                longitude = property.longitude.Value,
+                level1 = property.level1,
+                level2 = property.level2,
+                level3 = new Level3() { NanoId = property.level3?.NanoId }, // property.level3,
+                level4 = property.level4,
+                level5 = property.level5,
+                postalCode = property.PostCode,
+                hasNoTownship = property.hasTownship
+            };
+
+            stupeLocationDto.Location.level1.Text = null;
+            stupeLocationDto.Location.level2.Text = null;
+            stupeLocationDto.Location.level3.Text = null;// = new Level3();
+            stupeLocationDto.Location.level4.NanoId = null;
+            stupeLocationDto.Location.level5.Text = null;
+
+
+            var query = "mutation addListingMutation($input: AddListingInput!) {\n  addListing(input: $input) {\n    listing {\n      id\n      channel {\n        id\n        code\n        description\n        label\n        __typename\n      }\n      propertyType {\n        id\n        code\n        description\n        label\n        __typename\n      }\n      lister {\n        id\n        firstName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        lastName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        fullName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        email\n        __typename\n      }\n      representationLister {\n        id\n        firstName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        lastName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        fullName {\n          en_GB\n          zh_HK\n          zh_CN\n          __typename\n        }\n        email\n        __typename\n      }\n      listingRefNo\n      extension {\n        isCoAgency\n        listingExclusivity {\n          id\n          code\n          description\n          label\n          __typename\n        }\n        __typename\n      }\n      propertyCategoryType {\n        id\n        code\n        description\n        label\n        __typename\n      }\n      isAuction\n      auctionDate\n      postedDate\n      __typename\n    }\n    __typename\n  }\n}\n";
+            stupeLocationDto.propertyTypeCode = property.propertyType.Code;
+            stupeLocationDto.propertyGroupTypeCode = property.propertyGroupType.Code;
+            stupeLocationDto.propertyCategoryTypeCode = addListingMutationDto.variables.input.propertyCategoryTypeCode;
+            stupeLocationDto.saleableAreaMeasurementCode = addListingMutationDto.variables.input.saleableAreaMeasurementCode;
+            stupeLocationDto.storeyCode = addListingMutationDto.variables.input.storeyCode;
+
+            var addListingMutationInput = new RequestData<InputDto<UpdateStupeLocationDto>>()
+            {
+                extensions = new IProperty.Extensions()
+                {
+                    persistedQuery = new IProperty.PersistedQuery
+                    {
+                        Sha256Hash = "d6797c24744e9c772977451f0dd7270ab0e622a483ffc8676d6accdd997036ae",
+                        Version = 1
+                    }
+                },
+                OperationName = "updateListingInfo",
+                query = query,
+                variables = new InputDto<UpdateStupeLocationDto>() { Input = stupeLocationDto }
+            };
+
+
+
+
+            var listing = await GetPolicy<AddListingDto>().ExecuteAsync(async (ctx) =>
+            {
+                string addListingMutationUrl = "https://www.iproperty.com.my/pro/rasor/graphql/addListingMutation";
+
+                var result = await AjaxJsonPostAsync(addListingMutationUrl, "https://www.iproperty.com.my/pro/add-listing/location", data: JsonConvert.SerializeObject(addListingMutationInput, jsonSerialzerSettings));
+                if (result.Contains("PERSISTED_QUERY_NOT_FOUND"))
+                {
+                    await PublishMessageAsync(result);
+                    throw new Exception("PERSISTED_QUERY_NOT_FOUND");
+                }
+                // await Task.Delay(60 * 1000 * 2);
+                if (result.Contains("errors"))
+                {
+                    throw new Exception(result);
+                }
+
+                try
+                {
+                    var listing = JsonConvert.DeserializeObject<ResponseData<AddListingPayload>>(result);
+                    await PublishMessageAsync($"create listing details success,listing is is {listing.Data.addListing.listing.Id}");
+                    return new PosterActionResult<AddListingDto>()
+                    {
+                        Data = listing.Data.addListing.listing,
+                        Status = PosterActionResultStatus.Success
+                    };
+                }
+                catch (Exception ex)
+                {
+
+                }
+
+
+
+                return new PosterActionResult<AddListingDto>();
+            }, new Context("addListingMutation"));
+
+
+            return listing;
+            async Task<PosterActionResult<List<PropertyDto>>> complete(string key)
+            {
+                string completeUrl = $"https://www.iproperty.com.my/pro/rasor/graphql/autocomplete?operationName=autocomplete&variables=%7B%22resolveLocation%22%3Atrue%2C%22includeBuildingFacility%22%3Atrue%2C%22keyword%22%3A%22{Url.Encode(key)}%22%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22154be742795bc943bd5c3b9c85b43b5d072ffb26fc11229e58b9599935aabcc3%22%7D%7D";
+
+                return await GetPolicy<List<PropertyDto>>()
+                     .ExecuteAsync(async (ctx) =>
+                     {
+                         var result = await AjaxJsonGetAsync(completeUrl);
+                         var responseData = JsonConvert.DeserializeObject<ResponseData<AutocompleteResult>>(result);
+                         if (result.Contains("PERSISTED_QUERY_NOT_FOUND"))
+                         {
+
+                             await PublishMessageAsync(result);
+                             throw new Exception("PERSISTED_QUERY_NOT_FOUND");
+                         }
+                         if (result.Contains("errors"))
+                         {
+                             throw new Exception(result);
+                         }
+                         return new PosterActionResult<List<PropertyDto>>()
+                         {
+                             Data = responseData.Data.autocomplete.Data,
+                             Status = PosterActionResultStatus.Success
+                         };
+                     }, new Context("complete"));
+
+            }
+        }
+
+
+
+
         public async Task<PosterActionResult<Listing>> propertyDetails(PropnexListing propnexListing, string listingId, string action = "")
         {
             var refUrl = $"https://www.iproperty.com.my/pro/add-listing/location/{listingId}";
@@ -889,7 +1049,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 using (RestClient client = new RestClient())
                 {
                     RestRequest request = new RestRequest();
-                    request.Timeout = 60*1000;
+                    request.Timeout = 60 * 1000;
                     request.Method = Method.Get;
                     request.Resource = url;
                     file = await client.DownloadDataAsync(request).ConfigureAwait(false);
@@ -1021,7 +1181,7 @@ namespace Propnex.Poster.NetCoreWinForm
             }
             if (listing == null)
             {
-                listing = Listings.FirstOrDefault(q => (q.Channel.Label.ToLower() == propnexListing.ListingType.ToLower() || q.Channel.Label.ToLower() == listingType) &&
+                listing = Listings.Where(q => q.Location.Level5.Text != null).FirstOrDefault(q => (q.Channel.Label.ToLower() == propnexListing.ListingType.ToLower() || q.Channel.Label.ToLower() == listingType) &&
                     (q.Location.Level5.Text.en_GB.Trim().ToLower().StartsWith(propnexListing.ListingName.Trim().ToLower().Replace(".", "")) ||
                      (propnexListing.ListingName.Trim().ToLower().StartsWith(q.Location.Level5.Text.en_GB.Trim().ToLower().Replace(",", "")) &&
                      propnexListing.FloorArea == q.SaleableArea.Value)
@@ -1116,7 +1276,7 @@ namespace Propnex.Poster.NetCoreWinForm
                     Message = await warning.GetInnerTextAsync()
                 };
             }
-            var expired= await (await DevToolsContext).QuerySelectorAsync<HtmlElement>(".expiry-title");
+            var expired = await (await DevToolsContext).QuerySelectorAsync<HtmlElement>(".expiry-title");
             if (expired != null)
             {
                 return new PosterActionResult()
@@ -1418,18 +1578,18 @@ namespace Propnex.Poster.NetCoreWinForm
 
         public async Task GetTaskAsync()
         {
-            //PnTaskDto = new PnTaskDto()
-            //{
-            //    Number = "28979.cef.tsk"
-            //};
-            //propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"D:\\{PnTaskDto.Number}"));
-            //if (propnexTasks == null)
-            //{
-            //    await PublishMessageAsync("Not find tasks ,dealy 1 min");
-            //    await Task.Delay(1000 * 60);
-            //    Close();
-            //}
-            //return;
+            PnTaskDto = new PnTaskDto()
+            {
+                Number = "28984.cef.tsk"
+            };
+            propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"D:\\{PnTaskDto.Number}"));
+            if (propnexTasks == null)
+            {
+                await PublishMessageAsync("Not find tasks ,dealy 1 min");
+                await Task.Delay(1000 * 60);
+                Close();
+            }
+            return;
             var context = "";
             PnTaskDto = await WebServer.GetTask();
             if (PnTaskDto != null)
