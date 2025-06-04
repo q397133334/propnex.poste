@@ -89,7 +89,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             //request.AddHeader("x-clientid", "L7C9YKV9-ESF3606Q-GHF9H1F5-8LJMKRO5");
             //request.AddHeader("x-clientsecret", "jjiF916yVwfCRQEJtS6loHVDZ16mWPWf");
             request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2024.8.26;M973Q;null");
-            request.Timeout = 1000 * 60 * 10;
+            request.Timeout = new TimeSpan(0, 5, 0);// 1000 * 60 * 10;
 
             return request;
         }
@@ -101,7 +101,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             //request.AddHeader("x-clientsecret", "jjiF916yVwfCRQEJtS6loHVDZ16mWPWf");
             request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2024.8.26;M973Q;null");
             request.Method = method;
-            request.Timeout = 1000 * 60 * 10;
+            request.Timeout = new TimeSpan(0, 5, 0);// 1000 * 60 * 10;
             request.Resource = resource;
             return request;
         }

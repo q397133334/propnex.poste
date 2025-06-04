@@ -14,6 +14,8 @@ using Volo.Abp.Autofac;
 using Volo.Abp.Modularity;
 using System.IO;
 using SlackBotMessages;
+using Propnex;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace PropnexPoster.WPF;
 
@@ -40,16 +42,29 @@ public class WPFModule : AbpModule
     public override async Task OnPreApplicationInitializationAsync(ApplicationInitializationContext context)
     {
         AutoUpdater.Start("http://testposter.propnex.net/PropnexPoster.Guru/PropnexPoster.WPF.AutoUpdater.xml");
-        //await Test();
-        //var client = new SbmClient("https://hooks.slack.com/services/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");
 
-        //var message = new SlackBotMessages.Models.Message
+        //var result = await PosterResultUpload.XWebItem(new XWebItemDto()
         //{
-        //    Channel= "#production-messenger-alerts",
-        //    Text = "test <@U01DQLBLWNL>",
-        //};
+        //    account_name = "emilyyep@ymail.com",
+        //    account_password = "fqM&w8#U",
+        //    task_id = "1224418",
+        //    taskitem_id = "5824283",
+        //    status = "Done",
+        //    time_cost = "0",
+        //    taskitem_note = "",
+        //    listing_version=DateTime.Now.ToString(""),
+        //    portal_link = "https://www.propertyguru.com.sg/listing/25629840"
+        //});
 
-        //var result=await client.SendAsync(message);
+        //var result1 = await PosterResultUpload.XWebEnd(new XWebEndDto()
+        //{
+        //    account_name = "emilyyep@ymail.com",
+        //    account_password = "fqM&w8#U",
+        //    task_id = "1224418",
+        //    status = "Done",
+        //    time_cost = "0",
+        //    note=""
+        //});
 
 
         await Task.CompletedTask;
@@ -62,7 +77,7 @@ public class WPFModule : AbpModule
         //request.AddHeader("x-clientsecret", "jjiF916yVwfCRQEJtS6loHVDZ16mWPWf");
         request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2023.12.6;LIO-AN00;null");
         request.Method = method;
-        request.Timeout = 1000 * 60;//new TimeSpan(0, 5, 0);
+        request.Timeout = new TimeSpan(0, 5, 0);
         request.Resource = resource;
         return request;
     }
@@ -82,7 +97,7 @@ public class WPFModule : AbpModule
         var filePath = "C:\\Users\\worker_fg\\Documents\\雷电模拟器\\Pictures\\3_image.jpg";
         var filePathLower = filePath.ToLower();
         if (filePathLower.Contains("youtube") ||
-            filePathLower.Contains("youtu.be")||
+            filePathLower.Contains("youtu.be") ||
             filePathLower.Contains("vimeo") ||
                 filePathLower.Contains("dailymotion") ||
                 filePathLower.Contains("<iframe") ||
