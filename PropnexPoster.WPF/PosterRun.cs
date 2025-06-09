@@ -1109,7 +1109,7 @@ namespace PropnexPoster.WPF
                     url.Contains("mixgo.com") ||
                     url.Contains("tiktok.com") ||
                     url.Contains("kuula.co") ||
-                    url.Contains("virtualtours")||
+                    url.Contains("virtualtours") ||
                     url.Contains("singaporeluxuryhouse")
                     )
                 {
@@ -1135,7 +1135,7 @@ namespace PropnexPoster.WPF
                         continue;
                     }
                 }
-                result = await _api.UploadVideosAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath,title);
+                result = await _api.UploadVideosAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
                 if (result.HttpStatusCode != System.Net.HttpStatusCode.OK)
                 {
                     break;
@@ -1491,8 +1491,8 @@ namespace PropnexPoster.WPF
         {
             StringBuilder formData = new StringBuilder();
             Dictionary<string, string> data = new Dictionary<string, string>();
-            formData.Append($"account_name={HttpUtility.UrlEncode(guruTask.Account)}&");
-            formData.Append($"account_password={HttpUtility.UrlEncode(guruTask.Password)}&");
+            formData.Append($"account_name={guruTask.Account}&");
+            formData.Append($"account_password={guruTask.Password}&");
             formData.Append($"task_id={guruTask.Id}&");
             formData.Append($"taskitem_id={taskListing.TaskItemId}&");
             formData.Append($"status={status}&");
@@ -1510,14 +1510,25 @@ namespace PropnexPoster.WPF
             formData.Append("poster=mobileApi");
             System.Net.Http.StringContent stringContent = new System.Net.Http.StringContent(formData.ToString());
             await Polly.Policy.Handle<Exception>()
-                .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(30), (ex, retry) =>
+                .WaitAndRetryAsync(5, retryNumber => TimeSpan.FromSeconds(30), (ex, retry) =>
                 {
                     _logger?.Error($"Retry count {retry},{ex.Message},{formData.ToString()}", ex);
                     Log(formData.ToString());
                 }).ExecuteAsync(async () =>
                 {
-                    var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus"
-                    .PostUrlEncodedAsync(formData.ToString());
+                    await PosterResultUpload.XWebItem(new XWebItemDto()
+                    {
+                        account_name = guruTask.Account,
+                        account_password = guruTask.Password,
+                        task_id = guruTask.Id,
+                        taskitem_id = taskListing.TaskItemId,
+                        status = status,
+                        time_cost = time_cost.ToString(),
+                        taskitem_note = note,
+                        portal_link = (taskListing.Listing.Id.HasValue && status == "Done") ? $"https://www.propertyguru.com.sg/listing/{taskListing.Listing.Id}" : "",
+                        listing_version = taskListing.UpdateTime,
+                        poster = "mobile_api"
+                    });
                     Log("xwebItem success");
                 });
         }
@@ -1528,8 +1539,8 @@ namespace PropnexPoster.WPF
                 return;
 
             StringBuilder formData = new StringBuilder();
-            formData.Append($"account_name={HttpUtility.UrlEncode(guruTask.Account)}&");
-            formData.Append($"account_password={HttpUtility.UrlEncode(guruTask.Password)}&");
+            formData.Append($"account_name={guruTask.Account}&");
+            formData.Append($"account_password={guruTask.Password}&");
             formData.Append($"task_id={guruTask.Id}&");
             formData.Append($"status={status}&");
             formData.Append($"time_cost=&");
@@ -1538,13 +1549,22 @@ namespace PropnexPoster.WPF
 
 
             await Polly.Policy.Handle<Exception>()
-                      .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(30), (ex, retry) =>
+                      .WaitAndRetryAsync(5, retryNumber => TimeSpan.FromSeconds(30), (ex, retry) =>
                       {
                           Log($"Retry count {retry},{ex.Message},{formData.ToString()}");
                       }).ExecuteAsync(async () =>
                       {
-                          var result = await "https://pa-production.propnex.net/index.php/tasks/updateStatus".PostUrlEncodedAsync(formData.ToString());
-                          Log("xwebItem success " + await result.GetStringAsync());
+                          var result=await PosterResultUpload.XWebEnd(new XWebEndDto()
+                          {
+                              account_name = guruTask.Account,
+                              account_password = guruTask.Password,
+                              task_id = guruTask.Id,
+                              status = status,
+                              time_cost ="",
+                              note = note,
+                              poster = "mobile_api"
+                          });
+                          Log("xwebItem success " + result);
                           return result;
                       });
         }
