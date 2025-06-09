@@ -100,7 +100,7 @@ namespace PropnexPoster.WPF
 #if DEBUG
             taskDto = new PnTaskDto()
             {
-                Number = "1216664.guru.tsk"
+                Number = "1223270.guru.tsk"
             };
             var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
             var lenght = context.IndexOf("Xpressor-Listing-File===");
@@ -278,7 +278,8 @@ namespace PropnexPoster.WPF
                                                 var project = (await _projectsApi.GetProjectAsync(int.Parse(locale.ObjectId))).Data;
                                                 if (project != null && project.addresses != null && project.addresses.Count > 0)
                                                 {
-                                                    createOrUpdateListing.location.id = int.Parse(project.addresses[0].external_id);
+                                                    project.addresses = project.addresses.Where(q => q.external_id != null).ToList();
+                                                    createOrUpdateListing.location.id = int.Parse(project.addresses[1].external_id);
                                                     result = await _api.CreateAsync(createOrUpdateListing);
                                                     if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
                                                     {
@@ -1040,8 +1041,8 @@ namespace PropnexPoster.WPF
                 if (i == 20)
                     break;
                 var title = "";
-                if (guruTaskListing.Videos[i].Split("#").Length > 1)
-                    title = guruTaskListing.Videos[i].Split("#")[1];
+                if (guruTaskListing.Photos[i].Split("#").Length > 1)
+                    title = guruTaskListing.Photos[i].Split("#")[1];
                 var filePath = $"{path}{i}_image.jpg";
                 try
                 {
@@ -1063,13 +1064,16 @@ namespace PropnexPoster.WPF
                     DownClient webClient = new DownClient();
                     webClient.DownloadFile(guruTaskListing.Photos[i], filePath);
                     Log("download photo complete");
-                    result = await _api.UploadPhotoAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
+                    result = await _api.UploadPhotoAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath,title);
                     if (result.HttpStatusCode != System.Net.HttpStatusCode.OK && result.HttpStatusCode != HttpStatusCode.BadRequest)
                     {
                         break;
                     }
                 }
-                catch { }
+                catch 
+                { 
+                
+                }
             }
             return result;
         }
@@ -1155,8 +1159,8 @@ namespace PropnexPoster.WPF
 
                 var url = guruTaskListing.Tours[i].ToLower();
                 var title = "";
-                if (guruTaskListing.Videos[i].Split("#").Length > 1)
-                    title = guruTaskListing.Videos[i].Split("#")[1];
+                if (guruTaskListing.Tours[i].Split("#").Length > 1)
+                    title = guruTaskListing.Tours[i].Split("#")[1];
                 var filePath = $"{path}{i}_vt.mp4";
                 if (url.Contains("youtube") ||
                     url.Contains("youtu.be") ||
@@ -1196,7 +1200,7 @@ namespace PropnexPoster.WPF
                         filePath = "";
                     }
                 }
-                result = await _api.UplaodVirtualTours($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
+                result = await _api.UplaodVirtualTours($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath,title);
                 if (result.HttpStatusCode != System.Net.HttpStatusCode.OK)
                 {
                     break;
@@ -1219,8 +1223,8 @@ namespace PropnexPoster.WPF
                 if (i == 20)
                     break;
                 var title = "";
-                if (guruTaskListing.Videos[i].Split("#").Length > 1)
-                    title = guruTaskListing.Videos[i].Split("#")[1];
+                if (guruTaskListing.FloorPlan[i].Split("#").Length > 1)
+                    title = guruTaskListing.FloorPlan[i].Split("#")[1];
                 var filePath = $"{path}{i}_fp.jpg";
                 try
                 {
@@ -1234,7 +1238,7 @@ namespace PropnexPoster.WPF
                     DownClient webClient = new DownClient();
                     webClient.DownloadFile(guruTaskListing.FloorPlan[i], filePath);
                     Log("download FloorPlan complete");
-                    result = await _api.UploadFlooplan($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath);
+                    result = await _api.UploadFlooplan($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
                     if (result.HttpStatusCode != System.Net.HttpStatusCode.OK)
                     {
                         break;

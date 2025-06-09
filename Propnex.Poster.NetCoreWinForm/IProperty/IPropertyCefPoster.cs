@@ -289,36 +289,44 @@ namespace Propnex.Poster.NetCoreWinForm
             {
                 listingId = listing.Id;
             }
+            propnexListing.Details["data_step1"] = propnexListing.Details["data_step1"].Replace("\"location\":[]", "\"location\":{}");
+            addListingMutationDto = JsonConvert.DeserializeObject<IProperty.V1.RequestDataV1<IProperty.V1.Variables<IProperty.V1.AddListingMutationDto>>>(propnexListing.Details["data_step1"]);
 
-            var refUrl = $"https://www.iproperty.com.my/pro/edit-listing/listing-details/{listingId}";
-            var resultListingDetails = await listingDetails();
-            if (resultListingDetails.Status == PosterActionResultStatus.Success)
-                listingId = resultListingDetails.Data;
-            else
-            {
-                await PublishMessageAsync(resultListingDetails.Message);
-                return new PosterActionResult()
-                {
-                    Data = listingId,
-                    Message = resultListingDetails.Message,
-                    Status = PosterActionResultStatus.Error
-                };
+            locationDto = JsonConvert.DeserializeObject<IProperty.V1.RequestDataV1<IProperty.V1.Variables<IProperty.V1.LocationDto>>>(propnexListing.Details["data_location"].Replace("\"extension\":[]", "\"extension\":{}"));
 
-            }
+            propnexListing.Details["data_details"] = propnexListing.Details["data_details"].Replace("\"location\":[]", "\"location\":{}");
+            propertyDetailsDto = JsonConvert.DeserializeObject<IProperty.V1.RequestDataV1<IProperty.V1.Variables<IProperty.V1.PropertyDetailsDto>>>(propnexListing.Details["data_details"]);
 
-            //var resultLocation = await location(propnexListing, listingId, $"https://www.iproperty.com.my/pro/edit-listing/location/{listingId}");
-            //if (resultLocation.Status == PosterActionResultStatus.Error)
+            //var refUrl = $"https://www.iproperty.com.my/pro/edit-listing/listing-details/{listingId}";
+            //var resultListingDetails = await listingDetails();
+            //if (resultListingDetails.Status == PosterActionResultStatus.Success)
+            //    listingId = resultListingDetails.Data;
+            //else
             //{
-            //    await PublishMessageAsync(resultLocation.Message);
+            //    await PublishMessageAsync(resultListingDetails.Message);
             //    return new PosterActionResult()
             //    {
             //        Data = listingId,
-            //        Message = resultLocation.Message,
+            //        Message = resultListingDetails.Message,
             //        Status = PosterActionResultStatus.Error
             //    };
+
             //}
 
-            var resultProperytDetails = await propertyDetails(propnexListing, listingId, $"https://www.iproperty.com.my/pro/edit-listing/property-details/{listingId}");
+            var resultLocation = await updatelocation(propnexListing, int.Parse(listingId), $"https://www.iproperty.com.my/pro/edit-listing/location/{listingId}");
+            if (resultLocation.Status == PosterActionResultStatus.Error)
+            {
+                await PublishMessageAsync(resultLocation.Message);
+                return new PosterActionResult()
+                {
+                    Data = listingId,
+                    Message = resultLocation.Message,
+                    Status = PosterActionResultStatus.Error
+                };
+            }
+
+            listingId = resultLocation.Data.Id;
+            var resultProperytDetails = await propertyDetails(propnexListing, listingId);
             if (resultProperytDetails.Status == PosterActionResultStatus.Error)
             {
                 await PublishMessageAsync(resultProperytDetails.Message);
@@ -331,7 +339,8 @@ namespace Propnex.Poster.NetCoreWinForm
             }
 
 
-            var resultDescriptionMedial = await descriptionMedial(propnexListing, listingId, $"https://www.iproperty.com.my/pro/edit-listing/description-and-media/{listingId}");
+
+            var resultDescriptionMedial = await descriptionMedial(propnexListing, listingId);
             if (resultDescriptionMedial.Status == PosterActionResultStatus.Error)
             {
                 await PublishMessageAsync(resultDescriptionMedial.Message);
@@ -342,48 +351,13 @@ namespace Propnex.Poster.NetCoreWinForm
                     Status = PosterActionResultStatus.Error
                 };
             }
+
             return new PosterActionResult()
             {
                 Status = PosterActionResultStatus.Success,
                 Message = resultDescriptionMedial.Message
+
             };
-            async Task<PosterActionResult<string>> listingDetails()
-            {
-                propnexListing.Details["data_step1"] = propnexListing.Details["data_step1"].Replace("\"location\":[]", "\"location\":{}");
-                addListingMutationDto = JsonConvert.DeserializeObject<IProperty.V1.RequestDataV1<IProperty.V1.Variables<IProperty.V1.AddListingMutationDto>>>(propnexListing.Details["data_step1"]);
-                var updateListingMutationDto = JsonConvert.DeserializeObject<IProperty.V1.RequestDataV1<IProperty.V1.Variables<IProperty.V1.UpdateListingMutationDto>>>(propnexListing.Details["data_step1"]);
-                updateListingMutationDto.query = null;
-                updateListingMutationDto.variables.input.id = listingId;
-                updateListingMutationDto.OperationName = "updateListingInfo";
-                updateListingMutationDto.variables.shouldExtendsFields = true;
-                updateListingMutationDto.extensions.persistedQuery.Sha256Hash = "696299734d38d07dac5e4571217cf4ecd35b8147c72822e8cf7b0b92f8e06e96";
-                string jsonData = JsonConvert.SerializeObject(updateListingMutationDto, jsonSerialzerSettings);
-
-
-                return await GetPolicy<string>().ExecuteAsync(async (ctx) =>
-                {
-                    var result = await AjaxJsonPostAsync("https://www.iproperty.com.my/pro/rasor/graphql/updateListingInfo", "refUrl", data: jsonData);
-                    if (result.Contains("PERSISTED_QUERY_NOT_FOUND"))
-                    {
-                        await PublishMessageAsync(result);
-                        throw new Exception("PERSISTED_QUERY_NOT_FOUND");
-                    }
-                    if (result.Contains("errors"))
-                    {
-                        throw new Exception(result);
-                    }
-                    _logger.Information(result);
-                    var data = JsonConvert.DeserializeObject<IProperty.V1.ResponseDataV1<UpdateListingPayloadV1>>(result);
-                    listingId = data?.Data.updateListing.listing.Id;
-                    await PublishMessageAsync($"update listing details success,listing is is {listingId}");
-                    return new PosterActionResult<string>()
-                    {
-                        Data = listingId,
-                        Status = PosterActionResultStatus.Success
-                    };
-
-                }, new Context("listingDetails"));
-            }
         }
 
 
@@ -690,7 +664,7 @@ namespace Propnex.Poster.NetCoreWinForm
             }
         }
 
-        public async Task<PosterActionResult<AddListingDto>> updatelocation(PropnexListing propnexListing,int id)
+        public async Task<PosterActionResult<AddListingDto>> updatelocation(PropnexListing propnexListing, int id, string action = "")
         {
 
             string buildingText = "";
@@ -768,12 +742,12 @@ namespace Propnex.Poster.NetCoreWinForm
                 {
                     persistedQuery = new IProperty.PersistedQuery
                     {
-                        Sha256Hash = "d6797c24744e9c772977451f0dd7270ab0e622a483ffc8676d6accdd997036ae",
+                        Sha256Hash = "696299734d38d07dac5e4571217cf4ecd35b8147c72822e8cf7b0b92f8e06e96",
                         Version = 1
                     }
                 },
                 OperationName = "updateListingInfo",
-                query = query,
+                //query = query,
                 variables = new InputDto<UpdateStupeLocationDto>() { Input = stupeLocationDto }
             };
 
@@ -782,13 +756,18 @@ namespace Propnex.Poster.NetCoreWinForm
 
             var listing = await GetPolicy<AddListingDto>().ExecuteAsync(async (ctx) =>
             {
-                string addListingMutationUrl = "https://www.iproperty.com.my/pro/rasor/graphql/addListingMutation";
+                string addListingMutationUrl = "https://www.iproperty.com.my/pro/rasor/graphql/updateListingInfo";
 
-                var result = await AjaxJsonPostAsync(addListingMutationUrl, "https://www.iproperty.com.my/pro/add-listing/location", data: JsonConvert.SerializeObject(addListingMutationInput, jsonSerialzerSettings));
+                var result = await AjaxJsonPostAsync(addListingMutationUrl, action, data: JsonConvert.SerializeObject(addListingMutationInput, jsonSerialzerSettings));
                 if (result.Contains("PERSISTED_QUERY_NOT_FOUND"))
                 {
                     await PublishMessageAsync(result);
                     throw new Exception("PERSISTED_QUERY_NOT_FOUND");
+                }
+                if (result.Contains("provided sha does not match query"))
+                {
+                    await PublishMessageAsync(result);
+                    throw new Exception("provided sha does not match query");
                 }
                 // await Task.Delay(60 * 1000 * 2);
                 if (result.Contains("errors"))
@@ -798,11 +777,11 @@ namespace Propnex.Poster.NetCoreWinForm
 
                 try
                 {
-                    var listing = JsonConvert.DeserializeObject<ResponseData<AddListingPayload>>(result);
-                    await PublishMessageAsync($"create listing details success,listing is is {listing.Data.addListing.listing.Id}");
+                    var listing = JsonConvert.DeserializeObject<ResponseData<UpdateListingPayload>>(result);
+                    await PublishMessageAsync($"create listing details success,listing is is {listing.Data.updateListing.listing.Id}");
                     return new PosterActionResult<AddListingDto>()
                     {
-                        Data = listing.Data.addListing.listing,
+                        Data = listing.Data.updateListing.listing,
                         Status = PosterActionResultStatus.Success
                     };
                 }
@@ -848,6 +827,7 @@ namespace Propnex.Poster.NetCoreWinForm
         }
 
 
+        
 
 
         public async Task<PosterActionResult<Listing>> propertyDetails(PropnexListing propnexListing, string listingId, string action = "")
@@ -889,10 +869,76 @@ namespace Propnex.Poster.NetCoreWinForm
                 input.isAuction = addListingMutationDto.variables.input.isAuction;
                 input.auctionDate = addListingMutationDto.variables.input.auctionDate;
                 input.listingRefNo = addListingMutationDto.variables.input.listingRefNo;
+                input.isPostCrossListing = false;
 
                 var result = await AjaxJsonPostAsync("https://www.iproperty.com.my/pro/rasor/graphql/updateListingInfo", refUrl, data: JsonConvert.SerializeObject(propertyDetailsDtov2, jsonSerialzerSettings));
 
-                //await Delay(60);
+                await Delay(60);
+               if (result.Contains("PersistedQueryNotFound"))
+                {
+                    throw new Exception("PersistedQueryNotFound");
+                }
+                if (result.Contains("errors"))
+                {
+                    throw new Exception(result);
+                }
+                var listing = JsonConvert.DeserializeObject<ResponseDataV1<UpdateListingPayloadV1>>(result);
+                await PublishMessageAsync($"propertyDetails success,{listingId}");
+                return new PosterActionResult<Listing>()
+                {
+                    Data = listing.Data.updateListing.listing,
+                    Status = PosterActionResultStatus.Success
+                };
+            }, new Context("propertyDetails"));
+
+            return result;
+
+        }
+
+        public async Task<PosterActionResult<Listing>> updatePropertyDetails(PropnexListing propnexListing, string listingId, string action = "")
+        {
+            var refUrl = $"https://www.iproperty.com.my/pro/add-listing/location/{listingId}";
+            if (string.IsNullOrEmpty(action) == false)
+            {
+                refUrl = action;
+            }
+
+            var result = await GetPolicy<Listing>().ExecuteAsync(async (ctx) =>
+            {
+                //propnexListing.Details["data_details"] = propnexListing.Details["data_details"].Replace("\"location\":[]", "\"location\":{}");
+                var propertyDetailsDtov2 = JsonConvert.DeserializeObject<RequestData<Variables<IProperty.PropertyDetailsDto>>>(propnexListing.Details["data_details"]);
+                var input = propertyDetailsDtov2.variables.input;
+                input.id = listingId;
+                propertyDetailsDtov2.extensions.persistedQuery.Sha256Hash = "696299734d38d07dac5e4571217cf4ecd35b8147c72822e8cf7b0b92f8e06e96";
+                if (input.photo360s.Count == 0)
+                {
+                    input.photo360s = null;
+                }
+                if (input.images.Count == 0)
+                {
+                    input.images = null;
+                }
+                if (input.floorPlans.Count == 0)
+                {
+                    input.floorPlans = null;
+                }
+                if (propertyDetailsDto.variables.input.buildingFacilityCodes != null)
+                {
+                    input.buildingFacilityCodes = propertyDetailsDto.variables.input.buildingFacilityCodes;
+                }
+                input.saleableAreaMeasurementCode = propertyDetailsDto.variables.input.saleableAreaMeasurementCode;
+
+                input.extension.isCoAgency = addListingMutationDto.variables.input.extension.isCoAgency;
+
+                input.channelCode = addListingMutationDto.variables.input.channelCode;
+                input.isAuction = addListingMutationDto.variables.input.isAuction;
+                input.auctionDate = addListingMutationDto.variables.input.auctionDate;
+                input.listingRefNo = addListingMutationDto.variables.input.listingRefNo;
+                input.isPostCrossListing = false;
+
+                var result = await AjaxJsonPostAsync("https://www.iproperty.com.my/pro/rasor/graphql/updateListingInfo", refUrl, data: JsonConvert.SerializeObject(propertyDetailsDtov2, jsonSerialzerSettings));
+
+                await Delay(60);
                 if (result.Contains("PersistedQueryNotFound"))
                 {
                     throw new Exception("PersistedQueryNotFound");
@@ -1582,7 +1628,7 @@ namespace Propnex.Poster.NetCoreWinForm
             {
                 Number = "28984.cef.tsk"
             };
-            propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"D:\\{PnTaskDto.Number}"));
+            propnexTasks = _propnexTaskProvider.Get(System.IO.File.ReadAllText($"E:\\{PnTaskDto.Number}"));
             if (propnexTasks == null)
             {
                 await PublishMessageAsync("Not find tasks ,dealy 1 min");

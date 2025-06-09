@@ -12,7 +12,7 @@ namespace Propnex.Poster.IProperty
 
     public class UpdateListingPayload
     {
-        public Payload<V1.Listing> updateListing { get; set; }
+        public Payload<AddListingDto> updateListing { get; set; }
     }
 
     public class PublishListingPayload

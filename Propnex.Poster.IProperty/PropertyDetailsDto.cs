@@ -162,6 +162,9 @@ namespace Propnex.Poster.IProperty
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int? directionCode { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public bool? isPostCrossListing { get; set; } = null;
+
         /// <summary>
         /// 
         /// </summary>
