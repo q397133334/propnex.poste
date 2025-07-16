@@ -100,7 +100,7 @@ namespace PropnexPoster.WPF
 #if DEBUG
             taskDto = new PnTaskDto()
             {
-                Number = "1223270.guru.tsk"
+                Number = "1235731.guru.tsk"
             };
             var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
             var lenght = context.IndexOf("Xpressor-Listing-File===");
@@ -1349,18 +1349,18 @@ namespace PropnexPoster.WPF
                     if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
                     {
                         addListing(result.Data.listings);
-                    }
-                    while (result.Data.page < result.Data.totalPages)
-                    {
-                        result = await mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
+                        while (result.Data.page < result.Data.totalPages)
                         {
-                            Page = (result.Data.page + 1).ToString()
-                        });
-                        if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                        {
-                            addListing(result.Data.listings);
+                            result = await mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
+                            {
+                                Page = (result.Data.page + 1).ToString()
+                            });
+                            if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                            {
+                                addListing(result.Data.listings);
+                            }
                         }
-                    }
+                    }  
                 }
                 catch
                 {

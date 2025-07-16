@@ -166,7 +166,6 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     unit = $"{detialss.FindAttribute("Name", "property_level_number").GetAttributeValue("Value", "01")}-{detialss.FindAttribute("Name", "property_unit_number").GetAttributeValue("Value", "01")}",
                     streetName1 = detialss.FindAttribute("Name", "streetname").GetAttributeValue("Value", ""),
                     hdbEstateCode = detialss.FindAttribute("Name", "hdb_estate").GetAttributeValue("Value", "")
-
                 };
 
                 listingModel.Property = new Property()
@@ -177,8 +176,12 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     typeGroup = detialss.FindAttribute("Name", "property_type_group").GetAttributeValue("Value", "N"),
                     floors = projectDatas.FindAttribute("Name", "floors").GetAttributeValue("Value", 0),
                     tenureCode = detialss.FindAttribute("Name", "tenure").GetAttributeValue("Value", ""),
-
                 };
+
+                if(listingModel.Property.typeGroup=="L")
+                {
+                    listingModel.Location.maskLocation = true;
+                }
 
                 listingModel.PropertyUnit = new PropertyUnit();
                 listingModel.PropertyUnit.floorLevelCode = detialss.FindAttribute("Name", "floor_level").GetAttributeValue("Value", "").ToUpper();
@@ -250,9 +253,22 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                 }
                 listingModel.PropertyUnit.hdbTypeCode = detialss.FindAttribute("Name", "hdb_type").GetAttributeValue<string>("Value", null);
                 listingModel.PropertyUnit.ceilingHeight = detialss.FindAttribute("Name", "ceiling_height").GetAttributeValue<string>("Value", null);
+                if(string.IsNullOrEmpty(listingModel.PropertyUnit.ceilingHeight))
+                {
+                    listingModel.PropertyUnit.ceilingHeight = null;
+                }
                 listingModel.PropertyUnit.electricitySupply = detialss.FindAttribute("Name", "electricity_supply").GetAttributeValue<int?>("Value", null);
                 listingModel.PropertyUnit.electricityPhase = detialss.FindAttribute("Name", "electricity_phase").GetAttributeValue<string>("Value", null);
+                if (string.IsNullOrEmpty(listingModel.PropertyUnit.electricityPhase))
+                {
+                    listingModel.PropertyUnit.electricityPhase = null;
+                }
                 listingModel.PropertyUnit.floorLoading = detialss.FindAttribute("Name", "floor_loading").GetAttributeValue<string>("Value", null);
+                if (string.IsNullOrEmpty(listingModel.PropertyUnit.floorLoading))
+                {
+                    listingModel.PropertyUnit.floorLoading = null;
+                }
+
 
                 if (detialss.FindAttribute("Name", "srx_tenanted").GetAttributeValue("Value", "") == "Yes")
                 {

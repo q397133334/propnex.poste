@@ -470,6 +470,8 @@ namespace Propnex.Poster.PropertyGuru.Listing
         /// 
         /// </summary>
         public string subZoneIds { get; set; }
+
+        public bool maskLocation { get; set; } = false;
     }
 
     public class AmenitiesItem
