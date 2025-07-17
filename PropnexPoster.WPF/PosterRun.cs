@@ -88,13 +88,14 @@ namespace PropnexPoster.WPF
             {
                 TaskNumber = "Get Task ...."
             };
+
             TaskInfoEvent?.Invoke(posterRunInfo);
         }
 
 
         public async Task Run()
         {
-
+            await WebServer.PosterPing();
             Log("Get Task .....");
             //1.获取任务信息
 #if DEBUG

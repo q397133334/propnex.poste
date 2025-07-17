@@ -174,6 +174,22 @@ namespace PropnexPoster.WPF
             });
         }
 
+        public static async Task PosterPing()
+        {
+            try
+            {
+                await CallBack(async () =>
+                {
+                    await $"https://pa-production.propnex.net/index.php/tools/posterPing?name={MachindNumber}".GetAsync();
+                });
+            }
+            catch
+            {
+
+            }
+
+        }
+
         public static async Task PingAsync()
         {
             Ping ping = new Ping();
@@ -182,7 +198,7 @@ namespace PropnexPoster.WPF
                 .OrResult<PingReply>(pr => pr.Status != IPStatus.Success)
                 .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
                 {
-                    
+
                 });
             await pingRetryPolicy.ExecuteAsync(async () =>
              {
