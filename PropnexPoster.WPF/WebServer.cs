@@ -178,10 +178,7 @@ namespace PropnexPoster.WPF
         {
             try
             {
-                await CallBack(async () =>
-                {
-                    await $"https://pa-production.propnex.net/index.php/tools/posterPing?name={MachindNumber}".GetAsync();
-                });
+                await $"https://pa-production.propnex.net/index.php/tools/posterPing?name={MachindNumber}".GetAsync();
             }
             catch
             {
