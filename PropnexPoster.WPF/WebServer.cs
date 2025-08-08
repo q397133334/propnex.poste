@@ -137,23 +137,45 @@ namespace PropnexPoster.WPF
 
             return await CallBack<string>(async () =>
             {
-                return await url.GetStringAsync();
+                try
+                {
+                    return await url.GetStringAsync();
+                }
+                catch
+                {
+                    return "";
+                }
             });
         }
 
         public static async Task UpdateMachineAsync()
         {
-            string url = $"{BaseUrl}/api/app/machine/{MachindNumber}/online";
-            await url.PutAsync();
+            try
+            {
+                string url = $"{BaseUrl}/api/app/machine/{MachindNumber}/online";
+                await url.PutAsync();
+            }
+            catch
+            {
+
+            }
         }
 
         public static async Task<PnUserDto> GetUser(string account)
         {
             return await CallBack<PnUserDto>(async () =>
             {
-                var userDto = await $"{BaseUrl}/api/app/pn-user/user?account={account}".GetJsonAsync<PnUserDto>();
-                if (userDto.Account != "")
-                    return userDto;
+                try
+                {
+                    var userDto = await $"{BaseUrl}/api/app/pn-user/user?account={account}".GetJsonAsync<PnUserDto>();
+                    if (userDto.Account != "")
+                        return userDto;
+                }
+                catch(Exception ex)
+                {
+
+                }
+                
                 return null;
             });
         }
@@ -162,7 +184,15 @@ namespace PropnexPoster.WPF
         {
             await CallBack(async () =>
             {
-                await $"{BaseUrl}/api/app/pn-user".PutJsonAsync(userDto);
+                try
+                {
+                    await $"{BaseUrl}/api/app/pn-user".PutJsonAsync(userDto);
+                }
+                catch
+                {
+
+                }
+                
             });
         }
 
@@ -170,7 +200,15 @@ namespace PropnexPoster.WPF
         {
             await CallBack(async () =>
             {
-                await $"{BaseUrl}/api/app/pn-user/upate-token".PostJsonAsync(userDto);
+                try
+                {
+                    await $"{BaseUrl}/api/app/pn-user/upate-token".PostJsonAsync(userDto);
+                }
+                catch
+                {
+
+                }
+                
             });
         }
 

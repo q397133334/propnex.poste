@@ -216,7 +216,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddParameter("mediaType", mediaType);
             request.AddParameter("userId", $"{Token.User.UserId}");
             request.AddParameter("source", "AgentNet");
-            request.AddParameter("sortOrder", 1);
+            request.AddParameter("sortOrder", sortOrder);
             request.AddParameter("caption", title);
             request.AddParameter("statusCode", "ACT");
             var filePathLower = filePath.ToLower();
