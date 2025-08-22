@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Propnex.Poster.Dtos", "Prop
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Propnex.Poster.WebServer", "Propnex.Poster.WebServer\Propnex.Poster.WebServer.csproj", "{7A0722A2-085A-4CA8-A92F-6E65EC3ADE78}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Propnex.Poster.WinFrmGuru", "Propnex.Poster.WinFrmGuru\Propnex.Poster.WinFrmGuru.csproj", "{9CCAAB36-3F84-4FCA-822E-67A047805A12}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Propnex.Poster.Share", "Propnex.Poster.Share\Propnex.Poster.Share.csproj", "{62A446E9-B73C-4F3C-ACF6-F625DBA08129}"
 EndProject
 Global
@@ -25,10 +23,6 @@ Global
 		{7A0722A2-085A-4CA8-A92F-6E65EC3ADE78}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A0722A2-085A-4CA8-A92F-6E65EC3ADE78}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A0722A2-085A-4CA8-A92F-6E65EC3ADE78}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9CCAAB36-3F84-4FCA-822E-67A047805A12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9CCAAB36-3F84-4FCA-822E-67A047805A12}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9CCAAB36-3F84-4FCA-822E-67A047805A12}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9CCAAB36-3F84-4FCA-822E-67A047805A12}.Release|Any CPU.Build.0 = Release|Any CPU
 		{62A446E9-B73C-4F3C-ACF6-F625DBA08129}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{62A446E9-B73C-4F3C-ACF6-F625DBA08129}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62A446E9-B73C-4F3C-ACF6-F625DBA08129}.Release|Any CPU.ActiveCfg = Release|Any CPU

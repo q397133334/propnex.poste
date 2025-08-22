@@ -3,7 +3,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Propnex.Poster.PropertyGuru.Mobile;
 using Volo.Abp;
 using Volo.Abp.Autofac;
 using Volo.Abp.Modularity;
@@ -30,10 +29,6 @@ namespace Propnex.Poster.Test
         public override void ConfigureServices(ServiceConfigurationContext context)
         {
             //注册一个singleton实例
-            context.Services.AddTransient<Auth>();
-            context.Services.AddTransient<Mobile>();
-            context.Services.AddTransient<Api>();
-            context.Services.AddTransient<ProjectsApi>();
             context.Services.AddTransient<IPropnexTaskProvider,DefaultPropnexTaskProvider>();
         }
     }

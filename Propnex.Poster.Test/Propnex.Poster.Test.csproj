@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -21,8 +21,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Propnex.Poster.Dtos\Propnex.Poster.Dtos\Propnex.Poster.Dtos.csproj" />
     <ProjectReference Include="..\Propnex.Poster.IProperty\Propnex.Poster.IProperty.csproj" />
-    <ProjectReference Include="..\Propnex.Poster.PropertyGuru.Mobile\Propnex.Poster.PropertyGuru.Mobile.csproj" />
-    <ProjectReference Include="..\Propnex.Poster.PropertyGuru\Propnex.Poster.PropertyGuru.csproj" />
     <ProjectReference Include="..\Propnex.Task\Propnex.csproj" />
   </ItemGroup>
 

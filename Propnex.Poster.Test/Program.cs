@@ -1,7 +1,4 @@
-﻿using Propnex.Poster.PropertyGuru;
-using Propnex.Poster.PropertyGuru.Mobile;
-using Propnex.Poster.PropertyGuru.Mobile.Dto;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

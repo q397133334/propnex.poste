@@ -945,7 +945,7 @@ namespace Propnex.Poster.NetCoreWinForm
                 using (RestClient client = new RestClient())
                 {
                     RestRequest request = new RestRequest();
-                    request.Timeout = 6000;
+                    //request.Timeout = 6000;
                     request.Method = Method.Get;
                     request.Resource = url;
                     file = await client.DownloadDataAsync(request).ConfigureAwait(false);

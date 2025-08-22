@@ -24,7 +24,7 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
         {
             var repository = workerContext.ServiceProvider.GetRequiredService<IRepository<PnTask>>();
             var mm = workerContext.ServiceProvider.GetService<IStringEncryptionService>();
-            var a= mm.Encrypt("c85898ae765fcdb9fc3c1a347d2b6e66-2ae2c6f3-aa147286");
+            var a= mm.Encrypt("");
             var waitCount = (await repository.GetQueryableAsync()).Where(q => q.Status == Share.TaskStatus.Wait).Count();
             if (waitCount > 100 && (SendTime < DateTime.Now.AddDays(-1)))
             {
@@ -32,15 +32,15 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
                 {
                     clinet.Connect("smtp.mailgun.org", 587, false);
                     //clinet.AuthenticationMechanisms.Remove("XOAUTH2");
-                    clinet.Authenticate("postmaster@mg1.propnex.net", "c85898ae765fcdb9fc3c1a347d2b6e66-2ae2c6f3-aa147286");
+                    clinet.Authenticate("", "");
 
                     var message = new MimeKit.MimeMessage();
-                    message.From.Add(new MailboxAddress("postmaster", "postmaster@mg1.propnex.net"));
-                    message.To.Add(new MailboxAddress("523291540@qq.com", "523291540@qq.com"));
-                    message.To.Add(new MailboxAddress("ymail2000@gmail.com", "ymail2000@gmail.com"));
-                    message.To.Add(new MailboxAddress("michael.koh@propnex.com", "michael.koh@propnex.com"));
-                    message.To.Add(new MailboxAddress("lindachan@propnex.com", "lindachan@propnex.com"));
-                    message.Subject = string.Format($"HIGH ALERT! Poster Detected. Please check", "523291540@qq.com,ymail2000@gmail.com,michael.koh@propnex.com,lindachan@propnex.com");
+                    message.From.Add(new MailboxAddress("postmaster", ""));
+                    message.To.Add(new MailboxAddress("@qq.com", ""));
+                    message.To.Add(new MailboxAddress("@gmail.com", ""));
+                    message.To.Add(new MailboxAddress("@propnex.com", ""));
+                    message.To.Add(new MailboxAddress("@propnex.com", ""));
+                    message.Subject = string.Format($"HIGH ALERT! Poster Detected. Please check", "@qq.com,@gmail.com,@propnex.com,@propnex.com");
 
                     message.Body = new TextPart("plain")
                     {
