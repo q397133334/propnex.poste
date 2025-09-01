@@ -98,7 +98,7 @@ namespace PropnexPoster.WPF
             await WebServer.PosterPing();
             Log("Get Task .....");
             //1.获取任务信息
-#if DEBUG
+#if !DEBUG
             taskDto = new PnTaskDto()
             {
                 Number = "1235731.guru.tsk"

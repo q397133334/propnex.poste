@@ -33,7 +33,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 UseDefaultCredentials = true,
                 UserAgent = "okhttp/4.12.0"
             });
-            client.AddDefaultHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2024.8.26;M973Q;null");
+            client.AddDefaultHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2025.8.20;SM-N9760;null");
             Log?.Invoke($"client {baseUrl}");
             clientRetryPolicy = Policy
                 .Handle<Exception>()
@@ -61,7 +61,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             { 
                 
             };
-            client.AddDefaultHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2024.8.26;M973Q;null");
+            client.AddDefaultHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2025.8.20;SM-N9760;null");
             Log?.Invoke($"client {baseUrl}");
             clientRetryPolicy = Policy
                 .Handle<Exception>()
@@ -88,7 +88,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             RestRequest request = new RestRequest();
             //request.AddHeader("x-clientid", "L7C9YKV9-ESF3606Q-GHF9H1F5-8LJMKRO5");
             //request.AddHeader("x-clientsecret", "jjiF916yVwfCRQEJtS6loHVDZ16mWPWf");
-            request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2024.8.26;M973Q;null");
+            request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2025.8.20;SM-N9760;null");
             request.Timeout = new TimeSpan(0, 5, 0);// 1000 * 60 * 10;
 
             return request;
@@ -99,7 +99,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             RestRequest request = new RestRequest();
             //request.AddHeader("x-clientid", "L7C9YKV9-ESF3606Q-GHF9H1F5-8LJMKRO5");
             //request.AddHeader("x-clientsecret", "jjiF916yVwfCRQEJtS6loHVDZ16mWPWf");
-            request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2024.8.26;M973Q;null");
+            request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2025.8.20;SM-N9760;null");
             request.Method = method;
             request.Timeout = new TimeSpan(0, 5, 0);// 1000 * 60 * 10;
             request.Resource = resource;

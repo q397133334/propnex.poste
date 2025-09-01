@@ -135,18 +135,18 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddParameter("locale", "en");
             request.AddParameter("region", "sg");
             request.AddParameter("agentId", $"{Token.User.AgentId}");
-            request.AddParameter("status_code[]", "ACT");
-            request.AddParameter("status_code[]", "COMP");
-            request.AddParameter("status_code[]", "DEL");
-            request.AddParameter("status_code[]", "DRAFT");
-            request.AddParameter("status_code[]", "EXP");
-            request.AddParameter("status_code[]", "SUSP");
-            request.AddParameter("status_code[]", "PAUSE");
-            request.AddParameter("include_suspended_photos", "1");
-            request.AddParameter("forceMasterConnection", "1");
+            //request.AddParameter("status_code[]", "ACT");
+            //request.AddParameter("status_code[]", "COMP");
+            //request.AddParameter("status_code[]", "DEL");
+            //request.AddParameter("status_code[]", "DRAFT");
+            //request.AddParameter("status_code[]", "EXP");
+            //request.AddParameter("status_code[]", "SUSP");
+            //request.AddParameter("status_code[]", "PAUSE");
+            //request.AddParameter("include_suspended_photos", "1");
+            //request.AddParameter("forceMasterConnection", "1");
 
-            //request.AddParameter("include_suspended_photos", "true");
-            //request.AddParameter("status_code", statusCode);
+            request.AddParameter("include_suspended_photos", "true");
+            request.AddParameter("status_code", statusCode);
 
             var response = await ExecuteAsync(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
