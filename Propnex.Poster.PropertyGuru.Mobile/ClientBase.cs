@@ -26,21 +26,21 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 
         public ClientBase(string baseUrl)
         {
+
             client = new RestSharp.RestClient(new RestClientOptions()
             {
                 BaseUrl = new Uri(baseUrl),
-                MaxTimeout = 1000 * 60 * 10,
                 UseDefaultCredentials = true,
-                UserAgent = "okhttp/4.12.0"
+                UserAgent = ""
             });
-            client.AddDefaultHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2024.8.26;M973Q;null");
+            client.AddDefaultHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2025.8.20;M973Q;null;");
             Log?.Invoke($"client {baseUrl}");
             clientRetryPolicy = Policy
                 .Handle<Exception>()
                  .OrResult<RestResponse>(response =>
                  response.ResponseStatus == ResponseStatus.TimedOut ||
                  response.ResponseStatus == ResponseStatus.Aborted) //||
-                 //response.ResponseStatus == ResponseStatus.Error)
+                                                                    //response.ResponseStatus == ResponseStatus.Error)
                 .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
                 {
                     LogHttpResponseMessage?.Invoke($"{ex.Result.Request.Resource} {ex.Result.ResponseStatus}", ex.Result);
@@ -58,17 +58,17 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 Proxy = new System.Net.WebProxy(ip, int.Parse(port)),
 
             })
-            { 
-                
+            {
+
             };
-            client.AddDefaultHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2024.8.26;M973Q;null");
+            client.AddDefaultHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2025.8.21;M973Q;null;LEGACY");
             Log?.Invoke($"client {baseUrl}");
             clientRetryPolicy = Policy
                 .Handle<Exception>()
                  .OrResult<RestResponse>(response =>
                  response.ResponseStatus == ResponseStatus.TimedOut ||
-                 response.ResponseStatus == ResponseStatus.Aborted )//||
-                 //response.ResponseStatus == ResponseStatus.Error)
+                 response.ResponseStatus == ResponseStatus.Aborted)//||
+                                                                   //response.ResponseStatus == ResponseStatus.Error)
 
                 .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
                 {
@@ -78,8 +78,9 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 
         public async Task<RestResponse> ExecuteAsync(RestRequest restRequest, RestClient _client = null)
         {
+           
             _client = _client == null ? client : _client;
-            
+
             return await clientRetryPolicy.ExecuteAsync(async () => { return await _client.ExecuteAsync(restRequest); });
         }
 
@@ -88,9 +89,9 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             RestRequest request = new RestRequest();
             //request.AddHeader("x-clientid", "L7C9YKV9-ESF3606Q-GHF9H1F5-8LJMKRO5");
             //request.AddHeader("x-clientsecret", "jjiF916yVwfCRQEJtS6loHVDZ16mWPWf");
-            request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2024.8.26;M973Q;null");
+            request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2025.8.21;M973Q;null;");
             request.Timeout = new TimeSpan(0, 5, 0);// 1000 * 60 * 10;
-
+            request.Version = new Version(2, 0);
             return request;
         }
 
@@ -99,10 +100,11 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             RestRequest request = new RestRequest();
             //request.AddHeader("x-clientid", "L7C9YKV9-ESF3606Q-GHF9H1F5-8LJMKRO5");
             //request.AddHeader("x-clientsecret", "jjiF916yVwfCRQEJtS6loHVDZ16mWPWf");
-            request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2024.8.26;M973Q;null");
+            request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2025.8.21;M973Q;null;");
             request.Method = method;
             request.Timeout = new TimeSpan(0, 5, 0);// 1000 * 60 * 10;
             request.Resource = resource;
+            request.Version = new Version(2, 0);
             return request;
         }
 

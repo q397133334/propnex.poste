@@ -101,7 +101,7 @@ namespace PropnexPoster.WPF
 #if DEBUG
             taskDto = new PnTaskDto()
             {
-                Number = "1238968.guru.tsk"
+                Number = "1251239.guru.tsk"
             };
             var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
             var lenght = context.IndexOf("Xpressor-Listing-File===");
@@ -423,6 +423,7 @@ namespace PropnexPoster.WPF
                                     var createOrUpdateListing = new CreateOrUpdateListing();
                                     listing.Listing.Agent.id = token.User.AgentId;
                                     createOrUpdateListing.Create(listing.Listing);
+
                                     createOrUpdateListing.isLiveTourAvailable = true;
                                     var result = await _api.CreateAsync(createOrUpdateListing);
                                     //result = new HttpResult<CreateOrUpdateListingResult>() { Data = new CreateOrUpdateListingResult { Id = 24371139 } };
