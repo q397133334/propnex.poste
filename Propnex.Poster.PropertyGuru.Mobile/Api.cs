@@ -102,7 +102,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             //}))
             //{
             var request = GetRequest();
-            request.Resource = $"/v1/listings?region=sg&agentId={Token.User.AgentId}";
+            request.Resource = $"/v1/listings?agentId={Token.User.AgentId}&region=sg";
             //request.Resource = "/v2/create-listing/detail";
             //request.AddParameter("region", "sg");
             //request.AddParameter("agentId", $"{Token.User.AgentId}");

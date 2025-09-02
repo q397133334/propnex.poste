@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Configuration;
 
 namespace Propnex.Poster.PropertyGuru.Listing
 {
@@ -1129,6 +1130,8 @@ namespace Propnex.Poster.PropertyGuru.Listing
             }
         }
 
+        public string version { get; set; } = "v3";
+
         /// <summary>
         /// 
         /// </summary>
@@ -1153,6 +1156,9 @@ namespace Propnex.Poster.PropertyGuru.Listing
         /// 
         /// </summary>
         public string typeCode { get; set; }
+
+        public string rentalType { get; set; } = "UNIT";
+
         /// <summary>
         /// 
         /// </summary>
@@ -1185,6 +1191,9 @@ namespace Propnex.Poster.PropertyGuru.Listing
         /// 
         /// </summary>
         public bool? isPremiumAccount { get; set; }
+
+        public bool? isBumiLot { get; set; }
+
         /// <summary>
         /// 
         /// </summary>
@@ -1208,7 +1217,7 @@ namespace Propnex.Poster.PropertyGuru.Listing
         /// <summary>
         /// 
         /// </summary>
-        public bool? hasStream { get; set; }
+        public bool? hasStream { get; set; } = false;
         /// <summary>
         /// 
         /// </summary>

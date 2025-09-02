@@ -29,11 +29,10 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             client = new RestSharp.RestClient(new RestClientOptions()
             {
                 BaseUrl = new Uri(baseUrl),
-                MaxTimeout = 1000 * 60 * 10,
                 UseDefaultCredentials = true,
-                UserAgent = "okhttp/4.12.0"
+                UserAgent = "sg;agentnet;android;2025.8.20;SM-N9760;7ae7893e-f212-49ab-ae59-c64808a8573d"
             });
-            client.AddDefaultHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2025.8.20;SM-N9760;null");
+            client.AddDefaultHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2025.8.20;SM-N9760;7ae7893e-f212-49ab-ae59-c64808a8573d");
             Log?.Invoke($"client {baseUrl}");
             clientRetryPolicy = Policy
                 .Handle<Exception>()
@@ -61,7 +60,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             { 
                 
             };
-            client.AddDefaultHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2025.8.20;SM-N9760;null");
+            client.AddDefaultHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2025.8.20;SM-N9760;7ae7893e-f212-49ab-ae59-c64808a8573d");
             Log?.Invoke($"client {baseUrl}");
             clientRetryPolicy = Policy
                 .Handle<Exception>()
@@ -88,7 +87,10 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             RestRequest request = new RestRequest();
             //request.AddHeader("x-clientid", "L7C9YKV9-ESF3606Q-GHF9H1F5-8LJMKRO5");
             //request.AddHeader("x-clientsecret", "jjiF916yVwfCRQEJtS6loHVDZ16mWPWf");
-            request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2025.8.20;SM-N9760;null");
+            request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2025.8.20;SM-N9760;7ae7893e-f212-49ab-ae59-c64808a8573d");
+            request.AddHeader("sentry-trace", "ffbf3d918b074492ac49fe38198ad392-88c62e9c084b2bbe");
+            request.AddHeader("sentry-trace", "8c720f64281a41ee8fd38fcd6d60e3bb-fc666871c06646c0");
+            request.AddHeader("baggage", "sentry-environment=SG-android,sentry-public_key=f0e2339e8daa4ee5a7051e17d4c4037b,sentry-release=com.allproperty.android.agentnet%402025.8.20%2B301413145,sentry-sample_rand=0.3658515189812961,sentry-trace_id=8c720f64281a41ee8fd38fcd6d60e3bb");
             request.Timeout = new TimeSpan(0, 5, 0);// 1000 * 60 * 10;
 
             return request;
@@ -99,7 +101,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             RestRequest request = new RestRequest();
             //request.AddHeader("x-clientid", "L7C9YKV9-ESF3606Q-GHF9H1F5-8LJMKRO5");
             //request.AddHeader("x-clientsecret", "jjiF916yVwfCRQEJtS6loHVDZ16mWPWf");
-            request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2025.8.20;SM-N9760;null");
+            request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;android;2025.8.20;SM-N9760;7ae7893e-f212-49ab-ae59-c64808a8573d");
             request.Method = method;
             request.Timeout = new TimeSpan(0, 5, 0);// 1000 * 60 * 10;
             request.Resource = resource;
