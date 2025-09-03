@@ -16,6 +16,8 @@ using System.IO;
 using SlackBotMessages;
 using Propnex;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Net;
+using System.Net.Security;
 
 namespace PropnexPoster.WPF;
 
@@ -26,6 +28,8 @@ public class WPFModule : AbpModule
 
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls13;
+
         context.Services.AddSingleton<MainWindow>();
         //context.Services.AddTransient<PosterRun>();
         context.Services.AddSingleton<Propnex.Poster.Share.AppConfiguration>();

@@ -210,6 +210,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             )
         {
             var request = GetRequest(Method.Post, $"/sf2-agent/ajax/listings/{ownerid}/media");
+            request.Version = new Version(1, 1);
             //request.Authenticator = new JwtAuthenticator(Token.accessToken);
             request.AddParameter("ownerId", ownerid);
             request.AddParameter("mediaClass", mediaClass);
@@ -258,7 +259,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 }
                 var files = File.ReadAllBytes(filePath);
                 var fileName = Path.GetExtension(filePath);
-                request.AddFile("mediaFile", files, $"{Guid.NewGuid()}{filePath}");
+                request.AddFile("mediaFile", files, $"{Guid.NewGuid()}.jpg");
             }
             int count = 0;
         Start:

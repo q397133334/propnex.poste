@@ -20,6 +20,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using System.Windows.Shapes;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using ILogger = Serilog.ILogger;
 
@@ -98,7 +99,7 @@ namespace PropnexPoster.WPF
             await WebServer.PosterPing();
             Log("Get Task .....");
             //1.获取任务信息
-#if !DEBUG
+#if DEBUG
             taskDto = new PnTaskDto()
             {
                 Number = "1251550.guru.tsk"
@@ -1066,15 +1067,15 @@ namespace PropnexPoster.WPF
                     DownClient webClient = new DownClient();
                     webClient.DownloadFile(guruTaskListing.Photos[i], filePath);
                     Log("download photo complete");
-                    result = await _api.UploadPhotoAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath,title);
+                    result = await _api.UploadPhotoAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
                     if (result.HttpStatusCode != System.Net.HttpStatusCode.OK && result.HttpStatusCode != HttpStatusCode.BadRequest)
                     {
                         break;
                     }
                 }
-                catch 
-                { 
-                
+                catch
+                {
+
                 }
             }
             return result;
@@ -1202,7 +1203,7 @@ namespace PropnexPoster.WPF
                         filePath = "";
                     }
                 }
-                result = await _api.UplaodVirtualTours($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath,title);
+                result = await _api.UplaodVirtualTours($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
                 if (result.HttpStatusCode != System.Net.HttpStatusCode.OK)
                 {
                     break;
@@ -1344,7 +1345,15 @@ namespace PropnexPoster.WPF
                 ListingInfos = new List<ListingInfo>();
                 Log("Get Listings ....");
                 var token = Newtonsoft.Json.JsonConvert.DeserializeObject<Token>(pnUser.TokenJson);
-                var mobile = new Mobile() { Token = token };
+                Mobile mobile;
+                if (string.IsNullOrEmpty(proxyIp) == false)
+                {
+                    mobile = new Mobile(token, proxyIp) { Token = token, Log = Log };
+                }
+                else
+                {
+                    mobile = new Mobile() { Token = token, Log = Log };
+                }
                 var result = await mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
                 try
                 {
@@ -1362,7 +1371,7 @@ namespace PropnexPoster.WPF
                                 addListing(result.Data.listings);
                             }
                         }
-                    }  
+                    }
                 }
                 catch
                 {
@@ -1556,13 +1565,13 @@ namespace PropnexPoster.WPF
                           Log($"Retry count {retry},{ex.Message},{formData.ToString()}");
                       }).ExecuteAsync(async () =>
                       {
-                          var result=await PosterResultUpload.XWebEnd(new XWebEndDto()
+                          var result = await PosterResultUpload.XWebEnd(new XWebEndDto()
                           {
                               account_name = guruTask.Account,
                               account_password = guruTask.Password,
                               task_id = guruTask.Id,
                               status = status,
-                              time_cost ="",
+                              time_cost = "",
                               note = note,
                               poster = "mobile_api"
                           });
