@@ -727,6 +727,20 @@ namespace Propnex.Poster.PropertyGuru.Listing
         /// 
         /// </summary>
         public Tenancy tenancy { get; set; } = new Tenancy();
+
+        public string ramp { get; set; } = null;
+        public string isHighCeiling { get; set; } = null;
+        public string floorLoadingCategory { get; set; } = null;
+        public string roomType { get; set; } = "COMMON";
+        public string cookingType { get; set; } = null;
+        public string tenantGender { get; set; } = "ANY";
+        public int maxTenants { get; set; } = 1;
+        public string petFriendly { get; set; } = null;
+        public string diversityFriendly { get; set; } = null;
+        public string ownerStays { get; set; } = null;
+        public string wifiIncluded { get; set; } = null;
+        public string utilitiesIncluded { get; set; } = null;
+        public string visitorsAllowed { get; set; } = null;
     }
 
     public class Cover

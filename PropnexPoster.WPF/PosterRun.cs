@@ -98,10 +98,10 @@ namespace PropnexPoster.WPF
             await WebServer.PosterPing();
             Log("Get Task .....");
             //1.获取任务信息
-#if DEBUG
+#if !DEBUG
             taskDto = new PnTaskDto()
             {
-                Number = "cp17567348249424.guru.tsk"
+                Number = "1251550.guru.tsk"
             };
             var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
             var lenght = context.IndexOf("Xpressor-Listing-File===");
@@ -423,6 +423,7 @@ namespace PropnexPoster.WPF
                                     var createOrUpdateListing = new CreateOrUpdateListing();
                                     listing.Listing.Agent.id = token.User.AgentId;
                                     createOrUpdateListing.Create(listing.Listing);
+
                                     createOrUpdateListing.isLiveTourAvailable = true;
                                     var result = await _api.CreateAsync(createOrUpdateListing);
                                     //result = new HttpResult<CreateOrUpdateListingResult>() { Data = new CreateOrUpdateListingResult { Id = 24371139 } };
@@ -593,7 +594,7 @@ namespace PropnexPoster.WPF
                                 }
                                 else
                                 {
-                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "Not find listing");
+                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "Update listing,but Not match listing");
                                 }
 
                                 await End(task, listing.TaskItemId);
