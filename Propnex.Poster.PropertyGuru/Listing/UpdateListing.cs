@@ -734,7 +734,7 @@ namespace Propnex.Poster.PropertyGuru.Listing
         public string roomType { get; set; } = "COMMON";
         public string cookingType { get; set; } = null;
         public string tenantGender { get; set; } = "ANY";
-        public int maxTenants { get; set; } = 1;
+        public int? maxTenants { get; set; } = 1;
         public string petFriendly { get; set; } = null;
         public string diversityFriendly { get; set; } = null;
         public string ownerStays { get; set; } = null;
