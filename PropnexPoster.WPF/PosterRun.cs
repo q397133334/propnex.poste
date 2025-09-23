@@ -99,7 +99,7 @@ namespace PropnexPoster.WPF
             await WebServer.PosterPing();
             Log("Get Task .....");
             //1.获取任务信息
-#if DEBUG
+#if !DEBUG
             taskDto = new PnTaskDto()
             {
                 Number = "1252084.guru.tsk"
@@ -186,6 +186,8 @@ namespace PropnexPoster.WPF
                             _adsProject = new AdsProduct(token) { Log = Log };
                             _mobile = new Mobile(token) { Log = Log };
                         }
+
+                        await _mobile.Dashboard(token.User.AgentId.ToString());
                         //4.执行操作
                         if (task.TaskType.ToLower() == "post only")
                         {
@@ -236,7 +238,11 @@ namespace PropnexPoster.WPF
                                             continue;
                                         }
                                         var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
-                                        await _api.UpdateAsync(taskListing.Data); var mobile = new Mobile() { Token = token };
+                                        if (taskListing.HttpStatusCode == HttpStatusCode.OK)
+                                        {
+                                            await _api.UpdateAsync(taskListing.Data);
+                                        }
+                                        var mobile = new Mobile() { Token = token };
                                         var draflistings =
                                         (await _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
                                         {
@@ -371,12 +377,13 @@ namespace PropnexPoster.WPF
                                 TaskInfoEvent?.Invoke(posterRunInfo);
                                 if (IsExtis(task, listing) != null)
                                 {
+                                    //match task 
                                     var listInfo = IsExtis(task, listing);
                                     var taskListing = await _api.GetListing(listing.Listing.Id.Value);
 
                                     if (listing.FastRepost == "0")
                                     {
-                                        //更新任务
+                                        //更新任务 update task 
                                         taskListing.Data.Update(listing.Listing);
                                         taskListing.Data.isLiveTourAvailable = true;
                                         await _api.UpdateAsync(taskListing.Data);
@@ -1354,6 +1361,7 @@ namespace PropnexPoster.WPF
                 {
                     mobile = new Mobile() { Token = token, Log = Log };
                 }
+                await mobile.Dashboard(token.User.AgentId.ToString());
                 var result = await mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
                 try
                 {

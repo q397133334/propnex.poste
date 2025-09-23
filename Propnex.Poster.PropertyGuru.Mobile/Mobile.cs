@@ -6,6 +6,7 @@ using RestSharp.Authenticators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,6 +32,21 @@ namespace Propnex.Poster.PropertyGuru.Mobile
         public Mobile(Token token, string proxyIp) : base(baseUrl, proxyIp)
         {
             Token = token;
+        }
+
+        public async Task<HttpResult<string>> Dashboard(string agentId)
+        {
+            var request = GetRequest();
+            request.Resource = $"/v1/dashboard?locale=en&region=sg&agentId={agentId}";
+            request.Method = Method.Get;
+            request.Authenticator = new JwtAuthenticator(Token.accessToken);
+            request.AddOrUpdateHeader(KnownHeaders.Accept, "application/json, application/xml, text/xml");
+            var reponse = await ExecuteAsync(request);
+            if (reponse.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                return new HttpResult<string>() { };
+            }
+            return GetHttpResult<string>(reponse);
         }
 
         public async Task<HttpResult<ListingsResult>> ListingManagementAsync(QueryListingManagement queryListingManagement)
@@ -82,6 +98,11 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             var reponse = await ExecuteAsync(request);
             if (reponse.StatusCode == System.Net.HttpStatusCode.OK)
             {
+                cookieContainer = new CookieContainer();
+                foreach (Cookie item in reponse.Cookies)
+                {
+                    cookieContainer.Add(item);
+                }
                 return new HttpResult<string>() { };
             }
             return GetHttpResult<string>(reponse);

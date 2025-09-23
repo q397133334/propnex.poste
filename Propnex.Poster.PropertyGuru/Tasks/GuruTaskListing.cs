@@ -7,6 +7,13 @@ using System.Threading.Tasks;
 
 namespace Propnex.Poster.PropertyGuru.Tasks
 {
+    public class TaskListing
+    {
+        public string FastRepost { get; set; }
+
+        public CreateOrUpdateListing Listing { get; set; }
+    }
+
     public class GuruTaskListing
     {
         public GuruTaskListing()
