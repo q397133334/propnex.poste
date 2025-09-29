@@ -210,6 +210,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             )
         {
             var request = GetRequest(Method.Post, $"/sf2-agent/ajax/listings/{ownerid}/media");
+            request.CookieContainer = new CookieContainer();
             request.Version = new Version(1, 1);
             //request.Authenticator = new JwtAuthenticator(Token.accessToken);
             request.AddParameter("ownerId", ownerid);

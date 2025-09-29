@@ -187,7 +187,7 @@ namespace PropnexPoster.WPF
                             _mobile = new Mobile(token) { Log = Log };
                         }
 
-                        await _mobile.Dashboard(token.User.AgentId.ToString());
+                        //await _mobile.Dashboard(token.User.AgentId.ToString());
                         //4.执行操作
                         if (task.TaskType.ToLower() == "post only")
                         {
