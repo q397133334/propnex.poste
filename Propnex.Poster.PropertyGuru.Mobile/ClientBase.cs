@@ -45,7 +45,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                  response.ResponseStatus == ResponseStatus.TimedOut ||
                  response.ResponseStatus == ResponseStatus.Aborted) //||
                                                                     //response.ResponseStatus == ResponseStatus.Error)
-                .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
+                .WaitAndRetryAsync(3, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
                 {
                     LogHttpResponseMessage?.Invoke($"{ex.Result.Request.Resource} {ex.Result.ResponseStatus}", ex.Result);
                 });
@@ -77,7 +77,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                  response.ResponseStatus == ResponseStatus.Aborted)//||
                                                                    //response.ResponseStatus == ResponseStatus.Error)
 
-                .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
+                .WaitAndRetryAsync(3, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
                 {
                     LogHttpResponseMessage?.Invoke($"{ex.Result.Request.Resource} {ex.Result.ResponseStatus}", ex.Result);
                 });

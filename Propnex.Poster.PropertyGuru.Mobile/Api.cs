@@ -304,7 +304,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                         Log($"media upload errir {response.StatusCode},{response.ErrorMessage}-{response.StatusDescription}");
                         cookie = null;
                         Log("Waiting 3min");
-                        await Task.Delay(1000 * 60 * 3);
+                        await Task.Delay(1000 * 60 * 1);
                         Log("retry get cookie");
                         goto Start;
                     }

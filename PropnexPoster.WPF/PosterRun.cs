@@ -99,7 +99,7 @@ namespace PropnexPoster.WPF
             await WebServer.PosterPing();
             Log("Get Task .....");
             //1.获取任务信息
-#if !DEBUG
+#if DEBUG
             taskDto = new PnTaskDto()
             {
                 Number = "1252084.guru.tsk"
@@ -565,13 +565,18 @@ namespace PropnexPoster.WPF
                                 TaskInfoEvent?.Invoke(posterRunInfo);
                                 if (IsExtis(task, listing) != null)
                                 {
+                                    //更新任务 UpdateTask 
 
+                                    // get listing detial 
                                     var taskListing = await _api.GetListing(listing.Listing.Id.Value);
-                                    //更新任务
-
+                                   
+                                    //replace listing 
                                     taskListing.Data.Update(listing.Listing);
                                     taskListing.Data.isLiveTourAvailable = true;
+
+                                    //update listing
                                     await _api.UpdateAsync(taskListing.Data);
+
                                     await _mobile.DeleteMediaAll(taskListing.Data);
                                     if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
                                     {
