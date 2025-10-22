@@ -569,7 +569,7 @@ namespace PropnexPoster.WPF
 
                                     // get listing detial 
                                     var taskListing = await _api.GetListing(listing.Listing.Id.Value);
-                                   
+
                                     //replace listing 
                                     taskListing.Data.Update(listing.Listing);
                                     taskListing.Data.isLiveTourAvailable = true;
@@ -1045,7 +1045,7 @@ namespace PropnexPoster.WPF
 
         private async Task<HttpResult<string>> uploadPhotosAsync(GuruTaskListing guruTaskListing, Api _api)
         {
-            HttpResult<string> result = new HttpResult<string>() { HttpStatusCode = HttpStatusCode.OK };
+            HttpResult<string> result = new HttpResult<string>() { HttpStatusCode = HttpStatusCode.BadRequest };
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
             if (guruTaskListing.Photos.Count == 0)
@@ -1076,8 +1076,12 @@ namespace PropnexPoster.WPF
                             Log("delete error");
                         }
                     }
-                    DownClient webClient = new DownClient();
-                    webClient.DownloadFile(guruTaskListing.Photos[i], filePath);
+                    //DownClient webClient = new DownClient();
+                    //webClient.DownloadFile(guruTaskListing.Photos[i], filePath);
+                    if (_downLoadFile(guruTaskListing.Photos[i], filePath))
+                    {
+                        break;
+                    }
                     Log("download photo complete");
                     result = await _api.UploadPhotoAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
                     if (result.HttpStatusCode != System.Net.HttpStatusCode.OK && result.HttpStatusCode != HttpStatusCode.BadRequest)
@@ -1095,7 +1099,7 @@ namespace PropnexPoster.WPF
 
         private async Task<HttpResult<string>> uploadVideos(GuruTaskListing guruTaskListing, Api _api)
         {
-            HttpResult<string> result = new HttpResult<string>() { HttpStatusCode = HttpStatusCode.OK };
+            HttpResult<string> result = new HttpResult<string>() { HttpStatusCode = HttpStatusCode.BadRequest };
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
             if (guruTaskListing.Videos.Count == 0)
@@ -1133,16 +1137,23 @@ namespace PropnexPoster.WPF
                 }
                 else
                 {
+                    int reTry = 0;
                     try
                     {
+
                         Log($"download move {filePath}");
                         if (File.Exists(filePath))
                         {
                             File.Delete(filePath);
                         }
-                        DownClient webClient = new DownClient();
-                        webClient.DownloadFile(guruTaskListing.Videos[i], filePath);
+                        //DownClient webClient = new DownClient();
+                        //webClient.DownloadFile(guruTaskListing.Videos[i], filePath);
+                        if (_downLoadFile(guruTaskListing.Videos[i], filePath))
+                        {
+                            break;
+                        }
                         Log("download move complete");
+                        result = await _api.UploadVideosAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
                     }
                     catch { }
                     if (System.IO.File.Exists(filePath) == false)
@@ -1150,7 +1161,7 @@ namespace PropnexPoster.WPF
                         continue;
                     }
                 }
-                result = await _api.UploadVideosAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
+               
                 if (result.HttpStatusCode != System.Net.HttpStatusCode.OK)
                 {
                     break;
@@ -1161,7 +1172,7 @@ namespace PropnexPoster.WPF
 
         private async Task<HttpResult<string>> uploadVirtualTours(GuruTaskListing guruTaskListing, Api _api)
         {
-            HttpResult<string> result = new HttpResult<string>() { HttpStatusCode = HttpStatusCode.OK };
+            HttpResult<string> result = new HttpResult<string>() { HttpStatusCode = HttpStatusCode.BadRequest };
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
             if (guruTaskListing.Tours.Count == 0)
@@ -1206,16 +1217,20 @@ namespace PropnexPoster.WPF
                         {
                             File.Delete(filePath);
                         }
-                        DownClient webClient = new DownClient();
-                        webClient.DownloadFile(guruTaskListing.Tours[i], filePath);
+                        //DownClient webClient = new DownClient();
+                        //webClient.DownloadFile(guruTaskListing.Tours[i], filePath);
+                        if (_downLoadFile(guruTaskListing.Tours[i], filePath))
+                        {
+                            break;
+                        }
                         Log("download tour complete");
+                        result = await _api.UplaodVirtualTours($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
                     }
                     catch
                     {
                         filePath = "";
                     }
                 }
-                result = await _api.UplaodVirtualTours($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
                 if (result.HttpStatusCode != System.Net.HttpStatusCode.OK)
                 {
                     break;
@@ -1227,7 +1242,7 @@ namespace PropnexPoster.WPF
 
         private async Task<HttpResult<string>> uploadFloorPlanAsync(GuruTaskListing guruTaskListing, Api _api)
         {
-            HttpResult<string> result = new HttpResult<string>() { HttpStatusCode = HttpStatusCode.OK };
+            HttpResult<string> result = new HttpResult<string>() { HttpStatusCode = HttpStatusCode.BadRequest };
             var taskId = guruTaskListing.Id.ToString();
             var path = checkFileDirectory(taskId);
             if (guruTaskListing.FloorPlan.Count == 0)
@@ -1250,8 +1265,12 @@ namespace PropnexPoster.WPF
                     {
                         File.Delete(filePath);
                     }
-                    DownClient webClient = new DownClient();
-                    webClient.DownloadFile(guruTaskListing.FloorPlan[i], filePath);
+                    //DownClient webClient = new DownClient();
+                    //webClient.DownloadFile(guruTaskListing.FloorPlan[i], filePath);
+                    if (_downLoadFile(guruTaskListing.FloorPlan[i], filePath))
+                    {
+                        break;
+                    }
                     Log("download FloorPlan complete");
                     result = await _api.UploadFlooplan($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
                     if (result.HttpStatusCode != System.Net.HttpStatusCode.OK)
@@ -1265,6 +1284,25 @@ namespace PropnexPoster.WPF
                 }
             }
             return result;
+        }
+
+        private bool _downLoadFile(string url, string filePath)
+        {
+        Start:
+            int reTry = 0;
+            try
+            {
+                DownClient webClient = new DownClient();
+                webClient.DownloadFile(url, filePath);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log(ex.Message);
+                if (reTry < 3)
+                    goto Start;
+            }
+            return false;
         }
 
         private string checkFileDirectory(string taskId)

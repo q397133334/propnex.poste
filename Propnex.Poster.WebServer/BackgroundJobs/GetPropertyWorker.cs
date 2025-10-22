@@ -34,7 +34,7 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
 
             if (GuruMissingId.status != "ok")
             {
-                await SlackBotMessage.SendAsync($"GetProperty 0 <@U01DQLBLWNL>");
+                //await SlackBotMessage.SendAsync($"GetProperty 0 <@U01DQLBLWNL>");
                 return;
             }
             list = GuruMissingId.data;
