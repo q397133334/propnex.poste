@@ -19,9 +19,6 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
-using System.Windows.Shapes;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using ILogger = Serilog.ILogger;
 
 namespace PropnexPoster.WPF
@@ -102,7 +99,7 @@ namespace PropnexPoster.WPF
 #if DEBUG
             taskDto = new PnTaskDto()
             {
-                Number = "1264056.guru.tsk"
+                Number = "1264802.guru.tsk"
             };
             var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
             var lenght = context.IndexOf("Xpressor-Listing-File===");
@@ -1078,7 +1075,7 @@ namespace PropnexPoster.WPF
                     }
                     //DownClient webClient = new DownClient();
                     //webClient.DownloadFile(guruTaskListing.Photos[i], filePath);
-                    if (_downLoadFile(guruTaskListing.Photos[i], filePath))
+                    if (_downLoadFile(guruTaskListing.Photos[i], filePath) == false)
                     {
                         break;
                     }
@@ -1089,9 +1086,9 @@ namespace PropnexPoster.WPF
                         break;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-
+                    Log(ex.Message);
                 }
             }
             return result;
@@ -1117,6 +1114,7 @@ namespace PropnexPoster.WPF
                 var filePath = $"{path}{i}_movie.mp4";
                 if (url.Contains("youtube") ||
                     url.Contains("youtu.be") ||
+                    url.Contains("youtube.com") ||
                     url.Contains("vimeo") ||
                     url.Contains("dailymotion") ||
                     url.Contains("<iframe") ||
@@ -1148,24 +1146,37 @@ namespace PropnexPoster.WPF
                         }
                         //DownClient webClient = new DownClient();
                         //webClient.DownloadFile(guruTaskListing.Videos[i], filePath);
-                        if (_downLoadFile(guruTaskListing.Videos[i], filePath))
+                        if (_downLoadFile(guruTaskListing.Videos[i], filePath) == false)
                         {
                             break;
                         }
                         Log("download move complete");
-                        result = await _api.UploadVideosAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
+                        //result = await _api.UploadVideosAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        Log(ex.Message);
+                    }
                     if (System.IO.File.Exists(filePath) == false)
                     {
                         continue;
                     }
                 }
-               
+                try
+                {
+                    result = await _api.UploadVideosAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
+
+                }
+                catch (Exception ex)
+                {
+                    Log(ex.Message);
+                }
+
                 if (result.HttpStatusCode != System.Net.HttpStatusCode.OK)
                 {
                     break;
                 }
+                Log("upload mov success");
             }
             return result;
         }
@@ -1219,22 +1230,29 @@ namespace PropnexPoster.WPF
                         }
                         //DownClient webClient = new DownClient();
                         //webClient.DownloadFile(guruTaskListing.Tours[i], filePath);
-                        if (_downLoadFile(guruTaskListing.Tours[i], filePath))
+                        if (_downLoadFile(guruTaskListing.Tours[i], filePath) == false)
                         {
                             break;
                         }
                         Log("download tour complete");
-                        result = await _api.UplaodVirtualTours($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
+                        //result = await _api.UplaodVirtualTours($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        filePath = "";
+                        Log(ex.Message); filePath = "";
                     }
                 }
+                try
+                {
+                    result = await _api.UploadVideosAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
+
+                }
+                catch { }
                 if (result.HttpStatusCode != System.Net.HttpStatusCode.OK)
                 {
                     break;
                 }
+                Log("upload tour succes");
             }
 
             return result;
@@ -1267,7 +1285,7 @@ namespace PropnexPoster.WPF
                     }
                     //DownClient webClient = new DownClient();
                     //webClient.DownloadFile(guruTaskListing.FloorPlan[i], filePath);
-                    if (_downLoadFile(guruTaskListing.FloorPlan[i], filePath))
+                    if (_downLoadFile(guruTaskListing.FloorPlan[i], filePath) == false)
                     {
                         break;
                     }
@@ -1317,16 +1335,19 @@ namespace PropnexPoster.WPF
 
         private async Task<Propnex.Poster.PropertyGuru.Mobile.Dto.Token> Login(GuruTask guruTask, string proxyIp = "")
         {
+            ClientBase.PhoneModel = PhoneModelList.GetPhoneModel();
             var pnUser = await getUser();
-            var _Token = await auth();// string.IsNullOrEmpty(pnUser.TokenJson) ? await auth() : await checkToken();
+            var _Token = string.IsNullOrEmpty(pnUser.TokenJson) ? await auth() : await checkToken();
             if (_Token == null)
                 return null;
+            ClientBase.PhoneModel = pnUser.PhoneModel == "" ? PhoneModelList.GetPhoneModel() : ClientBase.PhoneModel;
             await getListing();
+
 
             async Task<PnUserDto> getUser()
             {
                 Log("get user ....");
-                var pnUser = new PnUserDto() { Id = Guid.Empty }; //await WebServer.GetUser(guruTask.Account);
+                var pnUser = await WebServer.GetUser(guruTask.Account);
 
                 //2.验证用户信息
                 if (pnUser.Id == Guid.Empty)
@@ -1336,8 +1357,10 @@ namespace PropnexPoster.WPF
                     pnUser.Account = guruTask.Account;
                     pnUser.Password = guruTask.Password;
                     Log("insert user ....");
+                    pnUser.PhoneModel = ClientBase.PhoneModel;
                     await WebServer.PnUser(pnUser);
                     pnUser = await WebServer.GetUser(guruTask.Account);
+
                 }
                 Log("user success .");
                 return pnUser;
@@ -1366,6 +1389,7 @@ namespace PropnexPoster.WPF
                     _Token = loginResult.Data;
                     Log("Token :" + _Token.accessToken);
                     pnUser.TokenJson = Newtonsoft.Json.JsonConvert.SerializeObject(_Token);
+                    pnUser.PhoneModel = pnUser.PhoneModel == "" ? ClientBase.PhoneModel : pnUser.PhoneModel;
                     Log("UpdatePnUserToken");
                     await WebServer.UpdatePnUserToken(pnUser);
                     return loginResult.Data;
@@ -1404,7 +1428,7 @@ namespace PropnexPoster.WPF
                 {
                     mobile = new Mobile() { Token = token, Log = Log };
                 }
-                await mobile.Dashboard(token.User.AgentId.ToString());
+                //await mobile.Dashboard(token.User.AgentId.ToString());
                 var result = await mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
                 try
                 {

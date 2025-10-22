@@ -176,7 +176,7 @@ namespace PropnexPoster.WPF
 
                 }
                 
-                return null;
+                return new PnUserDto();
             });
         }
 

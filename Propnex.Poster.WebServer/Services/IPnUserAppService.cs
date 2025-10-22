@@ -38,6 +38,7 @@ namespace Propnex.Poster.WebServer.Services
                 user.Account = userDto.Account;
                 user.TokenJson = userDto.TokenJson;
                 user.Password = userDto.Password;
+                user.PhoneModel = userDto.PhoneModel;
                 await _repository.InsertAsync(user);
             }
             else
@@ -45,6 +46,7 @@ namespace Propnex.Poster.WebServer.Services
                 user.Account = userDto.Account;
                 user.TokenJson = userDto.TokenJson;
                 user.Password = userDto.Password;
+                user.PhoneModel= userDto.PhoneModel;
                 await _repository.UpdateAsync(user);
             }
         }

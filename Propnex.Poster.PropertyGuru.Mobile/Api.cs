@@ -16,13 +16,14 @@ using Flurl.Http;
 using Flurl.Util;
 using System.Net;
 using System.Threading;
+using System.Data.SqlClient;
 
 namespace Propnex.Poster.PropertyGuru.Mobile
 {
     public class Api : ClientBase
     {
 
-        private const string baseUrl = "https://listing.propertyguru.com";
+        private const string baseUrl = "https://api.propertyguru.com";
 
         public Token Token { get; set; }
 
@@ -111,7 +112,9 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddHeader(KnownHeaders.Authorization, $"Bearer {Token.accessToken}");
             //createListing.agent = new Agent();
             //createListing.media = null;
+
             var stringBody = Newtonsoft.Json.JsonConvert.SerializeObject(createListing);
+            Log(stringBody);
             request.AddStringBody(stringBody, DataFormat.Json);
             var response = await ExecuteAsync(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created)
@@ -168,7 +171,9 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             //request.AddParameter("agentId", $"{Token.User.AgentId}");
             request.Method = Method.Put;
             request.Authenticator = new JwtAuthenticator(Token.accessToken);
-            request.AddStringBody(Newtonsoft.Json.JsonConvert.SerializeObject(createListing), DataFormat.Json);
+            var stringBody = Newtonsoft.Json.JsonConvert.SerializeObject(createListing);
+            Log(stringBody);
+            request.AddStringBody(stringBody, DataFormat.Json);
             var response = await ExecuteAsync(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
@@ -183,21 +188,81 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 
         public async Task<HttpResult<string>> UploadPhotoAsync(string ownerId, string sortOrder, string filePath, string title = "")
         {
-            return await UploadMediaAsync(ownerId, "UPHO", "IMAGE", sortOrder, filePath, title);
+            return await UploadMediaV1Async(ownerId, "UPHO", "IMAGE", sortOrder, filePath, title);
         }
         public async Task<HttpResult<string>> UploadVideosAsync(string ownerId, string sortOrder, string filePath, string title = "")
         {
-            return await UploadMediaAsync(ownerId, "UMOV", "MOVIE", sortOrder, filePath, title);
+            return await UploadMediaV1Async(ownerId, "UMOV", "MOVIE", sortOrder, filePath, title);
         }
 
         public async Task<HttpResult<string>> UplaodVirtualTours(string ownerId, string sortOrder, string filePath, string title = "")
         {
-            return await UploadMediaAsync(ownerId, "UTOUR", "VTOUR", sortOrder, filePath, title);
+            return await UploadMediaV1Async(ownerId, "UTOUR", "VTOUR", sortOrder, filePath, title);
         }
 
         public async Task<HttpResult<string>> UploadFlooplan(string ownerId, string sortOrder, string filePath, string title = "")
         {
-            return await UploadMediaAsync(ownerId, "UFLOO", "IMAGE", sortOrder, filePath, title);
+            return await UploadMediaV1Async(ownerId, "UFLOO", "IMAGE", sortOrder, filePath, title);
+        }
+
+        private async Task<HttpResult<string>> UploadMediaV1Async(string ownerid,
+            string mediaClass,
+            string mediaType,
+            string sortOrder,
+            string filePath,
+            string title = "")
+        {
+            var request = GetRequest(Method.Post, "/v0/media");
+            request.Authenticator = new JwtAuthenticator(Token.accessToken);
+            request.AddParameter("locale", "en");
+            request.AddParameter("ownerId", ownerid);
+            request.AddParameter("region", "sg");
+            request.AddParameter("mediaClass", mediaClass);
+            request.AddParameter("mediaType", mediaType);
+            request.AddParameter("caption", title);
+            request.AddParameter("userId", $"{Token.User.AgentId}");
+            request.AddParameter("source", "AgentNet-android");
+            request.AddParameter("sortOrder", sortOrder);
+            request.AddParameter("statusCode", "ACT");
+            var filePathLower = filePath.ToLower();
+            if (filePathLower.Contains("youtube") ||
+                filePathLower.Contains("vimeo") ||
+                    filePathLower.Contains("dailymotion") ||
+                    filePathLower.Contains("<iframe") ||
+                    filePathLower.Contains("havelock2")
+                    )
+            {
+                if (filePath.Contains("#"))
+                {
+                    filePath = filePath.Split('#')[0];
+                }
+                request.AddParameter("videoEmbedHtml", filePath);
+                request.AlwaysMultipartFormData = true;
+            }
+            else
+            {
+                if (filePath == "")
+                {
+                    return new HttpResult<string>() { };
+                }
+                if (File.Exists(filePath) == false)
+                {
+                    return new HttpResult<string>() { };
+                }
+                var files = File.ReadAllBytes(filePath);
+                var fileName = Path.GetExtension(filePath);
+                request.AddFile("mediaFile", files, $"{Guid.NewGuid()}{filePath}");
+            }
+            var response = await ExecuteAsync(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                return new HttpResult<string>()
+                {
+                    Data = response.Content,
+                    HttpStatusCode = System.Net.HttpStatusCode.OK
+                };
+            }
+            return GetHttpResult<string>(response);
         }
 
         private async Task<HttpResult<string>> UploadMediaAsync(

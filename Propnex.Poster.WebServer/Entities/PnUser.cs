@@ -13,5 +13,7 @@ namespace Propnex.Poster.WebServer.Entities
         public string LoginMessage { get; set; }
 
         public string UserType { get; set; } = "GURU";
+
+        public string PhoneModel { get; set; }
     }
 }

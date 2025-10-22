@@ -16,5 +16,7 @@ namespace Propnex.Poster.Dtos
         public string LoginMessage { get; set; }
 
         public string UserType { get; set; } = "GURU";
+
+        public string PhoneModel { get; set; }
     }
 }

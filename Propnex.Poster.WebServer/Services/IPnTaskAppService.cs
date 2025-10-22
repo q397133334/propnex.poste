@@ -21,7 +21,7 @@ namespace Propnex.Poster.WebServer.Services
     {
         Task<Dtos.PnTaskDto> GetPnTaskAsync(Dtos.InputGetTaskInfoDto inputDto);
 
-        Task PnTaskRetry(Guid Machineid, Guid pnTaskId, string message = "");
+        Task PnTaskRetry(Guid? Machineid, Guid pnTaskId, string message = "");
 
         Task PnTaskXmlRetry(Guid pnTaskId, string message = "");
 
@@ -153,15 +153,19 @@ namespace Propnex.Poster.WebServer.Services
             return lists;
         }
 
-        public async Task PnTaskRetry(Guid machineId, Guid pnTaskId, string message = "")
+        public async Task PnTaskRetry(Guid? machineId, Guid pnTaskId, string message = "")
         {
+            if(machineId.HasValue==false)
+            {
+                machineId = Guid.NewGuid();
+            }
             var pnTask = await AsyncExecuter.FirstOrDefaultAsync((await Repository.GetQueryableAsync()).Where(q => q.Id == pnTaskId));
-            if (pnTask != null && pnTask.RetryCount <= 3)
+            if (pnTask != null && pnTask.RetryCount <= 5)
             {
                 pnTask.RetryCount += 1;
                 pnTask.Status = Share.TaskStatus.Wait;
                 await Repository.UpdateAsync(pnTask);
-                await _pnTaskLogRepository.InsertAsync(machineId, pnTask.Id, $"Set Retry {pnTask.RetryCount}, {message}", "");
+                await _pnTaskLogRepository.InsertAsync(machineId.Value, pnTask.Id, $"Set Retry {pnTask.RetryCount}, {message}", "");
 
 
 
@@ -176,7 +180,7 @@ namespace Propnex.Poster.WebServer.Services
             {
                 pnTask.Status = Share.TaskStatus.Failure;
                 await Repository.UpdateAsync(pnTask);
-                await _pnTaskLogRepository.InsertAsync(machineId, pnTask.Id, $"set Retry,but retyr max count {pnTask.RetryCount},{message}", "");
+                await _pnTaskLogRepository.InsertAsync(machineId.Value, pnTask.Id, $"set Retry,but retyr max count {pnTask.RetryCount},{message}", "");
             }
         }
 
