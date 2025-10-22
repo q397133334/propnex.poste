@@ -35,8 +35,8 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             var request = GetRequest();
             request.Method = Method.Post;
             request.Resource = "/v1/jwt/login";
-            request.AddHeader("x-clientid", "L7C9YKV9-ESF3606Q-GHF9H1F5-8LJMKRO5");
-            request.AddHeader("x-clientsecret", "jjiF916yVwfCRQEJtS6loHVDZ16mWPWf");
+            request.AddHeader("x-clientid", "766f966f-e33c-4a51-ae2c-1c2ccb989eeb");
+            request.AddHeader("x-clientsecret", "hJUmEWsszf3Oz3CR5TZgVlPyvbwJ0wwoQzPTD4Yp14enfYqlrUOd0uw2MFSKACfaYAxvDcK8Xq3Tafm");
             request.AddParameter("username", authLogin.UserName);
             request.AddParameter("password", authLogin.Password);
             request.AddParameter("grant_type", "password");
