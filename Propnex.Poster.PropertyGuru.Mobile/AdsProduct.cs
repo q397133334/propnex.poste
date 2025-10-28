@@ -4,6 +4,7 @@ using RestSharp.Authenticators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -43,11 +44,25 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             var response = await ExecuteAsync(request);
             if (response.IsSuccessStatusCode)
             {
-                return new HttpResult<string>()
+                if (response.Content.Contains("OK"))
                 {
-                    HttpStatusCode = response.StatusCode,
-                    Data = response.Content
-                };
+                    return new HttpResult<string>()
+                    {
+                        HttpStatusCode = response.StatusCode,
+                        Data = response.Content,
+                        Message = response.Content
+                    };
+                }
+                else
+                {
+                    return new HttpResult<string>()
+                    {
+                        HttpStatusCode = HttpStatusCode.BadRequest,
+                        Data = response.Content,
+                        Message = response.Content
+                    };
+                }
+
             }
             return GetHttpResult<string>(response);
         }

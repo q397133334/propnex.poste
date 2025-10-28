@@ -104,7 +104,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
         {
             System.Threading.Thread.Sleep(Random.Next(1000, 5000));
             RestRequest request = new RestRequest();
-            request.AddOrUpdateHeader(KnownHeaders.UserAgent, $"sg;agentnet;android;2025.9.8;{PhoneModel}");
+            request.AddOrUpdateHeader(KnownHeaders.UserAgent, $"sg;agentnet;android;2025.10.24;{PhoneModel}");
             request.Timeout = new TimeSpan(0, 5, 0);// 1000 * 60 * 10;
             //request.Version = new Version(2, 0);
             request.CookieContainer = cookieContainer;
@@ -119,7 +119,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             System.Threading.Thread.Sleep(Random.Next(1000, 5000));
 
             RestRequest request = new RestRequest();
-            request.AddOrUpdateHeader(KnownHeaders.UserAgent, $"sg;agentnet;android;2025.9.8;{PhoneModel}");
+            request.AddOrUpdateHeader(KnownHeaders.UserAgent, $"sg;agentnet;android;2025.10.24;{PhoneModel}");
             request.Method = method;
             request.Timeout = new TimeSpan(0, 5, 0);// 1000 * 60 * 10;
             request.Resource = resource;

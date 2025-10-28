@@ -96,10 +96,10 @@ namespace PropnexPoster.WPF
             await WebServer.PosterPing();
             Log("Get Task .....");
             //1.获取任务信息
-#if DEBUG
+#if !DEBUG
             taskDto = new PnTaskDto()
             {
-                Number = "1264802.guru.tsk"
+                Number = "cp17613059612005.guru.tsk"
             };
             var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
             var lenght = context.IndexOf("Xpressor-Listing-File===");
