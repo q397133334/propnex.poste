@@ -10,7 +10,7 @@ namespace Propnex
         protected override WebRequest GetWebRequest(Uri address)
         {
             var request = base.GetWebRequest(address);
-            request.Timeout = 1000 * 60 * 3;
+            request.Timeout = 1000 * 60 ;
             return request;
         }
     }

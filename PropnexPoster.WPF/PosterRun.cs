@@ -68,7 +68,7 @@ namespace PropnexPoster.WPF
     public class PosterRun : Volo.Abp.DependencyInjection.ITransientDependency
     {
 
-        public Action<string> MessageEvent { get; set; }
+        public Action<string, bool> MessageEvent { get; set; }
 
         public Action<PosterRunInfo> TaskInfoEvent { get; set; }
 
@@ -96,7 +96,7 @@ namespace PropnexPoster.WPF
             await WebServer.PosterPing();
             Log("Get Task .....");
             //1.获取任务信息
-#if !DEBUG
+#if DEBUG
             taskDto = new PnTaskDto()
             {
                 Number = "cp17613059612005.guru.tsk"
@@ -171,17 +171,17 @@ namespace PropnexPoster.WPF
                         Mobile _mobile;
                         if (WPFModule.AppConfiguration.IsProxy)
                         {
-                            _api = new Api(token, proxyIp) { Log = Log };
-                            _projectsApi = new ProjectsApi(token, proxyIp) { Log = Log };
-                            _adsProject = new AdsProduct(token, proxyIp) { Log = Log };
-                            _mobile = new Mobile(token, proxyIp) { Log = Log };
+                            _api = new Api(token, proxyIp) { Log = Log1 };
+                            _projectsApi = new ProjectsApi(token, proxyIp) { Log = Log1 };
+                            _adsProject = new AdsProduct(token, proxyIp) { Log = Log1 };
+                            _mobile = new Mobile(token, proxyIp) { Log = Log1 };
                         }
                         else
                         {
-                            _api = new Api(token) { Log = Log };
-                            _projectsApi = new ProjectsApi(token) { Log = Log };
-                            _adsProject = new AdsProduct(token) { Log = Log };
-                            _mobile = new Mobile(token) { Log = Log };
+                            _api = new Api(token) { Log = Log1 };
+                            _projectsApi = new ProjectsApi(token) { Log = Log1 };
+                            _adsProject = new AdsProduct(token) { Log = Log1 };
+                            _mobile = new Mobile(token) { Log = Log1 };
                         }
 
                         //await _mobile.Dashboard(token.User.AgentId.ToString());
@@ -695,7 +695,8 @@ namespace PropnexPoster.WPF
                                                         if (parts.Length > 0)
                                                         {
                                                             data[formName + "[title]"] = parts[0].Replace("-", " ").Replace("_", " ");
-                                                        };
+                                                        }
+                                                        ;
                                                         if (vnames.Length > 1 && !string.IsNullOrEmpty(vnames[1].Trim()))
                                                         {
                                                             data[formName + "[title]"] = vnames[1].Trim();
@@ -749,7 +750,8 @@ namespace PropnexPoster.WPF
                                                                 string fn = System.IO.Path.GetFileName(p);
                                                                 string[] parts = fn.Split(new char[] { '.' });
                                                                 data[formName + "[title]"] = parts[0].Replace("-", " ");
-                                                            };
+                                                            }
+                                                            ;
                                                             if (vnames.Length > 1 && !string.IsNullOrEmpty(vnames[1].Trim()))
                                                             {
                                                                 data[formName + "[title]"] = vnames[1].Trim();
@@ -876,18 +878,21 @@ namespace PropnexPoster.WPF
                                                             string fn = System.IO.Path.GetFileName(p.Trim());
                                                             string[] parts = fn.Split(new char[] { '.' });
                                                             data[formName + "[title]"] = parts[0].Replace("-", " ");
-                                                        };
+                                                        }
+                                                        ;
                                                     }
                                                     else
                                                     {
                                                         data[formName + "[embed_code]"] = p;
-                                                    };
+                                                    }
+                                                    ;
                                                     data["xpressor"] = "";
 
                                                     if (vnames.Length > 1 && !string.IsNullOrEmpty(vnames[vnames.Length - 1].Trim()))
                                                     {
                                                         data[formName + "[title]"] = vnames[vnames.Length - 1].Trim();
-                                                    };
+                                                    }
+                                                    ;
 
                                                     try
                                                     {
@@ -1055,7 +1060,7 @@ namespace PropnexPoster.WPF
                 var title = "";
                 if (guruTaskListing.Photos[i].Split("#").Length > 1)
                     title = guruTaskListing.Photos[i].Split("#")[1];
-                var filePath = $"{path}{i}_image.jpg";
+                var filePath = $"{path}{i}_image{GetExtensionFromUrl(guruTaskListing.Photos[i])}";
                 try
                 {
                     Log($"download photo {filePath}");
@@ -1075,7 +1080,7 @@ namespace PropnexPoster.WPF
                     }
                     //DownClient webClient = new DownClient();
                     //webClient.DownloadFile(guruTaskListing.Photos[i], filePath);
-                    if (_downLoadFile(guruTaskListing.Photos[i], filePath) == false)
+                    if (await _downLoadFile(guruTaskListing.Photos[i], filePath) == false)
                     {
                         break;
                     }
@@ -1092,6 +1097,24 @@ namespace PropnexPoster.WPF
                 }
             }
             return result;
+        }
+
+        public string GetExtensionFromUrl(string url)
+        {
+            if (string.IsNullOrEmpty(url)) return string.Empty;
+            try
+            {
+                var uri = new Uri(url);
+                // AbsolutePath 会去掉 query/fragment，再用 Path.GetExtension 取得扩展名
+                return Path.GetExtension(uri.AbsolutePath) ?? string.Empty;
+            }
+            catch
+            {
+                // 如果不是合法 URI，则退回到简单字符串处理（去掉 query/fragment 后取最后一个点）
+                var clean = url.Split(new[] { '?', '#' })[0];
+                var idx = clean.LastIndexOf('.');
+                return (idx >= 0) ? clean.Substring(idx) : string.Empty;
+            }
         }
 
         private async Task<HttpResult<string>> uploadVideos(GuruTaskListing guruTaskListing, Api _api)
@@ -1111,7 +1134,7 @@ namespace PropnexPoster.WPF
                 var title = "";
                 if (guruTaskListing.Videos[i].Split("#").Length > 1)
                     title = guruTaskListing.Videos[i].Split("#")[1];
-                var filePath = $"{path}{i}_movie.mp4";
+                var filePath = $"{path}{i}_movie{GetExtensionFromUrl(url)}";
                 if (url.Contains("youtube") ||
                     url.Contains("youtu.be") ||
                     url.Contains("youtube.com") ||
@@ -1146,7 +1169,7 @@ namespace PropnexPoster.WPF
                         }
                         //DownClient webClient = new DownClient();
                         //webClient.DownloadFile(guruTaskListing.Videos[i], filePath);
-                        if (_downLoadFile(guruTaskListing.Videos[i], filePath) == false)
+                        if (await _downLoadFile(guruTaskListing.Videos[i], filePath) == false)
                         {
                             break;
                         }
@@ -1198,7 +1221,7 @@ namespace PropnexPoster.WPF
                 var title = "";
                 if (guruTaskListing.Tours[i].Split("#").Length > 1)
                     title = guruTaskListing.Tours[i].Split("#")[1];
-                var filePath = $"{path}{i}_vt.mp4";
+                var filePath = $"{path}{i}_vt{GetExtensionFromUrl(url)}";
                 if (url.Contains("youtube") ||
                     url.Contains("youtu.be") ||
                     url.Contains("vimeo") ||
@@ -1230,7 +1253,7 @@ namespace PropnexPoster.WPF
                         }
                         //DownClient webClient = new DownClient();
                         //webClient.DownloadFile(guruTaskListing.Tours[i], filePath);
-                        if (_downLoadFile(guruTaskListing.Tours[i], filePath) == false)
+                        if (await _downLoadFile(guruTaskListing.Tours[i], filePath) == false)
                         {
                             break;
                         }
@@ -1273,7 +1296,7 @@ namespace PropnexPoster.WPF
                 var title = "";
                 if (guruTaskListing.FloorPlan[i].Split("#").Length > 1)
                     title = guruTaskListing.FloorPlan[i].Split("#")[1];
-                var filePath = $"{path}{i}_fp.jpg";
+                var filePath = $"{path}{i}_fp{GetExtensionFromUrl(guruTaskListing.FloorPlan[i])}";
                 try
                 {
                     //await guruTaskListing.FloorPlan[i].DownloadFileAsync(path, $"{i}_fp.jpg");
@@ -1285,7 +1308,7 @@ namespace PropnexPoster.WPF
                     }
                     //DownClient webClient = new DownClient();
                     //webClient.DownloadFile(guruTaskListing.FloorPlan[i], filePath);
-                    if (_downLoadFile(guruTaskListing.FloorPlan[i], filePath) == false)
+                    if (await _downLoadFile(guruTaskListing.FloorPlan[i], filePath) == false)
                     {
                         break;
                     }
@@ -1304,23 +1327,29 @@ namespace PropnexPoster.WPF
             return result;
         }
 
-        private bool _downLoadFile(string url, string filePath)
+        private async Task<bool> _downLoadFile(string url, string filePath)
         {
-        Start:
-            int reTry = 0;
-            try
+            //Start:
+            //    int reTry = 0;
+            //    try
+            //    {
+            //        DownClient webClient = new DownClient();
+            //        webClient.DownloadFile(url, filePath);
+            //        return true;
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Log(ex.Message);
+            //        if (reTry < 3)
+            //            goto Start;
+            //    }
+            //    return false;
+
+            return await FileDownloader.DownloadFileAsync(url, filePath, maxAttempts: 3,  new Progress<double>(p =>
             {
-                DownClient webClient = new DownClient();
-                webClient.DownloadFile(url, filePath);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Log(ex.Message);
-                if (reTry < 3)
-                    goto Start;
-            }
-            return false;
+                if (p < 0) Log("Downloading... size unknown");
+                else Log($"FilePath {filePath} Progress: {p:P1}", true, false);
+            }), TimeSpan.FromSeconds(5), null);
         }
 
         private string checkFileDirectory(string taskId)
@@ -1371,11 +1400,11 @@ namespace PropnexPoster.WPF
                 Auth _auth;
                 if (string.IsNullOrEmpty(proxyIp) == false)
                 {
-                    _auth = new Auth(proxyIp) { Log = Log };
+                    _auth = new Auth(proxyIp) { Log = Log1 };
                 }
                 else
                 {
-                    _auth = new Auth() { Log = Log };
+                    _auth = new Auth() { Log = Log1 };
                 }
                 Log("Login ....");
                 var loginResult = await _auth.LoginAsync(new AuthLogin()
@@ -1422,11 +1451,11 @@ namespace PropnexPoster.WPF
                 Mobile mobile;
                 if (string.IsNullOrEmpty(proxyIp) == false)
                 {
-                    mobile = new Mobile(token, proxyIp) { Token = token, Log = Log };
+                    mobile = new Mobile(token, proxyIp) { Token = token, Log = Log1 };
                 }
                 else
                 {
-                    mobile = new Mobile() { Token = token, Log = Log };
+                    mobile = new Mobile() { Token = token, Log = Log1 };
                 }
                 //await mobile.Dashboard(token.User.AgentId.ToString());
                 var result = await mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
@@ -1680,10 +1709,16 @@ namespace PropnexPoster.WPF
             return (long)unix_time.TotalSeconds;
         }
 
-        private void Log(string message)
+        private void Log(string message, bool isRef = false, bool isSave = true)
         {
-            MessageEvent?.Invoke(message);
-            _logger?.Information(message);
+            MessageEvent?.Invoke(message, isRef);
+            if (isSave)
+                _logger?.Information(message);
+        }
+
+        private void Log1(string message, bool isRef = false)
+        {
+            MessageEvent?.Invoke(message, isRef);
         }
     }
 }
