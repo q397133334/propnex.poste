@@ -96,10 +96,10 @@ namespace PropnexPoster.WPF
             await WebServer.PosterPing();
             Log("Get Task .....");
             //1.获取任务信息
-#if DEBUG
+#if !DEBUG
             taskDto = new PnTaskDto()
             {
-                Number = "cp17613059612005.guru.tsk"
+                Number = "1266415.guru.tsk"
             };
             var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
             var lenght = context.IndexOf("Xpressor-Listing-File===");
@@ -1366,7 +1366,9 @@ namespace PropnexPoster.WPF
         {
             ClientBase.PhoneModel = PhoneModelList.GetPhoneModel();
             var pnUser = await getUser();
-            var _Token = string.IsNullOrEmpty(pnUser.TokenJson) ? await auth() : await checkToken();
+            var _Token = string.IsNullOrEmpty(pnUser.TokenJson) ? 
+                await auth() : 
+                await checkToken();
             if (_Token == null)
                 return null;
             ClientBase.PhoneModel = pnUser.PhoneModel == "" ? PhoneModelList.GetPhoneModel() : ClientBase.PhoneModel;
@@ -1444,7 +1446,7 @@ namespace PropnexPoster.WPF
             }
             async Task getListing()
             {
-                listings = new List<ListingsListing>();
+                //listings = new List<ListingsListing>();
                 ListingInfos = new List<ListingInfo>();
                 Log("Get Listings ....");
                 var token = Newtonsoft.Json.JsonConvert.DeserializeObject<Token>(pnUser.TokenJson);
@@ -1476,6 +1478,10 @@ namespace PropnexPoster.WPF
                             }
                         }
                     }
+                    else
+                    {
+                        listings = null;
+                    }
                 }
                 catch
                 {
@@ -1485,6 +1491,8 @@ namespace PropnexPoster.WPF
 
             void addListing(List<ListingsListing> lists)
             {
+                if (listings == null)
+                    listings = new List<ListingsListing>();
                 foreach (var item in lists)
                 {
                     var info = new ListingInfo();
@@ -1525,7 +1533,7 @@ namespace PropnexPoster.WPF
             }
             return _Token;
         }
-        private List<ListingsListing> listings = new List<ListingsListing>();
+        private List<ListingsListing> listings = null;
 
         private async Task<GuruTasks> getGuruTasks()
         {

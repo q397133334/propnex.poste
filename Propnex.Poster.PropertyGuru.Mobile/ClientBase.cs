@@ -104,8 +104,8 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             RestRequest request = new RestRequest();
             //request.AddOrUpdateHeader(KnownHeaders.UserAgent, $"AgentNet Android/LEGACY");
             request.AddOrUpdateHeader(KnownHeaders.UserAgent, $"sg;agentnet;android;2025.10.24;{PhoneModel}");
-            request.Timeout = TimeSpan.FromSeconds(5);//  1000 * 60 * 5;
-            //request.Version = new Version(2, 0);
+            request.Timeout = TimeSpan.FromMinutes(5);//  1000 * 60 * 5;
+            request.Version = new Version(2, 0);
             request.CookieContainer = cookieContainer;
             return request;
         }
@@ -121,9 +121,9 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             //request.AddOrUpdateHeader(KnownHeaders.UserAgent, $"AgentNet Android/LEGACY");
             request.AddOrUpdateHeader(KnownHeaders.UserAgent, $"sg;agentnet;android;2025.10.24;{PhoneModel}");
             request.Method = method;
-            request.Timeout = TimeSpan.FromSeconds(5);// 1000 * 60 * 5;
+            request.Timeout = TimeSpan.FromMinutes(5);// 1000 * 60 * 5;
             request.Resource = resource;
-            //request.Version = new Version(2, 0);
+            request.Version = new Version(2, 0);
             request.CookieContainer = cookieContainer;
             return request;
         }
