@@ -153,7 +153,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             // Allow TLS 1.0/1.1/1.2/1.3 (TLS 1.0/1.1 are deprecated; prefer TLS1.2+ in production)
             handler.SslOptions = new SslClientAuthenticationOptions
             {
-                EnabledSslProtocols = SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12 | SslProtocols.Tls13
+                EnabledSslProtocols =  SslProtocols.Tls12 | SslProtocols.Tls13
             };
 
             // Try to set per-connection cipher suites where supported (may throw on some platforms)
@@ -203,7 +203,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             // Allow TLS 1.0 / 1.1 / 1.2 / 1.3 (note: TLS 1.0/1.1 are deprecated on many platforms)
             handler.SslOptions = new SslClientAuthenticationOptions
             {
-                EnabledSslProtocols = SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12 | SslProtocols.Tls13
+                EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13
             };
 
             // Try to set per-connection cipher suites where supported (.NET 5+ on supported OSes).

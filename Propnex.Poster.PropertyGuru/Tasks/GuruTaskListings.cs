@@ -185,6 +185,8 @@ namespace Propnex.Poster.PropertyGuru.Tasks
 
                 listingModel.PropertyUnit = new PropertyUnit();
                 listingModel.PropertyUnit.floorLevelCode = detialss.FindAttribute("Name", "floor_level").GetAttributeValue("Value", "").ToUpper();
+                listingModel.PropertyUnit.sellerEthnic = detialss.FindAttribute("Name", "sellerEthnic").GetAttributeValue("Value", "");
+                listingModel.PropertyUnit.sellerResidency = detialss.FindAttribute("Name", "sellerResidency").GetAttributeValue("Value", "");
                 List<string> features = new List<string>()
                 {
                     "AIRC",
