@@ -56,9 +56,6 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.Method = Method.Get;
             request.Resource = "/v1/listingManagement";
             request.AddHeader("Authorization", $"Bearer {Token.accessToken}");
-            request.AddHeader("Accept", "*/*");
-            request.AddHeader("Host", "bff-mobile.propertyguru.com");
-            request.AddHeader("Connection", "keep-alive");
             request.AddQueryParameter("locale", queryListingManagement.Locale);
             request.AddQueryParameter("region", queryListingManagement.Region);
             request.AddQueryParameter("agent", queryListingManagement.Agent);
