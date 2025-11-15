@@ -13,9 +13,24 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Security;
+using RestSharp.Serializers.Xml;
 
 namespace Propnex.Poster.PropertyGuru.Mobile
 {
+
+    public class CustomHttpWebRequestHandler : DelegatingHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            // 手动使用 HttpWebRequest 处理请求
+            var webRequest = (HttpWebRequest)WebRequest.Create(request.RequestUri!);
+            // 复制 headers、method 等参数...
+            var webResponse = (HttpWebResponse)webRequest.GetResponse();
+            // 转换为 HttpResponseMessage 并返回
+            return Task.FromResult(new HttpResponseMessage(webResponse.StatusCode));
+        }
+    }
 
 
     public class ClientBase : IDisposable
@@ -23,7 +38,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
         public static string PhoneModel = "23127PN0CC";
         protected readonly RestClient client;
 
-        public static CookieContainer cookieContainer = new CookieContainer();
+        //public static CookieContainer cookieContainer = new CookieContainer();
 
         public Action<string, RestResponse> LogHttpResponseMessage;
 
@@ -34,9 +49,11 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 
         public ClientBase(string baseUrl)
         {
+            
 
             client = new RestClient(new RestClientOptions()
             {
+                //ConfigureMessageHandler = (s) => new WebRequestHandle(),
                 BaseUrl = new Uri(baseUrl),
                 UseDefaultCredentials = true,
                 UserAgent = ""
@@ -66,6 +83,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             var port = proxyIp.Split(':')[1];
             client = new RestClient(new RestClientOptions()
             {
+                //ConfigureMessageHandler = (s) => new HttpWebRequestMessageHandler(),
                 BaseUrl = new Uri(baseUrl),
                 UseDefaultCredentials = true,
                 UserAgent = "",
@@ -105,8 +123,8 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             //request.AddOrUpdateHeader(KnownHeaders.UserAgent, $"AgentNet Android/LEGACY");
             request.AddOrUpdateHeader(KnownHeaders.UserAgent, $"sg;agentnet;android;2025.10.24;{PhoneModel}");
             request.Timeout = TimeSpan.FromMinutes(5);//  1000 * 60 * 5;
-            request.Version = new Version(2, 0);
-            request.CookieContainer = cookieContainer;
+            //request.Version = new Version(2, 0);
+            //request.CookieContainer = cookieContainer;
             return request;
         }
 
@@ -123,8 +141,8 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.Method = method;
             request.Timeout = TimeSpan.FromMinutes(5);// 1000 * 60 * 5;
             request.Resource = resource;
-            request.Version = new Version(2, 0);
-            request.CookieContainer = cookieContainer;
+            //request.Version = new Version(2, 0);
+            //request.CookieContainer = cookieContainer;
             return request;
         }
 

@@ -13,7 +13,7 @@ using Flurl.Http;
 using Polly;
 using Propnex.Poster.Dtos;
 
-namespace PropnexPoster.Console
+namespace PropnexPoster.ConsoleClient
 {
     public class WebServer
     {
@@ -37,11 +37,13 @@ namespace PropnexPoster.Console
             }
             catch (FlurlHttpException ex)
             {
+                Console.WriteLine(ex.Message);
                 var exType = ex.GetType();
                 await PingAsync();
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 var exType = ex.GetType();
                 await PingAsync();
             }
@@ -63,6 +65,7 @@ namespace PropnexPoster.Console
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await PingAsync();
                 }
             }
@@ -82,6 +85,7 @@ namespace PropnexPoster.Console
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await PingAsync();
                 }
             }
@@ -100,8 +104,9 @@ namespace PropnexPoster.Console
                     count = 20;
                     break;
                 }
-                catch
+                catch(Exception ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await PingAsync();
                 }
             }
@@ -119,8 +124,9 @@ namespace PropnexPoster.Console
                 {
                     await url.PostAsync();
                 }
-                catch
+                catch(Exception ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await PingAsync();
                 }
             }
@@ -141,8 +147,9 @@ namespace PropnexPoster.Console
                 {
                     return await url.GetStringAsync();
                 }
-                catch
+                catch(Exception ex)
                 {
+                    Console.WriteLine(ex.Message);
                     return "";
                 }
             });
@@ -155,9 +162,9 @@ namespace PropnexPoster.Console
                 string url = $"{BaseUrl}/api/app/machine/{MachindNumber}/online";
                 await url.PutAsync();
             }
-            catch
+            catch(Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
             }
         }
 
@@ -173,7 +180,7 @@ namespace PropnexPoster.Console
                 }
                 catch(Exception ex)
                 {
-
+                    Console.WriteLine(ex.Message);
                 }
                 
                 return new PnUserDto();
@@ -188,9 +195,9 @@ namespace PropnexPoster.Console
                 {
                     await $"{BaseUrl}/api/app/pn-user".PutJsonAsync(userDto);
                 }
-                catch
+                catch(Exception ex)
                 {
-
+                    Console.WriteLine(ex.Message);
                 }
                 
             });
@@ -204,9 +211,9 @@ namespace PropnexPoster.Console
                 {
                     await $"{BaseUrl}/api/app/pn-user/upate-token".PostJsonAsync(userDto);
                 }
-                catch
+                catch(Exception ex)
                 {
-
+                    Console.WriteLine(ex.Message);
                 }
                 
             });
@@ -218,9 +225,9 @@ namespace PropnexPoster.Console
             {
                 await $"https://pa-production.propnex.net/index.php/tools/posterPing?name={MachindNumber}".GetAsync();
             }
-            catch
+            catch(Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
             }
 
         }
@@ -233,7 +240,7 @@ namespace PropnexPoster.Console
                 .OrResult<PingReply>(pr => pr.Status != IPStatus.Success)
                 .WaitAndRetryAsync(10, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
                 {
-
+                    Console.WriteLine(ex.Exception.Message);
                 });
             await pingRetryPolicy.ExecuteAsync(async () =>
              {

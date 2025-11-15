@@ -98,11 +98,11 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             var reponse = await ExecuteAsync(request);
             if (reponse.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                cookieContainer = new CookieContainer();
-                foreach (Cookie item in reponse.Cookies)
-                {
-                    cookieContainer.Add(item);
-                }
+                //cookieContainer = new CookieContainer();
+                //foreach (Cookie item in reponse.Cookies)
+                //{
+                //    cookieContainer.Add(item);
+                //}
                 return new HttpResult<string>() { };
             }
             return GetHttpResult<string>(reponse);
