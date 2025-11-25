@@ -12,6 +12,14 @@ namespace Propnex.Poster.PropertyGuru.Tasks
         public string FastRepost { get; set; }
 
         public CreateOrUpdateListing Listing { get; set; }
+
+        public List<string> Photos { get; set; }
+
+        public List<string> Videos { get; set; }
+
+        public List<string> Tours { get; set; }
+
+        public List<string> FloorPlan { get; set; }
     }
 
     public class GuruTaskListing

@@ -35,7 +35,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
         public ClientBase(string baseUrl)
         {
 
-            client = new RestClient(new RestClientOptions()
+            client = Create(new RestClientOptions()
             {
                 BaseUrl = new Uri(baseUrl),
                 UseDefaultCredentials = true,
@@ -64,7 +64,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
         {
             var ip = proxyIp.Split(':')[0];
             var port = proxyIp.Split(':')[1];
-            client = new RestClient(new RestClientOptions()
+            client = Create(new RestClientOptions()
             {
                 BaseUrl = new Uri(baseUrl),
                 UseDefaultCredentials = true,
@@ -103,10 +103,11 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             System.Threading.Thread.Sleep(Random.Next(1000, 5000));
             RestRequest request = new RestRequest();
             //request.AddOrUpdateHeader(KnownHeaders.UserAgent, $"AgentNet Android/LEGACY");
-            request.AddOrUpdateHeader(KnownHeaders.UserAgent, $"sg;agentnet;android;2025.10.24;{PhoneModel}");
+            //request.AddOrUpdateHeader(KnownHeaders.UserAgent, $"sg;agentnet;android;2025.10.24;{PhoneModel}");
+            request.AddOrUpdateHeader(KnownHeaders.UserAgent, $"sg;agentnet;android;2025.11.7;{PhoneModel}");
             request.Timeout = TimeSpan.FromSeconds(5);//  1000 * 60 * 5;
             //request.Version = new Version(2, 0);
-            request.CookieContainer = cookieContainer;
+            //request.CookieContainer = cookieContainer;
             return request;
         }
 
@@ -118,13 +119,14 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             System.Threading.Thread.Sleep(Random.Next(1000, 5000));
 
             RestRequest request = new RestRequest();
-            //request.AddOrUpdateHeader(KnownHeaders.UserAgent, $"AgentNet Android/LEGACY");
-            request.AddOrUpdateHeader(KnownHeaders.UserAgent, $"sg;agentnet;android;2025.10.24;{PhoneModel}");
+            //request.AddOrUpdateHeader(KnownHeaders.UserAgent, $"AgentNet Android/LEGACY");8c7baddd-79bd-4095-b583-6ea1730a47cc
+            request.AddOrUpdateHeader(KnownHeaders.UserAgent, $"sg;agentnet;android;2025.11.7;{PhoneModel}");
+            //request.AddOrUpdateHeader(KnownHeaders.UserAgent, "sg;agentnet;ios;2025.11.7;iPhone14,8");
             request.Method = method;
             request.Timeout = TimeSpan.FromSeconds(5);// 1000 * 60 * 5;
             request.Resource = resource;
             //request.Version = new Version(2, 0);
-            request.CookieContainer = cookieContainer;
+            //request.CookieContainer = cookieContainer;
             return request;
         }
 
@@ -153,7 +155,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             // Allow TLS 1.0/1.1/1.2/1.3 (TLS 1.0/1.1 are deprecated; prefer TLS1.2+ in production)
             handler.SslOptions = new SslClientAuthenticationOptions
             {
-                EnabledSslProtocols =  SslProtocols.Tls12 | SslProtocols.Tls13
+                EnabledSslProtocols =  SslProtocols.Tls12 
             };
 
             // Try to set per-connection cipher suites where supported (may throw on some platforms)
@@ -161,25 +163,21 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             {
                 handler.SslOptions.CipherSuitesPolicy = new CipherSuitesPolicy(new[]
                 {
-                // AES/GCM / ChaCha20
-                TlsCipherSuite.TLS_AES_256_GCM_SHA384,
-                TlsCipherSuite.TLS_CHACHA20_POLY1305_SHA256,
-                TlsCipherSuite.TLS_AES_128_GCM_SHA256,
-
-                // ECDHE
-                TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-                TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-                TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-                TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-
-                // DHE / CBC fallbacks
-                TlsCipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
-                TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
-                TlsCipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
-                TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
-                TlsCipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
-                TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-                TlsCipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA
+                      TlsCipherSuite.TLS_AES_128_GCM_SHA256,
+                    TlsCipherSuite.TLS_AES_256_GCM_SHA384,
+                    TlsCipherSuite.TLS_CHACHA20_POLY1305_SHA256,
+                    TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                    TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+                    TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+                    TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                    TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+                    TlsCipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+                    TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+                    TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+                    TlsCipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256,
+                    TlsCipherSuite.TLS_RSA_WITH_AES_256_GCM_SHA384,
+                    TlsCipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+                    TlsCipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA
             });
             }
             catch (PlatformNotSupportedException)
@@ -203,7 +201,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             // Allow TLS 1.0 / 1.1 / 1.2 / 1.3 (note: TLS 1.0/1.1 are deprecated on many platforms)
             handler.SslOptions = new SslClientAuthenticationOptions
             {
-                EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13
+                EnabledSslProtocols = SslProtocols.Tls12 
             };
 
             // Try to set per-connection cipher suites where supported (.NET 5+ on supported OSes).
@@ -211,25 +209,21 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             {
                 handler.SslOptions.CipherSuitesPolicy = new CipherSuitesPolicy(new[]
                 {
-                // Preferred AEAD / modern suites
-                TlsCipherSuite.TLS_AES_256_GCM_SHA384,
-                TlsCipherSuite.TLS_CHACHA20_POLY1305_SHA256,
-                TlsCipherSuite.TLS_AES_128_GCM_SHA256,
-
-                // ECDHE suites
-                TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-                TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-                TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-                TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-
-                // DHE / CBC fallbacks (as in your Java list)
-                TlsCipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
-                TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
-                TlsCipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
-                TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
-                TlsCipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
-                TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-                TlsCipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA
+                  TlsCipherSuite.TLS_AES_128_GCM_SHA256,
+                    TlsCipherSuite.TLS_AES_256_GCM_SHA384,
+                    TlsCipherSuite.TLS_CHACHA20_POLY1305_SHA256,
+                    TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                    TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+                    TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+                    TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                    TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+                    TlsCipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+                    TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+                    TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+                    TlsCipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256,
+                    TlsCipherSuite.TLS_RSA_WITH_AES_256_GCM_SHA384,
+                    TlsCipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+                    TlsCipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA
             });
             }
             catch (PlatformNotSupportedException)

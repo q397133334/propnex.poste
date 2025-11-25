@@ -1345,7 +1345,7 @@ namespace PropnexPoster.WPF
             //    }
             //    return false;
 
-            return await FileDownloader.DownloadFileAsync(url, filePath, maxAttempts: 3,  new Progress<double>(p =>
+            return await FileDownloader.DownloadFileAsync(url, filePath, maxAttempts: 3, new Progress<double>(p =>
             {
                 if (p < 0) Log("Downloading... size unknown");
                 else Log($"FilePath {filePath} Progress: {p:P1}", true, false);
@@ -1370,6 +1370,10 @@ namespace PropnexPoster.WPF
             if (_Token == null)
                 return null;
             ClientBase.PhoneModel = pnUser.PhoneModel == "" ? PhoneModelList.GetPhoneModel() : ClientBase.PhoneModel;
+            if (ClientBase.PhoneModel.Length < 20)
+            {
+                ClientBase.PhoneModel += $";{Guid.NewGuid()}";
+            }
             await getListing();
 
 
@@ -1387,6 +1391,10 @@ namespace PropnexPoster.WPF
                     pnUser.Password = guruTask.Password;
                     Log("insert user ....");
                     pnUser.PhoneModel = ClientBase.PhoneModel;
+                    if (pnUser.PhoneModel.Length < 20)
+                    {
+                        pnUser.PhoneModel += $";{Guid.NewGuid()}";
+                    }
                     await WebServer.PnUser(pnUser);
                     pnUser = await WebServer.GetUser(guruTask.Account);
 
@@ -1420,6 +1428,10 @@ namespace PropnexPoster.WPF
                     pnUser.TokenJson = Newtonsoft.Json.JsonConvert.SerializeObject(_Token);
                     pnUser.PhoneModel = pnUser.PhoneModel == "" ? ClientBase.PhoneModel : pnUser.PhoneModel;
                     Log("UpdatePnUserToken");
+                    if (pnUser.PhoneModel.Length < 20)
+                    {
+                        pnUser.PhoneModel += $";{Guid.NewGuid()}";
+                    }
                     await WebServer.UpdatePnUserToken(pnUser);
                     return loginResult.Data;
                 }
