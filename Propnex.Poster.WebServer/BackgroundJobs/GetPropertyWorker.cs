@@ -39,20 +39,20 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
             }
             list = GuruMissingId.data;
 
-            var loginResult = await new Auth().LoginAsync(new AuthLogin()
-            {
-                UserName = "davidytp@gmail.com",
-                Password = "calista"
-            });
-            Token token;
-            if (loginResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
-            {
-                token = loginResult.Data;
-            }
-            else
-            {
-                return;
-            }
+            //var loginResult = await new Auth().LoginAsync(new AuthLogin()
+            //{
+            //    UserName = "davidytp@gmail.com",
+            //    Password = "calista"
+            //});
+            Token token = Newtonsoft.Json.JsonConvert.DeserializeObject<Token>((await PropnexPoster.WPF.WebServer.GetUser("")).TokenJson);
+            //if (loginResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+            //{
+            //    token = loginResult.Data;
+            //}
+            //else
+            //{
+            //    return;
+            //}
             var jsonList = new List<string>();
             var listname = new List<string>();
             foreach (var item in list)

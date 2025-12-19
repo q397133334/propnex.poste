@@ -503,7 +503,7 @@ namespace PropnexPoster.WPF
                                             {
                                                 createOrUpdateListing.location.id = int.Parse(project.addresses[0].external_id);
                                                 result = await _api.CreateAsync(createOrUpdateListing);
-                                                if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                                if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)          
                                                 {
                                                     listing.Listing.Id = result.Data.Id;
                                                     if (result.Data.Id != 0)

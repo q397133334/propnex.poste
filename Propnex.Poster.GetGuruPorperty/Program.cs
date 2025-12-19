@@ -24,20 +24,20 @@ namespace Propnex.Poster.GetGuruPorperty
                 return;
             }
             list = GuruMissingId.data;
-            var loginResult = await new Auth().LoginAsync(new AuthLogin()
-            {
-                UserName = "davidytp@gmail.com",
-                Password = "calista"
-            });
-            Token token;
-            if (loginResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
-            {
-                token = loginResult.Data;
-            }
-            else
-            {
-                return;
-            }
+            //var loginResult = await new Auth().LoginAsync(new AuthLogin()
+            //{
+            //    UserName = "davidytp@gmail.com",
+            //    Password = "calista"
+            //});
+            Token token = Newtonsoft.Json.JsonConvert.DeserializeObject<Token>((await PropnexPoster.WPF.WebServer.GetUser("")).TokenJson);
+            //if (loginResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+            //{
+            //    token = loginResult.Data;
+            //}
+            //else
+            //{
+            //    return;
+            //}
             var jsonList = new List<string>();
 
             foreach (var item in list)
@@ -49,16 +49,25 @@ namespace Propnex.Poster.GetGuruPorperty
                     var project = projectResult.Data;
                     jsonList.Add(project.ToJson());
 
-                    //https://pa-production.propnex.net/index.php/scrape/guruProjects
-                    //https://pa-staging.propnex.net/index.php/scrape/guruProjects
-                    var ok = await $"https://pa-production.propnex.net/index.php/scrape/guruProjects".PostUrlEncodedAsync(new
+                    try
                     {
-                        id = item,
-                        json = projectResult.Message
-                    }) ;
+                        //https://pa-production.propnex.net/index.php/scrape/guruProjects
+                        //https://pa-staging.propnex.net/index.php/scrape/guruProjects
+                        var ok = await $"https://pa-production.propnex.net/index.php/scrape/guruProjects".PostUrlEncodedAsync(new
+                        {
+                            id = item,
+                            json = projectResult.Message
+                        });
 
-                    var msg = await ok.GetStringAsync();
-                    Console.WriteLine(msg);
+                        var msg = await ok.GetStringAsync();
+                        Console.WriteLine(msg);
+                    }
+                    catch
+                    {
+
+                    }
+     
+               
                 }
             }
 
