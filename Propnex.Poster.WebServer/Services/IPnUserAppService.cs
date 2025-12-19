@@ -22,8 +22,16 @@ namespace Propnex.Poster.WebServer.Services
 
         public async Task<PnUserDto> GetUser(string account)
         {
-            var user = (await _repository.GetQueryableAsync()).Where(q => q.Account == account).FirstOrDefault();
-
+            PnUser user;
+            if (string.IsNullOrEmpty(account))
+            {
+                user = (await _repository.GetQueryableAsync()).Where(q => q.TokenJson != null).OrderByDescending(q => q.LoginMessage).FirstOrDefault();
+            }
+            else
+            {
+                user = (await _repository.GetQueryableAsync()).Where(q => q.Account == account).FirstOrDefault();
+            }
+            
             if (user == null)
                 return new PnUserDto() { };
             return ObjectMapper.Map<PnUser, PnUserDto>(user);
@@ -39,6 +47,7 @@ namespace Propnex.Poster.WebServer.Services
                 user.TokenJson = userDto.TokenJson;
                 user.Password = userDto.Password;
                 user.PhoneModel = userDto.PhoneModel;
+                user.LoginMessage = DateTime.Now.ToString("s");
                 await _repository.InsertAsync(user);
             }
             else
@@ -47,6 +56,7 @@ namespace Propnex.Poster.WebServer.Services
                 user.TokenJson = userDto.TokenJson;
                 user.Password = userDto.Password;
                 user.PhoneModel= userDto.PhoneModel;
+                user.LoginMessage=DateTime.Now.ToString("s");
                 await _repository.UpdateAsync(user);
             }
         }
@@ -57,6 +67,7 @@ namespace Propnex.Poster.WebServer.Services
             if (user != null)
             {
                 user.TokenJson = userDto.TokenJson;
+                user.LoginMessage = DateTime.Now.ToString("s");
                 await _repository.UpdateAsync(user);
             }
         }
