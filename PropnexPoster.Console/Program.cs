@@ -8,7 +8,7 @@ using Serilog;
 using Serilog.Events;
 using Volo.Abp;
 
-namespace PropnexPoster.Console
+namespace PropnexPoster.ConsoleClient
 {
     public class Program
     {

@@ -21,7 +21,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ILogger = Serilog.ILogger;
 
-namespace PropnexPoster.Console
+namespace PropnexPoster.ConsoleClient
 {
 
     public class PosterRunInfo
@@ -124,7 +124,7 @@ namespace PropnexPoster.Console
             {
                 _logger = new LoggerConfiguration()
                   .MinimumLevel.Debug()
-                  .WriteTo.Async(c => c.File($"{Directory.GetDirectoryRoot(System.AppDomain.CurrentDomain.BaseDirectory)}\\logs\\task\\{taskDto.Number}.txt"))
+                  .WriteTo.Async(c => c.File($"Task/Logs/{taskDto.Number}.txt"))
                   .CreateLogger();
                 var proxyIp = "";
                 if (ConsoleModule.AppConfiguration.IsProxy)
@@ -1345,7 +1345,7 @@ namespace PropnexPoster.Console
             //    }
             //    return false;
 
-            return await FileDownloader.DownloadFileAsync(url, filePath, maxAttempts: 3,  new Progress<double>(p =>
+            return await FileDownloader.DownloadFileAsync(url, filePath, maxAttempts: 3, new Progress<double>(p =>
             {
                 if (p < 0) Log("Downloading... size unknown");
                 else Log($"FilePath {filePath} Progress: {p:P1}", true, false);

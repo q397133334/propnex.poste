@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PropnexPoster.Console
+namespace PropnexPoster.ConsoleClient
 {
     public class HostedService : IHostedService
     {
@@ -37,6 +37,7 @@ namespace PropnexPoster.Console
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            Console.WriteLine("StopAsync");
             return Task.CompletedTask;
         }
     }

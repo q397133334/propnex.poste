@@ -1,6 +1,7 @@
 ﻿using Propnex.Poster.Share;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.EventBus;
+using System.ComponentModel;
 
 namespace Propnex.Poster.NetCoreWinForm
 {
@@ -9,6 +10,7 @@ namespace Propnex.Poster.NetCoreWinForm
         private bool IsRun = false;
         private bool IsStop = false;
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Func<CefFrom> GetForm { get; set; }
 
         private CefFrom CefPoster { get; set; }

@@ -15,7 +15,7 @@ using Propnex;
 using System.Net;
 using System.Net.Security;
 
-namespace PropnexPoster.Console;
+namespace PropnexPoster.ConsoleClient;
 
 [DependsOn(typeof(AbpAutofacModule))]
 public class ConsoleModule : AbpModule
