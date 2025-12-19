@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Propnex.Poster.PropertyGuru.Tasks
 {
+    /// <summary>
+    /// app 接口使用
+    /// </summary>
     public class TaskListing
     {
         public string FastRepost { get; set; }
@@ -20,6 +23,20 @@ namespace Propnex.Poster.PropertyGuru.Tasks
         public List<string> Tours { get; set; }
 
         public List<string> FloorPlan { get; set; }
+    }
+
+
+    public class Retrieve
+    {
+        public string Account { get; set; }
+
+        public string TargetPortal { get; set; }
+
+        public string Id { get; set; }
+
+        public string Password { get; set; }
+
+        public List<CreateOrUpdateListing> Listings { get; set; }
     }
 
     public class GuruTaskListing
