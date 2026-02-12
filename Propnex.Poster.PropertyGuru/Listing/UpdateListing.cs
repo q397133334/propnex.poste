@@ -1409,7 +1409,7 @@ namespace Propnex.Poster.PropertyGuru.Listing
         public DateTime startDate { get; set; }
         public DateTime endDate { get; set; }
         public int creditsCharged { get; set; }
-        public int durationInWeeks { get; set; }
+        public int? durationInWeeks { get; set; }
         public bool isExpiring { get; set; }
     }
 

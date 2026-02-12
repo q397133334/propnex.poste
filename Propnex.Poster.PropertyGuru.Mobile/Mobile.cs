@@ -66,6 +66,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddQueryParameter("sort", queryListingManagement.Sort);
 
             var response = await ExecuteAsync(request);
+            //Log(response.Content,false);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 var listingResult = Newtonsoft.Json.JsonConvert.DeserializeObject<ListingsResult>(response.Content);

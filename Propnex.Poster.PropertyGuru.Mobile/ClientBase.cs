@@ -70,7 +70,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                  response.StatusCode == HttpStatusCode.Unauthorized ||
                  response.ResponseStatus == ResponseStatus.TimedOut ||
                  response.ResponseStatus == ResponseStatus.Aborted)
-                .WaitAndRetryAsync(3, retryNumber => TimeSpan.FromSeconds(60), (ex, retry) =>
+                .WaitAndRetryAsync(3, retryNumber => TimeSpan.FromSeconds(30), (ex, retry) =>
                 {
                     Log?.Invoke($"{ex.Result.Request.Resource} {ex.Result.ResponseStatus} {ex.Result?.Content} {ex.Exception?.Message}", false);
                     LogHttpResponseMessage?.Invoke($"{ex.Result.Request.Resource} {ex.Result.ResponseStatus}", ex.Result);
@@ -102,7 +102,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                  response.ResponseStatus == ResponseStatus.TimedOut ||
                  response.ResponseStatus == ResponseStatus.Aborted)
 
-                .WaitAndRetryAsync(3, retryNumber => TimeSpan.FromSeconds(10), (ex, retry) =>
+                .WaitAndRetryAsync(3, retryNumber => TimeSpan.FromSeconds(30), (ex, retry) =>
                 {
                     Log?.Invoke($"{ex.Result.Request.Resource} {ex.Result.ResponseStatus} {ex.Result?.Content} {ex.Exception?.Message}", false);
                     LogHttpResponseMessage?.Invoke($"{ex.Result.Request.Resource} {ex.Result.ResponseStatus}", ex.Result);
