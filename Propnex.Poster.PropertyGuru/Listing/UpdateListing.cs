@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Configuration;
 
@@ -253,7 +254,7 @@ namespace Propnex.Poster.PropertyGuru.Listing
         /// <summary>
         /// 
         /// </summary>
-        public string timezone { get; set; }
+        public string timezone { get; set; } = "Asia/Singapore";
         /// <summary>
         /// 
         /// </summary>
@@ -1304,6 +1305,7 @@ namespace Propnex.Poster.PropertyGuru.Listing
         /// 
         /// </summary>
         public object dates { get; set; }
+
 
         /// <summary>
         /// 

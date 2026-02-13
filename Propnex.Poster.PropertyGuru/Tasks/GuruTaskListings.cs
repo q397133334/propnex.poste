@@ -138,19 +138,19 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                 {
                     listingModel.Dates.available = new Dates_Available();
                     var available_date = detialss.FindAttribute("Name", "available_date").GetAttributeValue("Value", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-
+                    //"2026-02-13T16:00:00.000Z"
                     try
                     {
-                        listingModel.Dates.available.Date = Convert.ToDateTime(available_date).ToString("yyyy-MM-dd 00:00:00");
+                        listingModel.Dates.available.date = Convert.ToDateTime(available_date).ToString("yyyy-MM-dd HH:mm:ss");
                     }
                     catch { }
-                    if (listingModel.Dates.available.Date == "")
+                    if (listingModel.Dates.available.date == "")
                     {
-                        listingModel.Dates.available.Date = DateTime.Now.AddYears(1).ToString("yyyy-MM-dd HH:mm:ss");
+                        listingModel.Dates.available.date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                     }
-                    if (Convert.ToDateTime(listingModel.Dates.available.Date) < DateTime.Now)
+                    if (Convert.ToDateTime(listingModel.Dates.available.date) < DateTime.Now)
                     {
-                        listingModel.Dates.available.Date = DateTime.Now.AddYears(1).ToString("yyyy-MM-dd HH:mm:ss");
+                        listingModel.Dates.available.date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"); ;
                     }
                 }
 

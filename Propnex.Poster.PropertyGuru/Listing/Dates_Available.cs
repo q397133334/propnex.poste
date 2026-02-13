@@ -15,9 +15,9 @@ namespace Propnex.Poster.PropertyGuru.Listing
 
         private DateTime now = DateTime.UtcNow.Date;
 
-        public string Date { get; set; }
+        public string date { get; set; }
 
-        public long Unix { get => unix_timestamp(Convert.ToDateTime(Date)); }
+        public long unix { get => unix_timestamp(Convert.ToDateTime(date)); }
 
         public long unix_timestamp(DateTime dt)
         {
