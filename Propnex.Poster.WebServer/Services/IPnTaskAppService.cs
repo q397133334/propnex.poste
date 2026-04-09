@@ -80,14 +80,15 @@ namespace Propnex.Poster.WebServer.Services
                 var rootPath = Path.Combine(_webHostEnvironment.WebRootPath, "taskxml");
                 //1. get waiting pntask
                 var pnTask = await AsyncExecuter.FirstOrDefaultAsync((await Repository.GetQueryableAsync()).Where(q => q.Status == Share.TaskStatus.Wait && q.TargetPortal == inputDto.TargetPortal).OrderBy(q=>q.CreationTime));
+                //PnTask pnTask = await AsyncExecuter.FirstOrDefaultAsync((await Repository.GetQueryableAsync()).Where(q => q.Number == "cp17733240140309.guru.tsk"));
                 if (pnTask == null)
                     return null;
                 //2. check task file
                 var downloadUrl = $"{WebServerConsts.PnBaseUrl}{WebServerConsts.PnreadGuruTask}?client_id={pnTask.ClientId}&fileName={pnTask.Number}";
-                if (inputDto.TargetPortal == "MyIP")
-                {
-                    downloadUrl = $"{WebServerConsts.PnreadMyIpTask}?client_id={pnTask.ClientId}&fileName={pnTask.Number}";
-                }
+                //if (inputDto.TargetPortal == "MyIP")
+                //{
+                //    downloadUrl = $"{WebServerConsts.PnreadMyIpTask}?client_id={pnTask.ClientId}&fileName={pnTask.Number}";
+                //}
                 //3. download task file
                 var taskContext = await downloadUrl.GetStringAsync();
                 //4. return pntasks

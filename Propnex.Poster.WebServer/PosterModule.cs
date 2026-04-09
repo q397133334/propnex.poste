@@ -307,8 +307,8 @@ public class PosterModule : AbpModule
     public override async Task OnPostApplicationInitializationAsync(ApplicationInitializationContext context)
     {
         var config= context.ServiceProvider.GetService<IConfiguration>();
-        WebServerConsts.PnfetchMyIpTasks = config["PnfetchMyIpTasks"];
-        WebServerConsts.PnreadMyIpTask = config["PnreadMyIpTask"];
+        //WebServerConsts.PnfetchMyIpTasks = config["PnfetchMyIpTasks"];
+        //WebServerConsts.PnreadMyIpTask = config["PnreadMyIpTask"];
 
         await Task.CompletedTask;
     }

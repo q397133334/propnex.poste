@@ -622,6 +622,7 @@ namespace Propnex.Poster.PropertyGuru.Listing
 
         private static string OverlayWatermark(string filename)
         {
+            return filename;
             try
             {
                 if (filename.EndsWith("pdf")) return filename;

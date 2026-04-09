@@ -24,19 +24,30 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
         [Volo.Abp.Uow.UnitOfWork(false)]
         protected async override Task DoWorkAsync(PeriodicBackgroundWorkerContext workerContext)
         {
-#if DEBUG
-            return;
-#endif
             var _repositoryPntask = workerContext.ServiceProvider.GetService<IRepository<PnTask>>();
             IPnTaskLogRepository _pnTaskLogRepository = workerContext.ServiceProvider.GetService<IPnTaskLogRepository>();
+            try
+            {
+                await getPnTasks(workerContext, WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.Message, ex);
+            }
+            try
+            {
+                await getPnTasks(workerContext, WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks + "?xweb=1");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.Message, ex);
+            }
 
-            await getPnTasks(workerContext, WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks);
-            await getPnTasks(workerContext, WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks + "?xweb=1");
-            await getPnTasks(workerContext, WebServerConsts.PnfetchMyIpTasks, "MyIP");
+            //await getPnTasks(workerContext, WebServerConsts.PnfetchMyIpTasks, "MyIP");
         }
 
 
-        private async Task getPnTasks(PeriodicBackgroundWorkerContext workerContext, string url,string targetPortal="GURU")
+        private async Task getPnTasks(PeriodicBackgroundWorkerContext workerContext, string url, string targetPortal = "GURU")
         {
             var _repositoryPntask = workerContext.ServiceProvider.GetService<IRepository<PnTask>>();
             IPnTaskLogRepository _pnTaskLogRepository = workerContext.ServiceProvider.GetService<IPnTaskLogRepository>();
@@ -47,7 +58,7 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
                 var tsk = item.Split('\t');
                 if (tsk.Length == 2)
                 {
-                    var waitTask = (await _repositoryPntask.GetQueryableAsync()).Where(q => q.Number == tsk[0] && q.ClientId == tsk[1] && q.TargetPortal==targetPortal).OrderByDescending(q => q.CreationTime).FirstOrDefault();
+                    var waitTask = (await _repositoryPntask.GetQueryableAsync()).Where(q => q.Number == tsk[0] && q.ClientId == tsk[1] && q.TargetPortal == targetPortal).OrderByDescending(q => q.CreationTime).FirstOrDefault();
                     if (waitTask == null)
                     {
                         waitTask = await _repositoryPntask.InsertAsync(new PnTask()
