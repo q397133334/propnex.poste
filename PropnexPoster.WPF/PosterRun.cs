@@ -239,30 +239,7 @@ namespace PropnexPoster.WPF
                                         {
                                             await _api.UpdateAsync(taskListing.Data);
                                         }
-                                        var mobile = new Mobile() { Token = token };
-                                        var draflistings =
-                                        (await _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
-                                        {
-                                            StatusCode = "DRAFT"
-                                        })).Data.listings;
-                                        var draflisting = draflistings.Where(q => q.id == listing.Listing.Id).FirstOrDefault();
-                                        if (draflisting != null)
-                                        {
-                                            var activateResult = await _adsProject.Activate(result.Data.Id, draflisting.charges.activate);
-                                            if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                            {
-                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-                                            }
-                                            else
-                                            {
-
-                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
-                                        }
+                                        await ActivateAndReportAsync(task, listing, _mobile, _adsProject, token);
                                     }
                                 }
                                 else
@@ -317,29 +294,7 @@ namespace PropnexPoster.WPF
                                                             }
                                                             var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
                                                             await _api.UpdateAsync(taskListing.Data);
-                                                            var draflistings =
-                                                                (await _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
-                                                                {
-                                                                    StatusCode = "DRAFT"
-                                                                })).Data.listings;
-                                                            var draflisting = draflistings.Where(q => q.id == listing.Listing.Id).FirstOrDefault();
-                                                            if (draflisting != null)
-                                                            {
-                                                                var activateResult = await _adsProject.Activate(result.Data.Id, draflisting.charges.activate);
-                                                                if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                                                {
-                                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-                                                                }
-                                                                else
-                                                                {
-
-                                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
-                                                                }
-                                                            }
-                                                            else
-                                                            {
-                                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
-                                                            }
+                                                            await ActivateAndReportAsync(task, listing, _mobile, _adsProject, token);
                                                         }
                                                     }
                                                 }
@@ -372,10 +327,10 @@ namespace PropnexPoster.WPF
                             {
                                 posterRunInfo.TaskItemId = listing.TaskItemId.ToString();
                                 TaskInfoEvent?.Invoke(posterRunInfo);
-                                if (IsExtis(task, listing) != null)
+                                var listInfo = IsExtis(task, listing);
+                                if (listInfo != null)
                                 {
-                                    //match task 
-                                    var listInfo = IsExtis(task, listing);
+                                    //match task
                                     var taskListing = await _api.GetListing(listing.Listing.Id.Value);
 
                                     if (listing.FastRepost == "0")
@@ -463,37 +418,13 @@ namespace PropnexPoster.WPF
                                             }
                                             var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
                                             await _api.UpdateAsync(taskListing.Data);
-                                            await _api.UpdateAsync(taskListing.Data); var mobile = new Mobile() { Token = token };
-                                            var draflistings =
-                                            (await _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
-                                            {
-                                                StatusCode = "DRAFT"
-                                            })).Data.listings;
-                                            var draflisting = draflistings.Where(q => q.id == listing.Listing.Id).FirstOrDefault();
-                                            if (draflisting != null)
-                                            {
-                                                var activateResult = await _adsProject.Activate(result.Data.Id, draflisting.charges.activate);
-                                                if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                                {
-                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-                                                }
-                                                else
-                                                {
-
-                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
-                                                }
-                                            }
-                                            else
-                                            {
-                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
-                                            }
+                                            await ActivateAndReportAsync(task, listing, _mobile, _adsProject, token);
                                         }
                                     }
                                     else
                                     {
                                         if (result.Message.Contains("Postal code is already being used"))
                                         {
-                                            var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
                                             //1.获取邮政编号
                                             var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
                                             var locale = locales.Data.FirstOrDefault();
@@ -514,30 +445,7 @@ namespace PropnexPoster.WPF
                                                         await uploadFloorPlanAsync(listing, _api);
                                                         var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
                                                         await _api.UpdateAsync(taskListing.Data);
-                                                        await _api.UpdateAsync(taskListing.Data); var mobile = new Mobile() { Token = token };
-                                                        var draflistings =
-                                                        (await _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
-                                                        {
-                                                            StatusCode = "DRAFT"
-                                                        })).Data.listings;
-                                                        var draflisting = draflistings.Where(q => q.id == listing.Listing.Id).FirstOrDefault();
-                                                        if (draflisting != null)
-                                                        {
-                                                            var activateResult = await _adsProject.Activate(result.Data.Id, draflisting.charges.activate);
-                                                            if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                                            {
-                                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-                                                            }
-                                                            else
-                                                            {
-
-                                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
-                                                            }
-                                                        }
-                                                        else
-                                                        {
-                                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
-                                                        }
+                                                        await ActivateAndReportAsync(task, listing, _mobile, _adsProject, token);
                                                     }
                                                 }
                                             }
@@ -619,9 +527,9 @@ namespace PropnexPoster.WPF
                             {
                                 posterRunInfo.TaskItemId = listing.TaskItemId.ToString();
                                 TaskInfoEvent?.Invoke(posterRunInfo);
-                                if (IsExtis(task, listing) != null)
+                                var listingInfo = IsExtis(task, listing);
+                                if (listingInfo != null)
                                 {
-                                    var listingInfo = IsExtis(task, listing);
                                     var ids = new List<int>();
                                     ids.Add(listingInfo.Id);
                                     await _mobile.DeleteListing(ids);
@@ -971,6 +879,27 @@ namespace PropnexPoster.WPF
 
         }
         private List<ListingInfo> ListingInfos = new List<ListingInfo>();
+
+        private async Task ActivateAndReportAsync(GuruTask task, GuruTaskListing listing, Mobile _mobile, AdsProduct _adsProject, Token token)
+        {
+            var draflistings = (await _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
+            {
+                StatusCode = "DRAFT"
+            })).Data.listings;
+            var draflisting = draflistings.FirstOrDefault(q => q.id == listing.Listing.Id);
+            if (draflisting != null)
+            {
+                var activateResult = await _adsProject.Activate(listing.Listing.Id.Value, draflisting.charges.activate);
+                if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                else
+                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
+            }
+            else
+            {
+                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
+            }
+        }
 
         private ListingInfo IsExtis(GuruTask guruTask, GuruTaskListing guruTaskListing, bool isPostOnly = false)
         {
@@ -1451,10 +1380,7 @@ namespace PropnexPoster.WPF
                 {
                     return await auth();
                 }
-                await getListing();
-                if (listings == null)
-                    return await auth();
-                return Newtonsoft.Json.JsonConvert.DeserializeObject<Token>(pnUser.TokenJson);
+                return token;
             }
             async Task getListing()
             {
