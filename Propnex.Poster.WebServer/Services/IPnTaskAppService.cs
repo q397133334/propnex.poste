@@ -9,6 +9,7 @@ using Propnex.Poster.Dtos;
 using System.Reflection.PortableExecutable;
 using System.Threading.Tasks;
 using Volo.Abp.Uow;
+using Polly;
 
 namespace Propnex.Poster.WebServer.Services
 {
@@ -16,7 +17,7 @@ namespace Propnex.Poster.WebServer.Services
     public interface IPnTaskAppService : ICrudAppService< //Defines CRUD methods
             Dtos.PnTaskDto, //Used to show books
             Guid, //Primary key of the book entity
-            PagedAndSortedResultRequestDto, //Used for paging/sorting
+            Dtos.PnTaskListInput, //Used for paging/sorting/filtering
             Dtos.CreateUpdatePnTaskDto> //Used
     {
         Task<Dtos.PnTaskDto> GetPnTaskAsync(Dtos.InputGetTaskInfoDto inputDto);
@@ -28,13 +29,15 @@ namespace Propnex.Poster.WebServer.Services
         Task<List<PnTaskDto>> GetWaitPnTaskAsync();
 
         Task CreatePropertyTasks(CreatePropertyTaskDto input);
+
+        Task ResetPnTask(Guid machineId, Guid pnTaskId, string message = "");
     }
 
     public class PnTaskAppService : CrudAppService<
             Entities.PnTask, //The Book entity
             Dtos.PnTaskDto, //Used to show books
             Guid, //Primary key of the book entity
-            PagedAndSortedResultRequestDto, //Used for paging/sorting
+            Dtos.PnTaskListInput, //Used for paging/sorting/filtering
             Dtos.CreateUpdatePnTaskDto>, IPnTaskAppService
     {
 
@@ -47,6 +50,16 @@ namespace Propnex.Poster.WebServer.Services
         {
             _pnTaskLogRepository = pnTaskLogRepository;
             _webHostEnvironment = webHostEnvironment;
+        }
+
+        protected override async Task<IQueryable<Entities.PnTask>> CreateFilteredQueryAsync(Dtos.PnTaskListInput input)
+        {
+            var query = await base.CreateFilteredQueryAsync(input);
+            if (!string.IsNullOrWhiteSpace(input.NumberFilter))
+            {
+                query = query.Where(t => t.Number.Contains(input.NumberFilter));
+            }
+            return query;
         }
 
         public async Task CreatePropertyTasks(CreatePropertyTaskDto input)
@@ -90,7 +103,10 @@ namespace Propnex.Poster.WebServer.Services
                 //    downloadUrl = $"{WebServerConsts.PnreadMyIpTask}?client_id={pnTask.ClientId}&fileName={pnTask.Number}";
                 //}
                 //3. download task file
-                var taskContext = await downloadUrl.GetStringAsync();
+                var taskContext = await Policy
+                    .Handle<Exception>()
+                    .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
+                    .ExecuteAsync(() => downloadUrl.GetStringAsync());
                 //4. return pntasks
                 if (taskContext == "Can't find task file." && File.Exists(Path.Combine(rootPath, pnTask.Number)) == false)
                 {
@@ -182,6 +198,25 @@ namespace Propnex.Poster.WebServer.Services
                 pnTask.Status = Share.TaskStatus.Failure;
                 await Repository.UpdateAsync(pnTask);
                 await _pnTaskLogRepository.InsertAsync(machineId.Value, pnTask.Id, $"set Retry,but retyr max count {pnTask.RetryCount},{message}", "");
+            }
+        }
+
+        public async Task ResetPnTask(Guid machineId, Guid pnTaskId, string message = "")
+        {
+            var pnTask = await AsyncExecuter.FirstOrDefaultAsync(
+                (await Repository.GetQueryableAsync()).Where(q => q.Id == pnTaskId));
+            if (pnTask == null) return;
+
+            pnTask.Status = Share.TaskStatus.Wait;
+            pnTask.RetryCount = 0;
+            await Repository.UpdateAsync(pnTask);
+            await _pnTaskLogRepository.InsertAsync(machineId, pnTask.Id, $"Reset task, {message}", "");
+
+            var rootPath = Path.Combine(_webHostEnvironment.WebRootPath, "taskxml");
+            var usePath = Path.Combine(_webHostEnvironment.WebRootPath, "usetaskxml");
+            if (File.Exists(Path.Combine(usePath, pnTask.Number)))
+            {
+                File.Move(Path.Combine(usePath, pnTask.Number), Path.Combine(rootPath, pnTask.Number));
             }
         }
 

@@ -2,7 +2,7 @@
 @using Volo.Abp.Application.Dtos
 @using Dtos
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
-@inherits AbpCrudPageBase<WebServer.Services.IPnTaskAppService, PnTaskDto , Guid, PagedAndSortedResultRequestDto, CreateUpdatePnTaskDto>
+@inherits AbpCrudPageBase<WebServer.Services.IPnTaskAppService, PnTaskDto , Guid, PnTaskListInput, CreateUpdatePnTaskDto>
 @inject AuthenticationStateProvider AuthenticationStateProvider
 <Card>
     <CardHeader>
@@ -12,6 +12,11 @@
         </PageHeader>
     </CardHeader>
     <CardBody>
+        <Row Margin="Margin.Is2.FromBottom">
+            <Column ColumnSize="ColumnSize.Is3">
+                <TextEdit Placeholder="Search by number..." @bind-Text="@NumberFilter" @oninput="OnNumberFilterChanged" />
+            </Column>
+        </Row>
         <DataGrid TItem="PnTaskDto"
                   Data="Entities"
                   ReadData="OnDataGridReadAsync"

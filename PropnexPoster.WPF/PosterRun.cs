@@ -869,6 +869,10 @@ namespace PropnexPoster.WPF
             catch (Exception ex)
             {
                 globleLogger.LogError(ex.Message, ex);
+                if (taskDto?.Id is Guid taskId && taskId != Guid.Empty)
+                {
+                    await WebServer.ResetTask(taskId, ex.Message);
+                }
             }
             finally
             {
