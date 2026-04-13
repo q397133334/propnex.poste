@@ -14,9 +14,23 @@ namespace Propnex.Poster.WebServer.Pages.PnTasks
 
         protected CreatePropertyTaskDto CreatePropertyTaskDto;
 
+        protected string NumberFilter { get; set; }
+
         public List()
         {
             CreatePropertyTaskDto = new CreatePropertyTaskDto();
+        }
+
+        protected override Task<PnTaskListInput> CreateGetListInputAsync()
+        {
+            var input = new PnTaskListInput { NumberFilter = NumberFilter };
+            return Task.FromResult(input);
+        }
+
+        private async Task OnNumberFilterChanged(ChangeEventArgs e)
+        {
+            NumberFilter = e.Value?.ToString();
+            await GetEntitiesAsync();
         }
 
 
