@@ -12,8 +12,13 @@ namespace Propnex.Poster.WebServer.Pages.PnTasks
         protected PageToolbar Toolbar { get; } = new();
 
         protected Modal CreatePropertyTaskModal;
+        protected Modal LogModal;
 
         protected CreatePropertyTaskDto CreatePropertyTaskDto;
+
+        protected List<PnTaskLogDto> TaskLogs;
+        protected string LogsTaskNumber;
+        protected bool LogsLoading;
 
         protected string NumberFilter { get; set; }
 
@@ -38,6 +43,16 @@ namespace Propnex.Poster.WebServer.Pages.PnTasks
         private async Task RetryTask(PnTaskDto pnTask)
         {
             await AppService.PnTaskRetry(new Guid(), pnTask.Id, "system action");
+        }
+
+        private async Task ShowLogsAsync(PnTaskDto pnTask)
+        {
+            LogsTaskNumber = pnTask.Number;
+            TaskLogs = null;
+            LogsLoading = true;
+            await LogModal.Show();
+            TaskLogs = await AppService.GetLogsAsync(pnTask.Id);
+            LogsLoading = false;
         }
 
         private async Task CreatePropertyTaskAsync()

@@ -31,6 +31,8 @@ namespace Propnex.Poster.WebServer.Services
         Task CreatePropertyTasks(CreatePropertyTaskDto input);
 
         Task ResetPnTask(Guid machineId, Guid pnTaskId, string message = "");
+
+        Task<List<PnTaskLogDto>> GetLogsAsync(Guid pnTaskId);
     }
 
     public class PnTaskAppService : CrudAppService<
@@ -234,6 +236,23 @@ namespace Propnex.Poster.WebServer.Services
                     System.IO.File.Move(Path.Combine(usePath, pnTask.Number), Path.Combine(rootPath, pnTask.Number));
                 }
             }
+        }
+
+        public async Task<List<PnTaskLogDto>> GetLogsAsync(Guid pnTaskId)
+        {
+            var logs = await AsyncExecuter.ToListAsync(
+                (await _pnTaskLogRepository.GetQueryableAsync())
+                .Where(l => l.PntaskId == pnTaskId)
+                .OrderByDescending(l => l.CreateTime));
+
+            return logs.Select(l => new PnTaskLogDto
+            {
+                PntaskId = l.PntaskId,
+                MachineId = l.MachineId,
+                Ip = l.Ip,
+                Message = l.Message,
+                CreateTime = l.CreateTime
+            }).ToList();
         }
     }
 
