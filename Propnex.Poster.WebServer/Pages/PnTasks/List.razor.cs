@@ -1,4 +1,5 @@
 ﻿using Blazorise;
+using Microsoft.AspNetCore.Components;
 using Propnex.Poster.Dtos;
 using Propnex.Poster.WebServer.Services;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
@@ -21,10 +22,10 @@ namespace Propnex.Poster.WebServer.Pages.PnTasks
             CreatePropertyTaskDto = new CreatePropertyTaskDto();
         }
 
-        protected override Task<PnTaskListInput> CreateGetListInputAsync()
+        protected override async Task GetEntitiesAsync()
         {
-            var input = new PnTaskListInput { NumberFilter = NumberFilter };
-            return Task.FromResult(input);
+            GetListInput.NumberFilter = NumberFilter;
+            await base.GetEntitiesAsync();
         }
 
         private async Task OnNumberFilterChanged(ChangeEventArgs e)
