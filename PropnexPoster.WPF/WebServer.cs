@@ -83,6 +83,16 @@ namespace PropnexPoster.WPF
             catch { }
         }
 
+        public static async Task LogErrorAsync(Guid pnTaskId, string message)
+        {
+            try
+            {
+                Guid.TryParse(MachindNumber, out var machineId);
+                await $"{BaseUrl}/api/app/pn-task/log-error?machineId={machineId}&pnTaskId={pnTaskId}&message={Uri.EscapeDataString(message)}".PostAsync();
+            }
+            catch { }
+        }
+
         public static async Task PostPntaskRetry(Guid pnTaskId, string message)
         {
             string url = $"{BaseUrl}/api/app/pn-task/pn-task-retry?machineId={MachindNumber}&pnTaskId={pnTaskId}&message={message}";

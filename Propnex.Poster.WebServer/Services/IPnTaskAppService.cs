@@ -33,6 +33,8 @@ namespace Propnex.Poster.WebServer.Services
         Task ResetPnTask(Guid machineId, Guid pnTaskId, string message = "");
 
         Task<List<PnTaskLogDto>> GetLogsAsync(Guid pnTaskId);
+
+        Task LogErrorAsync(Guid machineId, Guid pnTaskId, string message);
     }
 
     public class PnTaskAppService : CrudAppService<
@@ -253,6 +255,11 @@ namespace Propnex.Poster.WebServer.Services
                 Message = l.Message,
                 CreateTime = l.CreateTime
             }).ToList();
+        }
+
+        public async Task LogErrorAsync(Guid machineId, Guid pnTaskId, string message)
+        {
+            await _pnTaskLogRepository.InsertAsync(pnTaskId, machineId, $"[Error] {message}", "");
         }
     }
 
