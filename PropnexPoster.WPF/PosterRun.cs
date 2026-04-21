@@ -856,6 +856,10 @@ namespace PropnexPoster.WPF
                     catch (Exception ex)
                     {
                         _logger.Error("{0},{1}", ex.Message, ex.StackTrace);
+                        if (taskDto?.Id is Guid innerTaskId && innerTaskId != Guid.Empty)
+                        {
+                            await WebServer.LogErrorAsync(innerTaskId, $"{ex.Message}\n{ex.StackTrace}");
+                        }
                     }
                     finally
                     {
@@ -872,6 +876,7 @@ namespace PropnexPoster.WPF
                 if (taskDto?.Id is Guid taskId && taskId != Guid.Empty)
                 {
                     await WebServer.ResetTask(taskId, ex.Message);
+                    await WebServer.LogErrorAsync(taskId, $"{ex.Message}\n{ex.StackTrace}");
                 }
             }
             finally
