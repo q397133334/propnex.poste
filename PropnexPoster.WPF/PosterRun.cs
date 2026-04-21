@@ -99,7 +99,7 @@ namespace PropnexPoster.WPF
 #if DEBUG
             taskDto = new PnTaskDto()
             {
-                Number = "cp17733240140309.guru.tsk"
+                Number = "1289680.guru.tsk"
             };
             var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
             var lenght = context.IndexOf("Xpressor-Listing-File===");
@@ -1361,7 +1361,7 @@ namespace PropnexPoster.WPF
                     _Token = loginResult.Data;
                     Log("Token :" + _Token.accessToken);
                     pnUser.TokenJson = Newtonsoft.Json.JsonConvert.SerializeObject(_Token);
-                    pnUser.PhoneModel = pnUser.PhoneModel == "" ? ClientBase.PhoneModel : pnUser.PhoneModel;
+                    pnUser.PhoneModel =string.IsNullOrEmpty(pnUser.PhoneModel) ? ClientBase.PhoneModel : pnUser.PhoneModel;
                     Log("UpdatePnUserToken");
                     if (pnUser.PhoneModel.Length < 20)
                     {
