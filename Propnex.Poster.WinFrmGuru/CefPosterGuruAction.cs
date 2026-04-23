@@ -20,7 +20,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Propnex.Poster.Dtos;
 using Propnex.Poster.PropertyGuru;
-using Propnex.Poster.PropertyGuru.Listing;
+using Propnex.Poster.PropertyGuru.Listing.V2;
 using Propnex.Poster.PropertyGuru.Tasks;
 using Propnex.Poster.Share;
 

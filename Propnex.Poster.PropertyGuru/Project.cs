@@ -2,7 +2,7 @@
 //
 // To parse this JSON data, add NuGet 'Newtonsoft.Json' then do:
 //
-//    using Propnex.Poster.PropertyGuru.Listing;
+//    using Propnex.Poster.PropertyGuru.Listing.V2;
 //
 //    var project = Project.FromJson(jsonString);
 
@@ -14,7 +14,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile.Model
     using System.Globalization;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
-    using Propnex.Poster.PropertyGuru.Listing;
+    using Propnex.Poster.PropertyGuru.Listing.V2;
 
 
     public class Location

@@ -1,4 +1,5 @@
-﻿using Propnex.Poster.PropertyGuru.Listing;
+﻿using Propnex.Poster.PropertyGuru.Listing.V2;
+using Propnex.Poster.PropertyGuru.Listing.V3;
 using Propnex.Poster.PropertyGuru.Xml;
 using System;
 using System.Collections.Generic;
@@ -113,8 +114,6 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                 listing.FloorPlan = element.ElementString("FloorPlan", "").Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable().Where(q => q.Trim() != "").Where(q => q.Length > 10).ToList();
                 listing.FastRepost = detialss.FindAttribute("Name", "FastRepost").GetAttributeValue("Value", "0");
                 listing.TaskItemId = detialss.FindAttribute("Name", "taskitem_id").GetAttributeValue("Value", "0");
-
-
 
                 //listing - projectData
                 ListingModel listingModel = new ListingModel();
@@ -349,6 +348,113 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     En = listingModel.LocalizedHeadline
                 };
                 listing.Listing = listingModel;
+
+                // 直接从 XML 构建 V3 格式，无需经过 V2 转换
+                var v3TypeCode    = detialss.FindAttribute("Name", "listing_type").GetAttributeValue("Value", "SALE");
+                var v3Headline    = detialss.FindAttribute("Name", "listing_title").GetAttributeValue("Value", DefaultTitles.GetTitle());
+                if (string.IsNullOrEmpty(v3Headline)) v3Headline = DefaultTitles.GetTitle();
+                var v3Description = detialss.FindAttribute("Name", "listing_description").GetAttributeValue("Value", "");
+                if (v3Description.Length > 2000) v3Description = v3Description.Substring(0, 1999);
+                var v3PostalCode  = detialss.FindAttribute("Name", "postcode").GetAttributeValue("Value", "");
+                var v3Floor       = detialss.FindAttribute("Name", "property_level_number").GetAttributeValue("Value", "");
+                var v3Unit        = detialss.FindAttribute("Name", "property_unit_number").GetAttributeValue("Value", "");
+                var v3TypeGroup   = detialss.FindAttribute("Name", "property_type_group").GetAttributeValue("Value", "N");
+                var v3Bedrooms    = detialss.FindAttribute("Name", "bedrooms").GetAttributeValue<int?>("Value", null);
+                var v3Bathrooms   = detialss.FindAttribute("Name", "bathrooms").GetAttributeValue<int?>("Value", null);
+                var v3FloorArea   = detialss.FindAttribute("Name", "floorarea").GetAttributeValue<int?>("Value", null);
+                var v3FloorLevel  = detialss.FindAttribute("Name", "floor_level").GetAttributeValue("Value", "").ToUpper();
+                var v3Furnishing  = detialss.FindAttribute("Name", "furnishing").GetAttributeValue<string>("Value", null);
+                var v3PgVerifiedId = detialss.FindAttribute("Name", "pg_verified_id").GetAttributeValue("Value", "");
+                var v3LocationId  = detialss.FindAttribute("Name", "location_id").GetAttributeValue<int?>("Value", null);
+                var v3PropTypeCode = detialss.FindAttribute("Name", "property_type_code").GetAttributeValue("Value", "");
+                var v3Price       = detialss.FindAttribute("Name", "price").GetAttributeValue<int>("Value", 0);
+                var v3Maintenance = detialss.FindAttribute("Name", "maintenance_fee").GetAttributeValue("Value", 0);
+                var v3ListingId   = detialss.FindAttribute("Name", "hidden_listing_id").GetAttributeValue<int?>("Value", null);
+
+                var v3Features = new List<string>();
+                foreach (var item in detialss)
+                {
+                    if (item.Attribute("Name").Value.Contains("unit_features"))
+                    {
+                        var code = item.Attribute("Name").Value.Replace("unit_features[],", "");
+                        if (features.Any(q => q == code))
+                            v3Features.Add(code);
+                    }
+                }
+
+                bool v3IsAvailableNow = true;
+                if (v3TypeCode?.ToUpper() == "RENT")
+                {
+                    var v3AvailDate = detialss.FindAttribute("Name", "available_date").GetAttributeValue("Value", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    try { v3IsAvailableNow = Convert.ToDateTime(v3AvailDate) <= DateTime.Now; }
+                    catch { }
+                }
+
+                listing.ListingV3 = new CreateListingV3
+                {
+                    Id          = v3ListingId,
+                    ListingType = new ListingTypeV3 { Code = v3TypeCode },
+                    Price = new PriceV3
+                    {
+                        Value          = v3Price,
+                        MaintenanceFee = v3Maintenance > 0 ? v3Maintenance : (int?)null
+                    },
+                    Location = new LocationV3
+                    {
+                        Address = new AddressV3
+                        {
+                            PostalCode     = v3PostalCode,
+                            Floor          = string.IsNullOrEmpty(v3Floor) ? null : v3Floor,
+                            Unit           = string.IsNullOrEmpty(v3Unit)  ? null : v3Unit,
+                            MaskUnitNumber = v3TypeGroup == "L"
+                        }
+                    },
+                    Headlines = new List<LocalizedTextV3>
+                    {
+                        new LocalizedTextV3 { Text = v3Headline, Locale = "en", Brand = "pg" }
+                    },
+                    Descriptions = new List<LocalizedTextV3>
+                    {
+                        new LocalizedTextV3 { Text = v3Description, Locale = "en", Brand = "pg" }
+                    },
+                    UnitDetails = new UnitDetailsV3
+                    {
+                        Configuration = new ConfigurationV3
+                        {
+                            Bedrooms  = v3Bedrooms,
+                            Bathrooms = v3Bathrooms
+                        },
+                        Dimensions = v3FloorArea.HasValue
+                            ? new DimensionsV3
+                            {
+                                Floor = new FloorDimensionV3
+                                {
+                                    Size = new SizeV3 { Value = v3FloorArea, Uom = "sqft" }
+                                }
+                            }
+                            : null,
+                        TenantEligibility = false,
+                        IsAvailableNow    = v3IsAvailableNow,
+                        FloorLevel  = string.IsNullOrEmpty(v3FloorLevel)  ? null : v3FloorLevel,
+                        Furnishing  = string.IsNullOrEmpty(v3Furnishing)  ? null : v3Furnishing,
+                        Features    = v3Features.Count > 0 ? v3Features : null,
+                        IsBumiLot   = null
+                    },
+                    Project = new ProjectV3
+                    {
+                        Type = "verified",
+                        MetaByType = new MetaByTypeV3
+                        {
+                            Verified = new VerifiedMetaV3
+                            {
+                                Id         = string.IsNullOrEmpty(v3PgVerifiedId) ? null : v3PgVerifiedId,
+                                LocationId = v3LocationId,
+                                Property   = new VerifiedPropertyV3 { SubType = v3PropTypeCode }
+                            }
+                        }
+                    }
+                };
+
                 Listings.Add(listing);
             }
         }

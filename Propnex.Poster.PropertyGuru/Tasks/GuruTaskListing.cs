@@ -1,4 +1,5 @@
-﻿using Propnex.Poster.PropertyGuru.Listing;
+﻿using Propnex.Poster.PropertyGuru.Listing.V2;
+using Propnex.Poster.PropertyGuru.Listing.V3;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,7 +49,11 @@ namespace Propnex.Poster.PropertyGuru.Tasks
             Videos = new List<string>();
         }
 
+        /// <summary>V2 格式数据（原有）</summary>
         public ListingModel Listing { get; set; }
+
+        /// <summary>V3 格式数据，与 Listing 同步解析，方便后续直接调用 v3 API</summary>
+        public CreateListingV3 ListingV3 { get; set; }
 
         public List<string> Photos { get; set; }
 

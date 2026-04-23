@@ -1,7 +1,7 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Propnex.Poster.PropertyGuru.Listing;
+using Propnex.Poster.PropertyGuru.Listing.V2;
 using Propnex.Poster.PropertyGuru.Mobile;
 using Propnex.Poster.PropertyGuru.Mobile.Dto;
 using Propnex.Poster.PropertyGuru.Mobile.Model;

@@ -3,7 +3,8 @@ using Microsoft.Extensions.Logging;
 using Polly;
 using Propnex;
 using Propnex.Poster.Dtos;
-using Propnex.Poster.PropertyGuru.Listing;
+using Propnex.Poster.PropertyGuru.Listing.V2;
+using Propnex.Poster.PropertyGuru.Listing.V3;
 using Propnex.Poster.PropertyGuru.Mobile;
 using Propnex.Poster.PropertyGuru.Mobile.Dto;
 using Propnex.Poster.PropertyGuru.Tasks;
@@ -192,6 +193,7 @@ namespace PropnexPoster.WPF
                             {
                                 posterRunInfo.TaskItemId = listing.TaskItemId.ToString();
                                 TaskInfoEvent?.Invoke(posterRunInfo);
+
                                 //var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
                                 //1. 获取邮政编号
                                 //var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
@@ -327,6 +329,7 @@ namespace PropnexPoster.WPF
                             {
                                 posterRunInfo.TaskItemId = listing.TaskItemId.ToString();
                                 TaskInfoEvent?.Invoke(posterRunInfo);
+
                                 var listInfo = IsExtis(task, listing);
                                 if (listInfo != null)
                                 {
@@ -468,6 +471,7 @@ namespace PropnexPoster.WPF
                             {
                                 posterRunInfo.TaskItemId = listing.TaskItemId.ToString();
                                 TaskInfoEvent?.Invoke(posterRunInfo);
+
                                 if (IsExtis(task, listing) != null)
                                 {
                                     //更新任务 UpdateTask 
@@ -1264,6 +1268,168 @@ namespace PropnexPoster.WPF
             }
             return result;
         }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // V3 执行方法
+        // ─────────────────────────────────────────────────────────────────────
+
+        /// <summary>V3 Post Only：用 v3 格式创建新 listing，上传媒体，再激活上报。</summary>
+        private async Task PostOnlyV3Async(GuruTask task, GuruTaskListing listing, Api _api, Mobile _mobile, AdsProduct _adsProject, Token token)
+        {
+            listing.Listing.Agent.id = token.User.AgentId;
+            var v3Listing = CreateListingV3.From(listing);
+
+            var result = await _api.CreateV3Async(v3Listing);
+            if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
+            {
+                listing.Listing.Id = result.Data.Id;
+                if (result.Data.Id != 0)
+                {
+                    if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
+                        await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload photo error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
+                        return;
+                    }
+                    if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
+                        await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload video error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
+                        return;
+                    }
+                    if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
+                        await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload vt error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
+                        return;
+                    }
+                    if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
+                        await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload floor plan error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
+                        return;
+                    }
+                    // 获取 DRAFT 后用 v3 格式 PUT 一次，令 PG 刷新数据
+                    v3Listing.Id = listing.Listing.Id;
+                    await _api.UpdateV3Async(v3Listing);
+
+                    await ActivateAndReportAsync(task, listing, _mobile, _adsProject, token);
+                }
+            }
+            else
+            {
+                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
+                await SlackBotMessage.SendAsync($"[V3]{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} {result.Message}");
+            }
+        }
+
+        /// <summary>V3 Repost：已存在则更新+repost；不存在则走 PostOnlyV3。</summary>
+        private async Task RepostV3Async(GuruTask task, GuruTaskListing listing, Api _api, Mobile _mobile, AdsProduct _adsProject, Token token)
+        {
+            listing.Listing.Agent.id = token.User.AgentId;
+            var listInfo = IsExtis(task, listing);
+            if (listInfo != null)
+            {
+                if (listing.FastRepost == "0")
+                {
+                    // 用 v3 格式更新
+                    var v3Listing = CreateListingV3.From(listing);
+                    v3Listing.Id = listing.Listing.Id;
+                    await _api.UpdateV3Async(v3Listing);
+                    await _mobile.DeleteMediaAll(await GetListingForMedia(_api, listing));
+                    if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
+                        await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload photo error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
+                        return;
+                    }
+                    if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
+                        await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload video error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
+                        return;
+                    }
+                    if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
+                        await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload vt error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
+                        return;
+                    }
+                    if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
+                        await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload floor plan error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
+                        return;
+                    }
+                }
+                else
+                {
+                    Log("FastRepost");
+                }
+                await _adsProject.Repost(listInfo.Id, listInfo.RepostCharge);
+                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+            }
+            else
+            {
+                // 不存在 → 走 Post Only V3
+                await PostOnlyV3Async(task, listing, _api, _mobile, _adsProject, token);
+            }
+        }
+
+        /// <summary>V3 Update：用 v3 格式更新已有 listing，再重传媒体。</summary>
+        private async Task UpdateV3Async(GuruTask task, GuruTaskListing listing, Api _api, Mobile _mobile)
+        {
+            if (IsExtis(task, listing) != null)
+            {
+                var v3Listing = CreateListingV3.From(listing);
+                v3Listing.Id = listing.Listing.Id;
+                await _api.UpdateV3Async(v3Listing);
+
+                var currentListing = await GetListingForMedia(_api, listing);
+                await _mobile.DeleteMediaAll(currentListing);
+
+                if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
+                    await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload photo error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
+                    return;
+                }
+                if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
+                    await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload video error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
+                    return;
+                }
+                if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
+                    await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload vt error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
+                    return;
+                }
+                if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
+                    await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload floor plan error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
+                    return;
+                }
+                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+            }
+            else
+            {
+                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "Update listing, but Not match listing");
+            }
+        }
+
+        /// <summary>获取当前 listing 的完整数据（用于删除媒体），v3 路径复用 v2 GET 接口。</summary>
+        private async Task<CreateOrUpdateListing> GetListingForMedia(Api _api, GuruTaskListing listing)
+        {
+            if (!listing.Listing.Id.HasValue)
+                return new CreateOrUpdateListing();
+            var result = await _api.GetListing(listing.Listing.Id.Value);
+            return result.HttpStatusCode == System.Net.HttpStatusCode.OK ? result.Data : new CreateOrUpdateListing();
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
 
         private async Task<bool> _downLoadFile(string url, string filePath)
         {
