@@ -194,19 +194,11 @@ namespace PropnexPoster.WPF
                                 posterRunInfo.TaskItemId = listing.TaskItemId.ToString();
                                 TaskInfoEvent?.Invoke(posterRunInfo);
 
-                                //var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
-                                //1. 获取邮政编号
-                                //var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
-                                //var locale = locales.Data.FirstOrDefault();
-                                ////2. 获取loca 信息
-                                //var project = (await _projectsApi.GetProjectAsync(int.Parse(locale.ObjectId))).Data;
-                                //3. 组织 createlisting
                                 var createOrUpdateListing = new CreateOrUpdateListing();
                                 listing.Listing.Agent.id = token.User.AgentId;
                                 createOrUpdateListing.Create(listing.Listing);
                                 createOrUpdateListing.isLiveTourAvailable = true;
                                 var result = await _api.CreateAsync(createOrUpdateListing);
-                                //result = new HttpResult<CreateOrUpdateListingResult>() { Data = new CreateOrUpdateListingResult { Id = 24371139 } };
                                 if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
                                 {
                                     listing.Listing.Id = result.Data.Id;
@@ -478,7 +470,6 @@ namespace PropnexPoster.WPF
 
                                     // get listing detial 
                                     var taskListing = await _api.GetListing(listing.Listing.Id.Value);
-
                                     //replace listing 
                                     taskListing.Data.Update(listing.Listing);
                                     taskListing.Data.isLiveTourAvailable = true;

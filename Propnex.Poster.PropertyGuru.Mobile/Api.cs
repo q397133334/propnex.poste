@@ -31,7 +31,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             Token = token;
         }
 
-        public async Task<HttpResult<Listing.CreateOrUpdateListing>> ListingsAsync(int id, QueryListing queryListing)
+        public async Task<HttpResult<Listing.V2.CreateOrUpdateListing>> ListingsAsync(int id, QueryListing queryListing)
         {
             var request = GetRequest();
             request.Method = Method.Get;
@@ -46,10 +46,10 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             var response = await ExecuteAsync(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                var listing = Newtonsoft.Json.JsonConvert.DeserializeObject<Listing.CreateOrUpdateListing>(response.Content);
-                return new HttpResult<Listing.CreateOrUpdateListing> { Data = listing, HttpStatusCode = System.Net.HttpStatusCode.OK };
+                var listing = Newtonsoft.Json.JsonConvert.DeserializeObject<Listing.V2.CreateOrUpdateListing>(response.Content);
+                return new HttpResult<Listing.V2.CreateOrUpdateListing> { Data = listing, HttpStatusCode = System.Net.HttpStatusCode.OK };
             }
-            return GetHttpResult<Listing.CreateOrUpdateListing>(response);
+            return GetHttpResult<Listing.V2.CreateOrUpdateListing>(response);
         }
 
         public async Task<HttpResult<List<QueryLocale>>> AutocompleteAsync(QueryAutocomplete queryAutocomplete)
