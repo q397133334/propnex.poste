@@ -225,6 +225,38 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
 
         [JsonProperty("isBumiLot")]
         public bool? IsBumiLot { get; set; }
+
+
+        [JsonProperty("maxTenants", NullValueHandling = NullValueHandling.Ignore)]
+        public int? MaxTenants { get; set; }
+
+        [JsonProperty("tenantGender", NullValueHandling = NullValueHandling.Ignore)]
+        public string TenantGender { get; set; }
+
+        [JsonProperty("ownerStays")]
+        public bool OwnerStays { get; set; }
+
+        [JsonProperty("petFriendly")]
+        public bool PetFriendly { get; set; }
+
+        [JsonProperty("wifiIncluded")]
+        public bool WifiIncluded { get; set; }
+
+        [JsonProperty("utilitiesIncluded")]
+        public bool UtilitiesIncluded { get; set; }
+
+        [JsonProperty("visitorsAllowed")]
+        public bool VisitorsAllowed { get; set; }
+
+
+        [JsonProperty("rentalType", NullValueHandling = NullValueHandling.Ignore)]
+        public string RentalType { get; set; }
+
+        [JsonProperty("roomType", NullValueHandling = NullValueHandling.Ignore)]
+        public string RoomType { get; set; }
+
+        [JsonProperty("hdbTypeCode", NullValueHandling = NullValueHandling.Ignore)]
+        public string HdbTypeCode { get; set; }
     }
 
     public class ConfigurationV3

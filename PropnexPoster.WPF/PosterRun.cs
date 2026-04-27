@@ -170,12 +170,14 @@ namespace PropnexPoster.WPF
                         ProjectsApi _projectsApi;
                         AdsProduct _adsProject;
                         Mobile _mobile;
+                        Agent _agent;
                         if (WPFModule.AppConfiguration.IsProxy)
                         {
                             _api = new Api(token, proxyIp) { Log = Log1 };
                             _projectsApi = new ProjectsApi(token, proxyIp) { Log = Log1 };
                             _adsProject = new AdsProduct(token, proxyIp) { Log = Log1 };
                             _mobile = new Mobile(token, proxyIp) { Log = Log1 };
+                            _agent = new Agent(token, proxyIp) { Log = Log1 };
                         }
                         else
                         {
@@ -183,6 +185,7 @@ namespace PropnexPoster.WPF
                             _projectsApi = new ProjectsApi(token) { Log = Log1 };
                             _adsProject = new AdsProduct(token) { Log = Log1 };
                             _mobile = new Mobile(token) { Log = Log1 };
+                            _agent = new Agent(token) { Log = Log1 };
                         }
 
                         //await _mobile.Dashboard(token.User.AgentId.ToString());
@@ -193,6 +196,11 @@ namespace PropnexPoster.WPF
                             {
                                 posterRunInfo.TaskItemId = listing.TaskItemId.ToString();
                                 TaskInfoEvent?.Invoke(posterRunInfo);
+
+                                var createListing = new Propnex.Poster.PropertyGuru.Listing.V3.CreateListingV3();
+
+
+                                await _agent.CreateListingAsync(listing.ListingV3);
 
                                 var createOrUpdateListing = new CreateOrUpdateListing();
                                 listing.Listing.Agent.id = token.User.AgentId;
@@ -429,7 +437,7 @@ namespace PropnexPoster.WPF
                                             {
                                                 createOrUpdateListing.location.id = int.Parse(project.addresses[0].external_id);
                                                 result = await _api.CreateAsync(createOrUpdateListing);
-                                                if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)          
+                                                if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
                                                 {
                                                     listing.Listing.Id = result.Data.Id;
                                                     if (result.Data.Id != 0)
@@ -1461,8 +1469,8 @@ namespace PropnexPoster.WPF
         {
             ClientBase.PhoneModel = PhoneModelList.GetPhoneModel();
             var pnUser = await getUser();
-            var _Token = string.IsNullOrEmpty(pnUser.TokenJson) ? 
-                await auth() : 
+            var _Token = string.IsNullOrEmpty(pnUser.TokenJson) ?
+                await auth() :
                 await checkToken();
             if (_Token == null)
                 return null;
@@ -1523,7 +1531,7 @@ namespace PropnexPoster.WPF
                     _Token = loginResult.Data;
                     Log("Token :" + _Token.accessToken);
                     pnUser.TokenJson = Newtonsoft.Json.JsonConvert.SerializeObject(_Token);
-                    pnUser.PhoneModel =string.IsNullOrEmpty(pnUser.PhoneModel) ? ClientBase.PhoneModel : pnUser.PhoneModel;
+                    pnUser.PhoneModel = string.IsNullOrEmpty(pnUser.PhoneModel) ? ClientBase.PhoneModel : pnUser.PhoneModel;
                     Log("UpdatePnUserToken");
                     if (pnUser.PhoneModel.Length < 20)
                     {

@@ -370,6 +370,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                 var v3Price = detialss.FindAttribute("Name", "price").GetAttributeValue<int>("Value", 0);
                 var v3Maintenance = detialss.FindAttribute("Name", "maintenance_fee").GetAttributeValue("Value", 0);
                 var v3ListingId = detialss.FindAttribute("Name", "hidden_listing_id").GetAttributeValue<int?>("Value", null);
+                var v3RoomType = detialss.FindAttribute("Name", "room_type").GetAttributeValue("Value", "");
 
                 var v3Features = new List<string>();
                 foreach (var item in detialss)
@@ -383,6 +384,12 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                 }
 
                 bool v3IsAvailableNow = true;
+                var v3rentalType = "ENT";
+                if (v3TypeCode == "ROOM")
+                {
+                    v3TypeCode = "RENT";
+                    v3rentalType = "ROOM";
+                }
                 if (v3TypeCode?.ToUpper() == "RENT")
                 {
                     var v3AvailDate = detialss.FindAttribute("Name", "available_date").GetAttributeValue("Value", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
@@ -438,7 +445,10 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                         FloorLevel = string.IsNullOrEmpty(v3FloorLevel) ? null : v3FloorLevel,
                         Furnishing = string.IsNullOrEmpty(v3Furnishing) ? null : v3Furnishing,
                         Features = v3Features.Count > 0 ? v3Features : null,
-                        IsBumiLot = null
+                        IsBumiLot = null,
+                        RentalType = v3rentalType,
+                        RoomType = v3RoomType,
+
                     },
                     Project = new ProjectV3
                     {
@@ -454,7 +464,6 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                         }
                     }
                 };
-
                 Listings.Add(listing);
             }
         }
