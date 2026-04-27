@@ -24,15 +24,12 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
         [Volo.Abp.Uow.UnitOfWork(false)]
         protected async override Task DoWorkAsync(PeriodicBackgroundWorkerContext workerContext)
         {
-#if DEBUG
-            return;
-#endif
             var _repositoryPntask = workerContext.ServiceProvider.GetService<IRepository<PnTask>>();
             IPnTaskLogRepository _pnTaskLogRepository = workerContext.ServiceProvider.GetService<IPnTaskLogRepository>();
 
             await getPnTasks(workerContext, WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks);
             await getPnTasks(workerContext, WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks + "?xweb=1");
-            await getPnTasks(workerContext, WebServerConsts.PnfetchMyIpTasks, "MyIP");
+            //await getPnTasks(workerContext, WebServerConsts.PnfetchMyIpTasks, "MyIP");
         }
 
 
