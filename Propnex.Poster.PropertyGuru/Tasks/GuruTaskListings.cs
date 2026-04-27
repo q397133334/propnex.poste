@@ -350,32 +350,33 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                 listing.Listing = listingModel;
 
                 // 直接从 XML 构建 V3 格式，无需经过 V2 转换
-                var v3TypeCode = detialss.FindAttribute("Name", "listing_type").GetAttributeValue("Value", "SALE");
-                var v3Headline = detialss.FindAttribute("Name", "listing_title").GetAttributeValue("Value", DefaultTitles.GetTitle());
+                var v3TypeCode     = detialss.FindAttribute("Name", "listing_type").GetAttributeValue("Value", "SALE");
+                var v3Headline     = detialss.FindAttribute("Name", "listing_title").GetAttributeValue("Value", DefaultTitles.GetTitle());
                 if (string.IsNullOrEmpty(v3Headline)) v3Headline = DefaultTitles.GetTitle();
-                var v3Description = detialss.FindAttribute("Name", "listing_description").GetAttributeValue("Value", "");
+                var v3Description  = detialss.FindAttribute("Name", "listing_description").GetAttributeValue("Value", "");
                 if (v3Description.Length > 2000) v3Description = v3Description.Substring(0, 1999);
-                var v3PostalCode = detialss.FindAttribute("Name", "postcode").GetAttributeValue("Value", "");
-                var v3Floor = detialss.FindAttribute("Name", "property_level_number").GetAttributeValue("Value", "");
-                var v3Unit = detialss.FindAttribute("Name", "property_unit_number").GetAttributeValue("Value", "");
-                var v3TypeGroup = detialss.FindAttribute("Name", "property_type_group").GetAttributeValue("Value", "N");
-                var v3Bedrooms = detialss.FindAttribute("Name", "bedrooms").GetAttributeValue<int?>("Value", null);
-                var v3Bathrooms = detialss.FindAttribute("Name", "bathrooms").GetAttributeValue<int?>("Value", null);
-                var v3FloorArea = detialss.FindAttribute("Name", "floorarea").GetAttributeValue<int?>("Value", null);
-                var v3FloorLevel = detialss.FindAttribute("Name", "floor_level").GetAttributeValue("Value", "").ToUpper();
-                var v3Furnishing = detialss.FindAttribute("Name", "furnishing").GetAttributeValue<string>("Value", null);
+                var v3PostalCode   = detialss.FindAttribute("Name", "postcode").GetAttributeValue("Value", "");
+                var v3Floor        = detialss.FindAttribute("Name", "property_level_number").GetAttributeValue("Value", "");
+                var v3Unit         = detialss.FindAttribute("Name", "property_unit_number").GetAttributeValue("Value", "");
+                var v3TypeGroup    = detialss.FindAttribute("Name", "property_type_group").GetAttributeValue("Value", "N");
+                var v3Bedrooms     = detialss.FindAttribute("Name", "bedrooms").GetAttributeValue<int?>("Value", null);
+                var v3Bathrooms    = detialss.FindAttribute("Name", "bathrooms").GetAttributeValue<int?>("Value", null);
+                var v3FloorArea    = detialss.FindAttribute("Name", "floorarea").GetAttributeValue<int?>("Value", null);
+                var v3FloorLevel   = detialss.FindAttribute("Name", "floor_level").GetAttributeValue("Value", "").ToUpper();
+                var v3Furnishing   = detialss.FindAttribute("Name", "furnishing").GetAttributeValue<string>("Value", null);
                 var v3PgVerifiedId = detialss.FindAttribute("Name", "pg_verified_id").GetAttributeValue("Value", "");
-                var v3LocationId = detialss.FindAttribute("Name", "location_id").GetAttributeValue<int?>("Value", null);
+                var v3LocationId   = detialss.FindAttribute("Name", "location_id").GetAttributeValue<int?>("Value", null);
                 var v3PropTypeCode = detialss.FindAttribute("Name", "property_type_code").GetAttributeValue("Value", "");
-                var v3Price = detialss.FindAttribute("Name", "price").GetAttributeValue<int>("Value", 0);
-                var v3Maintenance = detialss.FindAttribute("Name", "maintenance_fee").GetAttributeValue("Value", 0);
-                var v3ListingId = detialss.FindAttribute("Name", "hidden_listing_id").GetAttributeValue<int?>("Value", null);
-                var v3RoomType = detialss.FindAttribute("Name", "room_type").GetAttributeValue("Value", "");
+                var v3Price        = detialss.FindAttribute("Name", "price").GetAttributeValue<int>("Value", 0);
+                var v3Maintenance  = detialss.FindAttribute("Name", "tep_maintenance_fee").GetAttributeValue("Value", 0);
+                var v3ListingId    = detialss.FindAttribute("Name", "hidden_listing_id").GetAttributeValue<int?>("Value", null);
+                var v3RoomType     = detialss.FindAttribute("Name", "room_type").GetAttributeValue("Value", "");
+                var v3HdbTypeCode  = detialss.FindAttribute("Name", "hdb_type").GetAttributeValue<string>("Value", null);
 
                 var v3Features = new List<string>();
                 foreach (var item in detialss)
                 {
-                    if (item.Attribute("Name").Value.Contains("unit_features"))
+                    if (item.Attribute("Name").Value.Contains("unit_features[],"))
                     {
                         var code = item.Attribute("Name").Value.Replace("unit_features[],", "");
                         if (features.Any(q => q == code))
@@ -399,20 +400,20 @@ namespace Propnex.Poster.PropertyGuru.Tasks
 
                 listing.ListingV3 = new CreateListingV3
                 {
-                    Id = v3ListingId,
+                    Id          = v3ListingId,
                     ListingType = new ListingTypeV3 { Code = v3TypeCode },
                     Price = new PriceV3
                     {
-                        Value = v3Price,
+                        Value          = v3Price,
                         MaintenanceFee = v3Maintenance > 0 ? v3Maintenance : (int?)null
                     },
                     Location = new LocationV3
                     {
                         Address = new AddressV3
                         {
-                            PostalCode = v3PostalCode,
-                            Floor = string.IsNullOrEmpty(v3Floor) ? null : v3Floor,
-                            Unit = string.IsNullOrEmpty(v3Unit) ? null : v3Unit,
+                            PostalCode     = v3PostalCode,
+                            Floor          = string.IsNullOrEmpty(v3Floor)  ? null : v3Floor,
+                            Unit           = string.IsNullOrEmpty(v3Unit)   ? null : v3Unit,
                             MaskUnitNumber = v3TypeGroup == "L"
                         }
                     },
@@ -428,7 +429,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     {
                         Configuration = new ConfigurationV3
                         {
-                            Bedrooms = v3Bedrooms,
+                            Bedrooms  = v3Bedrooms,
                             Bathrooms = v3Bathrooms
                         },
                         Dimensions = v3FloorArea.HasValue
@@ -441,14 +442,14 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                             }
                             : null,
                         TenantEligibility = false,
-                        IsAvailableNow = v3IsAvailableNow,
-                        FloorLevel = string.IsNullOrEmpty(v3FloorLevel) ? null : v3FloorLevel,
-                        Furnishing = string.IsNullOrEmpty(v3Furnishing) ? null : v3Furnishing,
-                        Features = v3Features.Count > 0 ? v3Features : null,
-                        IsBumiLot = null,
-                        RentalType = v3rentalType,
-                        RoomType = v3RoomType,
-
+                        IsAvailableNow    = v3IsAvailableNow,
+                        FloorLevel        = string.IsNullOrEmpty(v3FloorLevel)  ? null : v3FloorLevel,
+                        Furnishing        = string.IsNullOrEmpty(v3Furnishing)  ? null : v3Furnishing,
+                        Features          = v3Features.Count > 0 ? v3Features   : null,
+                        IsBumiLot         = null,
+                        RentalType        = v3rentalType,
+                        RoomType          = string.IsNullOrEmpty(v3RoomType)    ? null : v3RoomType,
+                        HdbTypeCode       = string.IsNullOrEmpty(v3HdbTypeCode) ? null : v3HdbTypeCode
                     },
                     Project = new ProjectV3
                     {
@@ -457,9 +458,9 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                         {
                             Verified = new VerifiedMetaV3
                             {
-                                Id = string.IsNullOrEmpty(v3PgVerifiedId) ? null : v3PgVerifiedId,
+                                Id         = string.IsNullOrEmpty(v3PgVerifiedId) ? null : v3PgVerifiedId,
                                 LocationId = v3LocationId,
-                                Property = new VerifiedPropertyV3 { SubType = v3PropTypeCode }
+                                Property   = new VerifiedPropertyV3 { SubType = v3PropTypeCode }
                             }
                         }
                     }
