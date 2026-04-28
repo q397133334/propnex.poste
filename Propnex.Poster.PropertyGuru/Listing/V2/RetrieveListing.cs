@@ -354,8 +354,8 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
             {
                 listing.UseFileName = true;
                 string baseDir = AppContext.BaseDirectory;
-                // Èç¹û task ÎÄ¼þ¼ÐÊÇÔÚ¸ùÄ¿Â¼ÏÂ£¬±£ÁôÔ­Âß¼­£»Èç¹ûÊÇÔÚ³ÌÐòÄ¿Â¼ÏÂ£¬ÔòÖ±½ÓÊ¹ÓÃ baseDir
-                // Ô­Âß¼­ÊÇÈ¡ÅÌ·û¸ùÄ¿Â¼£¬ÀýÈç C:\task\{id}
+                // ï¿½ï¿½ï¿½ task ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½Ä¿Â¼ï¿½Â£ï¿½ï¿½ï¿½ï¿½ï¿½Ô­ï¿½ß¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú³ï¿½ï¿½ï¿½Ä¿Â¼ï¿½Â£ï¿½ï¿½ï¿½Ö±ï¿½ï¿½Ê¹ï¿½ï¿½ baseDir
+                // Ô­ï¿½ß¼ï¿½ï¿½ï¿½È¡ï¿½Ì·ï¿½ï¿½ï¿½Ä¿Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ C:\task\{id}
                 string rootPath = Path.GetPathRoot(baseDir);
                 savepath = Path.Combine(rootPath, "task", id);
                 if (!Directory.Exists(savepath))
@@ -379,7 +379,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
                         pics.Append(result).Append(Environment.NewLine);
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
 
                 }
@@ -407,7 +407,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
                             listing.FloorPlan = "";
                         };
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
 
                     }
@@ -439,7 +439,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
                             var result = await p.WithTimeout(30).DownloadFileAsync(savepath, filename);
                             sbFile.Append(result).Append("#").Append(title).Append(Environment.NewLine);
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
 
                         };
@@ -489,7 +489,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
                             var result = await p.DownloadFileAsync(savepath, filename);
                             sbFile.Append(result).Append("#").Append(title).Append(Environment.NewLine);
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
 
                         };
@@ -645,6 +645,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
         }
     }
 
+#pragma warning disable SYSLIB0014
     public class WebClientEx : WebClient
     {
         protected override WebRequest GetWebRequest(Uri address)
@@ -654,4 +655,5 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
             return request;
         }
     }
+#pragma warning restore SYSLIB0014
 }

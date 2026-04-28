@@ -48,7 +48,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     Document = XDocument.Parse(info.ToString());
                     Init();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                 }
             }

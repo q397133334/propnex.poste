@@ -22,7 +22,7 @@ namespace Propnex.Poster.PropertyGuru.Xml
 
                 return Convert.ToInt32(findElement.Value);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return nullValue;
             }
@@ -40,7 +40,7 @@ namespace Propnex.Poster.PropertyGuru.Xml
 
                 return Convert.ToDouble(findElement.Value);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return nullValue;
             }
@@ -57,7 +57,7 @@ namespace Propnex.Poster.PropertyGuru.Xml
             {
                 return Convert.ToBoolean(findElement.Value);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return nullValue;
             }
@@ -94,7 +94,7 @@ namespace Propnex.Poster.PropertyGuru.Xml
                 }
                 return nullValue;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return nullValue;
             }
@@ -123,7 +123,7 @@ namespace Propnex.Poster.PropertyGuru.Xml
                 }
                 return nullValue;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return nullValue;
             }
