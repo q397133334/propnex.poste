@@ -144,6 +144,8 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     }
                 }
 
+                
+
                 var listing = new GuruTaskListing();
                 listing.NoGuruPhotos = element.ElementBool("NoGuruPhotos");
                 listing.NoiPropertyPhotos = element.ElementBool("NoiPropertyPhotos");
@@ -583,8 +585,140 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     },
                     Lease = string.IsNullOrEmpty(v3LeaseTerm) ? null : new LeaseV3 { Code = v3LeaseTerm }
                 };
+
+                listing.Data = ParseListingData(element, projectDatas, detialss, features);
                 Listings.Add(listing);
             }
+        }
+
+        /// <summary>
+        /// 将 &lt;ProjectData&gt; 和 &lt;Details&gt; 的 Field 元素解析为强类型 GuruListingData 模型
+        /// </summary>
+        private static GuruListingData ParseListingData(
+            XElement element,
+            IEnumerable<XElement> projectDatas,
+            List<XElement> detialss,
+            List<string> features)
+        {
+            var d = new GuruListingData();
+
+            // ── 顶层 Listing 字段 ──────────────────────────────────────
+            d.ListingId      = element.ElementInt("ID");
+            d.XID            = element.ElementString("XID");
+            d.ListingName    = element.ElementString("ListingName");
+            d.ListingTypeRaw = element.ElementString("ListingType");
+            d.PropertyType   = element.ElementString("PropertyType");
+
+            // ── ProjectData 子模型 ─────────────────────────────────────
+            d.ProjectData = new GuruProjectData
+            {
+                ProjectName  = projectDatas.FindAttribute("Name", "name").GetAttributeValue("Value", ""),
+                RegionCode   = projectDatas.FindAttribute("Name", "regionCode").GetAttributeValue("Value", ""),
+                ProjectFloors = projectDatas.FindAttribute("Name", "floors").GetAttributeValue("Value", 0)
+            };
+
+            // ── Details 子模型 ─────────────────────────────────────────
+            var det = new GuruDetailsData();
+            d.Details = det;
+
+            // 物业基本信息
+            det.PropertyName      = detialss.FindAttribute("Name", "property_name").GetAttributeValue("Value", "");
+            det.PropertyId        = detialss.FindAttribute("Name", "property_id").GetAttributeValue<int?>("Value", null);
+            det.LocationId        = detialss.FindAttribute("Name", "location_id").GetAttributeValue<int?>("Value", null);
+            det.PgVerifiedId      = detialss.FindAttribute("Name", "pg_verified_id").GetAttributeValue("Value", "");
+            det.PropertyTypeGroup = detialss.FindAttribute("Name", "property_type_group").GetAttributeValue("Value", "N");
+            det.PropertyTypeCode  = detialss.FindAttribute("Name", "property_type_code").GetAttributeValue("Value", "");
+            det.HdbType           = detialss.FindAttribute("Name", "hdb_type").GetAttributeValue<string>("Value", null);
+            det.HdbEstate         = detialss.FindAttribute("Name", "hdb_estate").GetAttributeValue("Value", "");
+            det.District          = detialss.FindAttribute("Name", "district").GetAttributeValue("Value", "");
+            det.Tenure            = detialss.FindAttribute("Name", "tenure").GetAttributeValue("Value", "");
+
+            // 挂牌信息
+            det.ListingType = detialss.FindAttribute("Name", "listing_type").GetAttributeValue("Value", "SALE");
+            det.ListingTitle = detialss.FindAttribute("Name", "listing_title").GetAttributeValue("Value", DefaultTitles.GetTitle());
+            if (string.IsNullOrEmpty(det.ListingTitle)) det.ListingTitle = DefaultTitles.GetTitle();
+            det.ListingDescription = detialss.FindAttribute("Name", "listing_description").GetAttributeValue("Value", "");
+            if (det.ListingDescription.Length > 2000) det.ListingDescription = det.ListingDescription.Substring(0, 1999);
+            det.LeaseTerm    = detialss.FindAttribute("Name", "lease_term").GetAttributeValue("Value", "");
+            det.AvailableDate = detialss.FindAttribute("Name", "available_date").GetAttributeValue("Value", "");
+
+            // 价格
+            det.Price          = detialss.FindAttribute("Name", "price").GetAttributeValue<int>("Value", 0);
+            det.PriceType      = detialss.FindAttribute("Name", "price_type").GetAttributeValue("Value", "VTO");
+            det.MaintenanceFee = detialss.FindAttribute("Name", "tep_maintenance_fee").GetAttributeValue("Value", 0);
+
+            // 面积
+            det.FloorArea = detialss.FindAttribute("Name", "floorarea").GetAttributeValue<int?>("Value", null);
+            det.LandArea  = detialss.FindAttribute("Name", "landarea").GetAttributeValue<int?>("Value", null);
+
+            // 房间配置
+            det.Bedrooms  = detialss.FindAttribute("Name", "bedrooms").GetAttributeValue<int?>("Value", null);
+            det.Bathrooms = detialss.FindAttribute("Name", "bathrooms").GetAttributeValue<int?>("Value", null);
+            det.RoomType  = detialss.FindAttribute("Name", "room_type").GetAttributeValue("Value", "");
+
+            // 地址
+            det.PostalCode   = detialss.FindAttribute("Name", "postcode").GetAttributeValue("Value", "");
+            det.StreetName   = detialss.FindAttribute("Name", "streetname").GetAttributeValue("Value", "");
+            det.StreetNumber = detialss.FindAttribute("Name", "streetnumber").GetAttributeValue("Value", "");
+            det.Longitude    = detialss.FindAttribute("Name", "longitude").GetAttributeValue("Value", 0.00);
+            det.Latitude     = detialss.FindAttribute("Name", "latitude").GetAttributeValue("Value", 0.00);
+            det.FloorNumber  = detialss.FindAttribute("Name", "property_level_number").GetAttributeValue("Value", "");
+            det.UnitNumber   = detialss.FindAttribute("Name", "property_unit_number").GetAttributeValue("Value", "");
+
+            // 单元属性
+            det.FloorLevel    = detialss.FindAttribute("Name", "floor_level").GetAttributeValue("Value", "").ToUpper();
+            det.Furnishing    = detialss.FindAttribute("Name", "furnishing").GetAttributeValue<string>("Value", null);
+            det.CeilingHeight = detialss.FindAttribute("Name", "ceiling_height").GetAttributeValue<string>("Value", null);
+            if (string.IsNullOrEmpty(det.CeilingHeight)) det.CeilingHeight = null;
+            det.SrxTenanted   = detialss.FindAttribute("Name", "srx_tenanted").GetAttributeValue("Value", "No");
+            det.TenantedUntil = detialss.FindAttribute("Name", "tenanted_until").GetAttributeValue("Value", "");
+            det.SellerEthnic   = detialss.FindAttribute("Name", "sellerEthnic").GetAttributeValue("Value", "");
+            det.SellerResidency = detialss.FindAttribute("Name", "sellerResidency").GetAttributeValue("Value", "");
+
+            foreach (var item in detialss)
+            {
+                if (item.Attribute("Name").Value.Contains("unit_features[],"))
+                {
+                    var code = item.Attribute("Name").Value.Replace("unit_features[],", "");
+                    if (features.Any(q => q == code))
+                        det.UnitFeatures.Add(code);
+                }
+            }
+
+            // 工业 / 商业专用
+            det.ElectricitySupply = detialss.FindAttribute("Name", "electricity_supply").GetAttributeValue<int?>("Value", null);
+            det.ElectricityPhase  = detialss.FindAttribute("Name", "electricity_phase").GetAttributeValue<string>("Value", null);
+            if (string.IsNullOrEmpty(det.ElectricityPhase)) det.ElectricityPhase = null;
+            det.FloorLoading         = detialss.FindAttribute("Name", "floor_loading").GetAttributeValue<string>("Value", null);
+            if (string.IsNullOrEmpty(det.FloorLoading)) det.FloorLoading = null;
+            det.FloorLoadingCategory = detialss.FindAttribute("Name", "floor_loading_category").GetAttributeValue<string>("Value", null);
+            if (string.IsNullOrEmpty(det.FloorLoadingCategory)) det.FloorLoadingCategory = null;
+            det.IsHighCeiling = detialss.FindAttribute("Name", "is_high_ceiling").GetAttributeValue<string>("Value", null);
+            if (string.IsNullOrEmpty(det.IsHighCeiling)) det.IsHighCeiling = null;
+            det.LiftCargo    = detialss.FindAttribute("Name", "lift_cargo").GetAttributeValue<int?>("Value", null);
+            det.LiftPassenger = detialss.FindAttribute("Name", "lift_passenger").GetAttributeValue<int?>("Value", null);
+            det.Ramp         = detialss.FindAttribute("Name", "ramp").GetAttributeValue<string>("Value", null);
+            if (string.IsNullOrEmpty(det.Ramp)) det.Ramp = null;
+            det.Condition    = detialss.FindAttribute("Name", "condition").GetAttributeValue<string>("Value", null);
+            if (string.IsNullOrEmpty(det.Condition)) det.Condition = null;
+            det.PropertyUse  = detialss.FindAttribute("Name", "property_use").GetAttributeValue<string>("Value", null);
+            if (string.IsNullOrEmpty(det.PropertyUse)) det.PropertyUse = null;
+            det.CookingType  = detialss.FindAttribute("Name", "cooking_type").GetAttributeValue<string>("Value", null);
+            if (string.IsNullOrEmpty(det.CookingType)) det.CookingType = null;
+
+            // 经纪人信息
+            det.AlternativeAgent  = detialss.FindAttribute("Name", "alternative_agent").GetAttributeValue("Value", "");
+            det.AlternativeMobile = detialss.FindAttribute("Name", "alternative_mobile").GetAttributeValue("Value", "");
+            det.AlternativePhone  = detialss.FindAttribute("Name", "alternative_phone").GetAttributeValue("Value", "");
+            det.AlternativeEmail  = detialss.FindAttribute("Name", "alternative_email").GetAttributeValue("Value", "");
+
+            // 任务信息
+            det.HiddenListingId = detialss.FindAttribute("Name", "hidden_listing_id").GetAttributeValue<int?>("Value", null);
+            det.TaskItemId  = detialss.FindAttribute("Name", "taskitem_id").GetAttributeValue("Value", "0");
+            det.UpdateTime  = detialss.FindAttribute("Name", "UpdateTime").GetAttributeValue("Value", "");
+            det.FastRepost  = detialss.FindAttribute("Name", "FastRepost").GetAttributeValue("Value", "0");
+
+            return d;
         }
     }
 }
