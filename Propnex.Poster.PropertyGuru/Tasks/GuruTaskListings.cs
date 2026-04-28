@@ -612,9 +612,30 @@ namespace Propnex.Poster.PropertyGuru.Tasks
             // ── ProjectData 子模型 ─────────────────────────────────────
             d.ProjectData = new GuruProjectData
             {
-                ProjectName  = projectDatas.FindAttribute("Name", "name").GetAttributeValue("Value", ""),
-                RegionCode   = projectDatas.FindAttribute("Name", "regionCode").GetAttributeValue("Value", ""),
-                ProjectFloors = projectDatas.FindAttribute("Name", "floors").GetAttributeValue("Value", 0)
+                Id              = projectDatas.FindAttribute("Name", "id").GetAttributeValue<int?>("Value", null),
+                TypeCode        = projectDatas.FindAttribute("Name", "typeCode").GetAttributeValue("Value", ""),
+                PropertyTypeGroup = projectDatas.FindAttribute("Name", "propertyTypeGroup").GetAttributeValue("Value", ""),
+                ProjectName     = projectDatas.FindAttribute("Name", "name").GetAttributeValue("Value", ""),
+                NewLaunch       = projectDatas.FindAttribute("Name", "newLaunch").GetAttributeValue("Value", ""),
+                TotalUnits      = projectDatas.FindAttribute("Name", "totalUnits").GetAttributeValue("Value", ""),
+                TopYear         = projectDatas.FindAttribute("Name", "topYear").GetAttributeValue("Value", ""),
+                Tenure          = projectDatas.FindAttribute("Name", "tenure").GetAttributeValue("Value", ""),
+                RegionCode      = projectDatas.FindAttribute("Name", "regionCode").GetAttributeValue("Value", ""),
+                Developer       = projectDatas.FindAttribute("Name", "developer").GetAttributeValue("Value", ""),
+                DistrictCode    = projectDatas.FindAttribute("Name", "districtCode").GetAttributeValue("Value", ""),
+                PostCode        = projectDatas.FindAttribute("Name", "postcode").GetAttributeValue("Value", ""),
+                StreetName      = projectDatas.FindAttribute("Name", "streetname").GetAttributeValue("Value", ""),
+                StreetNumber    = projectDatas.FindAttribute("Name", "streetnumber").GetAttributeValue("Value", ""),
+                Longitude       = projectDatas.FindAttribute("Name", "longitude").GetAttributeValue("Value", 0.00),
+                Latitude        = projectDatas.FindAttribute("Name", "latitude").GetAttributeValue("Value", 0.00),
+                StatusCode      = projectDatas.FindAttribute("Name", "statusCode").GetAttributeValue("Value", ""),
+                EstateCode      = projectDatas.FindAttribute("Name", "estateCode").GetAttributeValue("Value", ""),
+                Url             = projectDatas.FindAttribute("Name", "url").GetAttributeValue("Value", ""),
+                PropertyId      = projectDatas.FindAttribute("Name", "propertyId").GetAttributeValue<int?>("Value", null),
+                PropertyName    = projectDatas.FindAttribute("Name", "propertyName").GetAttributeValue("Value", ""),
+                ProjectNameAlt  = projectDatas.FindAttribute("Name", "projectName").GetAttributeValue("Value", ""),
+                PropertyType    = projectDatas.FindAttribute("Name", "propertyType").GetAttributeValue("Value", ""),
+                ProjectFloors   = projectDatas.FindAttribute("Name", "floors").GetAttributeValue("Value", 0)
             };
 
             // ── Details 子模型 ─────────────────────────────────────────

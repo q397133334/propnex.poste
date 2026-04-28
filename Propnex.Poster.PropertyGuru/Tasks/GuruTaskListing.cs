@@ -40,14 +40,56 @@ namespace Propnex.Poster.PropertyGuru.Tasks
         public List<CreateOrUpdateListing> Listings { get; set; }
     }
 
-    /// <summary>ProjectData 子模型（&lt;ProjectData&gt; 节点下的 Field 字段）</summary>
+    /// <summary>ProjectData 子模型（&lt;ProjectData&gt; 节点下的 ProjectField 全字段）</summary>
     public class GuruProjectData
     {
-        /// <summary>楼盘名称（Field Name="name"）</summary>
+        /// <summary>楼盘内部 ID（id）</summary>
+        public int? Id { get; set; }
+        /// <summary>楼盘类型代码，如 HDB / CONDO（typeCode）</summary>
+        public string TypeCode { get; set; }
+        /// <summary>物业类型组别：N 住宅 / H 组屋 / L 有地 / C 商业（propertyTypeGroup）</summary>
+        public string PropertyTypeGroup { get; set; }
+        /// <summary>楼盘名称（name）</summary>
         public string ProjectName { get; set; }
-        /// <summary>区域代码（Field Name="regionCode"）</summary>
+        /// <summary>是否新推盘（newLaunch）</summary>
+        public string NewLaunch { get; set; }
+        /// <summary>单元总数（totalUnits）</summary>
+        public string TotalUnits { get; set; }
+        /// <summary>竣工年份（topYear）</summary>
+        public string TopYear { get; set; }
+        /// <summary>地契类型代码，如 F / L99 / L999（tenure）</summary>
+        public string Tenure { get; set; }
+        /// <summary>区域代码，如 G / CR / RCR（regionCode）</summary>
         public string RegionCode { get; set; }
-        /// <summary>楼盘总楼层（Field Name="floors"）</summary>
+        /// <summary>开发商名称（developer）</summary>
+        public string Developer { get; set; }
+        /// <summary>地区代码，如 D19（districtCode）</summary>
+        public string DistrictCode { get; set; }
+        /// <summary>邮政编码（postcode）</summary>
+        public string PostCode { get; set; }
+        /// <summary>街道名（streetname）</summary>
+        public string StreetName { get; set; }
+        /// <summary>门牌号（streetnumber）</summary>
+        public string StreetNumber { get; set; }
+        /// <summary>经度（longitude）</summary>
+        public double Longitude { get; set; }
+        /// <summary>纬度（latitude）</summary>
+        public double Latitude { get; set; }
+        /// <summary>楼盘状态代码（statusCode）</summary>
+        public string StatusCode { get; set; }
+        /// <summary>组屋市镇代码（estateCode）</summary>
+        public string EstateCode { get; set; }
+        /// <summary>楼盘详情页 URL（url）</summary>
+        public string Url { get; set; }
+        /// <summary>物业 ID（propertyId）</summary>
+        public int? PropertyId { get; set; }
+        /// <summary>物业名称（propertyName）</summary>
+        public string PropertyName { get; set; }
+        /// <summary>项目名称（projectName）</summary>
+        public string ProjectNameAlt { get; set; }
+        /// <summary>物业类型文字，如 HDB / Condominium（propertyType）</summary>
+        public string PropertyType { get; set; }
+        /// <summary>楼盘总楼层（floors）</summary>
         public int ProjectFloors { get; set; }
     }
 
