@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -8,7 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Flurl.Http;
 
-namespace Propnex.Poster.PropertyGuru.Listing
+namespace Propnex.Poster.PropertyGuru.Listing.V2
 {
     [System.Reflection.ObfuscationAttribute(Feature = "properties renaming")]
     public class RetrieveListing
@@ -272,62 +272,61 @@ namespace Propnex.Poster.PropertyGuru.Listing
             listing.ListingType = createOrUpdate.typeCode;
             listing.Quality = createOrUpdate.qualityScore.ToString() + "%";
 
-            listing.PropertyType = createOrUpdate.typeText;//  (string)ht1["typeText"];
-            listing.ListingName = createOrUpdate.localizedTitle;//  (string)ht["localizedTitle"];
-            listing.Details["standard_name"] = createOrUpdate.property.name;// (string)ht1["name"];
-            listing.Details["property_name"] = createOrUpdate.property.name;// (string)ht1["name"];
-            listing.Details["property_url"] = "http://www.propertyguru.com.sg/project/" + createOrUpdate.property.id?.ToString();//  ht1["id"]?.ToString();
-            listing.Details["property_id"] = createOrUpdate.property.id?.ToString(); // ht1["id"]?.ToString();
-            listing.Details["property_type_code"] = createOrUpdate.property.typeCode;//  (string)ht1["typeCode"];
-            listing.Details["property_type_group"] = createOrUpdate.property.typeGroup;//  (string)ht1["typeGroup"];
-            listing.Details["tenure"] = createOrUpdate.property.tenureCode;//  (string)ht1["tenureCode"];
-            listing.Details["constructionyear"] = createOrUpdate.property.topYear?.ToString();// // ht1["topYear"]?.ToString();
-            listing.Details["numberofunits"] = createOrUpdate.property.totalUnits?.ToString();//  ht1["totalUnits"]?.ToString();
-            listing.Details["numberoffloors"] = createOrUpdate.property.floors?.ToString();//  ht1["floors"]?.ToString();
+            listing.PropertyType = createOrUpdate.typeText;
+            listing.ListingName = createOrUpdate.localizedTitle;
+            listing.Details["standard_name"] = createOrUpdate.property.name;
+            listing.Details["property_name"] = createOrUpdate.property.name;
+            listing.Details["property_url"] = "http://www.propertyguru.com.sg/project/" + createOrUpdate.property.id?.ToString();
+            listing.Details["property_id"] = createOrUpdate.property.id?.ToString();
+            listing.Details["property_type_code"] = createOrUpdate.property.typeCode;
+            listing.Details["property_type_group"] = createOrUpdate.property.typeGroup;
+            listing.Details["tenure"] = createOrUpdate.property.tenureCode;
+            listing.Details["constructionyear"] = createOrUpdate.property.topYear?.ToString();
+            listing.Details["numberofunits"] = createOrUpdate.property.totalUnits?.ToString();
+            listing.Details["numberoffloors"] = createOrUpdate.property.floors?.ToString();
 
             foreach (var item in createOrUpdate.property.amenities)
             {
                 listing.Details["amenities," + item.code] = "Checked";
             }
 
-            listing.Details["hdb_type"] = createOrUpdate.propertyUnit.hdbTypeCode; // (string)ht1["hdbTypeCode"];
+            listing.Details["hdb_type"] = createOrUpdate.propertyUnit.hdbTypeCode;
 
-            listing.Details["fittings"] = createOrUpdate.propertyUnit.furnishingCode; //(string)ht1["furnishingCode"];
-            listing.Details["furnishing"] = createOrUpdate.propertyUnit.furnishingCode;// (string)ht1["furnishingCode"];
-            listing.Details["floor_level"] = createOrUpdate.propertyUnit.floorLevelCode;// (string)ht1["floorLevelCode"];
-            listing.Details["electricity_supply"] = createOrUpdate.propertyUnit.electricitySupply?.ToString();//  ht1["electricitySupply"]?.ToString();
+            listing.Details["fittings"] = createOrUpdate.propertyUnit.furnishingCode;
+            listing.Details["furnishing"] = createOrUpdate.propertyUnit.furnishingCode;
+            listing.Details["floor_level"] = createOrUpdate.propertyUnit.floorLevelCode;
+            listing.Details["electricity_supply"] = createOrUpdate.propertyUnit.electricitySupply?.ToString();
             listing.Details["electricity_unit"] = "KVA";
-            listing.Details["electricity_phase"] = createOrUpdate.propertyUnit.electricityPhase;// (string)ht1["electricityPhase"]?.ToString();
-            listing.Details["ceiling_height"] = createOrUpdate.propertyUnit.ceilingHeight;//  ht1["ceilingHeight"]?.ToString();
-            listing.Details["floor_loading"] = createOrUpdate.propertyUnit.floorLoading;//  ht1["floorLoading"]?.ToString();
+            listing.Details["electricity_phase"] = createOrUpdate.propertyUnit.electricityPhase;
+            listing.Details["ceiling_height"] = createOrUpdate.propertyUnit.ceilingHeight;
+            listing.Details["floor_loading"] = createOrUpdate.propertyUnit.floorLoading;
 
             foreach (var item in createOrUpdate.propertyUnit.features)
             {
                 listing.Details["unit_features," + item.code] = "Checked";
             }
 
-            listing.Price = createOrUpdate.price.value.Value.ToString();//  ht1["value"]?.ToString();
+            listing.Price = createOrUpdate.price.value.Value.ToString();
             listing.Details["price"] = listing.Price;
-            listing.Details["price_type"] = createOrUpdate.price.type.code;//  (string)((System.Collections.Hashtable)ht1["type"])["code"];
-            listing.Details["valuation_price"] = createOrUpdate.price.valuation?.ToString(); // ht1["valuation"]?.ToString();
+            listing.Details["price_type"] = createOrUpdate.price.type.code;
+            listing.Details["valuation_price"] = createOrUpdate.price.valuation?.ToString();
 
-
-            listing.BedRooms = createOrUpdate.sizes.bedrooms.value?.ToString();  //((System.Collections.Hashtable)ht1["bedrooms"])["value"]?.ToString();
+            listing.BedRooms = createOrUpdate.sizes.bedrooms.value?.ToString();
             listing.Details["bedrooms"] = listing.BedRooms;
-            listing.Details["bathrooms"] = createOrUpdate.sizes.bathrooms.value?.ToString(); //((System.Collections.Hashtable)ht1["bathrooms"])["value"]?.ToString();
-            listing.FloorArea = createOrUpdate.sizes.floorArea[0].value?.ToString(); // ((System.Collections.Hashtable)((System.Collections.ArrayList)ht1["floorArea"])[0])["value"]?.ToString();
+            listing.Details["bathrooms"] = createOrUpdate.sizes.bathrooms.value?.ToString();
+            listing.FloorArea = createOrUpdate.sizes.floorArea[0].value?.ToString();
             listing.Details["floorarea"] = listing.FloorArea;
-            listing.Details["landarea"] = createOrUpdate.sizes.landArea[0].value?.ToString(); //((System.Collections.Hashtable)((System.Collections.ArrayList)ht1["landArea"])[0])["value"]?.ToString();
+            listing.Details["landarea"] = createOrUpdate.sizes.landArea[0].value?.ToString();
             listing.Details["floorarea_unit"] = "sqft";
 
-            listing.Details["district"] = createOrUpdate.location.districtCode; // (string)ht1["districtCode"];
-            listing.Details["streetname"] = createOrUpdate.location.streetName1;//(string)ht1["streetName1"];
-            listing.Details["streetnumber"] = createOrUpdate.location.streetNumber; //(string)ht1["streetNumber"];
-            listing.Details["location_id"] = createOrUpdate.location.id.ToString();// (ht1["id"])?.ToString();
-            listing.Details["latitude"] = createOrUpdate.location.latitude.ToString();// (string)ht1["latitude"]?.ToString(); ;
-            listing.Details["longitude"] = createOrUpdate.location.longitude.ToString();// (string)ht1["longitude"]?.ToString(); ;
-            listing.Details["postcode"] = createOrUpdate.location.postalCode;// (string)ht1["postalCode"];
-            listing.Details["hdb_estate"] = createOrUpdate.location.hdbEstateCode;// (string)ht1["hdbEstateCode"];
+            listing.Details["district"] = createOrUpdate.location.districtCode;
+            listing.Details["streetname"] = createOrUpdate.location.streetName1;
+            listing.Details["streetnumber"] = createOrUpdate.location.streetNumber;
+            listing.Details["location_id"] = createOrUpdate.location.id.ToString();
+            listing.Details["latitude"] = createOrUpdate.location.latitude.ToString();
+            listing.Details["longitude"] = createOrUpdate.location.longitude.ToString();
+            listing.Details["postcode"] = createOrUpdate.location.postalCode;
+            listing.Details["hdb_estate"] = createOrUpdate.location.hdbEstateCode;
 
             if (string.IsNullOrEmpty(createOrUpdate.location.unit) == false)
             {
@@ -336,11 +335,11 @@ namespace Propnex.Poster.PropertyGuru.Listing
                 listing.Details["property_unit_number"] = ss.Length > 1 ? ss[1] : "";
             }
 
-            listing.Details["alternative_agent"] = createOrUpdate.agent.alternativeAgent == null ? "" : createOrUpdate.agent.alternativeAgent; // (string)ht1["alternativeAgent"];
-            listing.Details["alternative_mobile"] = createOrUpdate.agent.alternativeMobile == null ? "" : createOrUpdate.agent.alternativeMobile;// (string)ht1["alternativeMobile"];
-            listing.Details["show_mobile"] = createOrUpdate.agent.showProfile.Value.ToString();// ht1["showProfile"].ToString();
-            listing.Details["alternative_phone"] = createOrUpdate.agent.alternativePhone == null ? "" : createOrUpdate.agent.alternativePhone;// (string)ht1["alternativePhone"];
-            listing.Details["alternative_email"] = createOrUpdate.agent.alternativeEmail == null ? "" : createOrUpdate.agent.alternativeEmail;// (string)ht1["alternativeEmail"];
+            listing.Details["alternative_agent"] = createOrUpdate.agent.alternativeAgent == null ? "" : createOrUpdate.agent.alternativeAgent;
+            listing.Details["alternative_mobile"] = createOrUpdate.agent.alternativeMobile == null ? "" : createOrUpdate.agent.alternativeMobile;
+            listing.Details["show_mobile"] = createOrUpdate.agent.showProfile.Value.ToString();
+            listing.Details["alternative_phone"] = createOrUpdate.agent.alternativePhone == null ? "" : createOrUpdate.agent.alternativePhone;
+            listing.Details["alternative_email"] = createOrUpdate.agent.alternativeEmail == null ? "" : createOrUpdate.agent.alternativeEmail;
 
             string agent = "";
             if (listing.Details.ContainsKey("alternative_agent") && !string.IsNullOrEmpty(listing.Details["alternative_agent"]))
@@ -354,7 +353,7 @@ namespace Propnex.Poster.PropertyGuru.Listing
             if (createOrUpdate.media.listing.Count > 0)
             {
                 listing.UseFileName = true;
-                savepath = $"{$"{Directory.GetDirectoryRoot(System.Windows.Forms.Application.StartupPath)}\\task\\{id}"}";    //System.IO.Path.Combine(pictureFolder, System.DateTime.Now.ToString("yyyyMMdd"));
+                savepath = $"{$"{Directory.GetDirectoryRoot(System.Windows.Forms.Application.StartupPath)}\\task\\{id}"}";
                 if (!System.IO.Directory.Exists(savepath))
                 {
                     System.IO.Directory.CreateDirectory(savepath);
@@ -363,24 +362,18 @@ namespace Propnex.Poster.PropertyGuru.Listing
             StringBuilder pics = new StringBuilder();
             foreach (var item in createOrUpdate.media.listing)
             {
-                string p = item.V550;//  ht2["V550"].ToString();
-                string filename = item.id.Value.ToString() + "." + System.IO.Path.GetFileName(p);//  ht2["id"].ToString() + "." + System.IO.Path.GetFileName(p);// p.Substring(p.LastIndexOf("/") + 1);
-                string title = item.caption?.Replace(" ", "-")?.Trim();//  ((string)ht2["caption"])?.Replace(" ", "-")?.Trim();
+                string p = item.V550;
+                string filename = item.id.Value.ToString() + "." + System.IO.Path.GetFileName(p);
+                string title = item.caption?.Replace(" ", "-")?.Trim();
                 filename = MakeValidFileName(title + ".(RP)" + filename);
-                //filename = System.IO.Path.Combine(savepath, filename);
                 try
                 {
-
-
-                    //WebClientEx webClient = new WebClientEx();
-                    //webClient.DownloadFile(p, filename);
                     var result = await p.WithTimeout(30).DownloadFileAsync(savepath, filename);
                     if (System.IO.File.Exists(result))
                     {
                         result = OverlayWatermark(result);
                         pics.Append(result).Append(Environment.NewLine);
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -394,14 +387,11 @@ namespace Propnex.Poster.PropertyGuru.Listing
             {
                 foreach (var item in createOrUpdate.media.listingFloorplans)
                 {
-                    string p = item.V550;// ht2["V550"].ToString();
+                    string p = item.V550;
                     listing.FloorPlan = p;
                     string filename = p.Substring(p.LastIndexOf("/") + 1);
-                    //filename = System.IO.Path.Combine(savepath, filename);
                     try
                     {
-                        //WebClientEx webClient = new WebClientEx();
-                        //webClient.DownloadFile(p, filename);
                         var result = await p.WithTimeout(30).DownloadFileAsync(savepath, filename);
                         if (System.IO.File.Exists(result))
                         {
@@ -426,17 +416,15 @@ namespace Propnex.Poster.PropertyGuru.Listing
             StringBuilder viThumbs = new StringBuilder();
             if (createOrUpdate.media.listingVideos != null)
             {
-
                 foreach (var item in createOrUpdate.media.listingVideos)
                 {
                     string filename = "";
-                    string title = item.caption;//(string)ht2["caption"];
+                    string title = item.caption;
                     bool isVtour = false;
                     StringBuilder sbFile = isVtour ? vFiles : viFiles;
                     StringBuilder sbThumb = isVtour ? vThumbs : viThumbs;
-                    //get vtour
-                    string p = item.file;// (string)ht2["file"];
-                    if (item.type != "htm")//not embed
+                    string p = item.file;
+                    if (item.type != "htm")
                     {
                         filename = p.Substring(p.LastIndexOf("/") + 1);
                         if (string.IsNullOrEmpty(filename)) continue;
@@ -444,9 +432,6 @@ namespace Propnex.Poster.PropertyGuru.Listing
                         filename = MakeValidFileName(string.Format("{0}.{1}.{2}", title, DateTime.Now.ToString("yyyyMMdd"), filename));
                         try
                         {
-                            //DoProgress(string.Format("Retrieve listing {0}, for {1},{2}...", id, User, savepath), -1, filename);
-                            //WebClientEx webClient = new WebClientEx();
-                            //webClient.DownloadFile(p, filename);
                             var result = await p.WithTimeout(30).DownloadFileAsync(savepath, filename);
                             sbFile.Append(result).Append("#").Append(title).Append(Environment.NewLine);
                         }
@@ -455,19 +440,15 @@ namespace Propnex.Poster.PropertyGuru.Listing
 
                         };
                     }
-                    else//embed
+                    else
                     {
-                        p = item.embed_html; // (string)ht2["embed_html"];
+                        p = item.embed_html;
                         sbFile.Append(p).Append("#").Append(title).Append(Environment.NewLine);
                     };
-                    //get thumbnail
-                    string turl = item.thumb; //(string)ht2["thumb"];
+                    string turl = item.thumb;
                     filename = turl.Substring(turl.LastIndexOf("/") + 1);
-                    //filename = System.IO.Path.Combine(savepath, filename);
                     if (turl.EndsWith(".jpg", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        //WebClientEx webClient = new WebClientEx();
-                        //webClient.DownloadFile(turl, filename);
                         filename = await turl.WithTimeout(30).DownloadFileAsync(savepath, filename);
                     };
                     if (System.IO.File.Exists(filename))
@@ -488,13 +469,12 @@ namespace Propnex.Poster.PropertyGuru.Listing
                 foreach (var item in createOrUpdate.media.listingVirtualTours)
                 {
                     string filename = "";
-                    string title = item.caption; //(string)ht2["caption"];
+                    string title = item.caption;
                     bool isVtour = true;
                     StringBuilder sbFile = isVtour ? vFiles : viFiles;
                     StringBuilder sbThumb = isVtour ? vThumbs : viThumbs;
-                    //get vtour
-                    string p = item.file;// (string)ht2["file"];
-                    if (item.type != "htm")//not embed
+                    string p = item.file;
+                    if (item.type != "htm")
                     {
                         filename = p.Substring(p.LastIndexOf("/") + 1);
                         if (string.IsNullOrEmpty(filename)) continue;
@@ -502,10 +482,6 @@ namespace Propnex.Poster.PropertyGuru.Listing
                         filename = MakeValidFileName(string.Format("{0}.{1}.{2}", title, DateTime.Now.ToString("yyyyMMdd"), filename));
                         try
                         {
-                            // DoProgress(string.Format("Retrieve listing {0}, for {1},{2}...", id, User, savepath), -1, filename);
-                            //bot.DownloadImage(p, filename);
-                            //WebClientEx webClient = new WebClientEx();
-                            //webClient.DownloadFile(p, filename);
                             var result = await p.DownloadFileAsync(savepath, filename);
                             sbFile.Append(result).Append("#").Append(title).Append(Environment.NewLine);
                         }
@@ -514,19 +490,15 @@ namespace Propnex.Poster.PropertyGuru.Listing
 
                         };
                     }
-                    else//embed
+                    else
                     {
-                        p = item.embed_html;//  (string)ht2["embed_html"];
+                        p = item.embed_html;
                         sbFile.Append(p).Append("#").Append(title).Append(Environment.NewLine);
                     };
-                    //get thumbnail
-                    string turl = item.thumb;//  (string)ht2["thumb"];
+                    string turl = item.thumb;
                     filename = turl.Substring(turl.LastIndexOf("/") + 1);
-                    //filename = System.IO.Path.Combine(savepath, filename);
                     if (turl.EndsWith(".jpg", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        //WebClientEx webClient = new WebClientEx();
-                        //webClient.DownloadFile(turl, filename);
                         filename = await turl.DownloadFileAsync(savepath, filename);
                     };
                     if (System.IO.File.Exists(filename))
@@ -546,7 +518,6 @@ namespace Propnex.Poster.PropertyGuru.Listing
             listing.Videos = viFiles.ToString();
             listing.VideoThumbnails = viThumbs.ToString();
             listing.EmbedVideo = "";
-            //listing.Account = User;
 
             return listing;
         }
@@ -587,7 +558,6 @@ namespace Propnex.Poster.PropertyGuru.Listing
                     }
                     else
                     {
-                        //DoProgress("Listing missing data:", -1, "district");
                         return new Tuple<Dictionary<string, string>, bool, string>(null, false, "Listing missing data: district");
                     };
                 };
@@ -622,6 +592,7 @@ namespace Propnex.Poster.PropertyGuru.Listing
 
         private static string OverlayWatermark(string filename)
         {
+            return filename;
             try
             {
                 if (filename.EndsWith("pdf")) return filename;
@@ -641,9 +612,6 @@ namespace Propnex.Poster.PropertyGuru.Listing
                     H = newH + 2;
                     Width = newWidth;
                 };
-                //remove following 2 lines to overlay only right part
-                //X = img.Width - Width - 5;
-                //W = img.Width - X;
                 string photo = "";
                 using (Image src = Image.FromFile("480x80.png"))
                 using (Bitmap dst = new Bitmap(img.Width, img.Height))

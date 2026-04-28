@@ -1,4 +1,4 @@
-﻿namespace Propnex.Poster.PropertyGuru.Listing
+namespace Propnex.Poster.PropertyGuru.Listing.V2
 {
     public class JwtResult
     {

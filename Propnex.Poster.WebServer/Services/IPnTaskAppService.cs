@@ -9,6 +9,7 @@ using Propnex.Poster.Dtos;
 using System.Reflection.PortableExecutable;
 using System.Threading.Tasks;
 using Volo.Abp.Uow;
+using Polly;
 
 namespace Propnex.Poster.WebServer.Services
 {
@@ -16,7 +17,7 @@ namespace Propnex.Poster.WebServer.Services
     public interface IPnTaskAppService : ICrudAppService< //Defines CRUD methods
             Dtos.PnTaskDto, //Used to show books
             Guid, //Primary key of the book entity
-            PagedAndSortedResultRequestDto, //Used for paging/sorting
+            Dtos.PnTaskListInput, //Used for paging/sorting/filtering
             Dtos.CreateUpdatePnTaskDto> //Used
     {
         Task<Dtos.PnTaskDto> GetPnTaskAsync(Dtos.InputGetTaskInfoDto inputDto);
@@ -28,13 +29,19 @@ namespace Propnex.Poster.WebServer.Services
         Task<List<PnTaskDto>> GetWaitPnTaskAsync();
 
         Task CreatePropertyTasks(CreatePropertyTaskDto input);
+
+        Task ResetPnTask(Guid machineId, Guid pnTaskId, string message = "");
+
+        Task<List<PnTaskLogDto>> GetLogsAsync(Guid pnTaskId);
+
+        Task LogErrorAsync(Guid machineId, Guid pnTaskId, string message);
     }
 
     public class PnTaskAppService : CrudAppService<
             Entities.PnTask, //The Book entity
             Dtos.PnTaskDto, //Used to show books
             Guid, //Primary key of the book entity
-            PagedAndSortedResultRequestDto, //Used for paging/sorting
+            Dtos.PnTaskListInput, //Used for paging/sorting/filtering
             Dtos.CreateUpdatePnTaskDto>, IPnTaskAppService
     {
 
@@ -47,6 +54,16 @@ namespace Propnex.Poster.WebServer.Services
         {
             _pnTaskLogRepository = pnTaskLogRepository;
             _webHostEnvironment = webHostEnvironment;
+        }
+
+        protected override async Task<IQueryable<Entities.PnTask>> CreateFilteredQueryAsync(Dtos.PnTaskListInput input)
+        {
+            var query = await base.CreateFilteredQueryAsync(input);
+            if (!string.IsNullOrWhiteSpace(input.NumberFilter))
+            {
+                query = query.Where(t => t.Number.Contains(input.NumberFilter));
+            }
+            return query;
         }
 
         public async Task CreatePropertyTasks(CreatePropertyTaskDto input)
@@ -80,16 +97,20 @@ namespace Propnex.Poster.WebServer.Services
                 var rootPath = Path.Combine(_webHostEnvironment.WebRootPath, "taskxml");
                 //1. get waiting pntask
                 var pnTask = await AsyncExecuter.FirstOrDefaultAsync((await Repository.GetQueryableAsync()).Where(q => q.Status == Share.TaskStatus.Wait && q.TargetPortal == inputDto.TargetPortal).OrderBy(q=>q.CreationTime));
+                //PnTask pnTask = await AsyncExecuter.FirstOrDefaultAsync((await Repository.GetQueryableAsync()).Where(q => q.Number == "cp17733240140309.guru.tsk"));
                 if (pnTask == null)
                     return null;
                 //2. check task file
                 var downloadUrl = $"{WebServerConsts.PnBaseUrl}{WebServerConsts.PnreadGuruTask}?client_id={pnTask.ClientId}&fileName={pnTask.Number}";
-                if (inputDto.TargetPortal == "MyIP")
-                {
-                    downloadUrl = $"{WebServerConsts.PnreadMyIpTask}?client_id={pnTask.ClientId}&fileName={pnTask.Number}";
-                }
+                //if (inputDto.TargetPortal == "MyIP")
+                //{
+                //    downloadUrl = $"{WebServerConsts.PnreadMyIpTask}?client_id={pnTask.ClientId}&fileName={pnTask.Number}";
+                //}
                 //3. download task file
-                var taskContext = await downloadUrl.GetStringAsync();
+                var taskContext = await Policy
+                    .Handle<Exception>()
+                    .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
+                    .ExecuteAsync(() => downloadUrl.GetStringAsync());
                 //4. return pntasks
                 if (taskContext == "Can't find task file." && File.Exists(Path.Combine(rootPath, pnTask.Number)) == false)
                 {
@@ -184,6 +205,25 @@ namespace Propnex.Poster.WebServer.Services
             }
         }
 
+        public async Task ResetPnTask(Guid machineId, Guid pnTaskId, string message = "")
+        {
+            var pnTask = await AsyncExecuter.FirstOrDefaultAsync(
+                (await Repository.GetQueryableAsync()).Where(q => q.Id == pnTaskId));
+            if (pnTask == null) return;
+
+            pnTask.Status = Share.TaskStatus.Wait;
+            pnTask.RetryCount = 0;
+            await Repository.UpdateAsync(pnTask);
+            await _pnTaskLogRepository.InsertAsync(machineId, pnTask.Id, $"Reset task, {message}", "");
+
+            var rootPath = Path.Combine(_webHostEnvironment.WebRootPath, "taskxml");
+            var usePath = Path.Combine(_webHostEnvironment.WebRootPath, "usetaskxml");
+            if (File.Exists(Path.Combine(usePath, pnTask.Number)))
+            {
+                File.Move(Path.Combine(usePath, pnTask.Number), Path.Combine(rootPath, pnTask.Number));
+            }
+        }
+
         public async Task PnTaskXmlRetry(Guid pnTaskId, string message = "")
         {
             var pnTask = await AsyncExecuter.FirstOrDefaultAsync((await Repository.GetQueryableAsync()).Where(q => q.Id == pnTaskId));
@@ -198,6 +238,28 @@ namespace Propnex.Poster.WebServer.Services
                     System.IO.File.Move(Path.Combine(usePath, pnTask.Number), Path.Combine(rootPath, pnTask.Number));
                 }
             }
+        }
+
+        public async Task<List<PnTaskLogDto>> GetLogsAsync(Guid pnTaskId)
+        {
+            var logs = await AsyncExecuter.ToListAsync(
+                (await _pnTaskLogRepository.GetQueryableAsync())
+                .Where(l => l.PntaskId == pnTaskId)
+                .OrderByDescending(l => l.CreateTime));
+
+            return logs.Select(l => new PnTaskLogDto
+            {
+                PntaskId = l.PntaskId,
+                MachineId = l.MachineId,
+                Ip = l.Ip,
+                Message = l.Message,
+                CreateTime = l.CreateTime
+            }).ToList();
+        }
+
+        public async Task LogErrorAsync(Guid machineId, Guid pnTaskId, string message)
+        {
+            await _pnTaskLogRepository.InsertAsync(pnTaskId, machineId, $"[Error] {message}", "");
         }
     }
 

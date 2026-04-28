@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
 
-namespace Propnex.Poster.PropertyGuru.Listing
+namespace Propnex.Poster.PropertyGuru.Listing.V2
 {
     public class Dates_Available
     {
-        public Dates_Available()
-        {
-
-        }
+        public Dates_Available() { }
 
         private DateTime now = DateTime.UtcNow.Date;
 
@@ -24,6 +17,5 @@ namespace Propnex.Poster.PropertyGuru.Listing
             TimeSpan unix_time = (dt.Date - new DateTime(1970, 1, 1, 0, 0, 0));
             return (long)unix_time.TotalSeconds;
         }
-
     }
 }

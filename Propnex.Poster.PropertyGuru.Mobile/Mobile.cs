@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using Propnex.Poster.PropertyGuru.Listing;
+using Propnex.Poster.PropertyGuru.Listing.V2;
 using Propnex.Poster.PropertyGuru.Mobile.Dto;
 using RestSharp;
 using RestSharp.Authenticators;

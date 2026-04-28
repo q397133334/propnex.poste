@@ -51,79 +51,55 @@ namespace PropnexPoster.WPF
 
         public static async Task<T> CallBack<T>(Func<Task<T>> action)
         {
-            int count = 0;
-            T context = default(T);
-            while (count < 10)
-            {
-                count++;
-                try
-                {
-                    context = await action();
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    await PingAsync();
-                }
-            }
-            return context;
+            return await Policy
+                .Handle<Exception>()
+                .WaitAndRetryAsync(3, _ => TimeSpan.Zero, async (ex, ts) => await PingAsync())
+                .ExecuteAsync(action);
         }
 
-        public static async Task CallBack(Action action)
+        public static async Task CallBack(Func<Task> action)
         {
-            int count = 0;
-            while (count < 10)
-            {
-                count++;
-                try
-                {
-                    action();
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    await PingAsync();
-                }
-            }
+            await Policy
+                .Handle<Exception>()
+                .WaitAndRetryAsync(3, _ => TimeSpan.Zero, async (ex, ts) => await PingAsync())
+                .ExecuteAsync(action);
         }
         public static async Task<string> GetTaskContent(PnTaskDto pnTaskDto)
         {
-            int count = 0;
-            var context = "";
-            while (count < 10)
-            {
-                count++;
-                try
-                {
-                    string url = $"{BaseUrl}/api/downloadtask?machineId={MachindNumber}&taskId={pnTaskDto.Id}&fileName={pnTaskDto.Number}";
-                    context = await url.GetStringAsync();
-                    count = 20;
-                    break;
-                }
-                catch
-                {
-                    await PingAsync();
-                }
-            }
-            return context;
+            string url = $"{BaseUrl}/api/downloadtask?machineId={MachindNumber}&taskId={pnTaskDto.Id}&fileName={pnTaskDto.Number}";
+            return await Policy
+                .Handle<Exception>()
+                .WaitAndRetryAsync(3, _ => TimeSpan.Zero, async (ex, ts) => await PingAsync())
+                .ExecuteAsync(() => url.GetStringAsync());
         }
 
-        public static async void PostPntaskRetry(Guid pnTaskId, string message)
+        public static async Task ResetTask(Guid pnTaskId, string message)
+        {
+            try
+            {
+                Guid.TryParse(MachindNumber, out var machineId);
+                await $"{BaseUrl}/api/app/pn-task/reset-pn-task?machineId={machineId}&pnTaskId={pnTaskId}&message={Uri.EscapeDataString(message)}".PostAsync();
+            }
+            catch { }
+        }
+
+        public static async Task LogErrorAsync(Guid pnTaskId, string message)
+        {
+            try
+            {
+                Guid.TryParse(MachindNumber, out var machineId);
+                await $"{BaseUrl}/api/app/pn-task/log-error?machineId={machineId}&pnTaskId={pnTaskId}&message={Uri.EscapeDataString(message)}".PostAsync();
+            }
+            catch { }
+        }
+
+        public static async Task PostPntaskRetry(Guid pnTaskId, string message)
         {
             string url = $"{BaseUrl}/api/app/pn-task/pn-task-retry?machineId={MachindNumber}&pnTaskId={pnTaskId}&message={message}";
-            int count = 0;
-            while (count < 10)
-            {
-                count++;
-                try
-                {
-                    await url.PostAsync();
-                }
-                catch
-                {
-                    await PingAsync();
-                }
-            }
+            await Policy
+                .Handle<Exception>()
+                .WaitAndRetryAsync(3, _ => TimeSpan.Zero, async (ex, ts) => await PingAsync())
+                .ExecuteAsync(() => url.PostAsync());
         }
 
         public static void UpdatePnTask(PnTaskDto pnTaskDto)

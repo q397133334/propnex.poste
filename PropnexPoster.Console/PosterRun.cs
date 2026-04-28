@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Polly;
 using Propnex;
 using Propnex.Poster.Dtos;
-using Propnex.Poster.PropertyGuru.Listing;
+using Propnex.Poster.PropertyGuru.Listing.V2;
 using Propnex.Poster.PropertyGuru.Mobile;
 using Propnex.Poster.PropertyGuru.Mobile.Dto;
 using Propnex.Poster.PropertyGuru.Tasks;

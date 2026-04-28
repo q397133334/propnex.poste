@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using Propnex.Poster.PropertyGuru.Listing;
+using Propnex.Poster.PropertyGuru.Listing.V2;
+using Propnex.Poster.PropertyGuru.Listing.V3;
 using Propnex.Poster.PropertyGuru.Mobile.Dto;
 using RestSharp;
 using RestSharp.Authenticators;
@@ -30,7 +31,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             Token = token;
         }
 
-        public async Task<HttpResult<Listing.CreateOrUpdateListing>> ListingsAsync(int id, QueryListing queryListing)
+        public async Task<HttpResult<Listing.V2.CreateOrUpdateListing>> ListingsAsync(int id, QueryListing queryListing)
         {
             var request = GetRequest();
             request.Method = Method.Get;
@@ -45,10 +46,10 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             var response = await ExecuteAsync(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                var listing = Newtonsoft.Json.JsonConvert.DeserializeObject<Listing.CreateOrUpdateListing>(response.Content);
-                return new HttpResult<Listing.CreateOrUpdateListing> { Data = listing, HttpStatusCode = System.Net.HttpStatusCode.OK };
+                var listing = Newtonsoft.Json.JsonConvert.DeserializeObject<Listing.V2.CreateOrUpdateListing>(response.Content);
+                return new HttpResult<Listing.V2.CreateOrUpdateListing> { Data = listing, HttpStatusCode = System.Net.HttpStatusCode.OK };
             }
-            return GetHttpResult<Listing.CreateOrUpdateListing>(response);
+            return GetHttpResult<Listing.V2.CreateOrUpdateListing>(response);
         }
 
         public async Task<HttpResult<List<QueryLocale>>> AutocompleteAsync(QueryAutocomplete queryAutocomplete)
@@ -149,6 +150,63 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             }
             return GetHttpResult<CreateOrUpdateListing>(response);
         }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // V3 API
+        // ─────────────────────────────────────────────────────────────────────
+
+        /// <summary>用 v3 格式创建 listing，POST /v1/listings</summary>
+        public async Task<HttpResult<CreateOrUpdateListingResult>> CreateV3Async(CreateListingV3 listing)
+        {
+            var request = GetRequest();
+            request.Resource = $"/v1/listings?agentId={Token.User.AgentId}&region=sg";
+            request.Method = Method.Post;
+            request.AddHeader("x-logger-edited-by", $"{Token.User.AgentId}");
+            request.AddHeader(KnownHeaders.Authorization, $"Bearer {Token.accessToken}");
+
+            var stringBody = Newtonsoft.Json.JsonConvert.SerializeObject(listing,
+                new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
+            Log(stringBody, false);
+            request.AddStringBody(stringBody, DataFormat.Json);
+
+            var response = await ExecuteAsync(request);
+            if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created)
+            {
+                return new HttpResult<CreateOrUpdateListingResult>()
+                {
+                    Data = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateOrUpdateListingResult>(response.Content),
+                    HttpStatusCode = HttpStatusCode.OK
+                };
+            }
+            return GetHttpResult<CreateOrUpdateListingResult>(response);
+        }
+
+        /// <summary>用 v3 格式更新 listing，PUT /v1/listings/{id}。listing.Id 必须有值。</summary>
+        public async Task<HttpResult<CreateOrUpdateListingResult>> UpdateV3Async(CreateListingV3 listing)
+        {
+            var request = GetRequest();
+            request.Resource = $"/v1/listings/{listing.Id}?region=sg&agentId={Token.User.AgentId}";
+            request.Method = Method.Put;
+            request.Authenticator = new JwtAuthenticator(Token.accessToken);
+
+            var stringBody = Newtonsoft.Json.JsonConvert.SerializeObject(listing,
+                new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
+            Log(stringBody, false);
+            request.AddStringBody(stringBody, DataFormat.Json);
+
+            var response = await ExecuteAsync(request);
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                return new HttpResult<CreateOrUpdateListingResult>()
+                {
+                    Data = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateOrUpdateListingResult>(response.Content),
+                    HttpStatusCode = HttpStatusCode.OK
+                };
+            }
+            return GetHttpResult<CreateOrUpdateListingResult>(response);
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
 
         public async Task<HttpResult<CreateOrUpdateListingResult>> UpdateAsync(CreateOrUpdateListing createListing)
         {

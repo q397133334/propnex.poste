@@ -2,7 +2,7 @@
 //
 // To parse this JSON data, add NuGet 'Newtonsoft.Json' then do:
 //
-//    using Propnex.Poster.PropertyGuru.Listing;
+//    using Propnex.Poster.PropertyGuru.Listing.V2;
 //
 //    var project = Project.FromJson(jsonString);
 
@@ -14,7 +14,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile.Model
     using System.Globalization;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
-    using Propnex.Poster.PropertyGuru.Listing;
+    using Propnex.Poster.PropertyGuru.Listing.V2;
 
 
     public class Location
@@ -176,12 +176,12 @@ namespace Propnex.Poster.PropertyGuru.Mobile.Model
 
     public partial class Project
     {
-        public static Project FromJson(string json) => JsonConvert.DeserializeObject<Project>(json, Propnex.Poster.PropertyGuru.Listing.Converter.Settings);
+        public static Project FromJson(string json) => JsonConvert.DeserializeObject<Project>(json, Converter.Settings);
     }
 
     public static class Serialize
     {
-        public static string ToJson(this Project self) => JsonConvert.SerializeObject(self, Propnex.Poster.PropertyGuru.Listing.Converter.Settings);
+        public static string ToJson(this Project self) => JsonConvert.SerializeObject(self, Converter.Settings);
     }
 
     internal static class Converter

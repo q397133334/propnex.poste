@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
-namespace Propnex.Poster.PropertyGuru.Listing
+namespace Propnex.Poster.PropertyGuru.Listing.V2
 {
     public class ListingsResult
     {

@@ -18,21 +18,6 @@ using RestSharp.Serializers.Xml;
 namespace Propnex.Poster.PropertyGuru.Mobile
 {
 
-    public class CustomHttpWebRequestHandler : DelegatingHandler
-    {
-        protected override Task<HttpResponseMessage> SendAsync(
-            HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            // 手动使用 HttpWebRequest 处理请求
-            var webRequest = (HttpWebRequest)WebRequest.Create(request.RequestUri!);
-            // 复制 headers、method 等参数...
-            var webResponse = (HttpWebResponse)webRequest.GetResponse();
-            // 转换为 HttpResponseMessage 并返回
-            return Task.FromResult(new HttpResponseMessage(webResponse.StatusCode));
-        }
-    }
-
-
     public class ClientBase : IDisposable
     {
         public static string PhoneModel = "23127PN0CC";

@@ -1,14 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Propnex.Poster.PropertyGuru.Listing
+namespace Propnex.Poster.PropertyGuru.Listing.V2
 {
     public partial class CreateListing
     {
-        public CreateListing() 
+        public CreateListing()
         {
             Agent = new CreateAgent();
             Dates = new CreateDates();
@@ -206,12 +206,12 @@ namespace Propnex.Poster.PropertyGuru.Listing
 
     public partial class CreateListing
     {
-        public static CreateListing FromJson(string json) => JsonConvert.DeserializeObject<CreateListing>(json, Propnex.Poster.PropertyGuru.Listing.Converter.Settings);
+        public static CreateListing FromJson(string json) => JsonConvert.DeserializeObject<CreateListing>(json, Propnex.Poster.PropertyGuru.Listing.V2.Converter.Settings);
     }
 
     public static class Serialize
     {
-        public static string ToJson(this CreateListing self) => JsonConvert.SerializeObject(self, Propnex.Poster.PropertyGuru.Listing.Converter.Settings);
+        public static string ToJson(this CreateListing self) => JsonConvert.SerializeObject(self, Propnex.Poster.PropertyGuru.Listing.V2.Converter.Settings);
     }
 
     internal static class Converter

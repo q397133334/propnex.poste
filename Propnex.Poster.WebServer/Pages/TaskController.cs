@@ -1,7 +1,7 @@
 ﻿using Flurl.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Propnex.Poster.PropertyGuru.Listing;
+using Propnex.Poster.PropertyGuru.Listing.V2;
 using Propnex.Poster.PropertyGuru.Tasks;
 using Propnex.Poster.Share;
 using System.Threading.Tasks;

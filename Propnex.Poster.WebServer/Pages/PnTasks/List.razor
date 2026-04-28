@@ -2,7 +2,7 @@
 @using Volo.Abp.Application.Dtos
 @using Dtos
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
-@inherits AbpCrudPageBase<WebServer.Services.IPnTaskAppService, PnTaskDto , Guid, PagedAndSortedResultRequestDto, CreateUpdatePnTaskDto>
+@inherits AbpCrudPageBase<WebServer.Services.IPnTaskAppService, PnTaskDto , Guid, PnTaskListInput, CreateUpdatePnTaskDto>
 @inject AuthenticationStateProvider AuthenticationStateProvider
 <Card>
     <CardHeader>
@@ -12,6 +12,11 @@
         </PageHeader>
     </CardHeader>
     <CardBody>
+        <Row Margin="Margin.Is2.FromBottom">
+            <Column ColumnSize="ColumnSize.Is3">
+                <TextEdit Placeholder="Search by number..." @bind-Text="@NumberFilter" @oninput="OnNumberFilterChanged" />
+            </Column>
+        </Row>
         <DataGrid TItem="PnTaskDto"
                   Data="Entities"
                   ReadData="OnDataGridReadAsync"
@@ -39,6 +44,9 @@
                                           Text="重试"
                                           ConfirmationMessage='()=> GetConfirmationMessage("Are you sure you want to run it again?")'
                                           Clicked="async ()=>await RetryTask(context)" />
+                            <EntityAction TItem="PnTaskDto"
+                                          Text="日志"
+                                          Clicked="async ()=>await ShowLogsAsync(context)" />
                         </EntityActions>
                     </DisplayTemplate>
                 </DataGridEntityActionsColumn>
@@ -46,6 +54,46 @@
         </DataGrid>
     </CardBody>
 </Card>
+<Modal @ref="LogModal" Size="ModalSize.ExtraLarge">
+    <ModalContent>
+        <ModalHeader>
+            <ModalTitle>日志 — @LogsTaskNumber</ModalTitle>
+            <CloseButton Clicked="()=>LogModal.Close(CloseReason.UserClosing)" />
+        </ModalHeader>
+        <ModalBody>
+            @if (LogsLoading)
+            {
+                <p>Loading...</p>
+            }
+            else if (TaskLogs == null || TaskLogs.Count == 0)
+            {
+                <p>No logs found.</p>
+            }
+            else
+            {
+                <Table Striped="true" Hoverable="true" Narrow="true" Responsive="true">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHeaderCell>Time</TableHeaderCell>
+                            <TableHeaderCell>Message</TableHeaderCell>
+                            <TableHeaderCell>MachineId</TableHeaderCell>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        @foreach (var log in TaskLogs)
+                        {
+                            <TableRow>
+                                <TableRowCell>@log.CreateTime.ToString("yyyy-MM-dd HH:mm:ss")</TableRowCell>
+                                <TableRowCell>@log.Message</TableRowCell>
+                                <TableRowCell>@log.MachineId</TableRowCell>
+                            </TableRow>
+                        }
+                    </TableBody>
+                </Table>
+            }
+        </ModalBody>
+    </ModalContent>
+</Modal>
 <Modal @ref="CreatePropertyTaskModal">
     <ModalContent Centered="true">
         <Form>
