@@ -353,23 +353,27 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
             if (createOrUpdate.media.listing.Count > 0)
             {
                 listing.UseFileName = true;
-                savepath = $"{$"{Directory.GetDirectoryRoot(System.Windows.Forms.Application.StartupPath)}\\task\\{id}"}";
-                if (!System.IO.Directory.Exists(savepath))
+                string baseDir = AppContext.BaseDirectory;
+                // 如果 task 文件夹是在根目录下，保留原逻辑；如果是在程序目录下，则直接使用 baseDir
+                // 原逻辑是取盘符根目录，例如 C:\task\{id}
+                string rootPath = Path.GetPathRoot(baseDir);
+                savepath = Path.Combine(rootPath, "task", id);
+                if (!Directory.Exists(savepath))
                 {
-                    System.IO.Directory.CreateDirectory(savepath);
+                    Directory.CreateDirectory(savepath);
                 }
             }
             StringBuilder pics = new StringBuilder();
             foreach (var item in createOrUpdate.media.listing)
             {
                 string p = item.V550;
-                string filename = item.id.Value.ToString() + "." + System.IO.Path.GetFileName(p);
+                string filename = item.id.Value.ToString() + "." + Path.GetFileName(p);
                 string title = item.caption?.Replace(" ", "-")?.Trim();
                 filename = MakeValidFileName(title + ".(RP)" + filename);
                 try
                 {
                     var result = await p.WithTimeout(30).DownloadFileAsync(savepath, filename);
-                    if (System.IO.File.Exists(result))
+                    if (File.Exists(result))
                     {
                         result = OverlayWatermark(result);
                         pics.Append(result).Append(Environment.NewLine);
@@ -593,44 +597,44 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
         private static string OverlayWatermark(string filename)
         {
             return filename;
-            try
-            {
-                if (filename.EndsWith("pdf")) return filename;
-                Image img = Bitmap.FromFile(filename);
-                int X, Y, H, W;
-                X = Y = H = W = 0;
-                Y = (int)System.Math.Round((img.Height * 0.5), 0);
-                X = (int)(img.Width - 360);
-                W = 360;
-                H = 55;
-                int Width = (int)System.Math.Round(H * 6.18, 0);
-                if (img.Width - Width < 56)
-                {
-                    int newWidth = img.Width - 56;
-                    int newH = H * newWidth / Width;
-                    Y -= H - newH + 2;
-                    H = newH + 2;
-                    Width = newWidth;
-                };
-                string photo = "";
-                using (Image src = Image.FromFile("480x80.png"))
-                using (Bitmap dst = new Bitmap(img.Width, img.Height))
-                using (Graphics g = Graphics.FromImage(dst))
-                {
-                    g.SmoothingMode = SmoothingMode.AntiAlias;
-                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    g.DrawImage(img, 0, 0, dst.Width, dst.Height);
-                    g.DrawImage(src, X, Y, W, H);
-                    photo = System.IO.Path.GetDirectoryName(filename) + "\\" + System.IO.Path.GetFileNameWithoutExtension(filename) + "_fixed" + ".jpg";
-                    dst.Save(photo, System.Drawing.Imaging.ImageFormat.Jpeg);
-                }
-                img.Dispose();
-                return photo;
-            }
-            catch (Exception ex)
-            {
-                return "";
-            }
+            //try
+            //{
+            //    if (filename.EndsWith("pdf")) return filename;
+            //    Image img = Bitmap.FromFile(filename);
+            //    int X, Y, H, W;
+            //    X = Y = H = W = 0;
+            //    Y = (int)System.Math.Round((img.Height * 0.5), 0);
+            //    X = (int)(img.Width - 360);
+            //    W = 360;
+            //    H = 55;
+            //    int Width = (int)System.Math.Round(H * 6.18, 0);
+            //    if (img.Width - Width < 56)
+            //    {
+            //        int newWidth = img.Width - 56;
+            //        int newH = H * newWidth / Width;
+            //        Y -= H - newH + 2;
+            //        H = newH + 2;
+            //        Width = newWidth;
+            //    };
+            //    string photo = "";
+            //    using (Image src = Image.FromFile("480x80.png"))
+            //    using (Bitmap dst = new Bitmap(img.Width, img.Height))
+            //    using (Graphics g = Graphics.FromImage(dst))
+            //    {
+            //        g.SmoothingMode = SmoothingMode.AntiAlias;
+            //        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            //        g.DrawImage(img, 0, 0, dst.Width, dst.Height);
+            //        g.DrawImage(src, X, Y, W, H);
+            //        photo = System.IO.Path.GetDirectoryName(filename) + "\\" + System.IO.Path.GetFileNameWithoutExtension(filename) + "_fixed" + ".jpg";
+            //        dst.Save(photo, System.Drawing.Imaging.ImageFormat.Jpeg);
+            //    }
+            //    img.Dispose();
+            //    return photo;
+            //}
+            //catch (Exception ex)
+            //{
+            //    return "";
+            //}
         }
 
         public static string MakeValidFileName(string name)
