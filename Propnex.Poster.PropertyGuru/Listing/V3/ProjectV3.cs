@@ -11,6 +11,6 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
 
         /// <summary>各类型楼盘的具体元数据</summary>
         [JsonProperty("metaByType")]
-        public MetaByTypeV3 MetaByType { get; set; }
+        public MetaByTypeV3 MetaByType { get; set; } = new MetaByTypeV3();
     }
 }

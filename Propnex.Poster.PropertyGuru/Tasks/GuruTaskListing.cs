@@ -234,23 +234,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
     /// <summary>从 XML Listing 文件解析出的原始字段模型（顶层字段 + ProjectData 子模型 + Details 子模型）</summary>
     public class GuruListingData
     {
-        // ── 顶层 Listing 字段 ────────────────────────────────────────
-        /// <summary>Listing 内部 ID（&lt;ID&gt;）</summary>
-        public int ListingId { get; set; }
-        /// <summary>Listing XID（&lt;XID&gt;）</summary>
-        public string XID { get; set; }
-        /// <summary>楼盘名称（&lt;ListingName&gt;）</summary>
-        public string ListingName { get; set; }
-        /// <summary>挂牌类型（&lt;ListingType&gt;，SALE/RENT）</summary>
-        public string ListingTypeRaw { get; set; }
-        /// <summary>物业类型文字（&lt;PropertyType&gt;）</summary>
-        public string PropertyType { get; set; }
-
-        // ── 子模型 ───────────────────────────────────────────────────
-        /// <summary>ProjectData 节点字段</summary>
-        public GuruProjectData ProjectData { get; set; }
-        /// <summary>Details 节点字段</summary>
-        public GuruDetailsData Details { get; set; }
+     
     }
 
     public class GuruTaskListing
@@ -268,8 +252,21 @@ namespace Propnex.Poster.PropertyGuru.Tasks
         /// <summary>V3 格式数据，与 Listing 同步解析，方便后续直接调用 v3 API</summary>
         public CreateListingV3 ListingV3 { get; set; }
 
-        /// <summary>XML 原始字段数据（ProjectData + Details 全量解析）</summary>
-        public GuruListingData Data { get; set; }
+        // ── 顶层 Listing 字段 ────────────────────────────────────────
+        /// <summary>Listing 内部 ID（&lt;ID&gt;）</summary>
+        public int ListingId { get; set; }
+
+        /// <summary>楼盘名称（&lt;ListingName&gt;）</summary>
+        public string ListingName { get; set; }
+        /// <summary>挂牌类型（&lt;ListingType&gt;，SALE/RENT）</summary>
+        public string ListingTypeRaw { get; set; }
+        /// <summary>物业类型文字（&lt;PropertyType&gt;）</summary>
+        public string PropertyType { get; set; }
+
+        /// <summary>ProjectData 节点字段</summary>
+        public GuruProjectData ProjectData { get; set; }
+        /// <summary>Details 节点字段</summary>
+        public GuruDetailsData Details { get; set; }
 
         public List<string> Photos { get; set; }
 
