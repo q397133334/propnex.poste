@@ -39,8 +39,56 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         public List<string> Features { get; set; }
 
         /// <summary>是否为马来人地段（马来西亚专用）</summary>
-        [JsonProperty("isBumiLot")]
+        [JsonProperty("isBumiLot", NullValueHandling = NullValueHandling.Ignore)]
         public bool? IsBumiLot { get; set; }
+
+        /// <summary>产权类型代码（titleType）</summary>
+        [JsonProperty("titleType", NullValueHandling = NullValueHandling.Ignore)]
+        public string TitleType { get; set; }
+
+        /// <summary>土地产权类型代码（landTitleType），有地住宅专用</summary>
+        [JsonProperty("landTitleType", NullValueHandling = NullValueHandling.Ignore)]
+        public string LandTitleType { get; set; }
+
+        /// <summary>天花板高度，如 "3.5m"（ceilingHeight）</summary>
+        [JsonProperty("ceilingHeight", NullValueHandling = NullValueHandling.Ignore)]
+        public string CeilingHeight { get; set; }
+
+        /// <summary>中央空调开放时长/说明（centralAirconHours）</summary>
+        [JsonProperty("centralAirconHours", NullValueHandling = NullValueHandling.Ignore)]
+        public string CentralAirconHours { get; set; }
+
+        /// <summary>朝向，如 NORTH / SOUTH 等（direction）</summary>
+        [JsonProperty("direction", NullValueHandling = NullValueHandling.Ignore)]
+        public string Direction { get; set; }
+
+        /// <summary>地板承重量（floorLoadingCapacity），工业房源专用</summary>
+        [JsonProperty("floorLoadingCapacity", NullValueHandling = NullValueHandling.Ignore)]
+        public string FloorLoadingCapacity { get; set; }
+
+        /// <summary>占用状态（occupancy）</summary>
+        [JsonProperty("occupancy", NullValueHandling = NullValueHandling.Ignore)]
+        public string Occupancy { get; set; }
+
+        /// <summary>业主类型（ownerType），如 INDIVIDUAL / COMPANY</summary>
+        [JsonProperty("ownerType", NullValueHandling = NullValueHandling.Ignore)]
+        public string OwnerType { get; set; }
+
+        /// <summary>停车费（parkingFee）</summary>
+        [JsonProperty("parkingFee", NullValueHandling = NullValueHandling.Ignore)]
+        public string ParkingFee { get; set; }
+
+        /// <summary>停车位数量（parkingSpots）</summary>
+        [JsonProperty("parkingSpots", NullValueHandling = NullValueHandling.Ignore)]
+        public int? ParkingSpots { get; set; }
+
+        /// <summary>种族配额剩余（quotaEthnic），如 C / M / I / O</summary>
+        [JsonProperty("quotaEthnic", NullValueHandling = NullValueHandling.Ignore)]
+        public string QuotaEthnic { get; set; }
+
+        /// <summary>永久居民配额剩余（quotaSpr）</summary>
+        [JsonProperty("quotaSpr", NullValueHandling = NullValueHandling.Ignore)]
+        public string QuotaSpr { get; set; }
 
         /// <summary>最多租客人数（合租房间用）</summary>
         [JsonProperty("maxTenants", NullValueHandling = NullValueHandling.Ignore)]
@@ -51,24 +99,24 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         public string TenantGender { get; set; }
 
         /// <summary>房东是否同住</summary>
-        [JsonProperty("ownerStays")]
-        public bool OwnerStays { get; set; }
+        [JsonProperty("ownerStays", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? OwnerStays { get; set; }
 
         /// <summary>是否允许养宠物</summary>
-        [JsonProperty("petFriendly")]
-        public bool PetFriendly { get; set; }
+        [JsonProperty("petFriendly", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? PetFriendly { get; set; }
 
         /// <summary>是否包含 WiFi</summary>
-        [JsonProperty("wifiIncluded")]
-        public bool WifiIncluded { get; set; }
+        [JsonProperty("wifiIncluded", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? WifiIncluded { get; set; }
 
         /// <summary>是否包含水电费</summary>
-        [JsonProperty("utilitiesIncluded")]
-        public bool UtilitiesIncluded { get; set; }
+        [JsonProperty("utilitiesIncluded", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? UtilitiesIncluded { get; set; }
 
         /// <summary>是否允许访客</summary>
-        [JsonProperty("visitorsAllowed")]
-        public bool VisitorsAllowed { get; set; }
+        [JsonProperty("visitorsAllowed", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? VisitorsAllowed { get; set; }
 
         /// <summary>出租类型，如 ENT（整套）、ROOM（房间）</summary>
         [JsonProperty("rentalType", NullValueHandling = NullValueHandling.Ignore)]
@@ -79,7 +127,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         public string RoomType { get; set; }
 
         /// <summary>组屋类型代码，如 3RM / 4RM / 5RM / EA 等</summary>
-        [JsonProperty("hdbTypeCode", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("hdbType", NullValueHandling = NullValueHandling.Ignore)]
         public string HdbTypeCode { get; set; }
 
         /// <summary>租赁状态（TENANTED 有租客 / UNTENANTED 无租客）及到期日</summary>

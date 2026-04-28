@@ -583,7 +583,17 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                             }
                         }
                     },
-                    Lease = string.IsNullOrEmpty(v3LeaseTerm) ? null : new LeaseV3 { Code = v3LeaseTerm }
+                    Lease = string.IsNullOrEmpty(v3LeaseTerm) ? null : new LeaseV3 { Code = v3LeaseTerm },
+                    Dates = v3TypeCode?.ToUpper() == "RENT"
+                        ? new DatesV3
+                        {
+                            Available = new DateItemV3
+                            {
+                                Date = detialss.FindAttribute("Name", "available_date")
+                                    .GetAttributeValue("Value", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
+                            }
+                        }
+                        : null
                 };
 
                 listing.Data = ParseListingData(element, projectDatas, detialss, features);

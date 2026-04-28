@@ -48,6 +48,10 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         [JsonProperty("lease", NullValueHandling = NullValueHandling.Ignore)]
         public LeaseV3 Lease { get; set; }
 
+        /// <summary>日期信息（出租时填 available 可入住日期，出售可为 null）</summary>
+        [JsonProperty("dates", NullValueHandling = NullValueHandling.Ignore)]
+        public DatesV3 Dates { get; set; }
+
         // ─────────────────────────────────────────────────────────────────────
         // 工厂方法：从解析好的 GuruTaskListing（V2）转换成 V3 请求体
         // 注意：此方法不含新增字段（租赁状态、电力、升降机等），
@@ -154,7 +158,10 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
                             Property   = new VerifiedPropertyV3 { SubType = m.Property?.typeCode ?? "" }
                         }
                     }
-                }
+                },
+                Dates = m.TypeCode?.ToUpper() == "RENT" && m.Dates?.available?.date != null
+                    ? new DatesV3 { Available = new DateItemV3 { Date = m.Dates.available.date } }
+                    : null
             };
         }
     }
