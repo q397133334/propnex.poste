@@ -407,38 +407,6 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     };
                 }
 
-                void CreateListingV3()
-                {
-                    var listingV3 = new CreateListingV3();
-                    listingV3.ListingType = new ListingTypeV3()
-                    {
-                        Code = detialss.FindAttribute("Name", "listing_type").GetAttributeValue("Value", "SALE")
-                    };
-                    if (listingV3.ListingType.Code.ToLower() == "RENT".ToLower())
-                    {
-                        listingV3.UnitDetails.RentalType = "ENT";
-                    }
-
-                    if (listingV3.ListingType.Code.ToLower() == "ROOM".ToLower())
-                    {
-                        listingV3.UnitDetails.RentalType = "ROOM";
-                        listingV3.ListingType.Code = "RENT";
-                    }
-
-                    if (listingV3.ListingType.Code.ToLower() == "RENT".ToLower())
-                    {
-                        var v3AvailDate = detialss.FindAttribute("Name", "available_date")
-                            .GetAttributeValue("Value", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                        try
-                        {
-                            listingV3.UnitDetails.IsAvailableNow = Convert.ToDateTime(v3AvailDate) <= DateTime.Now;
-                        }
-                        catch
-                        {
-                        }
-                    }
-                }
-
                 // 直接从 XML 构建 V3 格式，无需经过 V2 转换
                 var v3TypeCode = detialss.FindAttribute("Name", "listing_type").GetAttributeValue("Value", "SALE");
                 var v3Headline = detialss.FindAttribute("Name", "listing_title")
@@ -468,6 +436,31 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     .GetAttributeValue<int?>("Value", null);
                 var v3RoomType = detialss.FindAttribute("Name", "room_type").GetAttributeValue("Value", "");
                 var v3HdbTypeCode = detialss.FindAttribute("Name", "hdb_type").GetAttributeValue<string>("Value", null);
+                var v3SellerEthnic = detialss.FindAttribute("Name", "sellerEthnic").GetAttributeValue("Value", "");
+                var v3SellerResidency = detialss.FindAttribute("Name", "sellerResidency").GetAttributeValue("Value", "");
+                var v3LeaseTerm = detialss.FindAttribute("Name", "lease_term").GetAttributeValue("Value", "");
+                var v3Tenanted = detialss.FindAttribute("Name", "srx_tenanted").GetAttributeValue("Value", "No");
+                var v3TenantedUntil = detialss.FindAttribute("Name", "tenanted_until").GetAttributeValue("Value", "");
+                var v3ElecPhase = detialss.FindAttribute("Name", "electricity_phase").GetAttributeValue<string>("Value", null);
+                var v3ElecSupply = detialss.FindAttribute("Name", "electricity_supply").GetAttributeValue<int?>("Value", null);
+                var v3FloorLoadingCat = detialss.FindAttribute("Name", "floor_loading_category").GetAttributeValue<string>("Value", null);
+                if (string.IsNullOrEmpty(v3FloorLoadingCat)) v3FloorLoadingCat = null;
+                var v3IsHighCeilingStr = detialss.FindAttribute("Name", "is_high_ceiling").GetAttributeValue<string>("Value", null);
+                bool? v3IsHighCeiling = string.IsNullOrEmpty(v3IsHighCeilingStr) ? (bool?)null
+                    : v3IsHighCeilingStr.Equals("true", StringComparison.OrdinalIgnoreCase) || v3IsHighCeilingStr == "1" || v3IsHighCeilingStr.Equals("yes", StringComparison.OrdinalIgnoreCase);
+                var v3LiftCargo = detialss.FindAttribute("Name", "lift_cargo").GetAttributeValue<int?>("Value", null);
+                var v3LiftPassenger = detialss.FindAttribute("Name", "lift_passenger").GetAttributeValue<int?>("Value", null);
+                var v3RampStr = detialss.FindAttribute("Name", "ramp").GetAttributeValue<string>("Value", null);
+                bool? v3Ramp = string.IsNullOrEmpty(v3RampStr) ? (bool?)null
+                    : v3RampStr.Equals("true", StringComparison.OrdinalIgnoreCase) || v3RampStr == "1" || v3RampStr.Equals("yes", StringComparison.OrdinalIgnoreCase);
+                var v3Condition = detialss.FindAttribute("Name", "condition").GetAttributeValue<string>("Value", null);
+                if (string.IsNullOrEmpty(v3Condition)) v3Condition = null;
+                var v3PropertyUseStr = detialss.FindAttribute("Name", "property_use").GetAttributeValue<string>("Value", null);
+                var v3PropertyUses = string.IsNullOrEmpty(v3PropertyUseStr)
+                    ? null
+                    : new List<string> { v3PropertyUseStr };
+                var v3CookingType = detialss.FindAttribute("Name", "cooking_type").GetAttributeValue<string>("Value", null);
+                if (string.IsNullOrEmpty(v3CookingType)) v3CookingType = null;
 
                 var v3Features = new List<string>();
                 foreach (var item in detialss)
@@ -481,7 +474,19 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                 }
 
                 bool v3IsAvailableNow = true;
-
+                var v3rentalType = "ENT";
+                if (v3TypeCode == "ROOM")
+                {
+                    v3TypeCode = "RENT";
+                    v3rentalType = "ROOM";
+                }
+                if (v3TypeCode?.ToUpper() == "RENT")
+                {
+                    var v3AvailDate = detialss.FindAttribute("Name", "available_date")
+                        .GetAttributeValue("Value", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    try { v3IsAvailableNow = Convert.ToDateTime(v3AvailDate) <= DateTime.Now; }
+                    catch { }
+                }
 
                 listing.ListingV3 = new CreateListingV3
                 {
@@ -534,7 +539,34 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                         IsBumiLot = null,
                         RentalType = v3rentalType,
                         RoomType = string.IsNullOrEmpty(v3RoomType) ? null : v3RoomType,
-                        HdbTypeCode = string.IsNullOrEmpty(v3HdbTypeCode) ? null : v3HdbTypeCode
+                        HdbTypeCode = string.IsNullOrEmpty(v3HdbTypeCode) ? null : v3HdbTypeCode,
+                        SellerEthnic = string.IsNullOrEmpty(v3SellerEthnic) ? null : v3SellerEthnic,
+                        SellerResidency = string.IsNullOrEmpty(v3SellerResidency) ? null : v3SellerResidency,
+                        CookingType = v3CookingType,
+                        Condition = v3Condition,
+                        PropertyUses = v3PropertyUses,
+                        IsHighCeiling = v3IsHighCeiling,
+                        Ramp = v3Ramp,
+                        FloorLoadingCategory = v3FloorLoadingCat,
+                        Electricity = (string.IsNullOrEmpty(v3ElecPhase) && !v3ElecSupply.HasValue) ? null
+                            : new ElectricityV3
+                            {
+                                Phase = string.IsNullOrEmpty(v3ElecPhase) ? null : new ElectricityPhaseV3 { Code = v3ElecPhase },
+                                Supply = v3ElecSupply
+                            },
+                        Lift = (v3LiftCargo.HasValue || v3LiftPassenger.HasValue) ? new LiftV3
+                        {
+                            Cargo = v3LiftCargo,
+                            TotalPassenger = v3LiftPassenger
+                        } : null,
+                        Tenancy = v3Tenanted.Equals("Yes", StringComparison.OrdinalIgnoreCase)
+                            ? new TenancyV3
+                            {
+                                Value = "TENANTED",
+                                TenantedUntilDate = string.IsNullOrEmpty(v3TenantedUntil) ? null
+                                    : new { date = v3TenantedUntil }
+                            }
+                            : new TenancyV3 { Value = "UNTENANTED" }
                     },
                     Project = new ProjectV3
                     {
@@ -548,7 +580,8 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                                 Property = new VerifiedPropertyV3 { SubType = v3PropTypeCode }
                             }
                         }
-                    }
+                    },
+                    Lease = string.IsNullOrEmpty(v3LeaseTerm) ? null : new LeaseV3 { Code = v3LeaseTerm }
                 };
                 Listings.Add(listing);
             }
