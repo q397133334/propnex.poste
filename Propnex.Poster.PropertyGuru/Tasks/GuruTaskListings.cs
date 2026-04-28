@@ -380,18 +380,19 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     {
                         Code = listing.Details.ListingType
                     };
-                    bool v3IsAvailableNow = true;
                     listingV3.UnitDetails.RentalType = "ENT";
                     if (listing.Details.ListingType == "ROOM")
                     {
                         listingV3.ListingType.Code = "RENT";
                         listingV3.UnitDetails.RentalType = "ROOM";
                     }
-                    try { 
-                        listingV3.UnitDetails.IsAvailableNow = Convert.ToDateTime(listing.Details.AvailableDate) <= DateTime.Now; 
-                        if(listingV3.UnitDetails.IsAvailableNow==false)
+                    listingV3.UnitDetails.IsAvailableNow = true;
+                    try
+                    {
+                        listingV3.UnitDetails.IsAvailableNow = Convert.ToDateTime(listing.Details.AvailableDate) <= DateTime.Now;
+                        if (listingV3.UnitDetails.IsAvailableNow == false)
                         {
-                            listingV3.UnitDetails.AvailableDate = Convert.ToDateTime(listing.Details.AvailableDate);
+                            listingV3.Dates.Available = Convert.ToDateTime(listing.Details.AvailableDate).ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'");
                         }
                     }
                     catch { }
@@ -462,173 +463,8 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                                 v3Features.Add(code);
                         }
                     }
-
-
-
-                    listing.ListingV3 = new CreateListingV3
-                    {
-                        Id = v3ListingId,
-                        ListingType = new ListingTypeV3 { Code = v3TypeCode },
-                        Price = new PriceV3
-                        {
-                            Value = v3Price,
-                            MaintenanceFee = v3Maintenance > 0 ? v3Maintenance : (int?)null
-                        },
-                        Location = new LocationV3
-                        {
-                            Address = new AddressV3
-                            {
-                                PostalCode = v3PostalCode,
-                                Floor = string.IsNullOrEmpty(v3Floor) ? null : v3Floor,
-                                Unit = string.IsNullOrEmpty(v3Unit) ? null : v3Unit,
-                                MaskUnitNumber = v3TypeGroup == "L"
-                            }
-                        },
-                        Headlines = new List<LocalizedTextV3>
-                    {
-                        new LocalizedTextV3 { Text = v3Headline, Locale = "en", Brand = "pg" }
-                    },
-                        Descriptions = new List<LocalizedTextV3>
-                    {
-                        new LocalizedTextV3 { Text = v3Description, Locale = "en", Brand = "pg" }
-                    },
-                        UnitDetails = new UnitDetailsV3
-                        {
-                            Configuration = new ConfigurationV3
-                            {
-                                Bedrooms = v3Bedrooms,
-                                Bathrooms = v3Bathrooms
-                            },
-                            Dimensions = v3FloorArea.HasValue
-                                ? new DimensionsV3
-                                {
-                                    Floor = new FloorDimensionV3
-                                    {
-                                        Size = new SizeV3 { Value = v3FloorArea, Uom = "sqft" }
-                                    }
-                                }
-                                : null,
-                            TenantEligibility = false,
-                            IsAvailableNow = v3IsAvailableNow,
-                            FloorLevel = string.IsNullOrEmpty(v3FloorLevel) ? null : v3FloorLevel,
-                            Furnishing = string.IsNullOrEmpty(v3Furnishing) ? null : v3Furnishing,
-                            Features = v3Features.Count > 0 ? v3Features : null,
-                            IsBumiLot = null,
-                            RentalType = v3rentalType,
-                            RoomType = string.IsNullOrEmpty(v3RoomType) ? null : v3RoomType,
-                            HdbTypeCode = string.IsNullOrEmpty(v3HdbTypeCode) ? null : v3HdbTypeCode,
-                            SellerEthnic = string.IsNullOrEmpty(v3SellerEthnic) ? null : v3SellerEthnic,
-                            SellerResidency = string.IsNullOrEmpty(v3SellerResidency) ? null : v3SellerResidency,
-                            CookingType = v3CookingType,
-                            Condition = v3Condition,
-                            PropertyUses = v3PropertyUses,
-                            IsHighCeiling = v3IsHighCeiling,
-                            Ramp = v3Ramp,
-                            FloorLoadingCategory = v3FloorLoadingCat,
-                            Electricity = (string.IsNullOrEmpty(v3ElecPhase) && !v3ElecSupply.HasValue) ? null
-                                : new ElectricityV3
-                                {
-                                    Phase = string.IsNullOrEmpty(v3ElecPhase) ? null : new ElectricityPhaseV3 { Code = v3ElecPhase },
-                                    Supply = v3ElecSupply
-                                },
-                            Lift = (v3LiftCargo.HasValue || v3LiftPassenger.HasValue) ? new LiftV3
-                            {
-                                Cargo = v3LiftCargo,
-                                TotalPassenger = v3LiftPassenger
-                            } : null,
-                            Tenancy = v3Tenanted.Equals("Yes", StringComparison.OrdinalIgnoreCase)
-                                ? new TenancyV3
-                                {
-                                    Value = "TENANTED",
-                                    TenantedUntilDate = string.IsNullOrEmpty(v3TenantedUntil) ? null
-                                        : new { date = v3TenantedUntil }
-                                }
-                                : new TenancyV3 { Value = "UNTENANTED" }
-                        },
-                        Project = new ProjectV3
-                        {
-                            Type = "verified",
-                            MetaByType = new MetaByTypeV3
-                            {
-                                Verified = new VerifiedMetaV3
-                                {
-                                    Id = string.IsNullOrEmpty(v3PgVerifiedId) ? null : v3PgVerifiedId,
-                                    LocationId = v3LocationId,
-                                    Property = new VerifiedPropertyV3 { SubType = v3PropTypeCode }
-                                }
-                            }
-<<<<<<< HEAD
-                            : null,
-                        TenantEligibility = false,
-                        IsAvailableNow = v3IsAvailableNow,
-                        FloorLevel = string.IsNullOrEmpty(v3FloorLevel) ? null : v3FloorLevel,
-                        Furnishing = string.IsNullOrEmpty(v3Furnishing) ? null : v3Furnishing,
-                        Features = v3Features.Count > 0 ? v3Features : null,
-                        IsBumiLot = null,
-                        RentalType = v3rentalType,
-                        RoomType = string.IsNullOrEmpty(v3RoomType) ? null : v3RoomType,
-                        HdbTypeCode = string.IsNullOrEmpty(v3HdbTypeCode) ? null : v3HdbTypeCode,
-                        SellerEthnic = string.IsNullOrEmpty(v3SellerEthnic) ? null : v3SellerEthnic,
-                        SellerResidency = string.IsNullOrEmpty(v3SellerResidency) ? null : v3SellerResidency,
-                        CookingType = v3CookingType,
-                        Condition = v3Condition,
-                        PropertyUses = v3PropertyUses,
-                        IsHighCeiling = v3IsHighCeiling,
-                        Ramp = v3Ramp,
-                        FloorLoadingCategory = v3FloorLoadingCat,
-                        Electricity = (string.IsNullOrEmpty(v3ElecPhase) && !v3ElecSupply.HasValue) ? null
-                            : new ElectricityV3
-                            {
-                                Phase = string.IsNullOrEmpty(v3ElecPhase) ? null : new ElectricityPhaseV3 { Code = v3ElecPhase },
-                                Supply = v3ElecSupply
-                            },
-                        Lift = (v3LiftCargo.HasValue || v3LiftPassenger.HasValue) ? new LiftV3
-                        {
-                            Cargo = v3LiftCargo,
-                            TotalPassenger = v3LiftPassenger
-                        } : null,
-                        Tenancy = v3Tenanted.Equals("Yes", StringComparison.OrdinalIgnoreCase)
-                            ? new TenancyV3
-                            {
-                                Value = "TENANTED",
-                                TenantedUntilDate = string.IsNullOrEmpty(v3TenantedUntil) ? null
-                                    : new { date = v3TenantedUntil }
-                            }
-                            : new TenancyV3 { Value = "UNTENANTED" }
-                    },
-                    Project = new ProjectV3
-                    {
-                        Type = "verified",
-                        MetaByType = new MetaByTypeV3
-                        {
-                            Verified = new VerifiedMetaV3
-                            {
-                                Id = string.IsNullOrEmpty(v3PgVerifiedId) ? null : v3PgVerifiedId,
-                                LocationId = v3LocationId,
-                                Property = new VerifiedPropertyV3 { SubType = v3PropTypeCode }
-                            }
-                        }
-                    },
-                    Lease = string.IsNullOrEmpty(v3LeaseTerm) ? null : new LeaseV3 { Code = v3LeaseTerm },
-                    Dates = v3TypeCode?.ToUpper() == "RENT"
-                        ? new DatesV3
-                        {
-                            Available = new DateItemV3
-                            {
-                                Date = detialss.FindAttribute("Name", "available_date")
-                                    .GetAttributeValue("Value", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
-                            }
-                        }
-                        : null
-                };
-
-                listing.Data = ParseListingData(element, projectDatas, detialss, features);
-=======
-                        },
-                        Lease = string.IsNullOrEmpty(v3LeaseTerm) ? null : new LeaseV3 { Code = v3LeaseTerm }
-                    };
                 }
->>>>>>> 7b180a59f5ef7046ddd21947164d224e9649aa20
+                ;
                 Listings.Add(listing);
             }
         }

@@ -14,15 +14,12 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
     public class DatesV3
     {
         /// <summary>可入住日期，出租房源必填，出售可为 null</summary>
-        [JsonProperty("available", NullValueHandling = NullValueHandling.Ignore)]
-        public DateItemV3 Available { get; set; }
+        [JsonProperty("available")]
+        public string Available { get; set; } = null;
 
         /// <summary>拍卖日期（auction），拍卖类房源专用</summary>
-        [JsonProperty("auction", NullValueHandling = NullValueHandling.Ignore)]
-        public DateItemV3 Auction { get; set; }
+        [JsonProperty("auction")]
+        public string Auction { get; set; }=null;
 
-        /// <summary>到期日期（expiry）</summary>
-        [JsonProperty("expiry", NullValueHandling = NullValueHandling.Ignore)]
-        public DateItemV3 Expiry { get; set; }
     }
 }

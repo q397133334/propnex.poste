@@ -6,11 +6,13 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
     public class ConfigurationV3
     {
         /// <summary>卧室数量，工商业房源为 null</summary>
-        [JsonProperty("bedrooms", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("bedrooms")]
         public int? Bedrooms { get; set; }
 
         /// <summary>浴室数量，工商业房源为 null</summary>
-        [JsonProperty("bathrooms", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("bathrooms")]
         public int? Bathrooms { get; set; }
+
+        public int? extrarooms { get; set; }
     }
 }

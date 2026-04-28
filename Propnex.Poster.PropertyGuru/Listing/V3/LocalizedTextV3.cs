@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace Propnex.Poster.PropertyGuru.Listing.V3
 {
@@ -17,4 +18,5 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         [JsonProperty("brand")]
         public string Brand { get; set; } = "pg";
     }
+
 }

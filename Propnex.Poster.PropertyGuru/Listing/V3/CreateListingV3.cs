@@ -16,41 +16,54 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         [JsonIgnore]
         public int? Id { get; set; }
 
-        /// <summary>挂牌类型（出售 SALE / 出租 RENT）</summary>
-        [JsonProperty("listingType")]
-        public ListingTypeV3 ListingType { get; set; } = new ListingTypeV3();
+        public string alternativeEmail { get; set; } = null;
+        public string alternativeMobile { get; set; } = null;
+        public string alternativePhone { get; set; } = null;
 
-        /// <summary>价格信息（售价或月租 + 管理费）</summary>
-        [JsonProperty("price")]
-        public PriceV3 Price { get; set; } = new PriceV3();
+        public string cobroke { get; set;}  =null;
 
-        /// <summary>地址/位置信息（邮编、楼层、单元号）</summary>
-        [JsonProperty("location")]
-        public LocationV3 Location { get; set; } = new LocationV3();
-
-        /// <summary>房源标题列表（多语言，目前仅 en）</summary>
-        [JsonProperty("headlines")]
-        public List<LocalizedTextV3> Headlines { get; set; } = new List<LocalizedTextV3>();
+        /// <summary>日期信息（出租时填 available 可入住日期，出售可为 null）</summary>
+        [JsonProperty("dates", NullValueHandling = NullValueHandling.Ignore)]
+        public DatesV3 Dates { get; set; } = new DatesV3();
 
         /// <summary>房源描述列表（多语言，目前仅 en）</summary>
         [JsonProperty("descriptions")]
         public List<LocalizedTextV3> Descriptions { get; set; } = new List<LocalizedTextV3>();
 
-        /// <summary>单元详情（面积、楼层、家具、设施等）</summary>
-        [JsonProperty("unitDetails")]
-        public UnitDetailsV3 UnitDetails { get; set; } = new UnitDetailsV3();
+        /// <summary>房源标题列表（多语言，目前仅 en）</summary>
+        [JsonProperty("headlines")]
+        public List<LocalizedTextV3> Headlines { get; set; } = new List<LocalizedTextV3>();
+
+        /// <summary>租约期限（如 1YR / 2YR / MTH），出售类型可为 null</summary>
+        [JsonProperty("lease", NullValueHandling = NullValueHandling.Ignore)]
+        public LeaseV3 Lease { get; set; }=new LeaseV3();
+
+        /// <summary>挂牌类型（出售 SALE / 出租 RENT）</summary>
+        [JsonProperty("listingType")]
+        public ListingTypeV3 ListingType { get; set; } = new ListingTypeV3();
+
+        /// <summary>地址/位置信息（邮编、楼层、单元号）</summary>
+        [JsonProperty("location")]
+        public LocationV3 Location { get; set; } = new LocationV3();
+
+        public string parkingFee { get; set;}   =null;
+
+        /// <summary>价格信息（售价或月租 + 管理费）</summary>
+        [JsonProperty("price")]
+        public PriceV3 Price { get; set; } = new PriceV3();
+
 
         /// <summary>所属楼盘信息（verified 类型 + 楼盘 ID + 物业类型）</summary>
         [JsonProperty("project")]
         public ProjectV3 Project { get; set; } = new ProjectV3();
 
-        /// <summary>租约期限（如 1YR / 2YR / MTH），出售类型可为 null</summary>
-        [JsonProperty("lease", NullValueHandling = NullValueHandling.Ignore)]
-        public LeaseV3 Lease { get; set; }
 
-        /// <summary>日期信息（出租时填 available 可入住日期，出售可为 null）</summary>
-        [JsonProperty("dates", NullValueHandling = NullValueHandling.Ignore)]
-        public DatesV3 Dates { get; set; }
+        public string referenceNumber { get; set;}   =null;
+
+
+        /// <summary>单元详情（面积、楼层、家具、设施等）</summary>
+        [JsonProperty("unitDetails")]
+        public UnitDetailsV3 UnitDetails { get; set; } = new UnitDetailsV3();
 
         // ─────────────────────────────────────────────────────────────────────
         // 工厂方法：从解析好的 GuruTaskListing（V2）转换成 V3 请求体
@@ -159,9 +172,6 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
                         }
                     }
                 },
-                Dates = m.TypeCode?.ToUpper() == "RENT" && m.Dates?.available?.date != null
-                    ? new DatesV3 { Available = new DateItemV3 { Date = m.Dates.available.date } }
-                    : null
             };
         }
     }
