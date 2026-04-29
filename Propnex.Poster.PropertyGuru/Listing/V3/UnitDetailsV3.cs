@@ -35,7 +35,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         /// <summary>面积尺寸（建筑面积/土地面积）</summary>
         [JsonProperty("dimensions")]
         public DimensionsV3 Dimensions { get; set; } = new DimensionsV3();
-
+        [JsonProperty("directionCode")]
         public string directionCode { get; set; } = null;
 
 
@@ -89,7 +89,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
 
 
         /// <summary>升降机信息（货梯/客梯数量）；工业房源专用</summary>
-        [JsonProperty("lift", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("lift")]
         public LiftV3 Lift { get; set; } = null;
 
 
@@ -182,33 +182,6 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         /// <summary>停车费（parkingFee）</summary>
         [JsonProperty("parkingFee", NullValueHandling = NullValueHandling.Ignore)]
         public string ParkingFee { get; set; } = null;
-
-
-
-
-
-
-
-
-
-
-
-
-
-        /// <summary>是否包含 WiFi</summary>
-        [JsonProperty("wifiIncluded", NullValueHandling = NullValueHandling.Ignore)]
-        public bool? WifiIncluded { get; set; }
-
-        /// <summary>是否包含水电费</summary>
-        [JsonProperty("utilitiesIncluded", NullValueHandling = NullValueHandling.Ignore)]
-        public bool? UtilitiesIncluded { get; set; }
-
-        /// <summary>是否允许访客</summary>
-        [JsonProperty("visitorsAllowed", NullValueHandling = NullValueHandling.Ignore)]
-        public bool? VisitorsAllowed { get; set; }
-
-
-
 
 
         /// <summary>租赁状态（TENANTED 有租客 / UNTENANTED 无租客）及到期日</summary>

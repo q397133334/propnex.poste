@@ -3,11 +3,16 @@ using Propnex.Poster.PropertyGuru.Listing.V3;
 using Propnex.Poster.PropertyGuru.Xml;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
+using System.Security.Claims;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Propnex.Poster.PropertyGuru.Tasks
 {
@@ -63,52 +68,12 @@ namespace Propnex.Poster.PropertyGuru.Tasks
             var listings = root.Elements("Listing");
             List<string> features = new List<string>()
             {
-                "AIRC",
-                "AUD",
-                "BAL",
-                "BATH",
-                "BED",
-                "BOMB",
-                "CAB",
-                "CITYV",
-                "COLO",
-                "COOK",
-                "CORN",
-                "DIN",
-                "DISH",
-                "DRY",
-                "DVD",
-                "FRI",
-                "GAR",
-                "GARD",
-                "GFLO",
-                "GREEN",
-                "HAIR",
-                "HFLO",
-                "INET",
-                "INT",
-                "IRO",
-                "JACZ",
-                "KUT",
-                "LAKEV",
-                "LFLO",
-                "LFUR",
-                "MAID",
-                "ORIG",
-                "OVEN",
-                "PAT",
-                "PENT",
-                "POOLV",
-                "PPOOL",
-                "RENO",
-                "ROOF",
-                "SEAV",
-                "TERR",
-                "TV",
-                "VAC",
-                "WAR",
-                "WAS",
-                "WHEAT"
+                "BAL","STOR","WICL","HLRM","ALCV","UTLY","BBQP","BQPV",
+                "SECG","CCTV","ALRM","SMALM","CMALM","CRPK","COPK","EVPK","TWPK","CHPK","BIPK","GARG", 
+                "AMTH", "BIRM", "BOAL", "HMLIB", "IDPL", "IFPL", "PRPL", "JCUZ", "SAUNA", "CITV", "GRNV", "LAKEV", "POOLV", "SEAV", 
+                "COLO", "CORN", "ORIG", "PENT", "RENO", "TRGN", "TERC", "ARCON", "INPLA", "CHSGT", "FREXT", "EMEX", "PNTRY", "RCPAR",
+                "BKGEN", "DPWR", "LDBAY", "HDFRD", "KTCHN", "FLRPT", "CHLPL", "BTRM", "VRM", "CTCAB", "CAB", "LUXLT", "CRWIN", "MTRM", 
+                "AVEQP", "VCONF", "BRCON", "ITSPT", "SECSR", "TNSYS", "SCSYS", "CONCR", "STOVE", "BLATD", "LOCKR", "COMAR"
             };
             foreach (var element in listings)
             {
@@ -397,74 +362,125 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     }
                     catch { }
 
-
-                    // 直接从 XML 构建 V3 格式，无需经过 V2 转换
-                    var v3TypeCode = detialss.FindAttribute("Name", "listing_type").GetAttributeValue("Value", "SALE");
-                    var v3Headline = detialss.FindAttribute("Name", "listing_title")
-                        .GetAttributeValue("Value", DefaultTitles.GetTitle());
-                    if (string.IsNullOrEmpty(v3Headline)) v3Headline = DefaultTitles.GetTitle();
-                    var v3Description = detialss.FindAttribute("Name", "listing_description")
-                        .GetAttributeValue("Value", "");
-                    if (v3Description.Length > 2000) v3Description = v3Description.Substring(0, 1999);
-                    var v3PostalCode = detialss.FindAttribute("Name", "postcode").GetAttributeValue("Value", "");
-                    var v3Floor = detialss.FindAttribute("Name", "property_level_number").GetAttributeValue("Value", "");
-                    var v3Unit = detialss.FindAttribute("Name", "property_unit_number").GetAttributeValue("Value", "");
-                    var v3TypeGroup = detialss.FindAttribute("Name", "property_type_group").GetAttributeValue("Value", "N");
-                    var v3Bedrooms = detialss.FindAttribute("Name", "bedrooms").GetAttributeValue<int?>("Value", null);
-                    var v3Bathrooms = detialss.FindAttribute("Name", "bathrooms").GetAttributeValue<int?>("Value", null);
-                    var v3FloorArea = detialss.FindAttribute("Name", "floorarea").GetAttributeValue<int?>("Value", null);
-                    var v3FloorLevel = detialss.FindAttribute("Name", "floor_level").GetAttributeValue("Value", "")
-                        .ToUpper();
-                    var v3Furnishing = detialss.FindAttribute("Name", "furnishing")
-                        .GetAttributeValue<string>("Value", null);
-                    var v3PgVerifiedId = detialss.FindAttribute("Name", "pg_verified_id").GetAttributeValue("Value", "");
-                    var v3LocationId = detialss.FindAttribute("Name", "location_id").GetAttributeValue<int?>("Value", null);
-                    var v3PropTypeCode =
-                        detialss.FindAttribute("Name", "property_type_code").GetAttributeValue("Value", "");
-                    var v3Price = detialss.FindAttribute("Name", "price").GetAttributeValue<int>("Value", 0);
-                    var v3Maintenance = detialss.FindAttribute("Name", "tep_maintenance_fee").GetAttributeValue("Value", 0);
-                    var v3ListingId = detialss.FindAttribute("Name", "hidden_listing_id")
-                        .GetAttributeValue<int?>("Value", null);
-                    var v3RoomType = detialss.FindAttribute("Name", "room_type").GetAttributeValue("Value", "");
-                    var v3HdbTypeCode = detialss.FindAttribute("Name", "hdb_type").GetAttributeValue<string>("Value", null);
-                    var v3SellerEthnic = detialss.FindAttribute("Name", "sellerEthnic").GetAttributeValue("Value", "");
-                    var v3SellerResidency = detialss.FindAttribute("Name", "sellerResidency").GetAttributeValue("Value", "");
-                    var v3LeaseTerm = detialss.FindAttribute("Name", "lease_term").GetAttributeValue("Value", "");
-                    var v3Tenanted = detialss.FindAttribute("Name", "srx_tenanted").GetAttributeValue("Value", "No");
-                    var v3TenantedUntil = detialss.FindAttribute("Name", "tenanted_until").GetAttributeValue("Value", "");
-                    var v3ElecPhase = detialss.FindAttribute("Name", "electricity_phase").GetAttributeValue<string>("Value", null);
-                    var v3ElecSupply = detialss.FindAttribute("Name", "electricity_supply").GetAttributeValue<int?>("Value", null);
-                    var v3FloorLoadingCat = detialss.FindAttribute("Name", "floor_loading_category").GetAttributeValue<string>("Value", null);
-                    if (string.IsNullOrEmpty(v3FloorLoadingCat)) v3FloorLoadingCat = null;
-                    var v3IsHighCeilingStr = detialss.FindAttribute("Name", "is_high_ceiling").GetAttributeValue<string>("Value", null);
-                    bool? v3IsHighCeiling = string.IsNullOrEmpty(v3IsHighCeilingStr) ? (bool?)null
-                        : v3IsHighCeilingStr.Equals("true", StringComparison.OrdinalIgnoreCase) || v3IsHighCeilingStr == "1" || v3IsHighCeilingStr.Equals("yes", StringComparison.OrdinalIgnoreCase);
-                    var v3LiftCargo = detialss.FindAttribute("Name", "lift_cargo").GetAttributeValue<int?>("Value", null);
-                    var v3LiftPassenger = detialss.FindAttribute("Name", "lift_passenger").GetAttributeValue<int?>("Value", null);
-                    var v3RampStr = detialss.FindAttribute("Name", "ramp").GetAttributeValue<string>("Value", null);
-                    bool? v3Ramp = string.IsNullOrEmpty(v3RampStr) ? (bool?)null
-                        : v3RampStr.Equals("true", StringComparison.OrdinalIgnoreCase) || v3RampStr == "1" || v3RampStr.Equals("yes", StringComparison.OrdinalIgnoreCase);
-                    var v3Condition = detialss.FindAttribute("Name", "condition").GetAttributeValue<string>("Value", null);
-                    if (string.IsNullOrEmpty(v3Condition)) v3Condition = null;
-                    var v3PropertyUseStr = detialss.FindAttribute("Name", "property_use").GetAttributeValue<string>("Value", null);
-                    var v3PropertyUses = string.IsNullOrEmpty(v3PropertyUseStr)
-                        ? null
-                        : new List<string> { v3PropertyUseStr };
-                    var v3CookingType = detialss.FindAttribute("Name", "cooking_type").GetAttributeValue<string>("Value", null);
-                    if (string.IsNullOrEmpty(v3CookingType)) v3CookingType = null;
-
-                    var v3Features = new List<string>();
-                    foreach (var item in detialss)
+                    listingV3.Descriptions.Add(new LocalizedTextV3()
                     {
-                        if (item.Attribute("Name").Value.Contains("unit_features[],"))
+                        Brand = "pg",
+                        Locale = "en",
+                        Text = listing.Details.ListingDescription
+                    });
+                    listingV3.Headlines.Add(new LocalizedTextV3()
+                    {
+                        Brand = "pg",
+                        Locale = "en",
+                        Text = listing.Details.ListingTitle
+                    });
+
+                    listingV3.Lease = new LeaseV3()
+                    {
+                        Code = listing.Details.LeaseTerm,
+                        Remaining = null
+                    };
+
+                    listingV3.Location = new LocationV3()
+                    {
+                        Address = new AddressV3()
                         {
-                            var code = item.Attribute("Name").Value.Replace("unit_features[],", "");
-                            if (features.Any(q => q == code))
-                                v3Features.Add(code);
+                            Floor = "1",
+                            MaskUnitNumber = false,
+                            PostalCode = listing.Details.PostalCode,
+                            Unit = listing.Details.UnitNumber
                         }
-                    }
+                    };
+
+                    listingV3.Price = new PriceV3()
+                    {
+                        Value = listing.Details.Price,
+                        MaintenanceFee = listing.Details.MaintenanceFee,
+                    };
+
+                    listingV3.Project = new ProjectV3()
+                    {
+                        MetaByType = new MetaByTypeV3()
+                        {
+                            Verified = new VerifiedMetaV3()
+                            {
+                                Id = listing.Details.PgVerifiedId,
+                                LocationId = listing.Details.LocationId,
+                                Property = new VerifiedPropertyV3()
+                                {
+                                    SubType = null
+                                }
+                            }
+                        }
+                    };
+
+                    listingV3.UnitDetails.Condition = listing.Details.Condition;
+
+                    listingV3.UnitDetails.Configuration = new ConfigurationV3()
+                    {
+                        Bedrooms = listing.Details.Bedrooms,
+                        Bathrooms = listing.Details.Bathrooms,
+                        extrarooms = null,
+                    };
+
+                    listingV3.UnitDetails.Dimensions = new DimensionsV3()
+                    {
+                        Floor = new FloorDimensionV3()
+                        {
+                            Size = new SizeV3()
+                            {
+                                Value = listing.Details.FloorArea,
+                                Uom = "sqft"
+                            }
+                        },
+                        land = new FloorDimensionV3(),
+                        room = new FloorDimensionV3()
+                    };
+
+                    listingV3.UnitDetails.Electricity = new ElectricityV3()
+                    {
+                        Phase = new ElectricityPhaseV3() { Code = listing.Details.ElectricityPhase }
+                    };
+
+                    listingV3.UnitDetails.Features = listing.Details.UnitFeatures;
+
+                    listingV3.UnitDetails.FloorLevel = listing.Details.FloorLevel;
+
+                    listingV3.UnitDetails.FloorLoadingCapacity = null;
+
+                    listingV3.UnitDetails.FloorLoadingCategory = listing.Details.FloorLoadingCategory;
+
+                    listingV3.UnitDetails.Furnishing = listing.Details.Furnishing;
+
+                    listingV3.UnitDetails.HdbTypeCode = listing.Details.HdbType;
+
+                    listingV3.UnitDetails.IsBumiLot = false;
+
+                    listingV3.UnitDetails.IsHighCeiling = null;
+
+                    listingV3.UnitDetails.LandTitleType = null;
+
+                    listingV3.UnitDetails.Lift = new LiftV3()
+                    {
+                        Cargo = listing.Details.LiftCargo,
+                        TotalPassenger = listing.Details.LiftPassenger,
+                        Capacity = null
+                    };
+
+                    listingV3.UnitDetails.MaxTenants = null;
+                    listingV3.UnitDetails.OwnerStays = null;
+                    listingV3.UnitDetails.ParkingSpots = null;
+                    listingV3.UnitDetails.PetFriendly = null;
+                    listingV3.UnitDetails.PropertyUses = new List<string>() { listing.Details.PropertyUse };
+                    listingV3.UnitDetails.QuotaEthnic = null;
+                    listingV3.UnitDetails.QuotaSpr = null;
+                    listingV3.UnitDetails.Ramp = null;
+                    listingV3.UnitDetails.SellerEthnic = listing.Details.SellerEthnic;
+                    listingV3.UnitDetails.SellerResidency = listing.Details.SellerResidency;
+                    listingV3.UnitDetails.TenantEligibility = false;
+
+                    listing.ListingV3 = listingV3;
                 }
-                ;
                 Listings.Add(listing);
             }
         }

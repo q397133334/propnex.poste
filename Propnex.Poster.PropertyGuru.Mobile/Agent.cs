@@ -81,15 +81,22 @@ public class Agent : ClientBase
         {
             request.CookieContainer.Add(cookies);
         }
-
-        var stringBody = Newtonsoft.Json.JsonConvert.SerializeObject(listing,
-            new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
-        Log(stringBody, false);
-        request.AddStringBody(stringBody, DataFormat.Json);
-
-        var response = await ExecuteAsync(request);
-        if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created)
+        try
         {
+            var stringBody = Newtonsoft.Json.JsonConvert.SerializeObject(listing);
+            Log(stringBody, false);
+            request.AddStringBody(stringBody, DataFormat.Json);
+
+            var response = await ExecuteAsync(request);
+            if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created)
+            {
+            }
         }
+        catch (Exception ex)
+        {
+            Log(ex.ToString(), true);
+        }
+        
+        
     }
 }
