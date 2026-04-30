@@ -14,11 +14,11 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
     public class ElectricityV3
     {
         /// <summary>电力相数</summary>
-        [JsonProperty("phase", NullValueHandling = NullValueHandling.Ignore)]
-        public ElectricityPhaseV3 Phase { get; set; }
+        [JsonProperty("phase")]
+        public string Phase { get; set; } = null;
 
         /// <summary>供电量（安培数），如 60 / 100 / 200</summary>
-        [JsonProperty("supply", NullValueHandling = NullValueHandling.Ignore)]
-        public int? Supply { get; set; }
+        [JsonProperty("supply")]
+        public int? Supply { get; set; } = null;
     }
 }

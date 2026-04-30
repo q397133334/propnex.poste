@@ -1,14 +1,15 @@
-﻿using RestSharp;
+﻿using Microsoft.Extensions.Logging;
+using Propnex.Poster.PropertyGuru.Listing.V2;
+using Propnex.Poster.PropertyGuru.Listing.V3;
+using Propnex.Poster.PropertyGuru.Mobile;
+using Propnex.Poster.PropertyGuru.Mobile.Dto;
+using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Propnex.Poster.PropertyGuru.Listing.V2;
-using Propnex.Poster.PropertyGuru.Mobile;
-using Propnex.Poster.PropertyGuru.Mobile.Dto;
 
 public class Agent : ClientBase
 {
@@ -51,7 +52,7 @@ public class Agent : ClientBase
         request.AddHeader("refresh_token", Token.refreshToken);
         request.AddHeader("mobileapp", "true");
         request.AddHeader(KnownHeaders.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
-        request.Version= new Version(2,0);
+        request.Version = new Version(2, 0);
 
         var response = await ExecuteAsync(request);
         if (response.StatusCode == HttpStatusCode.OK)
@@ -60,7 +61,7 @@ public class Agent : ClientBase
         }
     }
 
-    public async Task CreateListingAsync(Propnex.Poster.PropertyGuru.Listing.V3.CreateListingV3 listing)
+    public async Task<HttpResult<CreateListingResult>> CreateListingAsync(Propnex.Poster.PropertyGuru.Listing.V3.CreateListingV3 listing)
     {
 
         if (cookies == null)
@@ -90,13 +91,33 @@ public class Agent : ClientBase
             var response = await ExecuteAsync(request);
             if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created)
             {
+                var result = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateListingResult>(response.Content);
+                return new HttpResult<CreateListingResult>
+                {
+                    HttpStatusCode = response.StatusCode,
+                    Data = result
+                };
+            }
+            else
+            {
+                return new HttpResult<CreateListingResult>
+                {
+                    Message = response.Content,
+                    HttpStatusCode = response.StatusCode,
+                    Data = new CreateListingResult { Id = -1 }
+                };
             }
         }
         catch (Exception ex)
         {
             Log(ex.ToString(), true);
+            return new HttpResult<CreateListingResult>
+            {
+                Message = ex.Message,
+                HttpStatusCode = HttpStatusCode.InternalServerError,
+                Data = new CreateListingResult { Id = -1 }
+            };
+
         }
-        
-        
     }
 }

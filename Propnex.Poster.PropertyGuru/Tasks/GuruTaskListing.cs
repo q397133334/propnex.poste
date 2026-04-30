@@ -136,7 +136,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
         /// <summary>价格类型代码，如 VTO / NEG / POA（price_type）</summary>
         public string PriceType { get; set; }
         /// <summary>管理费/维护费（tep_maintenance_fee）</summary>
-        public int MaintenanceFee { get; set; }
+        public int? MaintenanceFee { get; set; }
 
         // ── 面积 ─────────────────────────────────────────────────────
         /// <summary>建筑面积 sqft（floorarea）</summary>

@@ -127,7 +127,21 @@ namespace Propnex.Poster.PropertyGuru.Xml
             {
                 return nullValue;
             }
+        }
 
+        public static string GetAttributeStringNull(this XElement element, string name)
+        {
+            try
+            {
+                if (element == null)
+                    return null;
+                var value = element.Attribute(name).Value;
+                return string.IsNullOrEmpty(value) ? null : value;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
     }
 }

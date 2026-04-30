@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace Propnex.Poster.PropertyGuru.Listing.V3
 {
@@ -6,7 +7,27 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
     public class MetaByTypeV3
     {
         /// <summary>已认证楼盘的详细信息</summary>
-        [JsonProperty("verified")]
-        public VerifiedMetaV3 Verified { get; set; }
+        [JsonProperty("verified", NullValueHandling = NullValueHandling.Ignore)]
+        public VerifiedMetaV3 Verified { get; set; } = null;
+
+        [JsonProperty("unverified", NullValueHandling = NullValueHandling.Ignore)]
+        public  UnverifiedV3 unverified { get; set;} = null;
+    }
+
+    public class UnverifiedV3
+    {
+        public List<string> facilities { get; set; } = null;
+
+        public locationPoint locationPoint { get; set; } = null;
+
+        public string name { get; set; } = "";
+
+        public VerifiedPropertyV3 property { get; set; } = new VerifiedPropertyV3();
+    }
+
+    public class locationPoint
+    {
+        public double lat { get; set; } = 0;
+        public double lon { get; set; } = 0;
     }
 }

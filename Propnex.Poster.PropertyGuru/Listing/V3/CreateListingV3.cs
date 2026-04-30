@@ -54,8 +54,8 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
 
 
         /// <summary>所属楼盘信息（verified 类型 + 楼盘 ID + 物业类型）</summary>
-        [JsonProperty("project")]
-        public ProjectV3 Project { get; set; } = new ProjectV3();
+        [JsonProperty("project", NullValueHandling = NullValueHandling.Ignore)]
+        public ProjectV3 Project { get; set; } = null;
 
 
         public string referenceNumber { get; set;}   =null;

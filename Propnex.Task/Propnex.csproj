@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<Platforms>x64;x86</Platforms>
+		<Platforms>x64</Platforms>
 		<LangVersion>8.0</LangVersion>
 	</PropertyGroup>
 

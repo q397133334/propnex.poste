@@ -1,10 +1,16 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Flurl;
+using Microsoft.Extensions.Logging;
 using Propnex.Poster.PropertyGuru.Listing.V2;
 using Propnex.Poster.PropertyGuru.Listing.V3;
 using Propnex.Poster.PropertyGuru.Mobile.Dto;
 using RestSharp;
 using RestSharp.Authenticators;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Propnex.Poster.PropertyGuru.Mobile
 {
@@ -271,10 +277,20 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddParameter("statusCode", "ACT");
             var filePathLower = filePath.ToLower();
             if (filePathLower.Contains("youtube") ||
-                filePathLower.Contains("vimeo") ||
+                    filePathLower.Contains("youtu.be") ||
+                    filePathLower.Contains("vimeo") ||
                     filePathLower.Contains("dailymotion") ||
                     filePathLower.Contains("<iframe") ||
-                    filePathLower.Contains("havelock2")
+                    filePathLower.Contains("havelock2") ||
+                    filePathLower.Contains("8prop.com") ||
+                    filePathLower.Contains("matterport.com") ||
+                    filePathLower.Contains("tubear") ||
+                    filePathLower.Contains("beyond.3dnest.cn") ||
+                    filePathLower.Contains("mixgo.com") ||
+                    filePathLower.Contains("tiktok.com") ||
+                    filePathLower.Contains("kuula.co") ||
+                    filePathLower.Contains("virtualtours") ||
+                    filePathLower.Contains("singaporeluxuryhouse")
                     )
             {
                 if (filePath.Contains("#"))
