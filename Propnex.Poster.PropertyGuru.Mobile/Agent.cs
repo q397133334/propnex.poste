@@ -68,7 +68,6 @@ public class Agent : ClientBase
         {
             await GetCreateListingAsync();
         }
-
         var request = GetRequest();
         request.Resource = $"api/agentnet/listings";
         request.Method = Method.Post;

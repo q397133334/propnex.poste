@@ -43,11 +43,6 @@ namespace Propnex.Poster.WebServer.BackgroundJobs
                 Logger.LogError(ex.Message, ex);
             }
 
-<<<<<<< HEAD
-            await getPnTasks(workerContext, WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks);
-            await getPnTasks(workerContext, WebServerConsts.PnBaseUrl + WebServerConsts.PnfetchGuruTasks + "?xweb=1");
-=======
->>>>>>> 854ca64042b4cfa5ed42d1646c35426bb8ca0489
             //await getPnTasks(workerContext, WebServerConsts.PnfetchMyIpTasks, "MyIP");
         }
 

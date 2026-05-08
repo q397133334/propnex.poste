@@ -22,6 +22,7 @@ namespace Propnex.Poster.WebServer.Pages
             {
                 var listsContext = await $"https://pa-production.propnex.net/index.php/tasks/getListingFile?lid={listingId}".GetStringAsync();
                 var listings = new GuruTaskListings(listsContext);
+                
 
                 var taskListings = new List<TaskListing>();
 
@@ -35,7 +36,9 @@ namespace Propnex.Poster.WebServer.Pages
                     createOrUpdateListing.FloorPlan = listing.FloorPlan;
                     createOrUpdateListing.Tours = listing.Tours;
                     createOrUpdateListing.Videos = listing.Videos;
+                    createOrUpdateListing.ListingV3 = listing.ListingV3;
                     taskListings.Add(createOrUpdateListing);
+                    
                 }
 
                 return taskListings;
@@ -106,6 +109,7 @@ namespace Propnex.Poster.WebServer.Pages
                     createOrUpdateListing.FastRepost = listing.FastRepost;
                     createOrUpdateListing.Listing = new CreateOrUpdateListing();
                     createOrUpdateListing.Listing.Create(listing.Listing);
+                    createOrUpdateListing.ListingV3 = listing.ListingV3;
                     createOrUpdateListing.Photos = listing.Photos;
                     createOrUpdateListing.FloorPlan = listing.FloorPlan;
                     createOrUpdateListing.Tours = listing.Tours;

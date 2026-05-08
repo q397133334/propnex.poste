@@ -11,19 +11,15 @@ public class Program
     {
         var loggerConfiguration = new LoggerConfiguration()
 #if DEBUG
-            .MinimumLevel.Debug()
+         .MinimumLevel.Debug()
 #else
             .MinimumLevel.Information()
 #endif
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-            .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
-            .Enrich.FromLogContext()
-            .WriteTo.Async(c => c.File("Logs/logs.txt",
-            rollingInterval: RollingInterval.Day,
-            rollOnFileSizeLimit: true,
-            fileSizeLimitBytes: 1024 * 1024,
-            retainedFileCountLimit: 30))
-            .WriteTo.Async(c => c.Console());
+         .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+         .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+         .Enrich.FromLogContext()
+         .WriteTo.Async(c => c.File("Logs/logs.txt"))
+         .WriteTo.Async(c => c.Console());
 
         if (IsMigrateDatabase(args))
         {
@@ -53,18 +49,18 @@ public class Program
                 return 0;
             }
 
-            Log.Information("Starting Propnex.Poster.");
+            Log.Information("Starting MyCompanyName.MyProjectName.");
             await app.RunAsync();
             return 0;
         }
         catch (Exception ex)
         {
-            if (ex.GetType().Name.Equals("StopTheHostException", StringComparison.Ordinal))
+            if (ex is HostAbortedException)
             {
                 throw;
             }
 
-            Log.Fatal(ex, "Propnex.Poster terminated unexpectedly!");
+            Log.Fatal(ex, "MyCompanyName.MyProjectName terminated unexpectedly!");
             return 1;
         }
         finally

@@ -266,3 +266,7 @@ Propnex.Poster.WebServer/Logs/*.tsk
 /Propnex.Poster.WebServer/wwwroot/taskxml/*.guru.tsk
 /Propnex.Poster.WebServer/wwwroot/usetaskxml/*.guru.tsk
 Propnex.Poster.WebServer/Logs/
+
+
+# ABP Studio
+**/.abpstudio/

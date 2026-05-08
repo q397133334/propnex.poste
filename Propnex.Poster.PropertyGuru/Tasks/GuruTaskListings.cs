@@ -409,12 +409,20 @@ namespace Propnex.Poster.PropertyGuru.Tasks
 
                     listingV3.UnitDetails.Condition = listing.Details.Condition;
 
-                    listingV3.UnitDetails.Configuration = new ConfigurationV3()
+                    if (listing.Details.PropertyTypeGroup == "I")
                     {
-                        Bedrooms = listing.Details.Bedrooms,
-                        Bathrooms = listing.Details.Bathrooms,
-                        extrarooms = null,
-                    };
+                        listingV3.UnitDetails.Configuration = null;
+                    }
+                    else
+                    {
+                        listingV3.UnitDetails.Configuration = new ConfigurationV3()
+                        {
+                            Bedrooms = listing.Details.Bedrooms,
+                            Bathrooms = listing.Details.Bathrooms == 0 ? null : listing.Details.Bathrooms,
+                            extrarooms = null,
+                        };
+                    }
+
 
                     listingV3.UnitDetails.Dimensions = new DimensionsV3()
                     {
@@ -630,7 +638,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                 det.ListingTitle = detialss.FindAttribute("Name", "listing_title").GetAttributeValue("Value", DefaultTitles.GetTitle());
                 if (string.IsNullOrEmpty(det.ListingTitle)) det.ListingTitle = DefaultTitles.GetTitle();
                 det.ListingDescription = detialss.FindAttribute("Name", "listing_description").GetAttributeStringNull("Value");
-                if (det.ListingDescription.Length > 2000) det.ListingDescription = det.ListingDescription.Substring(0, 1999);
+                if (det.ListingDescription?.Length > 2000) det.ListingDescription = det.ListingDescription?.Substring(0, 1999);
                 det.ListingDescription = CleanText(det.ListingDescription);
                 det.LeaseTerm = detialss.FindAttribute("Name", "lease_term").GetAttributeStringNull("Value");
                 det.AvailableDate = detialss.FindAttribute("Name", "available_date").GetAttributeStringNull("Value");
