@@ -361,12 +361,19 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                         Locale = "en",
                         Text = listing.Details.ListingTitle
                     });
-
-                    listingV3.Lease = new LeaseV3()
+                    if(listing.Details.ListingType=="SALE")
                     {
-                        Code = listing.Details.LeaseTerm,
-                        Remaining = null
-                    };
+                        listingV3.Lease = null;
+                    }
+                    else
+                    {
+                        listingV3.Lease = new LeaseV3()
+                        {
+                            Code = listing.Details.LeaseTerm,
+                            Remaining = null
+                        };
+                    }
+                        
 
                     listingV3.Location = new LocationV3()
                     {
@@ -482,7 +489,11 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     {
                         listingV3.UnitDetails.Lift = null;
                         listingV3.UnitDetails.Electricity = null;
-                        listingV3.UnitDetails.Configuration.Bathrooms = null;
+                        if(listingV3.UnitDetails.Configuration!=null)
+                        {
+                            listingV3.UnitDetails.Configuration.Bathrooms = null;
+                        }
+                      
                     }
 
                     listingV3.UnitDetails.MaxTenants = null;
@@ -507,7 +518,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
         /// <summary>
         /// 移除 HTML 标签和 Emoji 表情
         /// </summary>
-        private static string CleanText(string input)
+        private  string CleanText(string input)
         {
             if (string.IsNullOrEmpty(input))
                 return input;
@@ -517,7 +528,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
 
             // 2. 移除 Emoji 表情 (Unicode 范围)
             // 这个正则表达式覆盖了大部分常见的 Emoji 范围
-            string noEmoji = Regex.Replace(noHtml, @"[\u00A9-\u00AE\u2000-\u3300\ud83c[\ud000-\udfff]\ud83d[\ud000-\udfff]\ud83e[\ud000-\udfff]]", string.Empty);
+            string noEmoji = RemoveEmoji(noHtml);
 
             // 可选：移除多余的空行或空白字符，保持整洁
             // noEmoji = Regex.Replace(noEmoji, @"\s+", " ").Trim();
@@ -525,11 +536,65 @@ namespace Propnex.Poster.PropertyGuru.Tasks
             return noEmoji;
         }
 
+        // 方法一：按 Unicode 分类过滤（最准确）
+        public  string RemoveEmoji(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return input;
+
+            var sb = new System.Text.StringBuilder();
+            for (int i = 0; i < input.Length; i++)
+            {
+                // 处理 surrogate pair（emoji 大多在此范围）
+                if (char.IsHighSurrogate(input[i]) && i + 1 < input.Length && char.IsLowSurrogate(input[i + 1]))
+                {
+                    int codePoint = char.ConvertToUtf32(input[i], input[i + 1]);
+                    // 跳过 emoji 范围
+                    if (!IsEmojiCodePoint(codePoint))
+                    {
+                        sb.Append(input[i]);
+                        sb.Append(input[i + 1]);
+                    }
+                    i++; // 跳过 low surrogate
+                }
+                else
+                {
+                    // 普通字符，过滤常见符号 emoji
+                    if (!IsEmojiChar(input[i]))
+                        sb.Append(input[i]);
+                }
+            }
+            return sb.ToString();
+        }
+
+        private  bool IsEmojiCodePoint(int cp)
+        {
+            return (cp >= 0x1F600 && cp <= 0x1F64F) || // 表情符号
+                   (cp >= 0x1F300 && cp <= 0x1F5FF) || // 杂项符号
+                   (cp >= 0x1F680 && cp <= 0x1F6FF) || // 交通/地图
+                   (cp >= 0x1F700 && cp <= 0x1F77F) || // 炼金符号
+                   (cp >= 0x1F780 && cp <= 0x1F7FF) || // 几何扩展
+                   (cp >= 0x1F800 && cp <= 0x1F8FF) || // 补充箭头
+                   (cp >= 0x1F900 && cp <= 0x1F9FF) || // 补充符号
+                   (cp >= 0x1FA00 && cp <= 0x1FA6F) || // 国际象棋
+                   (cp >= 0x1FA70 && cp <= 0x1FAFF) || // 符号扩展
+                   (cp >= 0x2600 && cp <= 0x26FF) || // 杂项符号
+                   (cp >= 0x2700 && cp <= 0x27BF);    // 装饰符号
+        }
+
+        private  bool IsEmojiChar(char c)
+        {
+            return (c >= '\u2600' && c <= '\u26FF') || // 杂项符号
+                   (c >= '\u2700' && c <= '\u27BF') || // 装饰符号
+                   (c >= '\uFE00' && c <= '\uFE0F') || // 变体选择器
+                   c == '\u200D' ||                    // 零宽连接符
+                   c == '\uFE0F';                      // 变体选择器16
+        }
+
 
         /// <summary>
         /// 将 &lt;ProjectData&gt; 和 &lt;Details&gt; 的 Field 元素解析为强类型 GuruListingData 模型
         /// </summary>
-        private static GuruTaskListing ParseListingData(
+        private GuruTaskListing ParseListingData(
             XElement element,
             IEnumerable<XElement> projectDatas,
             List<XElement> detialss,
