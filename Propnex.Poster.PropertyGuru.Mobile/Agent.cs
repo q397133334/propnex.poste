@@ -119,4 +119,57 @@ public class Agent : ClientBase
 
         }
     }
+
+    public async Task<HttpResult<Project>> AgnetProject(int id)
+    {
+        if (cookies == null)
+        {
+            await GetCreateListingAsync();
+        }
+        var request = GetRequest();
+        request.Resource = $"/api/agentnet/project/project?id={id}&locale=en&t={DateTime.Now.ToLongTimeString}";
+        request.Method = Method.Get;
+        request.AddHeader(KnownHeaders.Authorization, $"Bearer {Token.accessToken}");
+        request.Version = new Version(2, 0);
+        if (request.CookieContainer == null)
+        {
+            request.CookieContainer = new CookieContainer();
+        }
+        foreach (var cookie in cookies)
+        {
+            request.CookieContainer.Add(cookies);
+        }
+        try
+        {
+            var response = await ExecuteAsync(request);
+            if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created)
+            {
+                var result = Newtonsoft.Json.JsonConvert.DeserializeObject<Project>(response.Content);
+                return new HttpResult<Project>
+                {
+                    HttpStatusCode = response.StatusCode,
+                    Data = result
+                };
+            }
+            else
+            {
+                return new HttpResult<Project>
+                {
+                    Message = response.Content,
+                    HttpStatusCode = response.StatusCode,
+                    Data = new Project { Id = -1 }
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            Log(ex.ToString(), true);
+            return new HttpResult<Project>
+            {
+                Message = ex.Message,
+                HttpStatusCode = HttpStatusCode.InternalServerError,
+                Data = new Project { Id = -1 }
+            };
+        }
+    }
 }

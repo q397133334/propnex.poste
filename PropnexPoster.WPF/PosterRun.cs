@@ -7,6 +7,7 @@ using Propnex.Poster.PropertyGuru.Listing.V2;
 using Propnex.Poster.PropertyGuru.Listing.V3;
 using Propnex.Poster.PropertyGuru.Mobile;
 using Propnex.Poster.PropertyGuru.Mobile.Dto;
+using Propnex.Poster.PropertyGuru.Mobile.Model;
 using Propnex.Poster.PropertyGuru.Tasks;
 using Propnex.Poster.Share;
 using Serilog;
@@ -100,7 +101,7 @@ namespace PropnexPoster.WPF
 #if DEBUG
             taskDto = new PnTaskDto()
             {
-                Number = "1291273.guru.tsk"
+                Number = "1293621.guru.tsk"
             };
             var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
             var lenght = context.IndexOf("Xpressor-Listing-File===");
@@ -142,7 +143,7 @@ namespace PropnexPoster.WPF
 
                         //1.获取用户信息
                         var task = guruTasks.Tasks[i];
-                        var listingAction = new ListingAction(task, proxyIp,Log);
+                        var listingAction = new ListingAction(task, proxyIp, Log);
                         //3.登陆
                         Log("Get Token .......");
                         var token = await Login(task, proxyIp);
@@ -204,6 +205,24 @@ namespace PropnexPoster.WPF
                                 posterRunInfo.TaskItemId = listing.TaskItemId.ToString();
                                 TaskInfoEvent?.Invoke(posterRunInfo);
 
+                                if (listing.ListingV3.Project.MetaByType.Verified != null)
+                                {
+                                    var projectResult = await _agent.AgnetProject(int.Parse(listing.ListingV3.Project.MetaByType.Verified.Id));
+                                    if (projectResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                    {
+                                        var project = projectResult.Data;
+                                        listing.ListingV3.Project.MetaByType.Verified.Id = project.NanoId;
+                                        var address = project.Addresses.Where(q => q.ExternalId == listing.ListingV3.Project.MetaByType.Verified.LocationId.ToString()).FirstOrDefault();
+                                        if (address != null)
+                                        {
+                                            listing.ListingV3.Project.MetaByType.Verified.LocationId = address.Id;
+                                        }
+                                        else
+                                        {
+                                            listing.ListingV3.Project.MetaByType.Verified.LocationId = project.Addresses[0].Id;
+                                        }
+                                    }
+                                }
 
 
                                 var result = await _agent.CreateListingAsync(listing.ListingV3);

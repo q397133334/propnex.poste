@@ -361,7 +361,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                         Locale = "en",
                         Text = listing.Details.ListingTitle
                     });
-                    if(listing.Details.ListingType=="SALE")
+                    if (listing.Details.ListingType == "SALE")
                     {
                         listingV3.Lease = null;
                     }
@@ -373,7 +373,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                             Remaining = null
                         };
                     }
-                        
+
 
                     listingV3.Location = new LocationV3()
                     {
@@ -392,27 +392,6 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                         MaintenanceFee = listing.Details.MaintenanceFee,
                     };
 
-                    listingV3.Project = new ProjectV3()
-                    {
-                        MetaByType = new MetaByTypeV3()
-                        {
-                            unverified = new UnverifiedV3()
-                            {
-                                locationPoint = new locationPoint()
-                                {
-                                    lon = listing.Details.Longitude,
-                                    lat = listing.Details.Latitude
-                                },
-
-                                name = listing.Details.PropertyName,
-                                property = new VerifiedPropertyV3()
-                                {
-                                    SubType = listing.Details.PropertyTypeCode
-                                }
-                            },
-                        },
-                        Type = "unverified"
-                    };
 
                     listingV3.UnitDetails.Condition = listing.Details.Condition;
 
@@ -489,11 +468,11 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     {
                         listingV3.UnitDetails.Lift = null;
                         listingV3.UnitDetails.Electricity = null;
-                        if(listingV3.UnitDetails.Configuration!=null)
+                        if (listingV3.UnitDetails.Configuration != null)
                         {
                             listingV3.UnitDetails.Configuration.Bathrooms = null;
                         }
-                      
+
                     }
 
                     listingV3.UnitDetails.MaxTenants = null;
@@ -509,6 +488,52 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     listingV3.UnitDetails.TenantEligibility = false;
 
                     listing.ListingV3 = listingV3;
+                    if(listing.Details.PropertyId.HasValue==false)
+                    {
+                        listingV3.Project = new ProjectV3()
+                        {
+                            MetaByType = new MetaByTypeV3()
+                            {
+                                unverified = new UnverifiedV3()
+                                {
+                                    locationPoint = new locationPoint()
+                                    {
+                                        lon = listing.Details.Longitude,
+                                        lat = listing.Details.Latitude
+                                    },
+
+                                    name = listing.Details.PropertyName,
+                                    property = new VerifiedPropertyV3()
+                                    {
+                                        SubType = listing.Details.PropertyTypeCode
+                                    }
+                                }
+                            },
+                            Type = "unverified"
+                        };
+                    }
+                    else
+                    {
+                        listingV3.Project = new ProjectV3()
+                        {
+                            MetaByType = new MetaByTypeV3()
+                            {
+                                Verified = new VerifiedMetaV3()
+                                {
+                                    Id =   listing.Details.PropertyId.Value.ToString() ,
+                                    LocationId = listing.Details.LocationId
+                                    ,
+                                    Property = new VerifiedPropertyV3()
+                                    {
+                                        SubType = listing.Details.PropertyTypeCode
+                                    }
+                                }
+                            },
+                            Type = "verified"
+                        };
+                    }
+                        
+
                 }
                 Listings.Add(listing);
             }
@@ -518,7 +543,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
         /// <summary>
         /// 移除 HTML 标签和 Emoji 表情
         /// </summary>
-        private  string CleanText(string input)
+        private string CleanText(string input)
         {
             if (string.IsNullOrEmpty(input))
                 return input;
@@ -537,7 +562,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
         }
 
         // 方法一：按 Unicode 分类过滤（最准确）
-        public  string RemoveEmoji(string input)
+        public string RemoveEmoji(string input)
         {
             if (string.IsNullOrEmpty(input)) return input;
 
@@ -566,7 +591,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
             return sb.ToString();
         }
 
-        private  bool IsEmojiCodePoint(int cp)
+        private bool IsEmojiCodePoint(int cp)
         {
             return (cp >= 0x1F600 && cp <= 0x1F64F) || // 表情符号
                    (cp >= 0x1F300 && cp <= 0x1F5FF) || // 杂项符号
@@ -581,7 +606,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                    (cp >= 0x2700 && cp <= 0x27BF);    // 装饰符号
         }
 
-        private  bool IsEmojiChar(char c)
+        private bool IsEmojiChar(char c)
         {
             return (c >= '\u2600' && c <= '\u26FF') || // 杂项符号
                    (c >= '\u2700' && c <= '\u27BF') || // 装饰符号
@@ -621,19 +646,20 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                 d.UpdateTime = detialss.FindAttribute("Name", "UpdateTime").GetAttributeValue("Value", "");
                 d.Photos = element.ElementString("Photos", "")
                     .Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable()
-                    .Where(q => q.Trim() != "").Where(q => q.Length > 10).ToList();
+                    .Where(q => q.Trim() != "" && q.Contains("http") && q.Length > 10).ToList();
+
                 d.PhotosTime = element.ElementString("PhotosTime", "")
                     .Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable()
-                    .Where(q => q.Trim() != "").Where(q => q.Length > 10).ToList();
+                    .Where(q => q.Trim() != "" && q.Contains("http") && q.Length > 10).ToList();
                 d.Videos = element.ElementString("Videos", "")
                     .Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable()
-                    .Where(q => q.Trim() != "").Where(q => q.Length > 10).ToList();
+                    .Where(q => q.Trim() != "" && q.Contains("http") && q.Length > 10).ToList();
                 d.Tours = element.ElementString("Tours", "")
                     .Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable()
-                    .Where(q => q.Trim() != "").Where(q => q.Length > 10).ToList();
+                    .Where(q => q.Trim() != "" && q.Contains("http") && q.Length > 10).ToList();
                 d.FloorPlan = element.ElementString("FloorPlan", "")
                     .Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).AsEnumerable()
-                    .Where(q => q.Trim() != "").Where(q => q.Length > 10).ToList();
+                    .Where(q => q.Trim() != "" && q.Contains("http") && q.Length > 10).ToList();
                 d.FastRepost = detialss.FindAttribute("Name", "FastRepost").GetAttributeValue("Value", "0");
                 d.TaskItemId = detialss.FindAttribute("Name", "taskitem_id").GetAttributeValue("Value", "0");
                 d.Listing.Agent = new Agent()
