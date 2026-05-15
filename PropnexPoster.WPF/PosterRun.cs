@@ -101,7 +101,7 @@ namespace PropnexPoster.WPF
 #if DEBUG
             taskDto = new PnTaskDto()
             {
-                Number = "1293621.guru.tsk"
+                Number = "1293954.guru.tsk"
             };
             var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
             var lenght = context.IndexOf("Xpressor-Listing-File===");
@@ -261,82 +261,39 @@ namespace PropnexPoster.WPF
                                             await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload floor plan error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                             continue;
                                         }
-                                        var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
-                                        //var offerings = await _wrapperListingSg.AdsProducts(listing.Listing.Id.ToString());
-                                        if (taskListing.HttpStatusCode == HttpStatusCode.OK)
+                                        var taskListing = await _wrapperListingSg.Listings(listing.Listing.Id.Value);
+
+                                        if (taskListing.Data != null)
                                         {
-                                            await _api.UpdateAsync(taskListing.Data);
+                                            var offerings = await _wrapperListingSg.AdsProducts(listing.Listing.Id.ToString());
+                                            if (offerings.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                            {
+                                                var publish = await _wrapperListingSg.Publish(new Publishe() { Key = offerings.Data.Products[0].Key, Brand = "pg" }, listing.Listing.Id.Value.ToString());
+                                                if(publish.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                                {
+                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                                }
+                                                else
+                                                {
+                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", publish.Message);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", offerings.Message);
+                                            }
                                         }
-                                        await ActivateAndReportAsync(task, listing, _mobile, _adsProject, token);
+                                        else
+                                        {
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
+                                        }
                                     }
                                 }
                                 else
                                 {
                                     if (result.Message.Contains("Postal code is already being used"))
                                     {
-                                        //var listings = _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
-                                        //1.获取邮政编号
-                                        //var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
-                                        //if (locales.Data != null)
-                                        //{
-                                        //    var locale = locales.Data.Where(q => q.DisplayText == listing.Listing.Title).FirstOrDefault();
-                                        //    if (locale == null)
-                                        //        locale = locales.Data.FirstOrDefault();
-                                        //    if (locale != null)
-                                        //    {
-                                        //        //2. 获取loca 信息
-                                        //        var project = (await _projectsApi.GetProjectAsync(int.Parse(locale.ObjectId))).Data;
-                                        //        if (project != null && project.addresses != null && project.addresses.Count > 0)
-                                        //        {
-                                        //            project.addresses = project.addresses.Where(q => q.external_id != null).ToList();
-                                        //            createOrUpdateListing.location.id = int.Parse(project.addresses[1].external_id);
-                                        //            result = await _api.CreateAsync(createOrUpdateListing);
-                                        //            if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                        //            {
-                                        //                listing.Listing.Id = result.Data.Id;
-                                        //                if (result.Data.Id != 0)
-                                        //                {
-                                        //                    if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                        //                    {
-                                        //                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
-                                        //                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload photo error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                        //                        continue;
-                                        //                    }
-                                        //                    if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                        //                    {
-                                        //                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
-                                        //                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload video error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                        //                        continue;
-                                        //                    }
-                                        //                    if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                        //                    {
-                                        //                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
-                                        //                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload vt error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                        //                        continue;
-                                        //                    }
-                                        //                    if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                        //                    {
-                                        //                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
-                                        //                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload floor plan error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                        //                        continue;
-                                        //                    }
-                                        //                    var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
-                                        //                    await _api.UpdateAsync(taskListing.Data);
-                                        //                    await ActivateAndReportAsync(task, listing, _mobile, _adsProject, token);
-                                        //                }
-                                        //            }
-                                        //        }
-                                        //    }
-                                        //    else
-                                        //    {
-                                        //        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
-                                        //    }
-                                        //}
-                                        //else
-                                        //{
-                                        //    await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} {result.Message}  {WPFModule.AppConfiguration.MachineNumber}  <@U01DQLBLWNL>");
-                                        //    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find :" + result.Message);
-                                        //}
+
                                     }
                                     else
                                     {
@@ -416,6 +373,24 @@ namespace PropnexPoster.WPF
                                 }
                                 else
                                 {
+                                    if (listing.ListingV3.Project.MetaByType.Verified != null)
+                                    {
+                                        var projectResult = await _agent.AgnetProject(int.Parse(listing.ListingV3.Project.MetaByType.Verified.Id));
+                                        if (projectResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                        {
+                                            var project = projectResult.Data;
+                                            listing.ListingV3.Project.MetaByType.Verified.Id = project.NanoId;
+                                            var address = project.Addresses.Where(q => q.ExternalId == listing.ListingV3.Project.MetaByType.Verified.LocationId.ToString()).FirstOrDefault();
+                                            if (address != null)
+                                            {
+                                                listing.ListingV3.Project.MetaByType.Verified.LocationId = address.Id;
+                                            }
+                                            else
+                                            {
+                                                listing.ListingV3.Project.MetaByType.Verified.LocationId = project.Addresses[0].Id;
+                                            }
+                                        }
+                                    }
                                     //Post Only
                                     var result = await _agent.CreateListingAsync(listing.ListingV3);
 
@@ -454,44 +429,45 @@ namespace PropnexPoster.WPF
                                                 await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload floor plan error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                                 continue;
                                             }
-                                            var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
-                                            await _api.UpdateAsync(taskListing.Data);
-                                            await ActivateAndReportAsync(task, listing, _mobile, _adsProject, token);
+                                            var taskListing = await _wrapperListingSg.Listings(listing.Listing.Id.Value);
+
+                                            if (taskListing.Data != null)
+                                            {
+                                                var offerings = await _wrapperListingSg.AdsProducts(listing.Listing.Id.ToString());
+                                                if (offerings.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                                {
+                                                    var publish = await _wrapperListingSg.Publish(new Publishe() { Key = offerings.Data.Products[0].Key, Brand = "pg" }, listing.Listing.Id.Value.ToString());
+                                                    if (publish.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                                                    {
+                                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                                                    }
+                                                    else
+                                                    {
+                                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", publish.Message);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", offerings.Message);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
+                                            }
                                         }
                                     }
                                     else
                                     {
-                                        //if (result.Message.Contains("Postal code is already being used"))
-                                        //{
-                                        //    //1.获取邮政编号
-                                        //    var locales = await _api.AutocompleteAsync(new QueryAutocomplete(listing.Listing.Location.postalCode));
-                                        //    var locale = locales.Data.FirstOrDefault();
-                                        //    //2. 获取loca 信息
-                                        //    var project = (await _projectsApi.GetProjectAsync(int.Parse(locale.ObjectId))).Data;
-                                        //    if (project != null && project.addresses != null && project.addresses.Count > 0)
-                                        //    {
-                                        //        createOrUpdateListing.location.id = int.Parse(project.addresses[0].external_id);
-                                        //        result = await _api.CreateAsync(createOrUpdateListing);
-                                        //        if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                        //        {
-                                        //            listing.Listing.Id = result.Data.Id;
-                                        //            if (result.Data.Id != 0)
-                                        //            {
-                                        //                await uploadPhotosAsync(listing, _api);
-                                        //                await uploadVideos(listing, _api);
-                                        //                await uploadVirtualTours(listing, _api);
-                                        //                await uploadFloorPlanAsync(listing, _api);
-                                        //                var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
-                                        //                await _api.UpdateAsync(taskListing.Data);
-                                        //                await ActivateAndReportAsync(task, listing, _mobile, _adsProject, token);
-                                        //            }
-                                        //        }
-                                        //    }
-                                        //}
-                                        //else
-                                        //{
-                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
-                                        //}
+                                        if (result.Message.Contains("Postal code is already being used"))
+                                        {
+
+                                        }
+                                        else
+                                        {
+                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
+                                            await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} {result.Message}");
+                                        }
                                     }
                                 }
 

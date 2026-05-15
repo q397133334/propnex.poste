@@ -169,7 +169,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 
         public string Page { get; set; } = "1";
 
-        public string Sort { get; set; } = "start_date";
+        public string Sort { get; set; } = "updated_date";
     }
 
 }

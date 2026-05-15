@@ -30,7 +30,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
 
         public long TaskId { get; set; }
 
-        public GuruTaskListings(string listsContext, string taskType = "Create")
+        public GuruTaskListings(string listsContext, string taskType = "")
         {
             Listings = new List<GuruTaskListing>();
             TaskType = taskType;
@@ -117,7 +117,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
 
 
                 //listing - projectData
-                ListingModel listingModel = new ListingModel();
+                Listing.V2.ListingModel listingModel = new Listing.V2.ListingModel();
                 listing.Listing = listingModel;
                 CreateListingModel();
                 CreateListingV3();
@@ -403,7 +403,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     {
                         listingV3.UnitDetails.Configuration = new ConfigurationV3()
                         {
-                            Bedrooms = listing.Details.Bedrooms,
+                            Bedrooms = listing.Details.Bedrooms == 0 ? -1 : listing.Details.Bedrooms,
                             Bathrooms = listing.Details.Bathrooms == 0 ? null : listing.Details.Bathrooms,
                             extrarooms = null,
                         };
@@ -488,7 +488,54 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     listingV3.UnitDetails.TenantEligibility = false;
 
                     listing.ListingV3 = listingV3;
-                    if(listing.Details.PropertyId.HasValue==false)
+                    if(TaskType!="create")
+                    {
+                        if (listing.Details.PropertyId.HasValue == false)
+                        {
+                            listingV3.Project = new ProjectV3()
+                            {
+                                MetaByType = new MetaByTypeV3()
+                                {
+                                    unverified = new UnverifiedV3()
+                                    {
+                                        locationPoint = new locationPoint()
+                                        {
+                                            lon = listing.Details.Longitude,
+                                            lat = listing.Details.Latitude
+                                        },
+
+                                        name = listing.Details.PropertyName,
+                                        property = new VerifiedPropertyV3()
+                                        {
+                                            SubType = listing.Details.PropertyTypeCode
+                                        }
+                                    }
+                                },
+                                Type = "unverified"
+                            };
+                        }
+                        else
+                        {
+                            listingV3.Project = new ProjectV3()
+                            {
+                                MetaByType = new MetaByTypeV3()
+                                {
+                                    Verified = new VerifiedMetaV3()
+                                    {
+                                        Id = listing.Details.PropertyId.Value.ToString(),
+                                        LocationId = listing.Details.LocationId
+                                        ,
+                                        Property = new VerifiedPropertyV3()
+                                        {
+                                            SubType = listing.Details.PropertyTypeCode
+                                        }
+                                    }
+                                },
+                                Type = "verified"
+                            };
+                        }
+                    }
+                    else
                     {
                         listingV3.Project = new ProjectV3()
                         {
@@ -512,28 +559,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                             Type = "unverified"
                         };
                     }
-                    else
-                    {
-                        listingV3.Project = new ProjectV3()
-                        {
-                            MetaByType = new MetaByTypeV3()
-                            {
-                                Verified = new VerifiedMetaV3()
-                                {
-                                    Id =   listing.Details.PropertyId.Value.ToString() ,
-                                    LocationId = listing.Details.LocationId
-                                    ,
-                                    Property = new VerifiedPropertyV3()
-                                    {
-                                        SubType = listing.Details.PropertyTypeCode
-                                    }
-                                }
-                            },
-                            Type = "verified"
-                        };
-                    }
-                        
-
+                  
                 }
                 Listings.Add(listing);
             }

@@ -243,13 +243,13 @@ namespace Propnex.Poster.PropertyGuru.Tasks
     {
         public GuruTaskListing()
         {
-            Listing = new ListingModel();
+            Listing = new Listing.V2.ListingModel();
             Photos = new List<string>();
             Videos = new List<string>();
         }
 
         /// <summary>V2 格式数据（原有）</summary>
-        public ListingModel Listing { get; set; }
+        public Listing.V2.ListingModel Listing { get; set; }
 
         /// <summary>V3 格式数据，与 Listing 同步解析，方便后续直接调用 v3 API</summary>
         public CreateListingV3 ListingV3 { get; set; }

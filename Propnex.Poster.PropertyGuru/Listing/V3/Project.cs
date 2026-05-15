@@ -24,13 +24,13 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
             public int PropertyId { get; set; }
 
             [JsonProperty("new_project")]
-            public bool NewProject { get; set; }
+            public bool? NewProject { get; set; }
 
             [JsonProperty("completion_year")]
-            public int CompletionYear { get; set; }
+            public int? CompletionYear { get; set; }
 
             [JsonProperty("launch_year")]
-            public int LaunchYear { get; set; }
+            public int? LaunchYear { get; set; }
 
             [JsonProperty("streetname")]
             public string StreetName { get; set; }
@@ -72,16 +72,16 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
             public string Status { get; set; }
 
             [JsonProperty("total_units")]
-            public int TotalUnits { get; set; }
+            public int? TotalUnits { get; set; }
 
             [JsonProperty("remaining_unit")]
             public int? RemainingUnit { get; set; }
 
             [JsonProperty("updated_at")]
-            public DateTime UpdatedAt { get; set; }
+            public DateTime? UpdatedAt { get; set; }
 
             [JsonProperty("created_at")]
-            public DateTime CreatedAt { get; set; }
+            public DateTime? CreatedAt { get; set; }
 
             [JsonProperty("location")]
             public GeoLocation Location { get; set; }
@@ -224,13 +224,13 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         public class DateInfo
         {
             [JsonProperty("year")]
-            public int Year { get; set; }
+            public int? Year { get; set; }
 
             [JsonProperty("month")]
-            public int Month { get; set; }
+            public int? Month { get; set; }
 
             [JsonProperty("day")]
-            public int Day { get; set; }
+            public int? Day { get; set; }
         }
 
         // ── 价格/面积通用值 ───────────────────────────────────
@@ -280,10 +280,10 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         public class Developer
         {
             [JsonProperty("id")]
-            public int Id { get; set; }
+            public int? Id { get; set; }
 
             [JsonProperty("main_developer_id")]
-            public int MainDeveloperId { get; set; }
+            public int? MainDeveloperId { get; set; }
 
             [JsonProperty("name")]
             public string Name { get; set; }
@@ -334,7 +334,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         public class DeveloperMedia
         {
             [JsonProperty("owner_id")]
-            public int OwnerId { get; set; }
+            public int? OwnerId { get; set; }
 
             [JsonProperty("logos")]
             public List<MediaItem> Logos { get; set; }
@@ -344,7 +344,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         public class Building
         {
             [JsonProperty("id")]
-            public int Id { get; set; }
+            public int? Id { get; set; }
 
             [JsonProperty("name")]
             public string Name { get; set; }
@@ -353,10 +353,10 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
             public int? TotalFloors { get; set; }
 
             [JsonProperty("total_units")]
-            public int TotalUnits { get; set; }
+            public int? TotalUnits { get; set; }
 
             [JsonProperty("address_id")]
-            public int AddressId { get; set; }
+            public int? AddressId { get; set; }
 
             [JsonProperty("completion_status")]
             public CompletionStatus CompletionStatus { get; set; }
@@ -468,7 +468,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
             public double WalkingDistanceKm { get; set; }
 
             [JsonProperty("walkingDurationMins")]
-            public int WalkingDurationMins { get; set; }
+            public int? WalkingDurationMins { get; set; }
 
             [JsonProperty("drivingDistanceKm")]
             public double? DrivingDistanceKm { get; set; }
@@ -490,7 +490,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
             public int Id { get; set; }
 
             [JsonProperty("project_id")]
-            public int ProjectId { get; set; }
+            public int? ProjectId { get; set; }
 
             [JsonProperty("description")]
             public string Description { get; set; }
@@ -509,7 +509,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
             public string Name { get; set; }
 
             [JsonProperty("bed")]
-            public int Bed { get; set; }
+            public int? Bed { get; set; }
 
             [JsonProperty("bath")]
             public int? Bath { get; set; }
@@ -583,13 +583,13 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         public class MediaItem
         {
             [JsonProperty("id")]
-            public long Id { get; set; }
+            public long? Id { get; set; }
 
             [JsonProperty("ownerId")]
-            public int OwnerId { get; set; }
+            public int? OwnerId { get; set; }
 
             [JsonProperty("userId")]
-            public int UserId { get; set; }
+            public int? UserId { get; set; }
 
             [JsonProperty("mediaClass")]
             public string MediaClass { get; set; }
@@ -607,13 +607,13 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
             public string Source { get; set; }
 
             [JsonProperty("sortOrder")]
-            public long SortOrder { get; set; }
+            public long? SortOrder { get; set; }
 
             [JsonProperty("url")]
             public string Url { get; set; }
 
             [JsonProperty("isCover")]
-            public bool IsCover { get; set; }
+            public bool? IsCover { get; set; }
 
             [JsonProperty("bucketPath")]
             public string BucketPath { get; set; }
@@ -631,7 +631,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         public class ProjectMedia
         {
             [JsonProperty("owner_id")]
-            public int OwnerId { get; set; }
+            public int? OwnerId { get; set; }
 
             [JsonProperty("photos")]
             public List<MediaItem> Photos { get; set; }
@@ -646,7 +646,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         public class UnitMedia
         {
             [JsonProperty("owner_id")]
-            public int OwnerId { get; set; }
+            public int? OwnerId { get; set; }
 
             [JsonProperty("floorplans")]
             public List<MediaItem> FloorPlans { get; set; }
@@ -659,10 +659,10 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
             public int? TotalFloors { get; set; }
 
             [JsonProperty("total_units")]
-            public int TotalUnits { get; set; }
+            public int? TotalUnits { get; set; }
 
             [JsonProperty("buildings_count")]
-            public int BuildingsCount { get; set; }
+            public int? BuildingsCount { get; set; }
 
             [JsonProperty("property_type")]
             public PropertyTypeInfo PropertyType { get; set; }
@@ -675,7 +675,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
             public string ReferenceId { get; set; }
 
             [JsonProperty("reference_date")]
-            public DateTime ReferenceDate { get; set; }
+            public DateTime? ReferenceDate { get; set; }
         }
 
         // ── 样板房 ────────────────────────────────────────────
