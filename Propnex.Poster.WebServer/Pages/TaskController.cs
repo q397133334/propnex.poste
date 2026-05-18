@@ -53,6 +53,47 @@ namespace Propnex.Poster.WebServer.Pages
             }
         }
 
+        [Route("/api/task1")]
+        [HttpGet]
+        public async Task<List<TaskListing>> GetListing1Json(string listingId)
+        {
+            if (string.IsNullOrEmpty(listingId))
+                throw new UserFriendlyException("listingId can not be empty");
+            try
+            {
+                var listsContext = await $"https://pa-production.propnex.net/index.php/tasks/getListingFile?lid={listingId}".GetStringAsync();
+                var listings = new GuruTaskListings(listsContext, "");
+
+
+                var taskListings = new List<TaskListing>();
+
+                foreach (var listing in listings.Listings)
+                {
+                    var createOrUpdateListing = new TaskListing();
+                    createOrUpdateListing.FastRepost = listing.FastRepost;
+                    createOrUpdateListing.Listing = new CreateOrUpdateListing();
+                    createOrUpdateListing.Listing.Create(listing.Listing);
+                    createOrUpdateListing.Photos = listing.Photos;
+                    createOrUpdateListing.FloorPlan = listing.FloorPlan;
+                    createOrUpdateListing.Tours = listing.Tours;
+                    createOrUpdateListing.Videos = listing.Videos;
+                    createOrUpdateListing.ListingV3 = listing.ListingV3;
+                    taskListings.Add(createOrUpdateListing);
+
+                }
+
+                return taskListings;
+            }
+            catch (FlurlHttpException ex)
+            {
+                throw new UserFriendlyException(ex.Message, innerException: ex);
+            }
+            catch (Exception ex)
+            {
+                throw new UserFriendlyException(ex.Message, innerException: ex);
+            }
+        }
+
         //[Route("/api/taskChope")]
         //[HttpGet]
         //public async Task<List<TaskListing>> GetChopeListingJson(string listingId)

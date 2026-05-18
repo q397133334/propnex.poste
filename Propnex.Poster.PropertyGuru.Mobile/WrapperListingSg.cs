@@ -30,7 +30,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             Token = token;
         }
 
-        public async Task<HttpResult<Offerings>> AdsProducts(string listingId)
+        public async Task<HttpResult<Offerings>> Offerings(string listingId)
         {
             var request = GetRequest();
             request.Method = Method.Get;

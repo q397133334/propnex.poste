@@ -265,7 +265,8 @@ namespace PropnexPoster.WPF
 
                                         if (taskListing.Data != null)
                                         {
-                                            var offerings = await _wrapperListingSg.AdsProducts(listing.Listing.Id.ToString());
+                                            //获取
+                                            var offerings = await _wrapperListingSg.Offerings(listing.Listing.Id.ToString());
                                             if (offerings.HttpStatusCode == System.Net.HttpStatusCode.OK)
                                             {
                                                 var publish = await _wrapperListingSg.Publish(new Publishe() { Key = offerings.Data.Products[0].Key, Brand = "pg" }, listing.Listing.Id.Value.ToString());
@@ -373,13 +374,18 @@ namespace PropnexPoster.WPF
                                 }
                                 else
                                 {
+                                    //Determine whether to obtain project information based on the type.
                                     if (listing.ListingV3.Project.MetaByType.Verified != null)
                                     {
+                                        //get project information to confirm the location id, otherwise it will cause the error of "The location is invalid" when posting.
                                         var projectResult = await _agent.AgnetProject(int.Parse(listing.ListingV3.Project.MetaByType.Verified.Id));
                                         if (projectResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
                                         {
                                             var project = projectResult.Data;
+                                            //update project id to NanoId
                                             listing.ListingV3.Project.MetaByType.Verified.Id = project.NanoId;
+                                            //update location id to location id
+                                            //Match by externalId and replace with the ID.
                                             var address = project.Addresses.Where(q => q.ExternalId == listing.ListingV3.Project.MetaByType.Verified.LocationId.ToString()).FirstOrDefault();
                                             if (address != null)
                                             {
@@ -433,7 +439,7 @@ namespace PropnexPoster.WPF
 
                                             if (taskListing.Data != null)
                                             {
-                                                var offerings = await _wrapperListingSg.AdsProducts(listing.Listing.Id.ToString());
+                                                var offerings = await _wrapperListingSg.Offerings(listing.Listing.Id.ToString());
                                                 if (offerings.HttpStatusCode == System.Net.HttpStatusCode.OK)
                                                 {
                                                     var publish = await _wrapperListingSg.Publish(new Publishe() { Key = offerings.Data.Products[0].Key, Brand = "pg" }, listing.Listing.Id.Value.ToString());
