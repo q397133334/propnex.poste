@@ -21,7 +21,7 @@ namespace Propnex.Poster.WebServer.Pages
             try
             {
                 var listsContext = await $"https://pa-production.propnex.net/index.php/tasks/getListingFile?lid={listingId}".GetStringAsync();
-                var listings = new GuruTaskListings(listsContext,"create");
+                var listings = new GuruTaskListings(listsContext,"");
                 
 
                 var taskListings = new List<TaskListing>();
@@ -140,7 +140,7 @@ namespace Propnex.Poster.WebServer.Pages
             try
             {
                 var listsContext = await $"https://pa-production.propnex.net/index.php/tasks/getChoperFile?choper_id={choperId}".GetStringAsync();
-                var listings = new GuruTaskListings(listsContext,"create");
+                var listings = new GuruTaskListings(listsContext,"");
 
                 var taskListings = new List<TaskListing>();
 

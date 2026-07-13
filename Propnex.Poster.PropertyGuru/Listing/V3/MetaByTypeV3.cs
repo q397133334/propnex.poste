@@ -11,7 +11,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         public VerifiedMetaV3 Verified { get; set; } = null;
 
         [JsonProperty("unverified", NullValueHandling = NullValueHandling.Ignore)]
-        public  UnverifiedV3 unverified { get; set;} = null;
+        public UnverifiedV3 unverified { get; set; } = null;
     }
 
     public class UnverifiedV3
@@ -23,11 +23,23 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         public string name { get; set; } = "";
 
         public VerifiedPropertyV3 property { get; set; } = new VerifiedPropertyV3();
+
+        [JsonProperty("locationLevels", NullValueHandling = NullValueHandling.Ignore)]
+        public LocationLevels locationLevels { get; set; } = null;
+
+        [JsonProperty("tenureCode", NullValueHandling = NullValueHandling.Ignore)]
+        public string tenureCode { get; set; } = null;
     }
 
     public class locationPoint
     {
         public double lat { get; set; } = 0;
         public double lon { get; set; } = 0;
+    }
+
+    public class LocationLevels
+    {
+        public string level200Id { get; set; } = "C";
+        public string level500Id { get; set;}
     }
 }

@@ -39,6 +39,8 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddHeader("x-source", "mobile");
             request.AddHeader("x-brand", "pg");
             request.AddHeader("x-market", "pg");
+            request.AddHeader("x-region", "sg");
+            request.AddHeader("x-requested-with", "com.allproperty.android.agentnet");
             var response = await ExecuteAsync(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
@@ -57,6 +59,8 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddHeader("x-source", "mobile");
             request.AddHeader("x-brand", "pg");
             request.AddHeader("x-market", "pg");
+            request.AddHeader("x-region", "sg");
+            request.AddHeader("x-requested-with", "com.allproperty.android.agentnet");
             request.AddJsonBody(new PublishRequest()
             {
                 Publishes = new List<Publishe>() { publishe }
@@ -79,11 +83,11 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddHeader("x-source", "mobile");
             request.AddHeader("x-brand", "pg");
             request.AddHeader("x-market", "pg");
+            request.AddHeader("x-region", "sg");
+            request.AddHeader("x-requested-with", "com.allproperty.android.agentnet");
             var response = await ExecuteAsync(request);
             try
             {
-
-
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
                     var responsePublisheResult = Newtonsoft.Json.JsonConvert.DeserializeObject<Listing.V3.ListingModel>(response.Content);

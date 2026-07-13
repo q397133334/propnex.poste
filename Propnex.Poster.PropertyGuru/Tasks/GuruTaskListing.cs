@@ -231,6 +231,10 @@ namespace Propnex.Poster.PropertyGuru.Tasks
         public string UpdateTime { get; set; }
         /// <summary>快速重发标记：0 正常 / 1 快速（FastRepost）</summary>
         public string FastRepost { get; set; }
+
+
+        public int PreferredGender { get; set; }
+        public int PreferredQty { get; set; }
     }
 
     /// <summary>从 XML Listing 文件解析出的原始字段模型（顶层字段 + ProjectData 子模型 + Details 子模型）</summary>
