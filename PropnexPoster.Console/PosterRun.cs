@@ -210,59 +210,11 @@ namespace PropnexPoster.ConsoleClient
                                     listing.Listing.Id = result.Data.Id;
                                     if (result.Data.Id != 0)
                                     {
-                                        if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                        if (!await UploadAllMediaAsync(task, listing, _api))
                                         {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
-                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload photo error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                             continue;
                                         }
-                                        if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                        {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
-                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload video error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                            continue;
-                                        }
-                                        if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                        {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
-                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload vt error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                            continue;
-                                        }
-                                        if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                        {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
-                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload floor plan error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                            continue;
-                                        }
-                                        var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
-                                        if (taskListing.HttpStatusCode == HttpStatusCode.OK)
-                                        {
-                                            await _api.UpdateAsync(taskListing.Data);
-                                        }
-                                        var mobile = new Mobile() { Token = token };
-                                        var draflistings =
-                                        (await _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
-                                        {
-                                            StatusCode = "DRAFT"
-                                        })).Data.listings;
-                                        var draflisting = draflistings.Where(q => q.id == listing.Listing.Id).FirstOrDefault();
-                                        if (draflisting != null)
-                                        {
-                                            var activateResult = await _adsProject.Activate(result.Data.Id, draflisting.charges.activate);
-                                            if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                            {
-                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-                                            }
-                                            else
-                                            {
-
-                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
-                                        }
+                                        await ActivateDraftListingAsync(task, listing, _api, _mobile, _adsProject, token);
                                     }
                                 }
                                 else
@@ -291,55 +243,11 @@ namespace PropnexPoster.ConsoleClient
                                                         listing.Listing.Id = result.Data.Id;
                                                         if (result.Data.Id != 0)
                                                         {
-                                                            if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                                            if (!await UploadAllMediaAsync(task, listing, _api))
                                                             {
-                                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
-                                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload photo error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                                                 continue;
                                                             }
-                                                            if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                                            {
-                                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
-                                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload video error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                                                continue;
-                                                            }
-                                                            if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                                            {
-                                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
-                                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload vt error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                                                continue;
-                                                            }
-                                                            if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                                            {
-                                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
-                                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload floor plan error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                                                continue;
-                                                            }
-                                                            var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
-                                                            await _api.UpdateAsync(taskListing.Data);
-                                                            var draflistings =
-                                                                (await _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
-                                                                {
-                                                                    StatusCode = "DRAFT"
-                                                                })).Data.listings;
-                                                            var draflisting = draflistings.Where(q => q.id == listing.Listing.Id).FirstOrDefault();
-                                                            if (draflisting != null)
-                                                            {
-                                                                var activateResult = await _adsProject.Activate(result.Data.Id, draflisting.charges.activate);
-                                                                if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                                                {
-                                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-                                                                }
-                                                                else
-                                                                {
-
-                                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
-                                                                }
-                                                            }
-                                                            else
-                                                            {
-                                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
-                                                            }
+                                                            await ActivateDraftListingAsync(task, listing, _api, _mobile, _adsProject, token);
                                                         }
                                                     }
                                                 }
@@ -385,31 +293,10 @@ namespace PropnexPoster.ConsoleClient
                                         taskListing.Data.isLiveTourAvailable = true;
                                         await _api.UpdateAsync(taskListing.Data);
                                         await _mobile.DeleteMediaAll(taskListing.Data);
-                                        if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                        if (!await UploadAllMediaAsync(task, listing, _api))
                                         {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
-                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload photo error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                             continue;
                                         }
-                                        if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                        {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
-                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload video error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                            continue;
-                                        }
-                                        if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                        {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
-                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload vt error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                            continue;
-                                        }
-                                        if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                        {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
-                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload floor plan error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                            continue;
-                                        }
-
                                     }
                                     else
                                     {
@@ -437,56 +324,11 @@ namespace PropnexPoster.ConsoleClient
                                         listing.Listing.Id = result.Data.Id;
                                         if (result.Data.Id != 0)
                                         {
-                                            if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                            if (!await UploadAllMediaAsync(task, listing, _api))
                                             {
-                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
-                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload photo error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                                 continue;
                                             }
-                                            if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                            {
-                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
-                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload video error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                                continue;
-                                            }
-                                            if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                            {
-                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
-                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload vt error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                                continue;
-                                            }
-                                            if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                            {
-                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
-                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload floor plan error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                                continue;
-                                            }
-                                            var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
-                                            await _api.UpdateAsync(taskListing.Data);
-                                            await _api.UpdateAsync(taskListing.Data); var mobile = new Mobile() { Token = token };
-                                            var draflistings =
-                                            (await _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
-                                            {
-                                                StatusCode = "DRAFT"
-                                            })).Data.listings;
-                                            var draflisting = draflistings.Where(q => q.id == listing.Listing.Id).FirstOrDefault();
-                                            if (draflisting != null)
-                                            {
-                                                var activateResult = await _adsProject.Activate(result.Data.Id, draflisting.charges.activate);
-                                                if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                                {
-                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-                                                }
-                                                else
-                                                {
-
-                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
-                                                }
-                                            }
-                                            else
-                                            {
-                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
-                                            }
+                                            await ActivateDraftListingAsync(task, listing, _api, _mobile, _adsProject, token);
                                         }
                                     }
                                     else
@@ -508,36 +350,11 @@ namespace PropnexPoster.ConsoleClient
                                                     listing.Listing.Id = result.Data.Id;
                                                     if (result.Data.Id != 0)
                                                     {
-                                                        await uploadPhotosAsync(listing, _api);
-                                                        await uploadVideos(listing, _api);
-                                                        await uploadVirtualTours(listing, _api);
-                                                        await uploadFloorPlanAsync(listing, _api);
-                                                        var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
-                                                        await _api.UpdateAsync(taskListing.Data);
-                                                        await _api.UpdateAsync(taskListing.Data); var mobile = new Mobile() { Token = token };
-                                                        var draflistings =
-                                                        (await _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
+                                                        if (!await UploadAllMediaAsync(task, listing, _api))
                                                         {
-                                                            StatusCode = "DRAFT"
-                                                        })).Data.listings;
-                                                        var draflisting = draflistings.Where(q => q.id == listing.Listing.Id).FirstOrDefault();
-                                                        if (draflisting != null)
-                                                        {
-                                                            var activateResult = await _adsProject.Activate(result.Data.Id, draflisting.charges.activate);
-                                                            if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                                            {
-                                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-                                                            }
-                                                            else
-                                                            {
-
-                                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
-                                                            }
+                                                            continue;
                                                         }
-                                                        else
-                                                        {
-                                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
-                                                        }
+                                                        await ActivateDraftListingAsync(task, listing, _api, _mobile, _adsProject, token);
                                                     }
                                                 }
                                             }
@@ -575,28 +392,8 @@ namespace PropnexPoster.ConsoleClient
                                     await _api.UpdateAsync(taskListing.Data);
 
                                     await _mobile.DeleteMediaAll(taskListing.Data);
-                                    if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                    if (!await UploadAllMediaAsync(task, listing, _api))
                                     {
-                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
-                                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload photo error {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                        continue;
-                                    }
-                                    if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                    {
-                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
-                                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload video error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                        continue;
-                                    }
-                                    if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                    {
-                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
-                                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload vt error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                        continue;
-                                    }
-                                    if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                    {
-                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
-                                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload floor plan error  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                         continue;
                                     }
                                     await _api.GetListing(listing.Listing.Id.Value);
@@ -702,30 +499,7 @@ namespace PropnexPoster.ConsoleClient
                                                             data[formName + "[title]"] = vnames[1].Trim();
                                                         }
                                                     }
-                                                    try
-                                                    {
-                                                        using (var multipartFormDataContent = new MultipartFormDataContent())
-                                                        {
-                                                            foreach (var content in data)
-                                                            {
-                                                                multipartFormDataContent.Add(new StringContent(content.Value), content.Key);
-                                                            }
-                                                            using (var client = new HttpClient())
-                                                            {
-                                                                using (var stream = new StreamContent(new System.IO.FileStream(p, System.IO.FileMode.Open)))
-                                                                {
-                                                                    multipartFormDataContent.Add(stream, formName + "[attachfile]", System.IO.Path.GetFileName(p));
-                                                                    ok = await httpClient.PostAsync($"{url}listingAttachments/create/{xpid}", multipartFormDataContent);
-                                                                    httpResult = await ok.Content.ReadAsStringAsync();
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                    catch (Exception ex)
-                                                    {
-                                                        //DoProgress("Exception in PostWebPageMultipart", -1, "");
-                                                        //throw;
-                                                    }
+                                                    await PostXpressorAttachmentAsync(httpClient, url, xpid, formName, data, p);
                                                 }
 
 
@@ -756,31 +530,7 @@ namespace PropnexPoster.ConsoleClient
                                                             {
                                                                 data[formName + "[title]"] = vnames[1].Trim();
                                                             }
-                                                            try
-                                                            {
-                                                                using (var multipartFormDataContent = new MultipartFormDataContent())
-                                                                {
-                                                                    foreach (var content in data)
-                                                                    {
-                                                                        multipartFormDataContent.Add(new StringContent(content.Value), content.Key);
-                                                                    }
-                                                                    using (var client = new HttpClient())
-                                                                    {
-                                                                        using (var stream = new StreamContent(new System.IO.FileStream(p, System.IO.FileMode.Open)))
-                                                                        {
-                                                                            multipartFormDataContent.Add(stream, formName + "[attachfile]", System.IO.Path.GetFileName(p));
-                                                                            ok = await httpClient.PostAsync($"{url}listingAttachments/create/{xpid}", multipartFormDataContent);
-                                                                            httpResult = await ok.Content.ReadAsStringAsync();
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                            catch (Exception ex)
-                                                            {
-                                                                //DoProgress("Exception in PostWebPageMultipart", -1, "");
-                                                                //throw;
-                                                            }
-
+                                                            await PostXpressorAttachmentAsync(httpClient, url, xpid, formName, data, p);
                                                         }
                                                     }
                                                 }
@@ -827,30 +577,7 @@ namespace PropnexPoster.ConsoleClient
                                                     {
                                                         data[formName + "[title]"] = vnames[vnames.Length - 1].Trim();
                                                     }
-                                                    try
-                                                    {
-                                                        using (var multipartFormDataContent = new MultipartFormDataContent())
-                                                        {
-                                                            foreach (var content in data)
-                                                            {
-                                                                multipartFormDataContent.Add(new StringContent(content.Value), content.Key);
-                                                            }
-                                                            using (var client = new HttpClient())
-                                                            {
-                                                                using (var stream = new StreamContent(new System.IO.FileStream(p, System.IO.FileMode.Open)))
-                                                                {
-                                                                    multipartFormDataContent.Add(stream, formName + "[attachfile]", System.IO.Path.GetFileName(p));
-                                                                    ok = await httpClient.PostAsync($"{url}listingAttachments/create/{xpid}", multipartFormDataContent);
-                                                                    httpResult = await ok.Content.ReadAsStringAsync();
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                    catch (Exception ex)
-                                                    {
-                                                        //DoProgress("Exception in PostWebPageMultipart", -1, "");
-                                                        //throw;
-                                                    }
+                                                    await PostXpressorAttachmentAsync(httpClient, url, xpid, formName, data, p);
                                                 }
 
                                                 string[] videos = retrieveListing.Videos.Split(new string[] { "\n" }, StringSplitOptions.None);
@@ -894,30 +621,7 @@ namespace PropnexPoster.ConsoleClient
                                                     }
                                                     ;
 
-                                                    try
-                                                    {
-                                                        using (var multipartFormDataContent = new MultipartFormDataContent())
-                                                        {
-                                                            foreach (var content in data)
-                                                            {
-                                                                multipartFormDataContent.Add(new StringContent(content.Value), content.Key);
-                                                            }
-                                                            using (var client = new HttpClient())
-                                                            {
-                                                                using (var stream = new StreamContent(new System.IO.FileStream(p, System.IO.FileMode.Open)))
-                                                                {
-                                                                    multipartFormDataContent.Add(stream, formName + "[attachfile]", System.IO.Path.GetFileName(p));
-                                                                    ok = await httpClient.PostAsync($"{url}listingAttachments/create/{xpid}", multipartFormDataContent);
-                                                                    httpResult = await ok.Content.ReadAsStringAsync();
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                    catch (Exception ex)
-                                                    {
-                                                        //DoProgress("Exception in PostWebPageMultipart", -1, "");
-                                                        //throw;
-                                                    }
+                                                    await PostXpressorAttachmentAsync(httpClient, url, xpid, formName, data, p);
                                                 }
                                             }
                                         }
@@ -1043,6 +747,91 @@ namespace PropnexPoster.ConsoleClient
                 _logger.Information("not find listingInfo");
             }
             return listingInfo;
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // 发布任务类型 (TaskType) 一览：
+        //   post only            新建 listing（CreateOrUpdateListing，PropertyGuru v2 接口），若因邮编冲突失败则换地址重试一次
+        //   repost                已存在匹配 listing：更新媒体后调用 Repost；不存在则按 post only 流程新建
+        //   update                已存在匹配 listing：更新字段与媒体
+        //   remove from portals   已存在匹配 listing：调用 DeleteListing 下架
+        //   retrieve*             拉取 listing 详情并转发给 Xpressor（第三方系统），与上面几类走完全不同的上传通道
+        // 除 retrieve 外，新建/更新流程都共用同一套媒体上传（图片/视频/全景/平面图）与"转 DRAFT 后激活并上报结果"逻辑。
+        // ─────────────────────────────────────────────────────────────────────
+
+        /// <summary>依次上传图片、视频、全景看房、平面图；任一步失败即上报失败结果并通知 Slack，返回 false。</summary>
+        private async Task<bool> UploadAllMediaAsync(GuruTask task, GuruTaskListing listing, Api _api)
+        {
+            return await uploadStep(uploadPhotosAsync, "upload photo error")
+                && await uploadStep(uploadVideos, "upload video error")
+                && await uploadStep(uploadVirtualTours, "upload vt error")
+                && await uploadStep(uploadFloorPlanAsync, "upload floor plan error");
+
+            async Task<bool> uploadStep(Func<GuruTaskListing, Api, Task<HttpResult<string>>> upload, string errorMessage)
+            {
+                if ((await upload(listing, _api)).HttpStatusCode == System.Net.HttpStatusCode.OK)
+                    return true;
+                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", errorMessage);
+                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} {errorMessage}  {ConsoleModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
+                return false;
+            }
+        }
+
+        /// <summary>将刚新建/重建的 listing 刷新为 DRAFT，找到匹配草稿后激活上架，最终上报结果。</summary>
+        private async Task ActivateDraftListingAsync(GuruTask task, GuruTaskListing listing, Api _api, Mobile _mobile, AdsProduct _adsProject, Token token)
+        {
+            var taskListing = await _api.GetListing(listing.Listing.Id.Value, "DRAFT");
+            if (taskListing.HttpStatusCode == HttpStatusCode.OK)
+            {
+                await _api.UpdateAsync(taskListing.Data);
+            }
+            var draflistings = (await _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
+            {
+                StatusCode = "DRAFT"
+            })).Data.listings;
+            var draflisting = draflistings.Where(q => q.id == listing.Listing.Id).FirstOrDefault();
+            if (draflisting != null)
+            {
+                var activateResult = await _adsProject.Activate(listing.Listing.Id.Value, draflisting.charges.activate);
+                if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+                }
+                else
+                {
+                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
+                }
+            }
+            else
+            {
+                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
+            }
+        }
+
+        /// <summary>把一个附件（图片/平面图/视频/全景）以 multipart 表单的形式上传给 Xpressor（retrieve 任务专用，与上面的 PropertyGuru 上传通道完全独立）。</summary>
+        private async Task PostXpressorAttachmentAsync(HttpClient httpClient, string url, string xpid, string formName, Dictionary<string, string> data, string filePath)
+        {
+            try
+            {
+                using (var multipartFormDataContent = new MultipartFormDataContent())
+                {
+                    foreach (var content in data)
+                    {
+                        multipartFormDataContent.Add(new StringContent(content.Value), content.Key);
+                    }
+                    using (var stream = new StreamContent(new System.IO.FileStream(filePath, System.IO.FileMode.Open)))
+                    {
+                        multipartFormDataContent.Add(stream, formName + "[attachfile]", System.IO.Path.GetFileName(filePath));
+                        var ok = await httpClient.PostAsync($"{url}listingAttachments/create/{xpid}", multipartFormDataContent);
+                        await ok.Content.ReadAsStringAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //DoProgress("Exception in PostWebPageMultipart", -1, "");
+                //throw;
+            }
         }
 
         private async Task<HttpResult<string>> uploadPhotosAsync(GuruTaskListing guruTaskListing, Api _api)

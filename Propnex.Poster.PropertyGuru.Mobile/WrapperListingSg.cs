@@ -144,6 +144,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             request.AddHeader("x-market", "pg");
             request.AddHeader("x-region", "sg");
             request.AddHeader("x-requested-with", "com.allproperty.android.agentnet");
+            return null;
         }
     }
 }
