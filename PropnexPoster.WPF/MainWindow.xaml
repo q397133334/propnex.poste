@@ -29,14 +29,14 @@
                          hc:InfoElement.TitlePlacement="Left" 
                          hc:InfoElement.Title="Number:" 
                          Margin="0,5,0,5" Canvas.Left="10" Width="230"></TextBox>
-            <GroupBox Grid.Row="2" Style="{StaticResource BaseStyle}" Header="Run Info:">
+            <GroupBox Grid.Row="2" Style="{StaticResource BaseStyle}" Header="Run Info:" DataContext="{Binding RunInfo, RelativeSource={RelativeSource AncestorType=Window}}">
                 <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
-                    <Label Name="lblTaskNumber"  Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
-                    <Label Name="lblAccount"  Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"/>
-                    <Label Name="lblAgentId" Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
-                    <Label Name="lblTaskType" Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
-                    <Label Name="lblListingCount" Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"/>
-                    <Label Name="lblTaskItemId" Style="{StaticResource BaseStyle}" Content="" HorizontalAlignment="Left"></Label>
+                    <Label Style="{StaticResource BaseStyle}" Content="{Binding TaskNumber}" HorizontalAlignment="Left"></Label>
+                    <Label Style="{StaticResource BaseStyle}" Content="{Binding Account}" HorizontalAlignment="Left"/>
+                    <Label Style="{StaticResource BaseStyle}" Content="{Binding AgentId}" HorizontalAlignment="Left"></Label>
+                    <Label Style="{StaticResource BaseStyle}" Content="{Binding TaskType}" HorizontalAlignment="Left"></Label>
+                    <Label Style="{StaticResource BaseStyle}" Content="{Binding ListingCount}" HorizontalAlignment="Left"/>
+                    <Label Style="{StaticResource BaseStyle}" Content="{Binding TaskItemId}" HorizontalAlignment="Left"></Label>
                 </StackPanel>
             </GroupBox>
         </Grid>

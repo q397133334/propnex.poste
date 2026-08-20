@@ -20,6 +20,8 @@ namespace PropnexPoster.WPF
     {
         private IServiceProvider _serviceProvider;
 
+        public PosterRunInfo RunInfo { get; } = new PosterRunInfo();
+
         public MainWindow(IServiceProvider serviceProvider, IConfiguration configuration)
         {
             _serviceProvider = serviceProvider;
@@ -57,7 +59,7 @@ namespace PropnexPoster.WPF
                 IsRun = true;
                 var run = _serviceProvider.GetService<PosterRun>();//  new PosterRun();
                 run.MessageEvent = Log;
-                run.TaskInfoEvent = TaskInfoEvent;
+                run.PosterRunInfo = RunInfo;
                 await run.Run();
                 run = null;
                 IsRun = false;
@@ -172,19 +174,6 @@ namespace PropnexPoster.WPF
             }, DispatcherPriority.Background);
             return result;
         
-        }
-
-        public void TaskInfoEvent(PosterRunInfo posterRunInfo)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                lblTaskNumber.Content = posterRunInfo.TaskNumber;
-                lblAccount.Content = posterRunInfo.Account;
-                lblAgentId.Content = posterRunInfo.AgentId;
-                lblTaskType.Content = posterRunInfo.TaskType;
-                lblListingCount.Content = posterRunInfo.ListingCount;
-                lblTaskItemId.Content = posterRunInfo.TaskItemId;
-            });
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

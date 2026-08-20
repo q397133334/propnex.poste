@@ -15,6 +15,7 @@ using Serilog.Core;
 using SlackBotMessages;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -26,8 +27,13 @@ using ILogger = Serilog.ILogger;
 namespace PropnexPoster.WPF
 {
 
-    public class PosterRunInfo
+    public class PosterRunInfo : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(string propertyName) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
         private string taskNumber;
         private string account;
         private string agentId;
@@ -35,36 +41,41 @@ namespace PropnexPoster.WPF
         private int listingCount = 0;
         private string taskItemId;
 
-        public string TaskNumber { get => taskNumber; set => taskNumber = value; }
+        public string TaskNumber
+        {
+            get => taskNumber;
+            set { taskNumber = value; OnPropertyChanged(nameof(TaskNumber)); }
+        }
 
         public string Account
         {
-            get
-            {
-                if (string.IsNullOrEmpty(account))
-                {
-                    return "";
-                }
-                else
-                {
-                    return $"Account: {account}";
-                }
-            }
-            set => account = value;
+            get => string.IsNullOrEmpty(account) ? "" : $"Account: {account}";
+            set { account = value; OnPropertyChanged(nameof(Account)); }
         }
 
         public string AgentId
         {
             get => string.IsNullOrEmpty(agentId) ? "" : $"AgentId: {agentId}";
-
-            set => agentId = value;
+            set { agentId = value; OnPropertyChanged(nameof(AgentId)); }
         }
 
-        public string TaskType { get => string.IsNullOrEmpty(agentId) ? "" : $"TaskType: {taskType}"; set => taskType = value; }
+        public string TaskType
+        {
+            get => string.IsNullOrEmpty(agentId) ? "" : $"TaskType: {taskType}";
+            set { taskType = value; OnPropertyChanged(nameof(TaskType)); }
+        }
 
-        public string TaskItemId { get => string.IsNullOrEmpty(taskItemId) ? "" : $"ListingNumber: {taskItemId}"; set => taskItemId = value; }
+        public string TaskItemId
+        {
+            get => string.IsNullOrEmpty(taskItemId) ? "" : $"ListingNumber: {taskItemId}";
+            set { taskItemId = value; OnPropertyChanged(nameof(TaskItemId)); }
+        }
 
-        public string ListingCount { get => listingCount == 0 ? "" : $"ListingCount: {listingCount}"; set => listingCount = int.Parse(value); }
+        public string ListingCount
+        {
+            get => listingCount == 0 ? "" : $"ListingCount: {listingCount}";
+            set { listingCount = int.Parse(value); OnPropertyChanged(nameof(ListingCount)); }
+        }
     }
 
     public class PosterRun : Volo.Abp.DependencyInjection.ITransientDependency
@@ -72,7 +83,7 @@ namespace PropnexPoster.WPF
 
         public Action<string, bool> MessageEvent { get; set; }
 
-        public Action<PosterRunInfo> TaskInfoEvent { get; set; }
+        public PosterRunInfo PosterRunInfo { get; set; } = new PosterRunInfo();
 
         private ILogger? _logger;
 
@@ -80,21 +91,10 @@ namespace PropnexPoster.WPF
 
         private PnTaskDto taskDto;
 
-        private PosterRunInfo posterRunInfo;
-
-        public PosterRun()
-        {
-            posterRunInfo = new PosterRunInfo()
-            {
-                TaskNumber = "Get Task ...."
-            };
-
-            TaskInfoEvent?.Invoke(posterRunInfo);
-        }
-
-
         public async Task Run()
         {
+            var posterRunInfo = PosterRunInfo;
+            posterRunInfo.TaskNumber = "Get Task ....";
             await WebServer.PosterPing();
             Log("Get Task .....");
             //1.获取任务信息
@@ -118,7 +118,6 @@ namespace PropnexPoster.WPF
                 return;
             }
             posterRunInfo.TaskNumber = taskDto.Number;
-            TaskInfoEvent?.Invoke(posterRunInfo);
             Log($"Get Task success,{taskDto.Number}");
             //2.生成日志
 
@@ -164,7 +163,6 @@ namespace PropnexPoster.WPF
                         posterRunInfo.AgentId = token.User.AgentId.ToString();
                         posterRunInfo.TaskType = task.TaskType;
                         posterRunInfo.ListingCount = ListingInfos.Count.ToString();
-                        TaskInfoEvent?.Invoke(posterRunInfo);
                         Log("Token success");
 
                         Log($"{task.TaskType.ToLower()}");
@@ -202,7 +200,6 @@ namespace PropnexPoster.WPF
                             foreach (var listing in task.Listings.Listings)
                             {
                                 posterRunInfo.TaskItemId = listing.TaskItemId.ToString();
-                                TaskInfoEvent?.Invoke(posterRunInfo);
 
                                 if (await CreateListingAndPublishAsync(task, listing, _api, _agent, _wrapperListingSg))
                                 {
@@ -218,7 +215,6 @@ namespace PropnexPoster.WPF
                             foreach (var listing in task.Listings.Listings)
                             {
                                 posterRunInfo.TaskItemId = listing.TaskItemId.ToString();
-                                TaskInfoEvent?.Invoke(posterRunInfo);
 
                                 var listInfo = IsExtis(task, listing);
                                 if (listInfo != null)
@@ -276,7 +272,6 @@ namespace PropnexPoster.WPF
                             foreach (var listing in task.Listings.Listings)
                             {
                                 posterRunInfo.TaskItemId = listing.TaskItemId.ToString();
-                                TaskInfoEvent?.Invoke(posterRunInfo);
 
                                 if (IsExtis(task, listing) != null)
                                 {
@@ -315,7 +310,6 @@ namespace PropnexPoster.WPF
                             foreach (var listing in task.Listings.Listings)
                             {
                                 posterRunInfo.TaskItemId = listing.TaskItemId.ToString();
-                                TaskInfoEvent?.Invoke(posterRunInfo);
                                 var listingInfo = IsExtis(task, listing);
                                 if (listingInfo != null)
                                 {
@@ -580,7 +574,6 @@ namespace PropnexPoster.WPF
             {
                 this.globleLogger = null;
                 this.MessageEvent = null;
-                this.TaskInfoEvent = null;
             }
 
         }
