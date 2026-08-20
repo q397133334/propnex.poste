@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Propnex.Poster.PropertyGuru.Listing.V3
 {
-    public class Publishe
+    public class CreditKey
     {
         [JsonProperty("key")]
         public string Key { get; set; }
@@ -19,7 +19,25 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
     public class PublishRequest
     {
         [JsonProperty("publishes")]
-        public List<Publishe> Publishes { get; set; } = new List<Publishe>();
+        public List<CreditKey> Publishes { get; set; } = new List<CreditKey>();
+
+        public string currencyTypeCode { get; set; } = "ad_credit";
+        //listing-management-mobile-android-single
+        //listing-management-mobile-ios-single
+        //listing-creation-desktop-web
+        public string origin { get; set; } = "listing-management-mobile-android-single";
+    }
+
+    public class RepostRequest
+    {
+        [JsonProperty("reposts")]
+        public List<CreditKey> Reposts { get; set; } = new List<CreditKey>();
+
+        public string currencyTypeCode { get; set; } = "ad_credit";
+        //listing-management-mobile-android-single
+        //listing-management-mobile-ios-single
+        //listing-creation-desktop-web
+        public string origin { get; set; } = "listing-management-mobile-android-single";
     }
 
     public class ResponsePublisheResult

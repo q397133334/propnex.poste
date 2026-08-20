@@ -155,7 +155,12 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                             ;
                         }
                     }
+                    if (listingModel.TypeCode == "ROOM")
+                    {
+                        listingModel.RentalType = "ROOM";
+                    }
 
+                   
 
                     listingModel.Location = new Location()
                     {
@@ -362,8 +367,8 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                         {
                             listingV3.UnitDetails.RoomType = "SHARE";
                         }
-                        listingV3.UnitDetails.Configuration.Bedrooms = null;
-                        if (listingV3.UnitDetails.Configuration.Bathrooms == null)
+                        //listingV3.UnitDetails.Configuration.Bedrooms = null;
+                        if (listingV3.UnitDetails.Configuration!=null && listingV3.UnitDetails.Configuration.Bathrooms == null)
                         {
                             listingV3.UnitDetails.Configuration.Bathrooms = 0;
                         }
@@ -412,8 +417,12 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                             MaskUnitNumber = false,
                             PostalCode = listing.Details.PostalCode,
                             Unit = listing.Details.UnitNumber
-                        }
+                        },
                     };
+                    if (string.IsNullOrEmpty(listing.Details.StreetNumber) == false)
+                    {
+                        listingV3.Location.street = listing.Details.StreetNumber;
+                    }
 
                     listingV3.Price = new PriceV3()
                     {
@@ -421,9 +430,28 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                         MaintenanceFee = listing.Details.MaintenanceFee,
                     };
 
-                    listingV3.UnitDetails.Condition = listing.Details.Condition;
-
-
+                    listingV3.UnitDetails.Furnishing = listing.Details.Furnishing;
+                    if (string.IsNullOrEmpty(listing.Details.Furnishing) == false)
+                    {
+                        switch (listing.Details.Furnishing)
+                        {
+                            case "UNFUR":
+                                listingV3.UnitDetails.Furnishing = null;
+                                listingV3.UnitDetails.Condition = "BARE";
+                                break;
+                            case "PART":
+                                listingV3.UnitDetails.Furnishing = null;
+                                listingV3.UnitDetails.Condition = "PARFT";
+                                break;
+                            case "FULL":
+                                listingV3.UnitDetails.Furnishing = null;
+                                listingV3.UnitDetails.Condition = "FULFT";
+                                break;
+                            default:
+                                listingV3.UnitDetails.Condition = null;
+                                break;
+                        }
+                    }
 
                     listingV3.UnitDetails.Dimensions = new DimensionsV3()
                     {
@@ -464,7 +492,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
 
                     listingV3.UnitDetails.FloorLoadingCategory = listing.Details.FloorLoadingCategory;
 
-                    listingV3.UnitDetails.Furnishing = listing.Details.Furnishing;
+                   
 
                     listingV3.UnitDetails.HdbTypeCode = listing.Details.HdbType;
 
@@ -608,6 +636,22 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                                 if (string.IsNullOrEmpty(listing.Details.Tenure) == false)
                                 {
                                     listingV3.Project.MetaByType.unverified.tenureCode = listing.Details.Tenure;
+                                }
+                                if (string.IsNullOrEmpty(listing.Details.District) == false)
+                                {
+                                    var district = GeoNode.Districts.Where(q => q.Id == listing.Details.District).FirstOrDefault();
+                                    if (district != null)
+                                    {
+                                        listingV3.Project.MetaByType.unverified.locationLevels = new LocationLevels
+                                        {
+                                            level500Id = district.Id,
+                                            level200Id = district.Parent.Id,
+                                        };
+                                    }
+                                    else
+                                    {
+                                        listingV3.Project.MetaByType.unverified.locationLevels = new LocationLevels { level500Id = listing.Details.District };
+                                    }
                                 }
                             }
                         }
@@ -851,7 +895,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                 // 房间配置
                 det.Bedrooms = detialss.FindAttribute("Name", "bedrooms").GetAttributeValue<int?>("Value", null);
                 det.Bathrooms = detialss.FindAttribute("Name", "bathrooms").GetAttributeValue<int?>("Value", null);
-                det.RoomType = detialss.FindAttribute("Name", "room_rental_type").GetAttributeStringNull("Value");
+                det.RoomType = detialss.FindAttribute("Name", "room_type").GetAttributeStringNull("Value");
 
                 // 地址
                 det.PostalCode = detialss.FindAttribute("Name", "postcode").GetAttributeStringNull("Value");

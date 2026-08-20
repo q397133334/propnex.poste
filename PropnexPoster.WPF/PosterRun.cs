@@ -101,7 +101,7 @@ namespace PropnexPoster.WPF
 #if DEBUG
             taskDto = new PnTaskDto()
             {
-                Number = "1297561.guru.tsk"
+                Number = "1308188.guru.tsk"
             };
             var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
             var lenght = context.IndexOf("Xpressor-Listing-File===");
@@ -269,7 +269,7 @@ namespace PropnexPoster.WPF
                                             var offerings = await _wrapperListingSg.Offerings(listing.Listing.Id.ToString());
                                             if (offerings.HttpStatusCode == System.Net.HttpStatusCode.OK)
                                             {
-                                                var publish = await _wrapperListingSg.Publish(new Publishe() { Key = offerings.Data.Products[0].Key, Brand = "pg" }, listing.Listing.Id.Value.ToString());
+                                                var publish = await _wrapperListingSg.Publish(new CreditKey() { Key = offerings.Data.Products[0].Key, Brand = "pg" }, listing.Listing.Id.Value.ToString());
                                                 if(publish.HttpStatusCode == System.Net.HttpStatusCode.OK)
                                                 {
                                                     await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
@@ -442,7 +442,7 @@ namespace PropnexPoster.WPF
                                                 var offerings = await _wrapperListingSg.Offerings(listing.Listing.Id.ToString());
                                                 if (offerings.HttpStatusCode == System.Net.HttpStatusCode.OK)
                                                 {
-                                                    var publish = await _wrapperListingSg.Publish(new Publishe() { Key = offerings.Data.Products[0].Key, Brand = "pg" }, listing.Listing.Id.Value.ToString());
+                                                    var publish = await _wrapperListingSg.Publish(new CreditKey() { Key = offerings.Data.Products[0].Key, Brand = "pg" }, listing.Listing.Id.Value.ToString());
                                                     if (publish.HttpStatusCode == System.Net.HttpStatusCode.OK)
                                                     {
                                                         await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());

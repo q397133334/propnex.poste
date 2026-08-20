@@ -8,5 +8,8 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         /// <summary>详细地址（邮编、楼层、单元号等）</summary>
         [JsonProperty("address")]
         public AddressV3 Address { get; set; }
+
+        [JsonProperty("street", NullValueHandling = NullValueHandling.Ignore)]
+        public string street { get; set; }
     }
 }

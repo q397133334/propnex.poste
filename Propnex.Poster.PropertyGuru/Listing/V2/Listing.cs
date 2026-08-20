@@ -38,6 +38,8 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
 
         public string TypeCode { get; set; }
 
+        public string RentalType { get; set; } = "UNIT";
+
         public string LeaseTermCode { get; set; }
 
         public string FeatureCode { get; set; }

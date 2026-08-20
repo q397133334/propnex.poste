@@ -398,6 +398,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
             this.hasStream = listing.HasStream;
             this.statusCode = listing.StatusCode;
             this.sourceCode = listing.SourceCode;
+            this.rentalType =listing.RentalType;
             this.typeCode = listing.TypeCode;
             this.leaseTermCode = listing.LeaseTermCode;
             this.featureCode = listing.FeatureCode;
@@ -487,7 +488,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
             {
                 this.typeCode = listing.TypeCode;
             }
-
+            this.rentalType= listing.RentalType;
             if (listing.Price.value == 0)
             {
                 listing.Price.type.code = "POA";
