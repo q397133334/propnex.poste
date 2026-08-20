@@ -251,9 +251,7 @@ namespace PropnexPoster.WPF
                                         Log("FastRepost");
                                     }
                                     //Repost
-
                                     await _adsProject.Repost(taskListing.Data.id.Value, listInfo.RepostCharge);
-
                                     await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
 
                                 }
@@ -644,8 +642,6 @@ namespace PropnexPoster.WPF
                                                    ).FirstOrDefault();
                         }
                     }
-
-
                 }
             }
             if (listingInfo != null)
@@ -1273,36 +1269,6 @@ namespace PropnexPoster.WPF
             return _Token;
         }
         private List<ListingsListing> listings = null;
-
-        private async Task<GuruTasks> getGuruTasks()
-        {
-            string context = "";
-            taskDto = await WebServer.GetTask();
-            //taskDto = new PnTaskDto()
-            //{
-            //    Id = Guid.Parse("3a0ceff3-f520-f889-5e83-327a219f7445"),
-            //    Number = "954852.guru.tsk"
-            //};
-
-            if (taskDto != null)
-            {
-                try
-                {
-                    context = await WebServer.GetTaskContent(taskDto);
-                    var lenght = context.IndexOf("Xpressor-Listing-File===");
-                    var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
-                    return new GuruTasks(context, taskContext);
-                }
-                catch
-                {
-                    return null;
-                }
-            }
-            else
-            {
-                return null;
-            }
-        }
 
         private async Task ResultUpload(GuruTask guruTask, GuruTaskListing taskListing, string queue_id, string listing_id, string status = "Done", string memo = "")
         {
