@@ -143,7 +143,6 @@ namespace PropnexPoster.WPF
 
                         //1.获取用户信息
                         var task = guruTasks.Tasks[i];
-                        var listingAction = new ListingAction(task, proxyIp, Log);
                         //3.登陆
                         Log("Get Token .......");
                         var token = await Login(task, proxyIp);
@@ -205,102 +204,9 @@ namespace PropnexPoster.WPF
                                 posterRunInfo.TaskItemId = listing.TaskItemId.ToString();
                                 TaskInfoEvent?.Invoke(posterRunInfo);
 
-                                if (listing.ListingV3.Project.MetaByType.Verified != null)
+                                if (await CreateListingAndPublishAsync(task, listing, _api, _agent, _wrapperListingSg))
                                 {
-                                    var projectResult = await _agent.AgnetProject(int.Parse(listing.ListingV3.Project.MetaByType.Verified.Id));
-                                    if (projectResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                    {
-                                        var project = projectResult.Data;
-                                        listing.ListingV3.Project.MetaByType.Verified.Id = project.NanoId;
-                                        var address = project.Addresses.Where(q => q.ExternalId == listing.ListingV3.Project.MetaByType.Verified.LocationId.ToString()).FirstOrDefault();
-                                        if (address != null)
-                                        {
-                                            listing.ListingV3.Project.MetaByType.Verified.LocationId = address.Id;
-                                        }
-                                        else
-                                        {
-                                            listing.ListingV3.Project.MetaByType.Verified.LocationId = project.Addresses[0].Id;
-                                        }
-                                    }
-                                }
-
-
-                                var result = await _agent.CreateListingAsync(listing.ListingV3);
-
-                                //var createOrUpdateListing = new CreateOrUpdateListing();
-                                //listing.Listing.Agent.id = token.User.AgentId;
-                                //createOrUpdateListing.Create(listing.Listing);
-                                //createOrUpdateListing.isLiveTourAvailable = true;
-                                //var result = await _api.CreateAsync(createOrUpdateListing);
-                                if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                {
-                                    listing.Listing.Id = result.Data.Id;
-                                    if (result.Data.Id != 0)
-                                    {
-                                        if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                        {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
-                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload photo error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                            continue;
-                                        }
-                                        if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                        {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
-                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload video error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                            continue;
-                                        }
-                                        if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                        {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
-                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload vt error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                            continue;
-                                        }
-                                        if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                        {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
-                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload floor plan error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                            continue;
-                                        }
-                                        var taskListing = await _wrapperListingSg.Listings(listing.Listing.Id.Value);
-
-                                        if (taskListing.Data != null)
-                                        {
-                                            //获取
-                                            var offerings = await _wrapperListingSg.Offerings(listing.Listing.Id.ToString());
-                                            if (offerings.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                            {
-                                                var publish = await _wrapperListingSg.Publish(new CreditKey() { Key = offerings.Data.Products[0].Key, Brand = "pg" }, listing.Listing.Id.Value.ToString());
-                                                if(publish.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                                {
-                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-                                                }
-                                                else
-                                                {
-                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", publish.Message);
-                                                }
-                                            }
-                                            else
-                                            {
-                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", offerings.Message);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    if (result.Message.Contains("Postal code is already being used"))
-                                    {
-
-                                    }
-                                    else
-                                    {
-                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
-                                        await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} {result.Message}");
-                                    }
+                                    continue;
                                 }
                                 await End(task, listing.TaskItemId);
                             }
@@ -335,31 +241,10 @@ namespace PropnexPoster.WPF
                                         //更新任务 update task 
 
                                         await _mobile.DeleteMediaAll(taskListing.Data);
-                                        if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                        if (!await UploadAllMediaAsync(task, listing, _api))
                                         {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
-                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload photo error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                             continue;
                                         }
-                                        if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                        {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
-                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload video error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                            continue;
-                                        }
-                                        if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                        {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
-                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload vt error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                            continue;
-                                        }
-                                        if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                        {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
-                                            await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload floor plan error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                            continue;
-                                        }
-
                                     }
                                     else
                                     {
@@ -374,106 +259,10 @@ namespace PropnexPoster.WPF
                                 }
                                 else
                                 {
-                                    //Determine whether to obtain project information based on the type.
-                                    if (listing.ListingV3.Project.MetaByType.Verified != null)
+                                    //Post Only：找不到已有 listing 时，与"post only"任务类型共用同一套 v3 创建+上架流程
+                                    if (await CreateListingAndPublishAsync(task, listing, _api, _agent, _wrapperListingSg))
                                     {
-                                        //get project information to confirm the location id, otherwise it will cause the error of "The location is invalid" when posting.
-                                        var projectResult = await _agent.AgnetProject(int.Parse(listing.ListingV3.Project.MetaByType.Verified.Id));
-                                        if (projectResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                        {
-                                            var project = projectResult.Data;
-                                            //update project id to NanoId
-                                            listing.ListingV3.Project.MetaByType.Verified.Id = project.NanoId;
-                                            //update location id to location id
-                                            //Match by externalId and replace with the ID.
-                                            var address = project.Addresses.Where(q => q.ExternalId == listing.ListingV3.Project.MetaByType.Verified.LocationId.ToString()).FirstOrDefault();
-                                            if (address != null)
-                                            {
-                                                listing.ListingV3.Project.MetaByType.Verified.LocationId = address.Id;
-                                            }
-                                            else
-                                            {
-                                                listing.ListingV3.Project.MetaByType.Verified.LocationId = project.Addresses[0].Id;
-                                            }
-                                        }
-                                    }
-                                    //Post Only
-                                    var result = await _agent.CreateListingAsync(listing.ListingV3);
-
-                                    //var createOrUpdateListing = new CreateOrUpdateListing();
-                                    //listing.Listing.Agent.id = token.User.AgentId;
-                                    //createOrUpdateListing.Create(listing.Listing);
-                                    //createOrUpdateListing.isLiveTourAvailable = true;
-                                    //var result = await _api.CreateAsync(createOrUpdateListing);
-
-                                    if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                    {
-                                        listing.Listing.Id = result.Data.Id;
-                                        if (result.Data.Id != 0)
-                                        {
-                                            if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                            {
-                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
-                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload photo error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                                continue;
-                                            }
-                                            if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                            {
-                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
-                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload video error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                                continue;
-                                            }
-                                            if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                            {
-                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
-                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload vt error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                                continue;
-                                            }
-                                            if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                            {
-                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
-                                                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload floor plan error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                                continue;
-                                            }
-                                            var taskListing = await _wrapperListingSg.Listings(listing.Listing.Id.Value);
-
-                                            if (taskListing.Data != null)
-                                            {
-                                                var offerings = await _wrapperListingSg.Offerings(listing.Listing.Id.ToString());
-                                                if (offerings.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                                {
-                                                    var publish = await _wrapperListingSg.Publish(new CreditKey() { Key = offerings.Data.Products[0].Key, Brand = "pg" }, listing.Listing.Id.Value.ToString());
-                                                    if (publish.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                                                    {
-                                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-                                                    }
-                                                    else
-                                                    {
-                                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", publish.Message);
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", offerings.Message);
-                                                }
-                                            }
-                                            else
-                                            {
-                                                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (result.Message.Contains("Postal code is already being used"))
-                                        {
-
-                                        }
-                                        else
-                                        {
-                                            await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
-                                            await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} {result.Message}");
-                                        }
+                                        continue;
                                     }
                                 }
 
@@ -503,28 +292,8 @@ namespace PropnexPoster.WPF
                                     await _api.UpdateAsync(taskListing.Data);
 
                                     await _mobile.DeleteMediaAll(taskListing.Data);
-                                    if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
+                                    if (!await UploadAllMediaAsync(task, listing, _api))
                                     {
-                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
-                                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload photo error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                        continue;
-                                    }
-                                    if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                    {
-                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
-                                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload video error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                        continue;
-                                    }
-                                    if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                    {
-                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
-                                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload vt error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                                        continue;
-                                    }
-                                    if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                                    {
-                                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
-                                        await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} upload floor plan error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
                                         continue;
                                     }
                                     await _api.GetListing(listing.Listing.Id.Value);
@@ -630,30 +399,7 @@ namespace PropnexPoster.WPF
                                                             data[formName + "[title]"] = vnames[1].Trim();
                                                         }
                                                     }
-                                                    try
-                                                    {
-                                                        using (var multipartFormDataContent = new MultipartFormDataContent())
-                                                        {
-                                                            foreach (var content in data)
-                                                            {
-                                                                multipartFormDataContent.Add(new StringContent(content.Value), content.Key);
-                                                            }
-                                                            using (var client = new HttpClient())
-                                                            {
-                                                                using (var stream = new StreamContent(new System.IO.FileStream(p, System.IO.FileMode.Open)))
-                                                                {
-                                                                    multipartFormDataContent.Add(stream, formName + "[attachfile]", System.IO.Path.GetFileName(p));
-                                                                    ok = await httpClient.PostAsync($"{url}listingAttachments/create/{xpid}", multipartFormDataContent);
-                                                                    httpResult = await ok.Content.ReadAsStringAsync();
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                    catch (Exception ex)
-                                                    {
-                                                        //DoProgress("Exception in PostWebPageMultipart", -1, "");
-                                                        //throw;
-                                                    }
+                                                    await PostXpressorAttachmentAsync(httpClient, url, xpid, formName, data, p);
                                                 }
 
 
@@ -684,31 +430,7 @@ namespace PropnexPoster.WPF
                                                             {
                                                                 data[formName + "[title]"] = vnames[1].Trim();
                                                             }
-                                                            try
-                                                            {
-                                                                using (var multipartFormDataContent = new MultipartFormDataContent())
-                                                                {
-                                                                    foreach (var content in data)
-                                                                    {
-                                                                        multipartFormDataContent.Add(new StringContent(content.Value), content.Key);
-                                                                    }
-                                                                    using (var client = new HttpClient())
-                                                                    {
-                                                                        using (var stream = new StreamContent(new System.IO.FileStream(p, System.IO.FileMode.Open)))
-                                                                        {
-                                                                            multipartFormDataContent.Add(stream, formName + "[attachfile]", System.IO.Path.GetFileName(p));
-                                                                            ok = await httpClient.PostAsync($"{url}listingAttachments/create/{xpid}", multipartFormDataContent);
-                                                                            httpResult = await ok.Content.ReadAsStringAsync();
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                            catch (Exception ex)
-                                                            {
-                                                                //DoProgress("Exception in PostWebPageMultipart", -1, "");
-                                                                //throw;
-                                                            }
-
+                                                            await PostXpressorAttachmentAsync(httpClient, url, xpid, formName, data, p);
                                                         }
                                                     }
                                                 }
@@ -755,30 +477,7 @@ namespace PropnexPoster.WPF
                                                     {
                                                         data[formName + "[title]"] = vnames[vnames.Length - 1].Trim();
                                                     }
-                                                    try
-                                                    {
-                                                        using (var multipartFormDataContent = new MultipartFormDataContent())
-                                                        {
-                                                            foreach (var content in data)
-                                                            {
-                                                                multipartFormDataContent.Add(new StringContent(content.Value), content.Key);
-                                                            }
-                                                            using (var client = new HttpClient())
-                                                            {
-                                                                using (var stream = new StreamContent(new System.IO.FileStream(p, System.IO.FileMode.Open)))
-                                                                {
-                                                                    multipartFormDataContent.Add(stream, formName + "[attachfile]", System.IO.Path.GetFileName(p));
-                                                                    ok = await httpClient.PostAsync($"{url}listingAttachments/create/{xpid}", multipartFormDataContent);
-                                                                    httpResult = await ok.Content.ReadAsStringAsync();
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                    catch (Exception ex)
-                                                    {
-                                                        //DoProgress("Exception in PostWebPageMultipart", -1, "");
-                                                        //throw;
-                                                    }
+                                                    await PostXpressorAttachmentAsync(httpClient, url, xpid, formName, data, p);
                                                 }
 
                                                 string[] videos = retrieveListing.Videos.Split(new string[] { "\n" }, StringSplitOptions.None);
@@ -822,30 +521,7 @@ namespace PropnexPoster.WPF
                                                     }
                                                     ;
 
-                                                    try
-                                                    {
-                                                        using (var multipartFormDataContent = new MultipartFormDataContent())
-                                                        {
-                                                            foreach (var content in data)
-                                                            {
-                                                                multipartFormDataContent.Add(new StringContent(content.Value), content.Key);
-                                                            }
-                                                            using (var client = new HttpClient())
-                                                            {
-                                                                using (var stream = new StreamContent(new System.IO.FileStream(p, System.IO.FileMode.Open)))
-                                                                {
-                                                                    multipartFormDataContent.Add(stream, formName + "[attachfile]", System.IO.Path.GetFileName(p));
-                                                                    ok = await httpClient.PostAsync($"{url}listingAttachments/create/{xpid}", multipartFormDataContent);
-                                                                    httpResult = await ok.Content.ReadAsStringAsync();
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                    catch (Exception ex)
-                                                    {
-                                                        //DoProgress("Exception in PostWebPageMultipart", -1, "");
-                                                        //throw;
-                                                    }
+                                                    await PostXpressorAttachmentAsync(httpClient, url, xpid, formName, data, p);
                                                 }
                                             }
                                         }
@@ -873,7 +549,6 @@ namespace PropnexPoster.WPF
                         _adsProject.Dispose();
                         _mobile.Dispose();
                         _agent.Dispose();
-                        listingAction.Dispose();
                     }
                     catch (Exception ex)
                     {
@@ -910,27 +585,6 @@ namespace PropnexPoster.WPF
 
         }
         private List<ListingInfo> ListingInfos = new List<ListingInfo>();
-
-        private async Task ActivateAndReportAsync(GuruTask task, GuruTaskListing listing, Mobile _mobile, AdsProduct _adsProject, Token token)
-        {
-            var draflistings = (await _mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
-            {
-                StatusCode = "DRAFT",
-            })).Data.listings;
-            var draflisting = draflistings.FirstOrDefault(q => q.id == listing.Listing.Id);
-            if (draflisting != null)
-            {
-                var activateResult = await _adsProject.Activate(listing.Listing.Id.Value, draflisting.charges.activate);
-                if (activateResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
-                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-                else
-                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", activateResult.Message);
-            }
-            else
-            {
-                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
-            }
-        }
 
         private ListingInfo IsExtis(GuruTask guruTask, GuruTaskListing guruTaskListing, bool isPostOnly = false)
         {
@@ -1003,6 +657,122 @@ namespace PropnexPoster.WPF
                 _logger.Information("not find listingInfo");
             }
             return listingInfo;
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // 发布任务类型 (TaskType) 一览：
+        //   post only            走 v3 新建流程：校验项目信息(AgnetProject) → Agent.CreateListingAsync 建 listing → 上传媒体 → WrapperListingSg.Offerings/Publish 上架
+        //   repost                已存在匹配 listing：（非 FastRepost 时）先用 v3/v2 更新并重传媒体，再 AdsProduct.Repost；不存在则按 post only 的 v3 流程新建
+        //   update                已存在匹配 listing：更新字段与媒体（走 _api 的 v2 GetListing/UpdateAsync）
+        //   remove from portals   已存在匹配 listing：调用 DeleteListing 下架
+        //   retrieve*             拉取 listing 详情并转发给 Xpressor（第三方系统），与上面几类走完全不同的上传通道
+        // 新建/更新流程都共用同一套媒体上传（图片/视频/全景/平面图），post only 与 repost 的"找不到已有 listing"分支共用同一套 v3 创建+上架逻辑，见下方 UploadAllMediaAsync / CreateListingAndPublishAsync。
+        // ─────────────────────────────────────────────────────────────────────
+
+        /// <summary>依次上传图片、视频、全景看房、平面图；任一步失败即上报失败结果并通知 Slack，返回 false。</summary>
+        private async Task<bool> UploadAllMediaAsync(GuruTask task, GuruTaskListing listing, Api _api)
+        {
+            return await uploadStep(uploadPhotosAsync, "upload photo error")
+                && await uploadStep(uploadVideos, "upload video error")
+                && await uploadStep(uploadVirtualTours, "upload vt error")
+                && await uploadStep(uploadFloorPlanAsync, "upload floor plan error");
+
+            async Task<bool> uploadStep(Func<GuruTaskListing, Api, Task<HttpResult<string>>> upload, string errorMessage)
+            {
+                if ((await upload(listing, _api)).HttpStatusCode == System.Net.HttpStatusCode.OK)
+                    return true;
+                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", errorMessage);
+                await SlackBotMessage.SendAsync($"TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId{listing.Listing.Id} {errorMessage}  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 新建 listing 并走 v3 发布流程（校验项目信息 → 创建 → 上传媒体 → Offerings/Publish 上架）。
+        /// post only、以及 repost 在找不到已有匹配 listing 时，都共用这一套流程。
+        /// 返回 true 仅代表"媒体上传失败"，调用方应据此 continue 以跳过本次 End 上报（与原逻辑保持一致）；其余失败分支已自行上报结果，返回 false 即可继续走 End。
+        /// </summary>
+        private async Task<bool> CreateListingAndPublishAsync(GuruTask task, GuruTaskListing listing, Api _api, Agent _agent, WrapperListingSg _wrapperListingSg)
+        {
+            if (listing.ListingV3.Project.MetaByType.Verified != null)
+            {
+                //get project information to confirm the location id, otherwise it will cause the error of "The location is invalid" when posting.
+                var projectResult = await _agent.AgnetProject(int.Parse(listing.ListingV3.Project.MetaByType.Verified.Id));
+                if (projectResult.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    var project = projectResult.Data;
+                    //update project id to NanoId
+                    listing.ListingV3.Project.MetaByType.Verified.Id = project.NanoId;
+                    //update location id to location id, match by externalId and replace with the ID.
+                    var address = project.Addresses.Where(q => q.ExternalId == listing.ListingV3.Project.MetaByType.Verified.LocationId.ToString()).FirstOrDefault();
+                    listing.ListingV3.Project.MetaByType.Verified.LocationId = address != null ? address.Id : project.Addresses[0].Id;
+                }
+            }
+
+            var result = await _agent.CreateListingAsync(listing.ListingV3);
+            if (result.HttpStatusCode != System.Net.HttpStatusCode.OK)
+            {
+                if (!result.Message.Contains("Postal code is already being used"))
+                {
+                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
+                    await SlackBotMessage.SendAsync($"{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} {result.Message}");
+                }
+                return false;
+            }
+
+            listing.Listing.Id = result.Data.Id;
+            if (result.Data.Id == 0)
+                return false;
+
+            if (!await UploadAllMediaAsync(task, listing, _api))
+                return true;
+
+            var taskListing = await _wrapperListingSg.Listings(listing.Listing.Id.Value);
+            if (taskListing.Data == null)
+            {
+                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
+                return false;
+            }
+
+            var offerings = await _wrapperListingSg.Offerings(listing.Listing.Id.ToString());
+            if (offerings.HttpStatusCode != System.Net.HttpStatusCode.OK)
+            {
+                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", offerings.Message);
+                return false;
+            }
+
+            var publish = await _wrapperListingSg.Publish(new CreditKey() { Key = offerings.Data.Products[0].Key, Brand = "pg" }, listing.Listing.Id.Value.ToString());
+            if (publish.HttpStatusCode == System.Net.HttpStatusCode.OK)
+                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
+            else
+                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", publish.Message);
+            return false;
+        }
+
+        /// <summary>把一个附件（图片/平面图/视频/全景）以 multipart 表单的形式上传给 Xpressor（retrieve 任务专用，与上面的 PropertyGuru 上传通道完全独立）。</summary>
+        private async Task PostXpressorAttachmentAsync(HttpClient httpClient, string url, string xpid, string formName, Dictionary<string, string> data, string filePath)
+        {
+            try
+            {
+                using (var multipartFormDataContent = new MultipartFormDataContent())
+                {
+                    foreach (var content in data)
+                    {
+                        multipartFormDataContent.Add(new StringContent(content.Value), content.Key);
+                    }
+                    using (var stream = new StreamContent(new System.IO.FileStream(filePath, System.IO.FileMode.Open)))
+                    {
+                        multipartFormDataContent.Add(stream, formName + "[attachfile]", System.IO.Path.GetFileName(filePath));
+                        var ok = await httpClient.PostAsync($"{url}listingAttachments/create/{xpid}", multipartFormDataContent);
+                        await ok.Content.ReadAsStringAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //DoProgress("Exception in PostWebPageMultipart", -1, "");
+                //throw;
+            }
         }
 
         private async Task<HttpResult<string>> uploadPhotosAsync(GuruTaskListing guruTaskListing, Api _api)
@@ -1286,168 +1056,6 @@ namespace PropnexPoster.WPF
             }
             return result;
         }
-
-        // ─────────────────────────────────────────────────────────────────────
-        // V3 执行方法
-        // ─────────────────────────────────────────────────────────────────────
-
-        /// <summary>V3 Post Only：用 v3 格式创建新 listing，上传媒体，再激活上报。</summary>
-        private async Task PostOnlyV3Async(GuruTask task, GuruTaskListing listing, Api _api, Mobile _mobile, AdsProduct _adsProject, Token token)
-        {
-            listing.Listing.Agent.id = token.User.AgentId;
-            var v3Listing = CreateListingV3.From(listing);
-
-            var result = await _api.CreateV3Async(v3Listing);
-            if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)
-            {
-                listing.Listing.Id = result.Data.Id;
-                if (result.Data.Id != 0)
-                {
-                    if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                    {
-                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
-                        await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload photo error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                        return;
-                    }
-                    if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                    {
-                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
-                        await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload video error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                        return;
-                    }
-                    if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                    {
-                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
-                        await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload vt error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                        return;
-                    }
-                    if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                    {
-                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
-                        await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload floor plan error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                        return;
-                    }
-                    // 获取 DRAFT 后用 v3 格式 PUT 一次，令 PG 刷新数据
-                    v3Listing.Id = listing.Listing.Id;
-                    await _api.UpdateV3Async(v3Listing);
-
-                    await ActivateAndReportAsync(task, listing, _mobile, _adsProject, token);
-                }
-            }
-            else
-            {
-                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", result.Message);
-                await SlackBotMessage.SendAsync($"[V3]{task.Id}-{listing.TaskItemId}-{listing.Listing.Id} {result.Message}");
-            }
-        }
-
-        /// <summary>V3 Repost：已存在则更新+repost；不存在则走 PostOnlyV3。</summary>
-        private async Task RepostV3Async(GuruTask task, GuruTaskListing listing, Api _api, Mobile _mobile, AdsProduct _adsProject, Token token)
-        {
-            listing.Listing.Agent.id = token.User.AgentId;
-            var listInfo = IsExtis(task, listing);
-            if (listInfo != null)
-            {
-                if (listing.FastRepost == "0")
-                {
-                    // 用 v3 格式更新
-                    var v3Listing = CreateListingV3.From(listing);
-                    v3Listing.Id = listing.Listing.Id;
-                    await _api.UpdateV3Async(v3Listing);
-                    await _mobile.DeleteMediaAll(await GetListingForMedia(_api, listing));
-                    if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                    {
-                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
-                        await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload photo error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                        return;
-                    }
-                    if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                    {
-                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
-                        await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload video error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                        return;
-                    }
-                    if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                    {
-                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
-                        await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload vt error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                        return;
-                    }
-                    if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                    {
-                        await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
-                        await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload floor plan error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                        return;
-                    }
-                }
-                else
-                {
-                    Log("FastRepost");
-                }
-                await _adsProject.Repost(listInfo.Id, listInfo.RepostCharge);
-                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-            }
-            else
-            {
-                // 不存在 → 走 Post Only V3
-                await PostOnlyV3Async(task, listing, _api, _mobile, _adsProject, token);
-            }
-        }
-
-        /// <summary>V3 Update：用 v3 格式更新已有 listing，再重传媒体。</summary>
-        private async Task UpdateV3Async(GuruTask task, GuruTaskListing listing, Api _api, Mobile _mobile)
-        {
-            if (IsExtis(task, listing) != null)
-            {
-                var v3Listing = CreateListingV3.From(listing);
-                v3Listing.Id = listing.Listing.Id;
-                await _api.UpdateV3Async(v3Listing);
-
-                var currentListing = await GetListingForMedia(_api, listing);
-                await _mobile.DeleteMediaAll(currentListing);
-
-                if ((await uploadPhotosAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                {
-                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload photo error");
-                    await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload photo error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                    return;
-                }
-                if ((await uploadVideos(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                {
-                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload video error");
-                    await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload video error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                    return;
-                }
-                if ((await uploadVirtualTours(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                {
-                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload vt error");
-                    await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload vt error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                    return;
-                }
-                if ((await uploadFloorPlanAsync(listing, _api)).HttpStatusCode != System.Net.HttpStatusCode.OK)
-                {
-                    await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "upload floor plan error");
-                    await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} upload floor plan error {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
-                    return;
-                }
-                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
-            }
-            else
-            {
-                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "Update listing, but Not match listing");
-            }
-        }
-
-        /// <summary>获取当前 listing 的完整数据（用于删除媒体），v3 路径复用 v2 GET 接口。</summary>
-        private async Task<CreateOrUpdateListing> GetListingForMedia(Api _api, GuruTaskListing listing)
-        {
-            if (!listing.Listing.Id.HasValue)
-                return new CreateOrUpdateListing();
-            var result = await _api.GetListing(listing.Listing.Id.Value);
-            return result.HttpStatusCode == System.Net.HttpStatusCode.OK ? result.Data : new CreateOrUpdateListing();
-        }
-
-        // ─────────────────────────────────────────────────────────────────────
 
         private async Task<bool> _downLoadFile(string url, string filePath)
         {
