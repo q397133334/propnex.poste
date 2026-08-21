@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Propnex.Poster.PropertyGuru
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PropnexPoster.WPF", "PropnexPoster.WPF\PropnexPoster.WPF.csproj", "{CE26A089-0E65-44D1-9790-294A4A03BBD8}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PropnexPoster.Avalonia", "PropnexPoster.Avalonia\PropnexPoster.Avalonia.csproj", "{F5451453-D488-4428-A210-AACFA7A6151F}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Propnex.Poster.Test", "Propnex.Poster.Test\Propnex.Poster.Test.csproj", "{F1B490E0-1AA9-4B4C-A35C-4CF4CFB8532B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Propnex", "Propnex.Task\Propnex.csproj", "{849BD261-357D-4D77-AE57-6A796DF8405D}"
@@ -45,6 +47,10 @@ Global
 		{CE26A089-0E65-44D1-9790-294A4A03BBD8}.Debug|x64.Build.0 = Debug|x64
 		{CE26A089-0E65-44D1-9790-294A4A03BBD8}.Release|x64.ActiveCfg = Release|x64
 		{CE26A089-0E65-44D1-9790-294A4A03BBD8}.Release|x64.Build.0 = Release|x64
+		{F5451453-D488-4428-A210-AACFA7A6151F}.Debug|x64.ActiveCfg = Debug|x64
+		{F5451453-D488-4428-A210-AACFA7A6151F}.Debug|x64.Build.0 = Debug|x64
+		{F5451453-D488-4428-A210-AACFA7A6151F}.Release|x64.ActiveCfg = Release|x64
+		{F5451453-D488-4428-A210-AACFA7A6151F}.Release|x64.Build.0 = Release|x64
 		{F1B490E0-1AA9-4B4C-A35C-4CF4CFB8532B}.Debug|x64.ActiveCfg = Debug|x64
 		{F1B490E0-1AA9-4B4C-A35C-4CF4CFB8532B}.Debug|x64.Build.0 = Debug|x64
 		{F1B490E0-1AA9-4B4C-A35C-4CF4CFB8532B}.Release|x64.ActiveCfg = Release|x64
