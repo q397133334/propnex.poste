@@ -40,11 +40,18 @@ namespace PropnexPoster.WPF
         private string taskType;
         private int listingCount = 0;
         private string taskItemId;
+        private DateTime? startTime;
 
         public string TaskNumber
         {
             get => taskNumber;
             set { taskNumber = value; OnPropertyChanged(nameof(TaskNumber)); }
+        }
+
+        public string StartTime
+        {
+            get => startTime.HasValue ? $"StartTime: {startTime:yyyy-MM-dd HH:mm:ss}" : "";
+            set { startTime = string.IsNullOrEmpty(value) ? (DateTime?)null : DateTime.Parse(value); OnPropertyChanged(nameof(StartTime)); }
         }
 
         public string Account
@@ -118,6 +125,7 @@ namespace PropnexPoster.WPF
                 return;
             }
             posterRunInfo.TaskNumber = taskDto.Number;
+            posterRunInfo.StartTime = DateTime.Now.ToString();
             Log($"Get Task success,{taskDto.Number}");
             //2.生成日志
 
