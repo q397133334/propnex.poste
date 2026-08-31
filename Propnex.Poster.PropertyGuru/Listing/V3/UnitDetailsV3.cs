@@ -118,7 +118,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
 
         /// <summary>种族配额剩余（quotaEthnic），如 C / M / I / O</summary>
         [JsonProperty("quotaEthnic", NullValueHandling = NullValueHandling.Ignore)]
-        public string QuotaEthnic { get; set; } = null;
+        public bool? QuotaEthnic { get; set; } = null;
 
         /// <summary>永久居民配额剩余（quotaSpr）</summary>
         [JsonProperty("quotaSpr", NullValueHandling = NullValueHandling.Ignore)]

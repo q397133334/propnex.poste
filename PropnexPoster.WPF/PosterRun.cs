@@ -232,7 +232,7 @@ namespace PropnexPoster.WPF
 
                                     if (listing.FastRepost == "0")
                                     {
-                                        if (!await UpdateExistingListingMediaAsync(task, listing, _api, _mobile, taskListing.Data))
+                                        if (!await UpdateExistingListingMediaAsync(task, listing, _api, _mobile, _wrapperListingSg, taskListing.Data))
                                         {
                                             continue;
                                         }
@@ -271,9 +271,9 @@ namespace PropnexPoster.WPF
                                     //更新任务 UpdateTask
 
                                     // get listing detial
-                                    var taskListing = await _api.GetListing(listing.Listing.Id.Value);
+                                    var taskListing = await _api.GetListing(listing.Listing.Id.Value, listing.Listing.StatusCode);
 
-                                    if (!await UpdateExistingListingMediaAsync(task, listing, _api, _mobile, taskListing.Data))
+                                    if (!await UpdateExistingListingMediaAsync(task, listing, _api, _mobile, _wrapperListingSg, taskListing.Data))
                                     {
                                         continue;
                                     }
@@ -568,6 +568,10 @@ namespace PropnexPoster.WPF
         private ListingInfo IsExtis(GuruTask guruTask, GuruTaskListing guruTaskListing, bool isPostOnly = false)
         {
             ListingInfo listingInfo = null;
+            //guruTaskListing.Listing.Id = listingInfo.Id;
+            //return listingInfo;
+
+
             if (guruTaskListing.Listing.Id.HasValue)
             {
                 listingInfo = ListingInfos.FirstOrDefault(q => q.Id == guruTaskListing.Listing.Id);
@@ -729,15 +733,12 @@ namespace PropnexPoster.WPF
         /// <summary>
         /// 更新一个已存在 listing 的字段并重传媒体（repost 命中已有 listing、update 任务类型共用），
         /// 按 listing 的 version 分流到 v2/v3 各自的更新实现。
-        /// v3 的更新逻辑还没做，暂时先复用 UpdateExistingListingMediaV2Async 占位，后面单独实现 v3 时
-        /// 只需要把 v3 分支换成真正的 UpdateExistingListingMediaV3Async。
         /// </summary>
-        private async Task<bool> UpdateExistingListingMediaAsync(GuruTask task, GuruTaskListing listing, Api _api, Mobile _mobile, CreateOrUpdateListing taskListingData)
+        private async Task<bool> UpdateExistingListingMediaAsync(GuruTask task, GuruTaskListing listing, Api _api, Mobile _mobile, WrapperListingSg _wrapperListingSg, CreateOrUpdateListing taskListingData)
         {
             if (taskListingData.version == "v3")
             {
-                // TODO: v3 更新逻辑还没实现，暂时复用 v2 的逻辑
-                return await UpdateExistingListingMediaV2Async(task, listing, _api, _mobile, taskListingData);
+                return await UpdateExistingListingMediaV3Async(task, listing, _api, _mobile, _wrapperListingSg, taskListingData);
             }
             else
             {
@@ -758,6 +759,34 @@ namespace PropnexPoster.WPF
 
             //update listing
             await _api.UpdateAsync(taskListingData);
+
+            await _mobile.DeleteMediaAll(taskListingData);
+            if (!await UploadAllMediaAsync(task, listing, _api))
+                return false;
+
+            await _api.GetListing(listing.Listing.Id.Value);
+            return true;
+        }
+
+        /// <summary>
+        /// v3 版本的"更新已有 listing 并重传媒体"：用 PatchListingV3（由 ListingV3 转换而来，见
+        /// GuruTaskListings.Init()）走 WrapperListingSg.Patch 局部更新字段 → 删光旧媒体 →
+        /// 依次重传图片/视频/全景/平面图 → 再 GetListing 一次让 PG 刷新数据。
+        /// 媒体的删除/上传接口（Mobile.DeleteMediaAll、UploadAllMediaAsync）跟 v2/v3 无关，是共用的
+        /// media 接口，taskListingData 也仍然来自 _api.GetListing（v2 接口）——version 只是 PG 返回的
+        /// 字段格式标记，不代表要换一套媒体通道。
+        /// 返回 false 代表 Patch 失败或媒体上传失败（均已自行上报结果，Patch 失败额外通知 Slack），
+        /// 调用方应据此 continue 跳过后续步骤。
+        /// </summary>
+        private async Task<bool> UpdateExistingListingMediaV3Async(GuruTask task, GuruTaskListing listing, Api _api, Mobile _mobile, WrapperListingSg _wrapperListingSg, CreateOrUpdateListing taskListingData)
+        {
+            var patchResult = await _wrapperListingSg.Patch(listing.Listing.Id.ToString(), listing.PatchV3);
+            if (patchResult.HttpStatusCode != System.Net.HttpStatusCode.OK)
+            {
+                await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", patchResult.Message);
+                await SlackBotMessage.SendAsync($"[V3]TaskId:{task.Id}-TaskItemid:{listing.TaskItemId}-ListingId:{listing.Listing.Id} patch listing error  {WPFModule.AppConfiguration.MachineNumber} <@U01DQLBLWNL>");
+                return false;
+            }
 
             await _mobile.DeleteMediaAll(taskListingData);
             if (!await UploadAllMediaAsync(task, listing, _api))
@@ -915,14 +944,11 @@ namespace PropnexPoster.WPF
                         {
                             File.Delete(filePath);
                         }
-                        //DownClient webClient = new DownClient();
-                        //webClient.DownloadFile(guruTaskListing.Videos[i], filePath);
                         if (await _downLoadFile(guruTaskListing.Videos[i], filePath) == false)
                         {
                             break;
                         }
                         Log("download move complete");
-                        //result = await _api.UploadVideosAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
                     }
                     catch (Exception ex)
                     {
@@ -999,14 +1025,11 @@ namespace PropnexPoster.WPF
                         {
                             File.Delete(filePath);
                         }
-                        //DownClient webClient = new DownClient();
-                        //webClient.DownloadFile(guruTaskListing.Tours[i], filePath);
                         if (await _downLoadFile(guruTaskListing.Tours[i], filePath) == false)
                         {
                             break;
                         }
                         Log("download tour complete");
-                        //result = await _api.UplaodVirtualTours($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
                     }
                     catch (Exception ex)
                     {
@@ -1047,15 +1070,11 @@ namespace PropnexPoster.WPF
                 var filePath = $"{path}{i}_fp{GetExtensionFromUrl(guruTaskListing.FloorPlan[i])}";
                 try
                 {
-                    //await guruTaskListing.FloorPlan[i].DownloadFileAsync(path, $"{i}_fp.jpg");
-
                     Log("download FloorPlan");
                     if (File.Exists(filePath))
                     {
                         File.Delete(filePath);
                     }
-                    //DownClient webClient = new DownClient();
-                    //webClient.DownloadFile(guruTaskListing.FloorPlan[i], filePath);
                     if (await _downLoadFile(guruTaskListing.FloorPlan[i], filePath) == false)
                     {
                         break;
@@ -1077,22 +1096,6 @@ namespace PropnexPoster.WPF
 
         private async Task<bool> _downLoadFile(string url, string filePath)
         {
-            //Start:
-            //    int reTry = 0;
-            //    try
-            //    {
-            //        DownClient webClient = new DownClient();
-            //        webClient.DownloadFile(url, filePath);
-            //        return true;
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        Log(ex.Message);
-            //        if (reTry < 3)
-            //            goto Start;
-            //    }
-            //    return false;
-
             return await FileDownloader.DownloadFileAsync(url, filePath, maxAttempts: 3, new Progress<double>(p =>
             {
                 if (p < 0) Log("Downloading... size unknown");

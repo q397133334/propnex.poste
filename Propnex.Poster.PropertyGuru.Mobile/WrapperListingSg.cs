@@ -133,18 +133,33 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             }
         }
 
-        public async Task<HttpResult<Listing.V3.ListingModel>> Patch(string listingId)
+        /// <summary>局部更新一个 listing（PATCH），body 是 PatchListingV3（跟 CreateListingV3 是两套不同的 schema）；返回更新后的完整 listing（与 Listings() 同一形状）。</summary>
+        public async Task<HttpResult<Listing.V3.ListingModel>> Patch(string listingId, PatchListingV3 body)
         {
             var request = GetRequest();
-            request.Method = Method.Get;
-            request.Resource = $"/v1/listings/{listingId}?t={DateTime.Now.ToLongTimeString()}";
+            request.Method = Method.Patch;
+            request.Resource = $"/v1/listings/{listingId}";
             request.AddHeader("Authorization", $"Bearer {Token.accessToken}");
             request.AddHeader("x-source", "mobile");
             request.AddHeader("x-brand", "pg");
             request.AddHeader("x-market", "pg");
             request.AddHeader("x-region", "sg");
             request.AddHeader("x-requested-with", "com.allproperty.android.agentnet");
-            return null;
+            request.AddJsonBody(body);
+            var response = await ExecuteAsync(request);
+            try
+            {
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    var listing = Newtonsoft.Json.JsonConvert.DeserializeObject<Listing.V3.ListingModel>(response.Content);
+                    return new HttpResult<Listing.V3.ListingModel> { Data = listing, HttpStatusCode = System.Net.HttpStatusCode.OK };
+                }
+                return GetHttpResult<Listing.V3.ListingModel>(response);
+            }
+            catch (Exception ex)
+            {
+                return new HttpResult<Listing.V3.ListingModel>();
+            }
         }
     }
 }

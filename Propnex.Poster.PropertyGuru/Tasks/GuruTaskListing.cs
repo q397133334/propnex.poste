@@ -258,6 +258,10 @@ namespace Propnex.Poster.PropertyGuru.Tasks
         /// <summary>V3 格式数据，与 Listing 同步解析，方便后续直接调用 v3 API</summary>
         public CreateListingV3 ListingV3 { get; set; }
 
+        /// <summary>PATCH /v1/listings/{id} 用的局部更新数据，由 ListingV3 转换而来（PatchListingV3.From），
+        /// 跟 ListingV3 是两套不同的 schema，不要互相混用</summary>
+        public PatchListingV3 PatchV3 { get; set; }
+
         // ── 顶层 Listing 字段 ────────────────────────────────────────
         /// <summary>Listing 内部 ID（&lt;ID&gt;）</summary>
         public int ListingId { get; set; }

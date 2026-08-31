@@ -78,27 +78,12 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
 
     }
 
-    public class CreatedType
+    /// <summary>{date, timestamp} 形式的时间点，dates 下 created/expiry/firstPosted/lastPosted/updated/contentUpdated 都是这个形状。</summary>
+    public class DateInfoType
     {
         public string date { get; set; }
 
-        public int? timestamp { get; set; }
-
-    }
-
-    public class UpdatedType
-    {
-        public string date { get; set; }
-
-        public int? timestamp { get; set; }
-
-    }
-
-    public class ContentUpdatedType
-    {
-        public string date { get; set; }
-
-        public int? timestamp { get; set; }
+        public long? timestamp { get; set; }
 
     }
 
@@ -110,17 +95,17 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
 
         public object? available { get; set; }
 
-        public CreatedType? created { get; set; }
+        public DateInfoType? created { get; set; }
 
-        public object? expiry { get; set; }
+        public DateInfoType? expiry { get; set; }
 
-        public object? firstPosted { get; set; }
+        public DateInfoType? firstPosted { get; set; }
 
-        public object? lastPosted { get; set; }
+        public DateInfoType? lastPosted { get; set; }
 
-        public UpdatedType? updated { get; set; }
+        public DateInfoType? updated { get; set; }
 
-        public ContentUpdatedType? contentUpdated { get; set; }
+        public DateInfoType? contentUpdated { get; set; }
 
     }
 
@@ -448,6 +433,26 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
 
     }
 
+    public class PropertyBrochuresType
+    {
+        public int? id { get; set; }
+
+        public object? caption { get; set; }
+
+        public string statusCode { get; set; }
+
+        public int? sortOrder { get; set; }
+
+        public string url { get; set; }
+
+        public string type { get; set; }
+
+        public string mimeType { get; set; }
+
+        public bool isCover { get; set; }
+
+    }
+
     public class MediaType
     {
         public List<AgencyLogosType> agencyLogos { get; set; }
@@ -461,6 +466,8 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         public List<object> developerLogos { get; set; }
 
         public List<object> excludedProjectPhotos { get; set; }
+
+        public List<object> excludedProjectFloorPlans { get; set; }
 
         public List<object> includedProjectFloorPlans { get; set; }
 
@@ -496,7 +503,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
 
         public List<object> projectSitePlans { get; set; }
 
-        public List<object> propertyBrochures { get; set; }
+        public List<PropertyBrochuresType> propertyBrochures { get; set; }
 
         public List<object> reviewCovers { get; set; }
 
@@ -818,6 +825,102 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
 
     }
 
+    // ── listing 顶层的 project 字段（楼盘详情，与 media.project[]/projectLogos[] 的相册图片形状无关，
+    //    不要跟上面的 ProjectType 混用）────────────────────────────────
+    public class ListingProjectTenureType
+    {
+        public string code { get; set; }
+
+        public string text { get; set; }
+
+    }
+
+    public class ListingProjectCategoryTypeType
+    {
+        public string code { get; set; }
+
+        public string text { get; set; }
+
+    }
+
+    public class ListingProjectFacilityType
+    {
+        public string code { get; set; }
+
+        public string description { get; set; }
+
+    }
+
+    public class ListingProjectCodeTextType
+    {
+        public string code { get; set; }
+
+        public string text { get; set; }
+
+    }
+
+    public class ListingProjectPropertyType
+    {
+        public ListingProjectCodeTextType type { get; set; }
+
+        public ListingProjectCodeTextType subType { get; set; }
+
+        public ListingProjectCodeTextType unitType { get; set; }
+
+    }
+
+    public class VerifiedProjectDetailType
+    {
+        public string id { get; set; }
+
+        public int? legacyId { get; set; }
+
+        public int? projectId { get; set; }
+
+        public string name { get; set; }
+
+        public string statusCode { get; set; }
+
+        public ListingProjectTenureType tenure { get; set; }
+
+        public string developer { get; set; }
+
+        public int? totalUnits { get; set; }
+
+        public List<ListingProjectFacilityType> facilities { get; set; }
+
+        public int? floors { get; set; }
+
+        public bool? isProjectActive { get; set; }
+
+        public bool? newProject { get; set; }
+
+        public int? completionMonth { get; set; }
+
+        public int? completionYear { get; set; }
+
+        public object? availableUnits { get; set; }
+
+        public ListingProjectCategoryTypeType categoryType { get; set; }
+
+        public ListingProjectPropertyType property { get; set; }
+
+    }
+
+    public class ListingProjectMetaByTypeType
+    {
+        public VerifiedProjectDetailType verified { get; set; }
+
+    }
+
+    public class ListingProjectType
+    {
+        public string type { get; set; }
+
+        public ListingProjectMetaByTypeType metaByType { get; set; }
+
+    }
+
     public class ListingModel
     {
         public int? id { get; set; }
@@ -870,7 +973,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
 
         public OfferingsType? offerings { get; set; }
 
-        public ProjectType? project { get; set; }
+        public ListingProjectType? project { get; set; }
 
         public PriceType? price { get; set; }
 

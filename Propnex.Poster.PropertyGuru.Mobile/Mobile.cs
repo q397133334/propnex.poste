@@ -161,7 +161,7 @@ namespace Propnex.Poster.PropertyGuru.Mobile
 
         public string Agent { get; set; } = "153282";
 
-        public string StatusCode { get; set; } = "ACT";
+        public string StatusCode { get; set; } = "DRAF";
 
         public string Order { get; set; } = "desc";
 
