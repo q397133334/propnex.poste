@@ -133,8 +133,8 @@ namespace Propnex.Poster.PropertyGuru.Mobile
             }
         }
 
-        /// <summary>局部更新一个 listing（PATCH），body 按需要修改的字段自行组装；返回更新后的完整 listing（与 Listings() 同一形状）。</summary>
-        public async Task<HttpResult<Listing.V3.ListingModel>> Patch(string listingId, object body)
+        /// <summary>局部更新一个 listing（PATCH），body 是 PatchListingV3（跟 CreateListingV3 是两套不同的 schema）；返回更新后的完整 listing（与 Listings() 同一形状）。</summary>
+        public async Task<HttpResult<Listing.V3.ListingModel>> Patch(string listingId, PatchListingV3 body)
         {
             var request = GetRequest();
             request.Method = Method.Patch;
