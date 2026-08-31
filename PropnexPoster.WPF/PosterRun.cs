@@ -108,7 +108,7 @@ namespace PropnexPoster.WPF
 #if DEBUG
             taskDto = new PnTaskDto()
             {
-                Number = "1308188.guru.tsk"
+                Number = "cp17881470235834.guru.tsk"
             };
             var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
             var lenght = context.IndexOf("Xpressor-Listing-File===");
@@ -234,21 +234,36 @@ namespace PropnexPoster.WPF
                                     {
                                         if (taskListing.Data.version == "v3")
                                         {
+
+                                            //replace listing 
                                             taskListing.Data.Update(listing.Listing);
                                             taskListing.Data.isLiveTourAvailable = true;
+
+                                            //update listing
                                             await _api.UpdateAsync(taskListing.Data);
+
+                                            await _mobile.DeleteMediaAll(taskListing.Data);
+                                            if (!await UploadAllMediaAsync(task, listing, _api))
+                                            {
+                                                continue;
+                                            }
                                         }
                                         else
                                         {
+                                            //replace listing 
+                                            taskListing.Data.Update(listing.Listing);
+                                            taskListing.Data.isLiveTourAvailable = true;
 
-                                        }
-                                        //更新任务 update task 
+                                            //update listing
+                                            await _api.UpdateAsync(taskListing.Data);
 
-                                        await _mobile.DeleteMediaAll(taskListing.Data);
-                                        if (!await UploadAllMediaAsync(task, listing, _api))
-                                        {
-                                            continue;
+                                            await _mobile.DeleteMediaAll(taskListing.Data);
+                                            if (!await UploadAllMediaAsync(task, listing, _api))
+                                            {
+                                                continue;
+                                            }
                                         }
+                                        await _api.GetListing(listing.Listing.Id.Value);
                                     }
                                     else
                                     {
@@ -285,19 +300,42 @@ namespace PropnexPoster.WPF
 
                                     // get listing detial 
                                     var taskListing = await _api.GetListing(listing.Listing.Id.Value);
-                                    //replace listing 
-                                    taskListing.Data.Update(listing.Listing);
-                                    taskListing.Data.isLiveTourAvailable = true;
-
-                                    //update listing
-                                    await _api.UpdateAsync(taskListing.Data);
-
-                                    await _mobile.DeleteMediaAll(taskListing.Data);
-                                    if (!await UploadAllMediaAsync(task, listing, _api))
+                                    
+                                    if (taskListing.Data.version == "v3")
                                     {
-                                        continue;
+
+                                        //replace listing 
+                                        taskListing.Data.Update(listing.Listing);
+                                        taskListing.Data.isLiveTourAvailable = true;
+
+                                        //update listing
+                                        await _api.UpdateAsync(taskListing.Data);
+
+                                        await _mobile.DeleteMediaAll(taskListing.Data);
+                                        if (!await UploadAllMediaAsync(task, listing, _api))
+                                        {
+                                            continue;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        //replace listing 
+                                        taskListing.Data.Update(listing.Listing);
+                                        taskListing.Data.isLiveTourAvailable = true;
+
+                                        //update listing
+                                        await _api.UpdateAsync(taskListing.Data);
+
+                                        await _mobile.DeleteMediaAll(taskListing.Data);
+                                        if (!await UploadAllMediaAsync(task, listing, _api))
+                                        {
+                                            continue;
+                                        }
                                     }
                                     await _api.GetListing(listing.Listing.Id.Value);
+                                    //更新任务 update task 
+
+
                                     await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
                                 }
                                 else
