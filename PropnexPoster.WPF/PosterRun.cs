@@ -727,39 +727,41 @@ namespace PropnexPoster.WPF
         }
 
         /// <summary>
-        /// 更新一个已存在 listing 的字段并重传媒体（repost 命中已有 listing、update 任务类型共用）：
-        /// 替换字段 → UpdateAsync → 删光旧媒体 → 依次重传图片/视频/全景/平面图 → 再 GetListing 一次让 PG 刷新数据。
-        /// v3 的更新逻辑还没做，目前 v3/非 v3 暂时走同一套；分支先留着，后面单独实现 v3 时只需要改 if 分支。
-        /// 返回 false 代表媒体上传失败（UploadAllMediaAsync 已自行上报结果并通知 Slack），调用方应据此 continue 跳过后续步骤。
+        /// 更新一个已存在 listing 的字段并重传媒体（repost 命中已有 listing、update 任务类型共用），
+        /// 按 listing 的 version 分流到 v2/v3 各自的更新实现。
+        /// v3 的更新逻辑还没做，暂时先复用 UpdateExistingListingMediaV2Async 占位，后面单独实现 v3 时
+        /// 只需要把 v3 分支换成真正的 UpdateExistingListingMediaV3Async。
         /// </summary>
         private async Task<bool> UpdateExistingListingMediaAsync(GuruTask task, GuruTaskListing listing, Api _api, Mobile _mobile, CreateOrUpdateListing taskListingData)
         {
             if (taskListingData.version == "v3")
             {
-                //replace listing
-                taskListingData.Update(listing.Listing);
-                taskListingData.isLiveTourAvailable = true;
-
-                //update listing
-                await _api.UpdateAsync(taskListingData);
-
-                await _mobile.DeleteMediaAll(taskListingData);
-                if (!await UploadAllMediaAsync(task, listing, _api))
-                    return false;
+                // TODO: v3 更新逻辑还没实现，暂时复用 v2 的逻辑
+                return await UpdateExistingListingMediaV2Async(task, listing, _api, _mobile, taskListingData);
             }
             else
             {
-                //replace listing
-                taskListingData.Update(listing.Listing);
-                taskListingData.isLiveTourAvailable = true;
-
-                //update listing
-                await _api.UpdateAsync(taskListingData);
-
-                await _mobile.DeleteMediaAll(taskListingData);
-                if (!await UploadAllMediaAsync(task, listing, _api))
-                    return false;
+                return await UpdateExistingListingMediaV2Async(task, listing, _api, _mobile, taskListingData);
             }
+        }
+
+        /// <summary>
+        /// v2 版本的"更新已有 listing 并重传媒体"：替换字段 → UpdateAsync → 删光旧媒体 →
+        /// 依次重传图片/视频/全景/平面图 → 再 GetListing 一次让 PG 刷新数据。
+        /// 返回 false 代表媒体上传失败（UploadAllMediaAsync 已自行上报结果并通知 Slack），调用方应据此 continue 跳过后续步骤。
+        /// </summary>
+        private async Task<bool> UpdateExistingListingMediaV2Async(GuruTask task, GuruTaskListing listing, Api _api, Mobile _mobile, CreateOrUpdateListing taskListingData)
+        {
+            //replace listing
+            taskListingData.Update(listing.Listing);
+            taskListingData.isLiveTourAvailable = true;
+
+            //update listing
+            await _api.UpdateAsync(taskListingData);
+
+            await _mobile.DeleteMediaAll(taskListingData);
+            if (!await UploadAllMediaAsync(task, listing, _api))
+                return false;
 
             await _api.GetListing(listing.Listing.Id.Value);
             return true;
