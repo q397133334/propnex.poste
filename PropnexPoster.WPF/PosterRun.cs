@@ -729,17 +729,37 @@ namespace PropnexPoster.WPF
         /// <summary>
         /// 更新一个已存在 listing 的字段并重传媒体（repost 命中已有 listing、update 任务类型共用）：
         /// 替换字段 → UpdateAsync → 删光旧媒体 → 依次重传图片/视频/全景/平面图 → 再 GetListing 一次让 PG 刷新数据。
+        /// v3 的更新逻辑还没做，目前 v3/非 v3 暂时走同一套；分支先留着，后面单独实现 v3 时只需要改 if 分支。
         /// 返回 false 代表媒体上传失败（UploadAllMediaAsync 已自行上报结果并通知 Slack），调用方应据此 continue 跳过后续步骤。
         /// </summary>
         private async Task<bool> UpdateExistingListingMediaAsync(GuruTask task, GuruTaskListing listing, Api _api, Mobile _mobile, CreateOrUpdateListing taskListingData)
         {
-            taskListingData.Update(listing.Listing);
-            taskListingData.isLiveTourAvailable = true;
-            await _api.UpdateAsync(taskListingData);
+            if (taskListingData.version == "v3")
+            {
+                //replace listing
+                taskListingData.Update(listing.Listing);
+                taskListingData.isLiveTourAvailable = true;
 
-            await _mobile.DeleteMediaAll(taskListingData);
-            if (!await UploadAllMediaAsync(task, listing, _api))
-                return false;
+                //update listing
+                await _api.UpdateAsync(taskListingData);
+
+                await _mobile.DeleteMediaAll(taskListingData);
+                if (!await UploadAllMediaAsync(task, listing, _api))
+                    return false;
+            }
+            else
+            {
+                //replace listing
+                taskListingData.Update(listing.Listing);
+                taskListingData.isLiveTourAvailable = true;
+
+                //update listing
+                await _api.UpdateAsync(taskListingData);
+
+                await _mobile.DeleteMediaAll(taskListingData);
+                if (!await UploadAllMediaAsync(task, listing, _api))
+                    return false;
+            }
 
             await _api.GetListing(listing.Listing.Id.Value);
             return true;
