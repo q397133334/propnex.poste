@@ -1295,6 +1295,36 @@ namespace PropnexPoster.WPF
         }
         private List<ListingsListing> listings = null;
 
+        private async Task<GuruTasks> getGuruTasks()
+        {
+            string context = "";
+            taskDto = await WebServer.GetTask();
+            //taskDto = new PnTaskDto()
+            //{
+            //    Id = Guid.Parse("3a0ceff3-f520-f889-5e83-327a219f7445"),
+            //    Number = "954852.guru.tsk"
+            //};
+
+            if (taskDto != null)
+            {
+                try
+                {
+                    context = await WebServer.GetTaskContent(taskDto);
+                    var lenght = context.IndexOf("Xpressor-Listing-File===");
+                    var taskContext = context.Substring(0, lenght == -1 ? context.Length : lenght);
+                    return new GuruTasks(context, taskContext);
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         private async Task ResultUpload(GuruTask guruTask, GuruTaskListing taskListing, string queue_id, string listing_id, string status = "Done", string memo = "")
         {
             Log($"result upload queue_id is {queue_id},listing_id is {listing_id} ,status is {status},memo is {memo}");
