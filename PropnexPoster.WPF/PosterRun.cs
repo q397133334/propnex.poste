@@ -232,38 +232,10 @@ namespace PropnexPoster.WPF
 
                                     if (listing.FastRepost == "0")
                                     {
-                                        if (taskListing.Data.version == "v3")
+                                        if (!await UpdateExistingListingMediaAsync(task, listing, _api, _mobile, taskListing.Data))
                                         {
-
-                                            //replace listing 
-                                            taskListing.Data.Update(listing.Listing);
-                                            taskListing.Data.isLiveTourAvailable = true;
-
-                                            //update listing
-                                            await _api.UpdateAsync(taskListing.Data);
-
-                                            await _mobile.DeleteMediaAll(taskListing.Data);
-                                            if (!await UploadAllMediaAsync(task, listing, _api))
-                                            {
-                                                continue;
-                                            }
+                                            continue;
                                         }
-                                        else
-                                        {
-                                            //replace listing 
-                                            taskListing.Data.Update(listing.Listing);
-                                            taskListing.Data.isLiveTourAvailable = true;
-
-                                            //update listing
-                                            await _api.UpdateAsync(taskListing.Data);
-
-                                            await _mobile.DeleteMediaAll(taskListing.Data);
-                                            if (!await UploadAllMediaAsync(task, listing, _api))
-                                            {
-                                                continue;
-                                            }
-                                        }
-                                        await _api.GetListing(listing.Listing.Id.Value);
                                     }
                                     else
                                     {
@@ -296,45 +268,15 @@ namespace PropnexPoster.WPF
 
                                 if (IsExtis(task, listing) != null)
                                 {
-                                    //更新任务 UpdateTask 
+                                    //更新任务 UpdateTask
 
-                                    // get listing detial 
+                                    // get listing detial
                                     var taskListing = await _api.GetListing(listing.Listing.Id.Value);
-                                    
-                                    if (taskListing.Data.version == "v3")
+
+                                    if (!await UpdateExistingListingMediaAsync(task, listing, _api, _mobile, taskListing.Data))
                                     {
-
-                                        //replace listing 
-                                        taskListing.Data.Update(listing.Listing);
-                                        taskListing.Data.isLiveTourAvailable = true;
-
-                                        //update listing
-                                        await _api.UpdateAsync(taskListing.Data);
-
-                                        await _mobile.DeleteMediaAll(taskListing.Data);
-                                        if (!await UploadAllMediaAsync(task, listing, _api))
-                                        {
-                                            continue;
-                                        }
+                                        continue;
                                     }
-                                    else
-                                    {
-                                        //replace listing 
-                                        taskListing.Data.Update(listing.Listing);
-                                        taskListing.Data.isLiveTourAvailable = true;
-
-                                        //update listing
-                                        await _api.UpdateAsync(taskListing.Data);
-
-                                        await _mobile.DeleteMediaAll(taskListing.Data);
-                                        if (!await UploadAllMediaAsync(task, listing, _api))
-                                        {
-                                            continue;
-                                        }
-                                    }
-                                    await _api.GetListing(listing.Listing.Id.Value);
-                                    //更新任务 update task 
-
 
                                     await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString());
                                 }
@@ -782,6 +724,25 @@ namespace PropnexPoster.WPF
             else
                 await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", publish.Message);
             return false;
+        }
+
+        /// <summary>
+        /// 更新一个已存在 listing 的字段并重传媒体（repost 命中已有 listing、update 任务类型共用）：
+        /// 替换字段 → UpdateAsync → 删光旧媒体 → 依次重传图片/视频/全景/平面图 → 再 GetListing 一次让 PG 刷新数据。
+        /// 返回 false 代表媒体上传失败（UploadAllMediaAsync 已自行上报结果并通知 Slack），调用方应据此 continue 跳过后续步骤。
+        /// </summary>
+        private async Task<bool> UpdateExistingListingMediaAsync(GuruTask task, GuruTaskListing listing, Api _api, Mobile _mobile, CreateOrUpdateListing taskListingData)
+        {
+            taskListingData.Update(listing.Listing);
+            taskListingData.isLiveTourAvailable = true;
+            await _api.UpdateAsync(taskListingData);
+
+            await _mobile.DeleteMediaAll(taskListingData);
+            if (!await UploadAllMediaAsync(task, listing, _api))
+                return false;
+
+            await _api.GetListing(listing.Listing.Id.Value);
+            return true;
         }
 
         /// <summary>把一个附件（图片/平面图/视频/全景）以 multipart 表单的形式上传给 Xpressor（retrieve 任务专用，与上面的 PropertyGuru 上传通道完全独立）。</summary>
