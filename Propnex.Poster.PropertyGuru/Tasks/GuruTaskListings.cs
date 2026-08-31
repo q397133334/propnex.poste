@@ -546,6 +546,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     listingV3.UnitDetails.MaxTenants = listing.Details.PreferredQty;
 
                     listing.ListingV3 = listingV3;
+                    listing.PatchV3 = PatchListingV3.From(listingV3);
                     if (TaskType != "create")
                     {
                         if (listing.Details.PropertyId.HasValue == false)

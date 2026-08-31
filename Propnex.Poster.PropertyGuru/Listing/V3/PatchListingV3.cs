@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Propnex.Poster.PropertyGuru.Listing.V3
 {
@@ -205,5 +206,127 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
         public object alternativeEmail { get; set; }
 
         public object parkingFee { get; set; }
+
+        /// <summary>
+        /// 从已经解析好的 CreateListingV3（创建时用的那套数据）填充出一份 PatchListingV3。
+        /// 两者字段形状不完全一样（比如 propertyUse 单数/复数、cobroke 类型），逐个按语义对应转换，
+        /// 不是简单地整体复用同一个对象。
+        /// </summary>
+        public static PatchListingV3 From(CreateListingV3 create)
+        {
+            if (create == null)
+                return null;
+
+            var unitDetails = create.UnitDetails;
+
+            return new PatchListingV3
+            {
+                cobroke = ParseBool(create.cobroke),
+                referenceNumber = create.referenceNumber,
+                dates = new PatchDatesV3
+                {
+                    available = create.Dates?.Available,
+                    auction = create.Dates?.Auction
+                },
+                lease = create.Lease == null ? null : new PatchLeaseV3
+                {
+                    code = create.Lease.Code,
+                    remaining = create.Lease.Remaining
+                },
+                price = create.Price == null ? null : new PatchPriceV3
+                {
+                    value = create.Price.Value,
+                    type = null,
+                    maintenanceFee = create.Price.MaintenanceFee
+                },
+                headlines = create.Headlines?.Select(h => new PatchHeadlineV3
+                {
+                    locale = h.Locale,
+                    text = h.Text,
+                    brand = h.Brand
+                }).ToList(),
+                descriptions = create.Descriptions?.Select(d => new PatchDescriptionV3
+                {
+                    locale = d.Locale,
+                    text = d.Text,
+                    brand = d.Brand
+                }).ToList(),
+                unitDetails = unitDetails == null ? null : new PatchUnitDetailsV3
+                {
+                    configuration = unitDetails.Configuration == null ? null : new PatchConfigurationV3
+                    {
+                        bedrooms = unitDetails.Configuration.Bedrooms,
+                        bathrooms = unitDetails.Configuration.Bathrooms,
+                        extrarooms = unitDetails.Configuration.extrarooms
+                    },
+                    dimensions = unitDetails.Dimensions == null ? null : new PatchDimensionsV3
+                    {
+                        floor = new PatchFloorDimensionV3 { size = ToPatchSize(unitDetails.Dimensions.Floor?.Size) },
+                        land = new PatchLandDimensionV3 { size = ToPatchSize(unitDetails.Dimensions.land?.Size) },
+                        room = new PatchRoomDimensionV3 { size = ToPatchSize(unitDetails.Dimensions.room?.Size) }
+                    },
+                    electricity = unitDetails.Electricity,
+                    lift = unitDetails.Lift,
+                    maxTenants = unitDetails.MaxTenants,
+                    tenantGender = unitDetails.TenantGender,
+                    ownerStays = unitDetails.OwnerStays,
+                    cookingType = unitDetails.CookingType,
+                    petFriendly = unitDetails.PetFriendly,
+                    wifiIncluded = unitDetails.wifiIncluded,
+                    utilitiesIncluded = unitDetails.utilitiesIncluded,
+                    visitorsAllowed = unitDetails.visitorsAllowed,
+                    tenantEligibility = unitDetails.TenantEligibility,
+                    titleType = unitDetails.TitleType,
+                    landTitleType = unitDetails.LandTitleType,
+                    isAvailableNow = unitDetails.IsAvailableNow,
+                    floorLevel = unitDetails.FloorLevel,
+                    furnishing = unitDetails.Furnishing,
+                    furnishingDetails = unitDetails.FurnishingDetails,
+                    features = unitDetails.Features,
+                    isBumiLot = unitDetails.IsBumiLot,
+                    directionCode = unitDetails.directionCode,
+                    roomType = unitDetails.RoomType,
+                    condition = unitDetails.Condition,
+                    parkingSpots = unitDetails.ParkingSpots,
+                    hdbTypeCode = unitDetails.HdbTypeCode,
+                    sellerResidency = unitDetails.SellerResidency,
+                    sellerEthnic = unitDetails.SellerEthnic,
+                    quotaEthnic = unitDetails.QuotaEthnic,
+                    quotaSpr = unitDetails.QuotaSpr,
+                    ramp = unitDetails.Ramp,
+                    isHighCeiling = unitDetails.IsHighCeiling,
+                    ceilingHeight = unitDetails.CeilingHeight,
+                    floorLoadingCategory = unitDetails.FloorLoadingCategory,
+                    floorLoadingCapacity = unitDetails.FloorLoadingCapacity,
+                    centralAirconHours = unitDetails.CentralAirconHours,
+                    centralAircon = unitDetails.CentralAircon,
+                    // Create 侧是 List<string> PropertyUses（工厂方法固定包一层单元素列表），
+                    // Patch 响应样例里是单个 propertyUse，取第一个即可
+                    propertyUse = unitDetails.PropertyUses?.FirstOrDefault()
+                },
+                alternativePhone = create.alternativePhone,
+                alternativeMobile = create.alternativeMobile,
+                alternativeEmail = create.alternativeEmail,
+                parkingFee = create.parkingFee
+            };
+        }
+
+        private static PatchSizeV3 ToPatchSize(SizeV3 size)
+        {
+            if (size == null)
+                return null;
+            return new PatchSizeV3 { value = size.Value, uom = size.Uom };
+        }
+
+        private static bool? ParseBool(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return null;
+            if (bool.TryParse(value, out var result))
+                return result;
+            if (value == "1") return true;
+            if (value == "0") return false;
+            return null;
+        }
     }
 }
