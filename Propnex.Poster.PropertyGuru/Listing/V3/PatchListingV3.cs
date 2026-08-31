@@ -159,7 +159,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
 
         public object sellerEthnic { get; set; }
 
-        public object quotaEthnic { get; set; }
+        public bool? quotaEthnic { get; set; }
 
         public object quotaSpr { get; set; }
 

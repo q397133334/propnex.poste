@@ -440,15 +440,15 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                         switch (listing.Details.Furnishing)
                         {
                             case "UNFUR":
-                                listingV3.UnitDetails.Furnishing = null;
+                                listingV3.UnitDetails.Furnishing = "UNFUR";
                                 listingV3.UnitDetails.Condition = "BARE";
                                 break;
                             case "PART":
-                                listingV3.UnitDetails.Furnishing = null;
+                                listingV3.UnitDetails.Furnishing = "PART";
                                 listingV3.UnitDetails.Condition = "PARFT";
                                 break;
                             case "FULL":
-                                listingV3.UnitDetails.Furnishing = null;
+                                listingV3.UnitDetails.Furnishing = "FULL";
                                 listingV3.UnitDetails.Condition = "FULFT";
                                 break;
                             default:
@@ -525,7 +525,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     listingV3.UnitDetails.ParkingSpots = null;
                     listingV3.UnitDetails.PetFriendly = null;
                     listingV3.UnitDetails.PropertyUses = new List<string>() { listing.Details.PropertyUse };
-                    listingV3.UnitDetails.QuotaEthnic = null;
+                    listingV3.UnitDetails.QuotaEthnic = false;
                     listingV3.UnitDetails.QuotaSpr = null;
                     listingV3.UnitDetails.Ramp = null;
                     listingV3.UnitDetails.SellerEthnic = listing.Details.SellerEthnic;

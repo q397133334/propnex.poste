@@ -271,7 +271,7 @@ namespace PropnexPoster.WPF
                                     //更新任务 UpdateTask
 
                                     // get listing detial
-                                    var taskListing = await _api.GetListing(listing.Listing.Id.Value);
+                                    var taskListing = await _api.GetListing(listing.Listing.Id.Value, listing.Listing.StatusCode);
 
                                     if (!await UpdateExistingListingMediaAsync(task, listing, _api, _mobile, _wrapperListingSg, taskListing.Data))
                                     {
@@ -568,6 +568,10 @@ namespace PropnexPoster.WPF
         private ListingInfo IsExtis(GuruTask guruTask, GuruTaskListing guruTaskListing, bool isPostOnly = false)
         {
             ListingInfo listingInfo = null;
+            //guruTaskListing.Listing.Id = listingInfo.Id;
+            //return listingInfo;
+
+
             if (guruTaskListing.Listing.Id.HasValue)
             {
                 listingInfo = ListingInfos.FirstOrDefault(q => q.Id == guruTaskListing.Listing.Id);
@@ -940,14 +944,11 @@ namespace PropnexPoster.WPF
                         {
                             File.Delete(filePath);
                         }
-                        //DownClient webClient = new DownClient();
-                        //webClient.DownloadFile(guruTaskListing.Videos[i], filePath);
                         if (await _downLoadFile(guruTaskListing.Videos[i], filePath) == false)
                         {
                             break;
                         }
                         Log("download move complete");
-                        //result = await _api.UploadVideosAsync($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
                     }
                     catch (Exception ex)
                     {
@@ -1024,14 +1025,11 @@ namespace PropnexPoster.WPF
                         {
                             File.Delete(filePath);
                         }
-                        //DownClient webClient = new DownClient();
-                        //webClient.DownloadFile(guruTaskListing.Tours[i], filePath);
                         if (await _downLoadFile(guruTaskListing.Tours[i], filePath) == false)
                         {
                             break;
                         }
                         Log("download tour complete");
-                        //result = await _api.UplaodVirtualTours($"{guruTaskListing.Listing.Id}", $"{i + 1}", filePath, title);
                     }
                     catch (Exception ex)
                     {
@@ -1072,15 +1070,11 @@ namespace PropnexPoster.WPF
                 var filePath = $"{path}{i}_fp{GetExtensionFromUrl(guruTaskListing.FloorPlan[i])}";
                 try
                 {
-                    //await guruTaskListing.FloorPlan[i].DownloadFileAsync(path, $"{i}_fp.jpg");
-
                     Log("download FloorPlan");
                     if (File.Exists(filePath))
                     {
                         File.Delete(filePath);
                     }
-                    //DownClient webClient = new DownClient();
-                    //webClient.DownloadFile(guruTaskListing.FloorPlan[i], filePath);
                     if (await _downLoadFile(guruTaskListing.FloorPlan[i], filePath) == false)
                     {
                         break;
@@ -1102,22 +1096,6 @@ namespace PropnexPoster.WPF
 
         private async Task<bool> _downLoadFile(string url, string filePath)
         {
-            //Start:
-            //    int reTry = 0;
-            //    try
-            //    {
-            //        DownClient webClient = new DownClient();
-            //        webClient.DownloadFile(url, filePath);
-            //        return true;
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        Log(ex.Message);
-            //        if (reTry < 3)
-            //            goto Start;
-            //    }
-            //    return false;
-
             return await FileDownloader.DownloadFileAsync(url, filePath, maxAttempts: 3, new Progress<double>(p =>
             {
                 if (p < 0) Log("Downloading... size unknown");
