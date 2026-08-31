@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.6.11819.183 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Propnex.Poster.Dtos", "Propnex.Poster.Dtos\Propnex.Poster.Dtos\Propnex.Poster.Dtos.csproj", "{89F3FA46-1679-4166-AE83-E6A8BB0D8694}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Propnex.Poster.PropertyGuru", "Propnex.Poster.PropertyGuru\Propnex.Poster.PropertyGuru.csproj", "{2613D6F8-BF87-45E2-B696-6FA879BB09CC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PropnexPoster.WPF", "PropnexPoster.WPF\PropnexPoster.WPF.csproj", "{CE26A089-0E65-44D1-9790-294A4A03BBD8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PropnexPoster.Avalonia", "PropnexPoster.Avalonia\PropnexPoster.Avalonia.csproj", "{F5451453-D488-4428-A210-AACFA7A6151F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Propnex.Poster.Test", "Propnex.Poster.Test\Propnex.Poster.Test.csproj", "{F1B490E0-1AA9-4B4C-A35C-4CF4CFB8532B}"
 EndProject
@@ -45,6 +47,10 @@ Global
 		{CE26A089-0E65-44D1-9790-294A4A03BBD8}.Debug|x64.Build.0 = Debug|x64
 		{CE26A089-0E65-44D1-9790-294A4A03BBD8}.Release|x64.ActiveCfg = Release|x64
 		{CE26A089-0E65-44D1-9790-294A4A03BBD8}.Release|x64.Build.0 = Release|x64
+		{F5451453-D488-4428-A210-AACFA7A6151F}.Debug|x64.ActiveCfg = Debug|x64
+		{F5451453-D488-4428-A210-AACFA7A6151F}.Debug|x64.Build.0 = Debug|x64
+		{F5451453-D488-4428-A210-AACFA7A6151F}.Release|x64.ActiveCfg = Release|x64
+		{F5451453-D488-4428-A210-AACFA7A6151F}.Release|x64.Build.0 = Release|x64
 		{F1B490E0-1AA9-4B4C-A35C-4CF4CFB8532B}.Debug|x64.ActiveCfg = Debug|x64
 		{F1B490E0-1AA9-4B4C-A35C-4CF4CFB8532B}.Debug|x64.Build.0 = Debug|x64
 		{F1B490E0-1AA9-4B4C-A35C-4CF4CFB8532B}.Release|x64.ActiveCfg = Release|x64
@@ -68,6 +74,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{2613D6F8-BF87-45E2-B696-6FA879BB09CC} = {04FECE49-B18B-496A-8755-5AFEBB6DCA5E}
 		{CE26A089-0E65-44D1-9790-294A4A03BBD8} = {62AD870F-BDA6-4AAC-9C02-7101122C01B1}
+		{F5451453-D488-4428-A210-AACFA7A6151F} = {62AD870F-BDA6-4AAC-9C02-7101122C01B1}
 		{930A5A01-D6A7-457E-A2D2-143DEBE5E5EA} = {62AD870F-BDA6-4AAC-9C02-7101122C01B1}
 		{5B01E974-110C-4D74-BD48-888A12C710AA} = {04FECE49-B18B-496A-8755-5AFEBB6DCA5E}
 	EndGlobalSection

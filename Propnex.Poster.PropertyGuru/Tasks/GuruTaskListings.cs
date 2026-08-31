@@ -160,7 +160,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                         listingModel.RentalType = "ROOM";
                     }
 
-                   
+
 
                     listingModel.Location = new Location()
                     {
@@ -349,6 +349,10 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                             Bathrooms = listing.Details.Bathrooms == 0 ? null : listing.Details.Bathrooms,
                             extrarooms = null,
                         };
+                        if (listing.Details.PropertyTypeGroup == "O")
+                        {
+                            listingV3.UnitDetails.Configuration.Bathrooms = null;
+                        }
                     }
                     listingV3.UnitDetails.RentalType = "ENT";
                     if (listing.Details.ListingType == "ROOM")
@@ -368,7 +372,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                             listingV3.UnitDetails.RoomType = "SHARE";
                         }
                         //listingV3.UnitDetails.Configuration.Bedrooms = null;
-                        if (listingV3.UnitDetails.Configuration!=null && listingV3.UnitDetails.Configuration.Bathrooms == null)
+                        if (listingV3.UnitDetails.Configuration != null && listingV3.UnitDetails.Configuration.Bathrooms == null)
                         {
                             listingV3.UnitDetails.Configuration.Bathrooms = 0;
                         }
@@ -492,7 +496,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
 
                     listingV3.UnitDetails.FloorLoadingCategory = listing.Details.FloorLoadingCategory;
 
-                   
+
 
                     listingV3.UnitDetails.HdbTypeCode = listing.Details.HdbType;
 
