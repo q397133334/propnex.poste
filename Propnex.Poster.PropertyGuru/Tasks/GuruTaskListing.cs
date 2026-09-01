@@ -19,6 +19,8 @@ namespace Propnex.Poster.PropertyGuru.Tasks
 
         public CreateListingV3 ListingV3 { get; set; }
 
+        public PatchListingV3 PatchListingV3 { get; set; }
+
         public List<string> Photos { get; set; }
 
         public List<string> Videos { get; set; }

@@ -37,6 +37,7 @@ namespace Propnex.Poster.WebServer.Pages
                     createOrUpdateListing.Tours = listing.Tours;
                     createOrUpdateListing.Videos = listing.Videos;
                     createOrUpdateListing.ListingV3 = listing.ListingV3;
+                    createOrUpdateListing.PatchListingV3 = listing.PatchV3;
                     taskListings.Add(createOrUpdateListing);
                     
                 }
@@ -78,6 +79,7 @@ namespace Propnex.Poster.WebServer.Pages
                     createOrUpdateListing.Tours = listing.Tours;
                     createOrUpdateListing.Videos = listing.Videos;
                     createOrUpdateListing.ListingV3 = listing.ListingV3;
+                    createOrUpdateListing.PatchListingV3 = listing.PatchV3;
                     taskListings.Add(createOrUpdateListing);
 
                 }
@@ -151,6 +153,7 @@ namespace Propnex.Poster.WebServer.Pages
                     createOrUpdateListing.Listing = new CreateOrUpdateListing();
                     createOrUpdateListing.Listing.Create(listing.Listing);
                     createOrUpdateListing.ListingV3 = listing.ListingV3;
+                    createOrUpdateListing.PatchListingV3 = listing.PatchV3;
                     createOrUpdateListing.Photos = listing.Photos;
                     createOrUpdateListing.FloorPlan = listing.FloorPlan;
                     createOrUpdateListing.Tours = listing.Tours;
