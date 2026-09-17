@@ -7,12 +7,10 @@ using Propnex.Poster.PropertyGuru.Listing.V2;
 using Propnex.Poster.PropertyGuru.Listing.V3;
 using Propnex.Poster.PropertyGuru.Mobile;
 using Propnex.Poster.PropertyGuru.Mobile.Dto;
-using Propnex.Poster.PropertyGuru.Mobile.Model;
 using Propnex.Poster.PropertyGuru.Tasks;
 using Propnex.Poster.Share;
 using Serilog;
 using Serilog.Core;
-using SlackBotMessages;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -269,7 +267,7 @@ namespace PropnexPoster.WPF
                                 if (IsExtis(task, listing) != null)
                                 {
                                     //更新任务 UpdateTask
-
+                                    
                                     // get listing detial
                                     var taskListing = await _api.GetListing(listing.Listing.Id.Value, listing.Listing.StatusCode);
 

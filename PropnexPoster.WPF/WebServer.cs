@@ -1,17 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Net.Http;
-using System.Net.NetworkInformation;
-using System.Net.WebSockets;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-using Flurl.Http;
+﻿using Flurl.Http;
 using Polly;
 using Propnex.Poster.Dtos;
+using System;
+using System.Net.NetworkInformation;
+using System.Threading.Tasks;
 
 namespace PropnexPoster.WPF
 {

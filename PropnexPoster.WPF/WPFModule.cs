@@ -1,23 +1,15 @@
-﻿using Autofac.Features.OwnedInstances;
-using AutoUpdaterDotNET;
+﻿using AutoUpdaterDotNET;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Propnex.Poster.PropertyGuru.Mobile;
 using Propnex.Poster.Share;
-using RestSharp.Authenticators;
 using RestSharp;
 using System;
+using System.IO;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using Volo.Abp;
 using Volo.Abp.Autofac;
 using Volo.Abp.Modularity;
-using System.IO;
-using SlackBotMessages;
-using Propnex;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using System.Net;
-using System.Net.Security;
 
 namespace PropnexPoster.WPF;
 

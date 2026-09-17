@@ -453,8 +453,28 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                                 break;
                             default:
                                 listingV3.UnitDetails.Condition = null;
+                                listingV3.UnitDetails.Furnishing = null;
                                 break;
                         }
+                    }
+                    switch (listing.Details.PropertyTypeGroup)
+                    {
+                        case "N":
+                            listingV3.UnitDetails.Furnishing = "UNFUR";
+                            listingV3.UnitDetails.Condition = null;
+                            break;
+                        case "H":
+                            listingV3.UnitDetails.Furnishing = "PART";
+                            listingV3.UnitDetails.Condition = null;
+                            break;
+                        case "L":
+                            listingV3.UnitDetails.Furnishing = "FULL";
+                            listingV3.UnitDetails.Condition = null;
+                            break;
+                        default:
+                            //listingV3.UnitDetails.Condition = null;
+                            listingV3.UnitDetails.Furnishing = null;
+                            break;
                     }
 
                     listingV3.UnitDetails.Dimensions = new DimensionsV3()
@@ -496,10 +516,16 @@ namespace Propnex.Poster.PropertyGuru.Tasks
 
                     listingV3.UnitDetails.FloorLoadingCategory = listing.Details.FloorLoadingCategory;
 
+                    if (listing.PropertyType == "HDB") 
+                    {
+                        listingV3.UnitDetails.HdbTypeCode = listing.Details.HdbType;
+                    }
+                    else
+                    {
+                        listingV3.UnitDetails.HdbTypeCode = null;
+                    }
 
-
-                    listingV3.UnitDetails.HdbTypeCode = listing.Details.HdbType;
-
+                   
                     listingV3.UnitDetails.IsBumiLot = false;
 
                     listingV3.UnitDetails.IsHighCeiling = null;
@@ -516,8 +542,6 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                     {
                         listingV3.UnitDetails.Lift = null;
                     }
-
-
 
 
                     listingV3.UnitDetails.MaxTenants = null;
