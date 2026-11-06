@@ -106,7 +106,7 @@ namespace PropnexPoster.WPF
 #if DEBUG
             taskDto = new PnTaskDto()
             {
-                Number = "cp17881470235834.guru.tsk"
+                Number = "1320986.guru.tsk"
             };
             var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
             var lenght = context.IndexOf("Xpressor-Listing-File===");
@@ -267,7 +267,7 @@ namespace PropnexPoster.WPF
                                 if (IsExtis(task, listing) != null)
                                 {
                                     //更新任务 UpdateTask
-                                    
+
                                     // get listing detial
                                     var taskListing = await _api.GetListing(listing.Listing.Id.Value, listing.Listing.StatusCode);
 
@@ -317,6 +317,7 @@ namespace PropnexPoster.WPF
                             {
                                 try
                                 {
+                                    var guruListingv3 = await _wrapperListingSg.Listings(listing.id.Value);
                                     var guruListing = await _api.GetListing(listing.id.Value);
                                     var postActionResult = new PosterActionResult()
                                     {
@@ -688,8 +689,11 @@ namespace PropnexPoster.WPF
                 }
             }
 
-            var result = await _agent.CreateListingAsync(listing.ListingV3);
-            if (result.HttpStatusCode != System.Net.HttpStatusCode.OK)
+            //var result = await _agent.CreateListingAsync(listing.ListingV3);
+            var result = await _wrapperListingSg.CreateAsync(listing.ListingV3);
+            if (result.HttpStatusCode != System.Net.HttpStatusCode.Created
+                && result.HttpStatusCode != System.Net.HttpStatusCode.OK
+                )
             {
                 if (!result.Message.Contains("Postal code is already being used"))
                 {
@@ -790,7 +794,7 @@ namespace PropnexPoster.WPF
             if (!await UploadAllMediaAsync(task, listing, _api))
                 return false;
 
-            await _api.GetListing(listing.Listing.Id.Value);
+            //await _api.GetListing(listing.Listing.Id.Value);
             return true;
         }
 
@@ -1218,7 +1222,10 @@ namespace PropnexPoster.WPF
                     mobile = new Mobile() { Token = token, Log = Log1 };
                 }
                 //await mobile.Dashboard(token.User.AgentId.ToString());
-                var result = await mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString()));
+                var result = await mobile.ListingManagementAsync(new QueryListingManagement(token.User.AgentId.ToString())
+                {
+                    StatusCode = "ACT"
+                });
                 try
                 {
                     if (result.HttpStatusCode == System.Net.HttpStatusCode.OK)

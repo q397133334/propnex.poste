@@ -94,7 +94,8 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
                 if (!string.IsNullOrEmpty(Status))
                 {
                     sb.Append("(PG) ").Append(Status);
-                };
+                }
+                ;
                 if (!string.IsNullOrEmpty(iPropertyStatus))
                 {
                     if (sb.Length > 0) sb.Append(",");
@@ -405,7 +406,8 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
                         else
                         {
                             listing.FloorPlan = "";
-                        };
+                        }
+                        ;
                     }
                     catch (Exception)
                     {
@@ -442,19 +444,22 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
                         catch (Exception)
                         {
 
-                        };
+                        }
+                        ;
                     }
                     else
                     {
                         p = item.embed_html;
                         sbFile.Append(p).Append("#").Append(title).Append(Environment.NewLine);
-                    };
+                    }
+                    ;
                     string turl = item.thumb;
                     filename = turl.Substring(turl.LastIndexOf("/") + 1);
                     if (turl.EndsWith(".jpg", StringComparison.CurrentCultureIgnoreCase))
                     {
                         filename = await turl.WithTimeout(30).DownloadFileAsync(savepath, filename);
-                    };
+                    }
+                    ;
                     if (System.IO.File.Exists(filename))
                     {
                         byte[] bin = System.IO.File.ReadAllBytes(filename);
@@ -464,7 +469,8 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
                     else
                     {
                         sbThumb.Append(Environment.NewLine);
-                    };
+                    }
+                    ;
                 }
             }
 
@@ -492,19 +498,22 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
                         catch (Exception)
                         {
 
-                        };
+                        }
+                        ;
                     }
                     else
                     {
                         p = item.embed_html;
                         sbFile.Append(p).Append("#").Append(title).Append(Environment.NewLine);
-                    };
+                    }
+                    ;
                     string turl = item.thumb;
                     filename = turl.Substring(turl.LastIndexOf("/") + 1);
                     if (turl.EndsWith(".jpg", StringComparison.CurrentCultureIgnoreCase))
                     {
                         filename = await turl.DownloadFileAsync(savepath, filename);
-                    };
+                    }
+                    ;
                     if (System.IO.File.Exists(filename))
                     {
                         byte[] bin = System.IO.File.ReadAllBytes(filename);
@@ -514,7 +523,8 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
                     else
                     {
                         sbThumb.Append(Environment.NewLine);
-                    };
+                    }
+                    ;
                 }
             }
             listing.TourThumbnails = vThumbs.ToString();
@@ -526,6 +536,257 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
             return listing;
         }
 
+        public static async System.Threading.Tasks.Task<RetrieveListing> Converter(Listing.V3.ListingModel listingModel, string account, string portal, string id)
+        {
+            var listing = new RetrieveListing();
+
+            listing.Details["listing_description"] = System.Web.HttpUtility.HtmlDecode(
+                listingModel.descriptions?[0]?.text ?? "");
+            listing.Details["available_for_cobroke"] = listingModel.cobroke?.ToString() ?? "";
+            listing.Details["hidden_listing_id"] = listingModel.id?.ToString() ?? "";
+            listing.Details["listing_notes"] = listingModel.notes?.ToString() ?? "";
+            listing.Details["lease_term"] = listingModel.lease?.code?.ToString() ?? "";
+            listing.ListingType = listingModel.listingType?.code ?? "";
+            listing.Quality = (listingModel.qualityScore?.ToString() ?? "0") + "%";
+
+            listing.PropertyType = listingModel.listingType?.text ?? "";
+            listing.ListingName = listingModel.title?.en ?? "";
+            listing.Details["standard_name"] = listingModel.project?.metaByType?.verified?.name ?? "";
+            listing.Details["property_name"] = listingModel.project?.metaByType?.verified?.name ?? "";
+            listing.Details["property_url"] = "http://www.propertyguru.com.sg/project/" + listingModel.project?.metaByType?.verified?.id?.ToString() ?? "";
+            listing.Details["property_id"] = listingModel.project?.metaByType?.verified?.id?.ToString() ?? "";
+            listing.Details["property_type_code"] = listingModel.project?.metaByType?.verified?.property?.type?.code ?? "";
+            listing.Details["property_type_group"] = listingModel.project?.metaByType?.verified?.property?.type?.code ?? "";
+            listing.Details["tenure"] = listingModel.project?.metaByType?.verified?.tenure?.code ?? "";
+            listing.Details["constructionyear"] = listingModel.project?.metaByType?.verified?.completionYear?.ToString() ?? "";
+            listing.Details["numberofunits"] = listingModel.project?.metaByType?.verified?.totalUnits?.ToString() ?? "";
+            listing.Details["numberoffloors"] = listingModel.project?.metaByType?.verified?.floors?.ToString() ?? "";
+
+            if (listingModel.project?.metaByType?.verified?.facilities != null)
+            {
+                foreach (var item in listingModel.project.metaByType.verified.facilities)
+                {
+                    listing.Details["amenities," + item.code] = "Checked";
+                }
+            }
+
+            listing.Details["hdb_type"] = listingModel.unitDetails?.titleType?.ToString() ?? "";
+
+            listing.Details["fittings"] = listingModel.unitDetails?.furnishing?.ToString() ?? "";
+            listing.Details["furnishing"] = listingModel.unitDetails?.furnishing?.ToString() ?? "";
+            listing.Details["floor_level"] = listingModel.unitDetails?.titleType?.ToString() ?? "";
+            listing.Details["electricity_supply"] = "";
+            listing.Details["electricity_unit"] = "KVA";
+            listing.Details["electricity_phase"] = "";
+            listing.Details["ceiling_height"] = listingModel.unitDetails?.ceilingHeight?.ToString() ?? "";
+            listing.Details["floor_loading"] = "";
+
+            if (listingModel.unitDetails?.features != null)
+            {
+                foreach (var item in listingModel.unitDetails.features)
+                {
+                    listing.Details["unit_features," + item.code] = "Checked";
+                }
+            }
+
+            listing.Price = listingModel.price?.min?.ToString() ?? "";
+            listing.Details["price"] = listing.Price;
+            listing.Details["price_type"] = listingModel.price?.type?.ToString() ?? "";
+            listing.Details["valuation_price"] = listingModel.price?.max?.ToString() ?? "";
+
+            listing.BedRooms = listingModel.unitDetails?.configuration?.bedrooms?.text ?? "";
+            listing.Details["bedrooms"] = listing.BedRooms;
+            listing.Details["bathrooms"] = listingModel.unitDetails?.configuration?.bathrooms.text ?? "";
+            listing.FloorArea = listingModel.unitDetails?.dimensions?.floor?.text ?? "";
+            listing.Details["floorarea"] = listing.FloorArea;
+            listing.Details["landarea"] = listingModel.unitDetails?.dimensions?.land?.size?.ToString() ?? "";
+            listing.Details["floorarea_unit"] = "sqft";
+
+            listing.Details["district"] = listingModel.location?.levels?[1].id;
+            listing.Details["streetname"] = listingModel.location?.street ?? "";
+            listing.Details["streetnumber"] = "";
+            listing.Details["location_id"] = listingModel.location?.id?.ToString() ?? "";
+            listing.Details["latitude"] = listingModel.location?.point?.lat?.ToString() ?? "";
+            listing.Details["longitude"] = listingModel.location?.point?.lon?.ToString() ?? "";
+            listing.Details["postcode"] = listingModel.location?.address?.postalCode ?? "";
+            listing.Details["hdb_estate"] = listingModel.location?.hdbEstate?.text ?? "";
+
+            if (listingModel.location?.levels?.Count > 0)
+            {
+                //var level = listingModel.location.levels[0];
+                //listing.Details["property_level_number"] = level.levelNumber?.ToString() ?? "";
+                //listing.Details["property_unit_number"] = level.unitNumber?.ToString() ?? "";
+            }
+
+            listing.Details["alternative_agent"] = listingModel.lister?.metaByType?.agent?.name ?? "";
+            listing.Details["alternative_mobile"] = "";
+            listing.Details["show_mobile"] = "";
+            listing.Details["alternative_phone"] = listingModel.lister?.metaByType?.agent?.contacts[0]?.value ?? "";
+            listing.Details["alternative_email"] = listingModel.lister?.metaByType?.agent?.contacts[0]?.value ?? "";
+
+            string agent = "";
+            if (listing.Details.ContainsKey("alternative_agent") && !string.IsNullOrEmpty(listing.Details["alternative_agent"]))
+                agent = listing.Details["alternative_agent"] + " - ";
+
+            listing.Details["RetrieveFrom"] = string.Format("{2}{0}({1})", account, portal, agent);
+
+            listing.XID = Guid.NewGuid().ToString();
+
+            var savepath = "";
+            if (listingModel.media?.listingImages?.Count > 0)
+            {
+                listing.UseFileName = true;
+                string baseDir = AppContext.BaseDirectory;
+                string rootPath = Path.GetPathRoot(baseDir);
+                savepath = Path.Combine(rootPath, "task", id);
+                if (!Directory.Exists(savepath))
+                {
+                    Directory.CreateDirectory(savepath);
+                }
+            }
+
+            StringBuilder pics = new StringBuilder();
+            if (listingModel.media?.listingImages != null)
+            {
+                foreach (var item in listingModel.media.listingImages)
+                {
+                    string p = item.urlTemplate?.Replace("${viewType}", "V800") ?? "";
+                    if (string.IsNullOrEmpty(p)) continue;
+
+                    string filename = item.id?.ToString() + "." + Path.GetFileName(p);
+                    string title = item.caption?.Replace(" ", "-")?.Trim();
+                    filename = MakeValidFileName(title + ".(RP)" + filename);
+                    try
+                    {
+                        var result = await p.WithTimeout(30).DownloadFileAsync(savepath, filename);
+                        if (File.Exists(result))
+                        {
+                            result = OverlayWatermark(result);
+                            pics.Append(result).Append(Environment.NewLine);
+                        }
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+                }
+            }
+
+            listing.Photos = pics.ToString();
+            listing.FloorPlan = "";
+            if (listingModel.media?.listingFloorPlans != null)
+            {
+                foreach (var item in listingModel.media.listingFloorPlans)
+                {
+                    string p = item.urlTemplate?.Replace("${viewType}", "V800") ?? "";
+                    listing.FloorPlan = p;
+                    string filename = p.Substring(p.LastIndexOf("/") + 1);
+                    try
+                    {
+                        var result = await p.WithTimeout(30).DownloadFileAsync(savepath, filename);
+                        if (System.IO.File.Exists(result))
+                        {
+                            result = OverlayWatermark(result);
+                            listing.FloorPlan = result;
+                        }
+                        else
+                        {
+                            listing.FloorPlan = "";
+                        }
+                        ;
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+                    break;
+                }
+            }
+
+            StringBuilder vFiles = new StringBuilder();
+            StringBuilder vThumbs = new StringBuilder();
+            StringBuilder viFiles = new StringBuilder();
+            StringBuilder viThumbs = new StringBuilder();
+
+            if (listingModel.media?.listingVideos != null)
+            {
+                foreach (var item in listingModel.media.listingVideos)
+                {
+                    string filename = "";
+                    string title = item.caption;
+                    bool isVtour = false;
+                    StringBuilder sbFile = isVtour ? vFiles : viFiles;
+                    StringBuilder sbThumb = isVtour ? vThumbs : viThumbs;
+
+                    string p = "";
+                    if (!string.IsNullOrEmpty(item.embedHtml))
+                    {
+                        p = item.embedHtml;
+                        sbFile.Append(p).Append("#").Append(title).Append(Environment.NewLine);
+                    }
+                    ;
+                    string turl = item.thumbnailUrl;
+                    if (!string.IsNullOrEmpty(turl))
+                    {
+                        filename = turl.Substring(turl.LastIndexOf("/") + 1);
+                        if (turl.EndsWith(".jpg", StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            try
+                            {
+                                filename = await turl.WithTimeout(30).DownloadFileAsync(savepath, filename);
+                            }
+                            catch (Exception)
+                            {
+
+                            }
+                        }
+                        ;
+                        if (System.IO.File.Exists(filename))
+                        {
+                            byte[] bin = System.IO.File.ReadAllBytes(filename);
+                            string base64 = System.Convert.ToBase64String(bin, 0, bin.Length);
+                            sbThumb.Append(base64).Append(Environment.NewLine);
+                        }
+                        else
+                        {
+                            sbThumb.Append(Environment.NewLine);
+                        }
+                        ;
+                    }
+                }
+            }
+
+            if (listingModel.media?.listingVirtualTours != null)
+            {
+                foreach (var item in listingModel.media.listingVirtualTours)
+                {
+                    string filename = "";
+                    string title = item.caption;
+                    bool isVtour = false;
+                    StringBuilder sbFile = isVtour ? vFiles : viFiles;
+                    StringBuilder sbThumb = isVtour ? vThumbs : viThumbs;
+
+                    string p = "";
+                    try
+                    {
+                        filename = await p.WithTimeout(30).DownloadFileAsync(savepath, filename);
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+                    ;
+                }
+            }
+
+            listing.TourThumbnails = vThumbs.ToString();
+            listing.Tours = vFiles.ToString();
+            listing.Videos = viFiles.ToString();
+            listing.VideoThumbnails = viThumbs.ToString();
+            listing.EmbedVideo = "";
+
+            return listing;
+        }
 
         public static Tuple<Dictionary<string, string>, bool, string> GetData(RetrieveListing l, string user, string password, string task_id)
         {
@@ -557,39 +818,49 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
                         if (l.PropertyType != null && l.PropertyType.StartsWith("HDB") && l.Details["district"] == "")
                         {
                             l.Details["district"] = "D04";
-                        };
+                        }
+                        ;
                         data["Listings[district]"] = l.Details["district"];
                     }
                     else
                     {
                         return new Tuple<Dictionary<string, string>, bool, string>(null, false, "Listing missing data: district");
-                    };
-                };
-            };
+                    }
+                    ;
+                }
+                ;
+            }
+            ;
             foreach (var item in l.Details)
             {
                 data["Listings[details][" + System.Web.HttpUtility.UrlEncode(item.Key) + "]"] = item.Value;
-            };
+            }
+            ;
             foreach (var item in l.Basic)
             {
                 data["Listings[basic][" + System.Web.HttpUtility.UrlEncode(item.Key) + "]"] = item.Value;
-            };
+            }
+            ;
             foreach (var item in l.Location)
             {
                 data["Listings[location][" + System.Web.HttpUtility.UrlEncode(item.Key) + "]"] = item.Value;
-            };
+            }
+            ;
             foreach (var item in l.Media)
             {
                 data["Listings[media][" + System.Web.HttpUtility.UrlEncode(item.Key) + "]"] = item.Value;
-            };
+            }
+            ;
             foreach (var item in l.Sales)
             {
                 data["Listings[sales][" + System.Web.HttpUtility.UrlEncode(item.Key) + "]"] = item.Value;
-            };
+            }
+            ;
             foreach (var item in l.Summary)
             {
                 data["Listings[summary][" + System.Web.HttpUtility.UrlEncode(item.Key) + "]"] = item.Value;
-            };
+            }
+            ;
 
             return new Tuple<Dictionary<string, string>, bool, string>(data, true, "");
         }

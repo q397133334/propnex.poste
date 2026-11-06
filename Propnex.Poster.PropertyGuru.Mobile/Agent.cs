@@ -61,7 +61,7 @@ public class Agent : ClientBase
         }
     }
 
-    public async Task<HttpResult<CreateListingResult>> CreateListingAsync(Propnex.Poster.PropertyGuru.Listing.V3.CreateListingV3 listing)
+    public async Task<HttpResult<CreateListingResult>> CreateListingAsync(CreateListingV3 listing)
     {
 
         if (cookies == null)

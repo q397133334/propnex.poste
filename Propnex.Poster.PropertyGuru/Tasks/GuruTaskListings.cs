@@ -421,11 +421,11 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                             MaskUnitNumber = false,
                             PostalCode = listing.Details.PostalCode,
                             Unit = listing.Details.UnitNumber
-                        },
+                        }
                     };
-                    if (string.IsNullOrEmpty(listing.Details.StreetNumber) == false)
+                    if (string.IsNullOrEmpty(listing.Details.StreetName) == false)
                     {
-                        listingV3.Location.street = listing.Details.StreetNumber;
+                        listingV3.Location.street = listing.Details.StreetName;
                     }
 
                     listingV3.Price = new PriceV3()
@@ -470,10 +470,12 @@ namespace Propnex.Poster.PropertyGuru.Tasks
                         case "L":
                             listingV3.UnitDetails.Furnishing = "FULL";
                             listingV3.UnitDetails.Condition = null;
+                            listingV3.Price.MaintenanceFee = null;
                             break;
                         default:
                             //listingV3.UnitDetails.Condition = null;
                             listingV3.UnitDetails.Furnishing = null;
+                            listingV3.Price.MaintenanceFee = null;
                             break;
                     }
 
@@ -516,7 +518,7 @@ namespace Propnex.Poster.PropertyGuru.Tasks
 
                     listingV3.UnitDetails.FloorLoadingCategory = listing.Details.FloorLoadingCategory;
 
-                    if (listing.PropertyType == "HDB") 
+                    if (listing.Details.PropertyTypeCode.ToLower().Contains("hdb")) 
                     {
                         listingV3.UnitDetails.HdbTypeCode = listing.Details.HdbType;
                     }

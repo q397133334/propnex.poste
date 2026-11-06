@@ -6,6 +6,8 @@ using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -78,6 +80,58 @@ namespace Propnex.Poster.PropertyGuru.Mobile
         }
 
 
+        public async Task<HttpResult<CreateListingResult>> CreateAsync(CreateListingV3 listing)
+        {
+            var request = GetRequest();
+            request.Method = Method.Post;
+            request.Resource = $"/v1/listings?region=sg&locale=en";
+            request.AddHeader("Authorization", $"Bearer {Token.accessToken}");
+            request.AddHeader("x-source", "mobile");
+            request.AddHeader("x-brand", "pg");
+            request.AddHeader("x-market", "pg");
+            request.AddHeader("x-region", "sg");
+            request.AddHeader("x-requested-with", "com.allproperty.android.agentnet");
+
+            try
+            {
+                var stringBody = Newtonsoft.Json.JsonConvert.SerializeObject(listing);
+                Log(stringBody, false);
+                request.AddStringBody(stringBody, DataFormat.Json);
+
+                var response = await ExecuteAsync(request);
+                if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created)
+                {
+                    var result = Newtonsoft.Json.JsonConvert.DeserializeObject<CreateListingResult>(response.Content);
+                    return new HttpResult<CreateListingResult>
+                    {
+                        HttpStatusCode = response.StatusCode,
+                        Data = result
+                    };
+                }
+                else
+                {
+                    return new HttpResult<CreateListingResult>
+                    {
+                        Message = response.Content,
+                        HttpStatusCode = response.StatusCode,
+                        Data = new CreateListingResult { Id = -1 }
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Log(ex.ToString(), true);
+                return new HttpResult<CreateListingResult>
+                {
+                    Message = ex.Message,
+                    HttpStatusCode = HttpStatusCode.InternalServerError,
+                    Data = new CreateListingResult { Id = -1 }
+                };
+
+            }
+
+        }
+
         public async Task<HttpResult<ResponsePublisheResult>> Repost(CreditKey creditKey, string listingId)
         {
             var request = GetRequest();
@@ -132,6 +186,40 @@ namespace Propnex.Poster.PropertyGuru.Mobile
                 return new HttpResult<Listing.V3.ListingModel>();
             }
         }
+
+        public async Task<HttpResult<Listing.V3.ListingModel>> Listings(QueryListingManagement queryListingManagement)
+        {
+            var request = GetRequest();
+            request.Method = Method.Get;
+            request.Resource = $"/v1/listings";
+            request.AddHeader("Authorization", $"Bearer {Token.accessToken}");
+            request.AddHeader("x-source", "mobile");
+            request.AddHeader("x-brand", "pg");
+            request.AddHeader("x-market", "pg");
+            request.AddHeader("x-region", "sg");
+            request.AddHeader("x-requested-with", "com.allproperty.android.agentnet");
+            request.AddQueryParameter("status_code", queryListingManagement.StatusCode);
+            request.AddQueryParameter("order", queryListingManagement.Order);
+            request.AddQueryParameter("limit", queryListingManagement.Limit);
+            request.AddQueryParameter("page", queryListingManagement.Page);
+            request.AddQueryParameter("sort", queryListingManagement.Sort);
+            var response = await ExecuteAsync(request);
+            try
+            {
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    var responsePublisheResult = Newtonsoft.Json.JsonConvert.DeserializeObject<Listing.V3.ListingModel>(response.Content);
+                    return new HttpResult<Listing.V3.ListingModel> { Data = responsePublisheResult, HttpStatusCode = System.Net.HttpStatusCode.OK };
+                }
+                return GetHttpResult<Listing.V3.ListingModel>(response);
+            }
+            catch (Exception ex)
+            {
+                return new HttpResult<Listing.V3.ListingModel>();
+            }
+        }
+
+
 
         /// <summary>局部更新一个 listing（PATCH），body 是 PatchListingV3（跟 CreateListingV3 是两套不同的 schema）；返回更新后的完整 listing（与 Listings() 同一形状）。</summary>
         public async Task<HttpResult<Listing.V3.ListingModel>> Patch(string listingId, PatchListingV3 body)

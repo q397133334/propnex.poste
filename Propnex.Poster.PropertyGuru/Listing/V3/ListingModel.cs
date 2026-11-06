@@ -233,9 +233,9 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
 
     public class HdbEstateType
     {
-        public object? code { get; set; }
+        public string? code { get; set; }
 
-        public object? text { get; set; }
+        public string? text { get; set; }
 
     }
 
@@ -339,7 +339,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
     {
         public int? id { get; set; }
 
-        public object? caption { get; set; }
+        public string? caption { get; set; }
 
         public string statusCode { get; set; }
 
@@ -391,7 +391,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
 
         public string mimeType { get; set; }
 
-        public object? caption { get; set; }
+        public string? caption { get; set; }
 
         public string statusCode { get; set; }
 
@@ -493,9 +493,9 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
 
         public List<ListingVideosType> listingVideos { get; set; }
 
-        public List<object> listingVirtualTours { get; set; }
+        public List<ListingVideosType> listingVirtualTours { get; set; }
 
-        public List<object> projectLogos { get; set; }
+        public List<ListingVideosType> projectLogos { get; set; }
 
         public List<ProjectType> project { get; set; }
 
@@ -589,7 +589,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
     {
         public object? value { get; set; }
 
-        public object? text { get; set; }
+        public string? text { get; set; }
 
     }
 
@@ -597,7 +597,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
     {
         public object? value { get; set; }
 
-        public object? text { get; set; }
+        public string? text { get; set; }
 
     }
 
@@ -605,7 +605,7 @@ namespace Propnex.Poster.PropertyGuru.Listing.V3
     {
         public object? value { get; set; }
 
-        public object? text { get; set; }
+        public string? text { get; set; }
 
     }
 
