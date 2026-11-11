@@ -689,8 +689,8 @@ namespace PropnexPoster.WPF
                 }
             }
 
-            //var result = await _agent.CreateListingAsync(listing.ListingV3);
-            var result = await _wrapperListingSg.CreateAsync(listing.ListingV3);
+            var result = await _agent.CreateListingAsync(listing.ListingV3);
+            //var result = await _wrapperListingSg.CreateAsync(listing.ListingV3);
             if (result.HttpStatusCode != System.Net.HttpStatusCode.Created
                 && result.HttpStatusCode != System.Net.HttpStatusCode.OK
                 )
@@ -710,7 +710,7 @@ namespace PropnexPoster.WPF
             if (!await UploadAllMediaAsync(task, listing, _api))
                 return true;
 
-            var taskListing = await _wrapperListingSg.Listings(listing.Listing.Id.Value);
+           var taskListing = await _wrapperListingSg.Listings(listing.Listing.Id.Value);
             if (taskListing.Data == null)
             {
                 await ResultUpload(task, listing, listing.TaskItemId, listing.Listing.Id.ToString(), "Failed", "not find listing in draf");
