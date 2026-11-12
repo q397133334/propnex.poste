@@ -613,9 +613,9 @@ namespace Propnex.Poster.PropertyGuru.Listing.V2
 
             if (listingModel.location?.levels?.Count > 0)
             {
-                //var level = listingModel.location.levels[0];
-                //listing.Details["property_level_number"] = level.levelNumber?.ToString() ?? "";
-                //listing.Details["property_unit_number"] = level.unitNumber?.ToString() ?? "";
+                var level = listingModel.location.address;
+                listing.Details["property_level_number"] = level.floor?.ToString() ?? "";
+                listing.Details["property_unit_number"] = level.unit?.ToString() ?? "";
             }
 
             listing.Details["alternative_agent"] = listingModel.lister?.metaByType?.agent?.name ?? "";

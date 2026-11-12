@@ -106,7 +106,7 @@ namespace PropnexPoster.WPF
 #if DEBUG
             taskDto = new PnTaskDto()
             {
-                Number = "1320986.guru.tsk"
+                Number = "1322235.guru.tsk"
             };
             var context = await File.ReadAllTextAsync($"E:\\{taskDto.Number}");
             var lenght = context.IndexOf("Xpressor-Listing-File===");
@@ -318,7 +318,7 @@ namespace PropnexPoster.WPF
                                 try
                                 {
                                     var guruListingv3 = await _wrapperListingSg.Listings(listing.id.Value);
-                                    var guruListing = await _api.GetListing(listing.id.Value);
+                                    // var guruListing = await _api.GetListing(listing.id.Value);
                                     var postActionResult = new PosterActionResult()
                                     {
                                         Status = PosterActionResultStatus.Success
@@ -328,7 +328,7 @@ namespace PropnexPoster.WPF
                                         _logger.Information("Retrieve");
                                         var url = "http://3.0.87.74/propnex/index.php/";
                                         //var guruListing = await this.getListing(task.Id.ToString());
-                                        var retrieveListing = await RetrieveListing.Converter(guruListing.Data, task.Account, task.TargetPortal, task.Id);
+                                        var retrieveListing = await RetrieveListing.Converter(guruListingv3.Data, task.Account, task.TargetPortal, task.Id);
                                         retrieveListing.Account = task.Account;
                                         var result = RetrieveListing.GetData(retrieveListing, task.Account, task.Password, task.Id);
                                         if (result.Item2)
